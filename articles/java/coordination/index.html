@@ -16,16 +16,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/learn.css">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
-  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css">
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
 <section class="bank card-page article"><div class="wrap narrow">
   <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Координация: семафоры, защёлки и барьеры</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Координация: семафоры, защёлки и барьеры"}]}</script>
   <h1>Координация: семафоры, защёлки и барьеры</h1>
@@ -51,6 +54,7 @@ finally { limit.release(); }</code></pre>
 <p>Шпаргалка выбора: ограничить одновременный доступ — Semaphore; дождаться завершения событий (одноразово) — CountDownLatch; циклическая встреча фиксированной группы — CyclicBarrier; динамические фазы — Phaser; парный обмен — Exchanger.</p>
 <h2>Как отвечать на собеседовании</h2>
 <p>Чётко противопоставьте примитивы: Semaphore (N пермитов, ограничение доступа, release не привязан к потоку), CountDownLatch (одноразовый, дождаться N), CyclicBarrier (переиспользуемый рандеву группы + barrier action), Phaser (динамические участники/фазы), Exchanger (обмен между двумя). Упомяните, что многие построены на AQS.</p></article>
+  <section class="block lesson-check" data-lesson="java/jc-lesson-coordination"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="java-concurrency"><a class="course-title" href="/courses/java-concurrency/">Курс «Многопоточность в Java»</a><span>урок 8 из 11</span><a href="/articles/java/completablefuture/">← Future и CompletableFuture</a><a class="next" href="/articles/java/threadlocal-forkjoin/">ThreadLocal и Fork/Join →</a></nav>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/latch-barrier-semaphore/">Чем различаются CountDownLatch, CyclicBarrier и Semaphore?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/semaphore-rate-limit/">Нужно ограничить число одновременных обращений к внешнему API десятью, не ограничивая при этом число рабочих потоков. Какой примитив подходит?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/countdownlatch-reuse/">Можно ли переиспользовать CountDownLatch после того, как счётчик дошёл до нуля?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/semaphore-release-finally/">В коде вызывается semaphore.acquire(), затем работа с ресурсом, затем semaphore.release() в конце метода. Что здесь опасно?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/countdownlatch/">Что делает CountDownLatch?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/locks/">Явные блокировки: ReentrantLock, RW и Condition</a><p>Когда synchronized мало, ReentrantLock с tryLock/fairness, ReadWriteLock и StampedLock, Condition вместо wait/notify.</p></li><li><a href="/articles/java/completablefuture/">Future и CompletableFuture</a><p>Ограничения Future, асинхронная композиция CompletableFuture, async-варианты с пулами и обработка ошибок.</p></li></ul></section>
 </div></section>
@@ -67,7 +71,9 @@ finally { limit.release(); }</code></pre>
 <footer><div class="wrap">
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>

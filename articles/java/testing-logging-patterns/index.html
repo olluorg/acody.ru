@@ -16,16 +16,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/learn.css">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
-  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css">
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
 <section class="bank card-page article"><div class="wrap narrow">
   <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Тестирование, логирование и базовые паттерны</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Тестирование, логирование и базовые паттерны"}]}</script>
   <h1>Тестирование, логирование и базовые паттерны</h1>
@@ -66,6 +69,7 @@ class Config {
 <h2>Как отвечать коротко</h2>
 <p>На интервью начинайте с определения, затем называйте trade-off и типичную ошибку. Такой формат хорошо работает для паттернов, логирования и тестов.</p>
 <p>Например: «Unit быстрее и изолированнее, integration дороже, но ловит проблемы wiring/контрактов; ошибка — поднимать весь Spring context для простой функции».</p></article>
+  <section class="block lesson-check" data-lesson="java/jc-lesson-testing-logging-patterns"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/singleton-thread-safe/">Что такое паттерн Singleton и как сделать его потокобезопасным?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/unit-vs-integration-tests/">Чем unit-тест отличается от integration-теста?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/log-levels/">Зачем в логировании существуют уровни вроде DEBUG и ERROR?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/logging-placeholders/">Почему в логировании предпочитают log.debug(&quot;user {} order {}&quot;, userId, orderId) вместо конкатенации строк?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/patterns-creational/">Порождающие паттерны</a><p>Factory Method против статической фабрики Блоха, Abstract Factory, Builder в двух версиях, Prototype и почему clone() считают ошибкой, object pool — с примерами из JDK и Spring.</p></li><li><a href="/articles/java/patterns-structural/">Структурные паттерны</a><p>Adapter, Decorator, Proxy и чем они отличаются друг от друга, Facade, Composite, Bridge и Flyweight — на примерах java.io, java.lang.reflect.Proxy и Spring AOP.</p></li><li><a href="/articles/java/patterns-behavioral/">Поведенческие паттерны</a><p>Strategy, Template Method, Observer, Command, Chain of Responsibility, State, Iterator и Visitor — с примерами из JDK, Spring и заменой паттернов лямбдами и sealed-типами.</p></li><li><a href="/articles/java/oop/">ООП и его принципы</a><p>Инкапсуляция, наследование, полиморфизм, абстракция — зачем они нужны, как работают внутри и почему композицию предпочитают наследованию.</p></li><li><a href="/articles/java/executors/">Пулы потоков и ExecutorService</a><p>Зачем пул, параметры ThreadPoolExecutor, ловушки фабрик Executors, выбор размера и корректное завершение.</p></li></ul></section>
 </div></section>
@@ -82,7 +86,9 @@ class Config {
 <footer><div class="wrap">
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>

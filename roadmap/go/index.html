@@ -16,23 +16,26 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/learn.css">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
-  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css">
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
 <section class="bank roadmap"><div class="wrap">
   <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/">Backend-разработчик</a> <span>/</span> <span>Go</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://learn.getsotto.ru/roadmap/backend/"},{"@type":"ListItem","position":3,"name":"Go"}]}</script>
   <h1>Go: карта развития</h1>
   <p class="lead">Go — часть пути бэкенд-разработчика. Сверху вниз — порядок изучения: основы языка, срезы и мапы, интерфейсы, ошибки, горутины, каналы и context, память и инструменты, HTTP-сервисы. Нажмите на узел, чтобы открыть справку.</p>
   <p class="rm-count">7 этапов · 7 тем</p>
   <p><a class="btn-plan" href="/roadmap/go/plan/">Составить ИПР по этой карте →</a></p>
-  <div class="rm-legend"><span class="rm-node sub k-core">Основа</span><span class="rm-node sub k-optional">Полезно знать</span><span class="rm-node sub k-alternative">Альтернатива</span></div><div class="rm-tree"><div class="rm-step" id="basics"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/go/basics/" title="Синтаксис, пакеты, структуры и методы, указатели, нулевые значения."><i>1</i>Основы языка</a><div class="rm-side r empty"></div></div><div class="rm-step" id="types"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/go/types/" title="Устройство среза, append и общий массив, мапы, строки и руны."><i>2</i>Срезы, мапы и строки</a><div class="rm-side r empty"></div></div><div class="rm-step" id="interfaces"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/go/interfaces/" title="Неявная реализация, пустой интерфейс, type switch, nil-интерфейс."><i>3</i>Интерфейсы</a><div class="rm-side r empty"></div></div><div class="rm-step" id="errors"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/go/errors/" title="Ошибки как значения, оборачивание, errors.Is и errors.As, panic и recover."><i>4</i>Ошибки</a><div class="rm-side r empty"></div></div><div class="rm-step" id="concurrency"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/go/concurrency/" title="Горутины, каналы и select, sync, context, утечки горутин и гонки."><i>5</i>Горутины, каналы и context</a><div class="rm-side r empty"></div></div><div class="rm-step" id="memory-tooling"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/go/memory-tooling/" title="Стек и куча, escape analysis, GC, модули, go test и pprof."><i>6</i>Память, инструменты и тесты</a><div class="rm-side r empty"></div></div><div class="rm-step" id="web"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/go/web/" title="net/http, маршрутизация, middleware, работа с базой и graceful shutdown."><i>7</i>Сервисы на Go</a><div class="rm-side r empty"></div></div></div>
+  <div class="rm-legend"><span class="rm-node sub k-core">Основа</span><span class="rm-node sub k-optional">Полезно знать</span><span class="rm-node sub k-alternative">Альтернатива</span></div><div class="rm-tree"><div class="rm-step" id="basics"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/go/basics/" data-node="go/basics" title="Синтаксис, пакеты, структуры и методы, указатели, нулевые значения."><i>1</i>Основы языка</a><div class="rm-side r empty"></div></div><div class="rm-step" id="types"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/go/types/" data-node="go/types" title="Устройство среза, append и общий массив, мапы, строки и руны."><i>2</i>Срезы, мапы и строки</a><div class="rm-side r empty"></div></div><div class="rm-step" id="interfaces"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/go/interfaces/" data-node="go/interfaces" title="Неявная реализация, пустой интерфейс, type switch, nil-интерфейс."><i>3</i>Интерфейсы</a><div class="rm-side r empty"></div></div><div class="rm-step" id="errors"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/go/errors/" data-node="go/errors" title="Ошибки как значения, оборачивание, errors.Is и errors.As, panic и recover."><i>4</i>Ошибки</a><div class="rm-side r empty"></div></div><div class="rm-step" id="concurrency"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/go/concurrency/" data-node="go/concurrency" title="Горутины, каналы и select, sync, context, утечки горутин и гонки."><i>5</i>Горутины, каналы и context</a><div class="rm-side r empty"></div></div><div class="rm-step" id="memory-tooling"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/go/memory-tooling/" data-node="go/memory-tooling" title="Стек и куча, escape analysis, GC, модули, go test и pprof."><i>6</i>Память, инструменты и тесты</a><div class="rm-side r empty"></div></div><div class="rm-step" id="web"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/go/web/" data-node="go/web" title="net/http, маршрутизация, middleware, работа с базой и graceful shutdown."><i>7</i>Сервисы на Go</a><div class="rm-side r empty"></div></div></div>
   
   <div class="prep-links"><span>Другие карты:</span> <a class="chip" href="/roadmap/ai-engineer/">ИИ-инженер</a><a class="chip" href="/roadmap/backend/">Backend-разработчик</a><a class="chip" href="/roadmap/frontend/">Frontend-разработчик</a><a class="chip" href="/roadmap/data-science/">Data Scientist</a></div>
 </div></section>
@@ -48,7 +51,9 @@
 <footer><div class="wrap">
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>

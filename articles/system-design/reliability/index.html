@@ -16,16 +16,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/learn.css">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
-  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css">
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
 <section class="bank card-page article"><div class="wrap narrow">
   <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#system-design">System design</a> <span>/</span> <span>Надёжность и идемпотентность</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/articles/#system-design"},{"@type":"ListItem","position":3,"name":"Надёжность и идемпотентность"}]}</script>
   <h1>Надёжность и идемпотентность</h1>
@@ -75,6 +78,7 @@ commit;</code></pre>
 <p>Называйте приёмы в правильном порядке и с их назначением: таймаут на каждом внешнем вызове и бюджет времени по цепочке, ограничение конкурентности и отсеки, повторы только для временных ошибок с ростом паузы и разбросом, предохранитель как защита от каскада, сброс нагрузки при перегрузке. Порядок здесь и есть содержание ответа: сначала ограничить время и ресурсы, потом повторять.</p>
 <p>Идемпотентность объясняйте механикой, а не определением: ключ от клиента, уникальное ограничение, эффект и отметка об обработке в одной транзакции, возврат сохранённого ответа при повторе. И отдельно проговорите, что это даёт однократный эффект, а не однократную доставку — это частая ловушка в вопросах.</p>
 <p>Задачу «изменить данные и опубликовать событие» закрывайте исходящей таблицей с объяснением, почему не двухфазный коммит, и обязательно добавляйте, что доставка получается не менее одного раза, поэтому потребитель идемпотентен. Хорошим финалом будет фраза о том, что все эти механизмы проверяются учениями: ненастроенный предохранитель хуже отсутствующего, потому что создаёт ложное чувство защиты.</p></article>
+  <section class="block lesson-check" data-lesson="system-design/sd-lesson-reliability"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="system-design"><a class="course-title" href="/courses/system-design/">Курс «System design»</a><span>урок 4 из 11</span><a href="/articles/system-design/caching/">← Кэширование и CDN</a><a class="next" href="/articles/system-design/microservices/">Монолит, микросервисы и границы сервисов →</a></nav>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/system-design/idempotency/">Что означает идемпотентность операции?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/system-design/slow-dependency-cascade/">Внешний платёжный провайдер начал отвечать за 30 секунд вместо 200 миллисекунд. Через минуту сервис перестал отвечать вообще, включая страницы, не связанные с оплатой. Что произошло?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/circuit-breaker-states/">В каких состояниях бывает circuit breaker и как он между ними переходит?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/retry-storm/">В цепочке из трёх сервисов каждый повторяет неудачный вызов до трёх раз. Нижний сервис кратковременно деградировал. Чем это закончится?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/graceful-degradation/">Нагрузка превысила возможности сервиса. Какие приёмы позволяют деградировать управляемо, а не упасть целиком?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/transactional-outbox/">Почему для надёжной публикации события после изменения данных применяют transactional outbox, а не двухфазный коммит?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/system-design/reliable-processing/">Как сделать обработку запросов надёжной при сбоях и повторах?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/system-design/cap/">CAP и согласованность</a><p>Точная формулировка CAP и типичные искажения, неизбежность разделения и выбор C/A по операции, спектр согласованности и сессионные гарантии, кворумы N/R/W и их пределы, PACELC и разрешение конфликтов.</p></li><li><a href="/articles/system-design/scaling/">Масштабирование</a><p>Что именно упирается, вертикальный и горизонтальный рост, stateless и балансировка, шардинг и consistent hashing, реплики на чтение и лаг, автоскейл и поиск настоящего узкого места.</p></li><li><a href="/articles/system-design/observability/">Наблюдаемость: метрики, логи, трассировка и SLO</a><p>Чем наблюдаемость отличается от мониторинга, три сигнала и что каждый умеет, RED и USE, почему среднее врёт, взрыв кардинальности, SLI/SLO/error budget и алерты на симптомы.</p></li><li><a href="/articles/system-design/delivery/">Выкатка без простоя и миграции схемы</a><p>Rolling, blue-green и canary с их ценой, отделение деплоя от релиза через feature flags, expand–contract для схемы БД, совместимость соседних версий и стратегия отката.</p></li></ul></section>
 </div></section>
@@ -91,7 +95,9 @@ commit;</code></pre>
 <footer><div class="wrap">
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>

@@ -16,16 +16,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/learn.css">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
-  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css">
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
 <section class="bank card-page article"><div class="wrap narrow">
   <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#brokers">Брокеры сообщений</a> <span>/</span> <span>Kafka: topic, partition, offset</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/articles/#brokers"},{"@type":"ListItem","position":3,"name":"Kafka: topic, partition, offset"}]}</script>
   <h1>Kafka: topic, partition, offset</h1>
@@ -51,6 +54,7 @@
 <p>У consumer'а без сохранённого offset поведение задаёт <code>auto.offset.reset</code>: earliest (с начала лога — для bootstrap новой группы), latest (только новые сообщения), none (бросить ошибку). Выбор — это уже про намерение: догнать историю или подключиться «с момента запуска».</p>
 <h2>Как отвечать на собеседовании</h2>
 <p>Опишите Kafka как распределённый append-only лог: topic → partitions → offset (offset только в партиции). Подчеркните роль партиции как единицы распределения/репликации/порядка и связку «параллелизм группы ≤ число партиций». Объясните ключ и hash-партиционирование, и ловушку добавления партиций (распределение по ключу меняется → возможный разрыв порядка). Различите time/size retention и log compaction (последнее значение по ключу + tombstone). Назовите replay и <code>auto.offset.reset</code> как основу пересборки состояния.</p></article>
+  <section class="block lesson-check" data-lesson="brokers/mb-lesson-kafka-core"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="brokers"><a class="course-title" href="/courses/brokers/">Курс «Брокеры сообщений и Kafka»</a><span>урок 2 из 11</span><a href="/articles/brokers/messaging-basics/">← Очереди, pub/sub и гарантии доставки</a><a class="next" href="/articles/brokers/kafka-producer/">Kafka Producer →</a></nav>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/brokers/topic-partition-offset/">Что такое topic, partition и offset в Kafka?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/brokers/when-kafka/">Когда стоит выбирать Kafka?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/kafka-components/">Какие основные компоненты Kafka?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/kafka-ordering/">Какая гарантия порядка в Kafka является базовой?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/offset-basic/">Что такое offset в Kafka?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/brokers/kafka-producer/">Kafka Producer</a><p>Запись и сериализация, выбор партиции, батчинг и сжатие, acks и долговечность, идемпотентный producer и транзакции.</p></li><li><a href="/articles/brokers/kafka-consumer/">Kafka Consumer и consumer group</a><p>Группа и распределение партиций, poll-цикл, heartbeat и таймауты, модели commit offset, ребаланс и роль идемпотентности.</p></li></ul></section>
 </div></section>
@@ -67,7 +71,9 @@
 <footer><div class="wrap">
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>

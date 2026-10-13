@@ -16,16 +16,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/learn.css">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
-  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css">
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
 <section class="bank card-page article"><div class="wrap narrow">
   <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>GC: корни, достижимость и типы ссылок</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"GC: корни, достижимость и типы ссылок"}]}</script>
   <h1>GC: корни, достижимость и типы ссылок</h1>
@@ -47,6 +50,7 @@
 <p>Диагностика — heap dump и анализ доминаторов/путей до GC root: инструмент показывает, какая сильная цепочка не даёт объекту умереть.</p>
 <h2>Как отвечать на собеседовании</h2>
 <p>Объясните reachability от GC roots и переопределите «утечку» как достижимый-но-ненужный объект. Разложите strong/soft/weak/phantom с практикой (Soft — кэш, Weak — WeakHashMap, Phantom/Cleaner — пострешур ресурсов), скажите, что finalize устарел в пользу try-with-resources/Cleaner, и назовите классические источники утечек (ThreadLocal в пуле, не отписанные listeners).</p></article>
+  <section class="block lesson-check" data-lesson="java/jc-lesson-gc-references"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="java-jvm"><a class="course-title" href="/courses/java-jvm/">Курс «JVM и сборка мусора»</a><span>урок 2 из 7</span><a href="/articles/java/jvm-memory/">← Память JVM и устройство объекта</a><a class="next" href="/articles/java/gc-generations/">GC: поколения и продвижение объектов →</a></nav>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/gc-reachability/">Какие объекты удаляет сборщик мусора?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/reference-types/">Что верно про типы ссылок в Java?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/gc-roots/">Что относится к GC roots — корням достижимости?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/finalize-cleaner/">Почему finalize() признан неудачным механизмом и что использовать вместо него?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/weak-reference/">Чем слабая ссылка (WeakReference) отличается от обычной?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/gc-generations/">GC: поколения и продвижение объектов</a><p>Гипотеза о поколениях, Eden и Survivor, minor GC через копирование, tenuring и преждевременное продвижение.</p></li><li><a href="/articles/java/gc-tuning/">GC: тюнинг и мониторинг</a><p>Ключевые флаги, unified GC-логи, метрики (паузы, throughput, allocation/promotion rate) и диагностика частых проблем.</p></li></ul></section>
 </div></section>
@@ -63,7 +67,9 @@
 <footer><div class="wrap">
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>

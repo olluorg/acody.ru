@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Курс «Базы данных для бэкенда» — бесплатно, с проверками</title>
+<meta name="description" content="SQL и JOIN, индексы и планы запросов, транзакции и изоляция, JDBC и ORM, моделирование данных, Redis и кэширование, обзор NoSQL.">
+<link rel="canonical" href="https://learn.getsotto.ru/courses/databases/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/courses/databases/">
+<meta property="og:title" content="Курс «Базы данных для бэкенда» — бесплатно, с проверками">
+<meta property="og:description" content="SQL и JOIN, индексы и планы запросов, транзакции и изоляция, JDBC и ORM, моделирование данных, Redis и кэширование, обзор NoSQL.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/" class=on>Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
+<section class="bank card-page course" data-course="databases"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/courses/">Курсы</a> <span>/</span> <span>Базы данных для бэкенда</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Курсы","item":"https://learn.getsotto.ru/courses/"},{"@type":"ListItem","position":2,"name":"Базы данных для бэкенда"}]}</script>
+  <h1>Базы данных для бэкенда</h1>
+  <p class="lead">SQL и JOIN, индексы и планы запросов, транзакции и изоляция, JDBC и ORM, моделирование данных, Redis и кэширование, обзор NoSQL.</p>
+  <p class="course-meta">10 уроков · проверка после каждого урока · карта «<a href="/roadmap/backend/">Backend-разработчик</a>»</p>
+  <div class="course-status" hidden></div>
+  <p><a class="btn primary" href="/articles/databases/sql-basics/">Начать курс</a></p>
+  <section class="block"><h2>Уроки</h2><ol class="links course-lessons"><li data-lesson="databases/db-lesson-sql-basics"><a href="/articles/databases/sql-basics/">SQL: операторы, NULL и фильтрация</a><p>Группы команд, логический порядок SELECT, трёхзначная логика NULL, разница WHERE/HAVING и оконные функции — с ловушками, на которых валятся на собеседовании.</p></li><li data-lesson="databases/db-lesson-joins-keys"><a href="/articles/databases/joins-keys/">JOIN, ключи и ограничения</a><p>INNER/OUTER/CROSS JOIN, ловушка ON vs WHERE, первичные/внешние/уникальные ключи и ссылочная целостность.</p></li><li data-lesson="databases/db-lesson-indexes"><a href="/articles/databases/indexes/">Индексы и планы запросов</a><p>Устройство B-tree, hash vs B-tree, составной и covering индекс, цена записи и когда индекс не используется.</p></li><li data-lesson="databases/db-lesson-transactions"><a href="/articles/databases/transactions/">Транзакции, изоляция и блокировки</a><p>ACID по буквам, аномалии чтения, уровни изоляции, MVCC и оптимистичные/пессимистичные блокировки.</p></li><li data-lesson="databases/db-lesson-jdbc"><a href="/articles/databases/jdbc/">JDBC и безопасные запросы</a><p>Connection/Statement/ResultSet, PreparedStatement против инъекций, ручные транзакции, ресурсы и пул соединений.</p></li><li data-lesson="databases/db-lesson-orm"><a href="/articles/databases/orm/">ORM, persistence context и N+1</a><p>Что делает ORM, lazy/eager и proxy, механизм N+1, способы лечения и типичные грабли.</p></li><li data-lesson="databases/db-lesson-query-performance"><a href="/articles/databases/query-performance/">Практика оптимизации запросов</a><p>EXPLAIN и чтение плана, порядок колонок индекса, keyset-пагинация и ловушки, мешающие индексу.</p></li><li data-lesson="databases/db-lesson-data-modeling"><a href="/articles/databases/data-modeling/">Моделирование данных и целостность</a><p>Ключи и constraints, нормальные формы простыми словами, осознанная денормализация и каскадные действия.</p></li><li data-lesson="databases/db-lesson-redis-cache"><a href="/articles/databases/redis-cache/">Redis и кэширование</a><p>Cache-aside и стратегии записи, TTL и eviction, защита от stampede и аккуратные распределённые блокировки.</p></li><li data-lesson="databases/db-lesson-nosql-overview"><a href="/articles/databases/nosql-overview/">NoSQL: семейства и когда их выбирать</a><p>Почему появился NoSQL, моделирование от access patterns, четыре семейства хранилищ, BASE против ACID и горизонтальное масштабирование.</p></li></ol></section>
+  <section class="block"><h2>Что отметит на карте</h2>
+    <p class="muted">Когда все проверки уроков сданы, эти темы отмечаются пройденными на карте и в ИПР.</p>
+    <ul class="links covers"><li><a href="/roadmap/common/sql/">SQL и реляционные базы</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/roadmap/common/sql/">SQL и реляционные базы</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/roadmap/backend/db-indexes/">Индексы и производительность запросов</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/roadmap/backend/db-indexes/">Индексы и производительность запросов</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/roadmap/backend/db-transactions/">Транзакции и изоляция</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/roadmap/backend/db-transactions/">Транзакции и изоляция</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/roadmap/backend/data-modeling/">Моделирование данных</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/roadmap/backend/orm/">ORM и доступ к данным</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/roadmap/backend/orm/">ORM и доступ к данным</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/roadmap/backend/caching/">Кэширование</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

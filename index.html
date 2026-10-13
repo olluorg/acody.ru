@@ -16,22 +16,27 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/learn.css">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
-  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css">
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
 <section class="bank hero-bank"><div class="wrap">
   <span class="kicker">Бесплатно и в открытом доступе</span>
   <h1>Учитесь профессии по карте</h1>
   <p class="lead">Карты профессий показывают, что изучать и в каком порядке, — от основ до уровня senior. Каждая тема — справка с главным, частыми ошибками, вопросами с собеседований и ссылками на документацию. По карте можно составить индивидуальный план развития с критериями и сроками.</p>
   <h2 class="sub">Карты профессий</h2>
   <div class="tiles"><a class="tile" href="/roadmap/ai-engineer/"><b>ИИ-инженер</b><span>17 этапов · ИПР</span><p>Карта навыков ИИ-инженера — от Python и устройства LLM до RAG, агентов, оценки качества, безопасности и продакшена. Каждый узел — справка со ссылками на вопросы с собеседований.</p></a><a class="tile" href="/roadmap/backend/"><b>Backend-разработчик</b><span>14 этапов · ИПР</span><p>Карта навыков бэкенд-разработчика — от устройства компьютера и сети до баз данных, брокеров, системного дизайна и highload. Языки Java, Python и Go — отдельными картами.</p></a><a class="tile" href="/roadmap/frontend/"><b>Frontend-разработчик</b><span>18 этапов · ИПР</span><p>Карта навыков фронтенд-разработчика — от HTTP и HTML до React, тестов, безопасности и серверного рендеринга. Каждый узел — справка со ссылками на вопросы с собеседований.</p></a><a class="tile" href="/roadmap/data-science/"><b>Data Scientist</b><span>13 этапов · ИПР</span><p>Карта навыков data scientist — математика, Python и SQL для данных, статистика и A/B-тесты, машинное обучение от основ до бустинга, прикладные задачи, нейросети и модели в продакшене.</p></a></div>
+  <h2 class="sub">Курсы</h2>
+  <div class="tiles"><a class="tile" href="/courses/java-core/"><b>Java Core</b><span>26 уроков</span><p>Основы языка — примитивы и строки, ООП, равенство, исключения, дженерики, лямбды и Stream API, современный синтаксис, ввод-вывод и принципы дизайна.</p></a><a class="tile" href="/courses/java-collections/"><b>Коллекции Java</b><span>10 уроков</span><p>Collections Framework изнутри — ArrayList и LinkedList, HashMap, LinkedHashMap и LRU, TreeMap и сортированные множества, очереди, итераторы и конкурентные коллекции.</p></a><a class="tile" href="/courses/java-concurrency/"><b>Многопоточность в Java</b><span>11 уроков</span><p>Потоки и synchronized, Java Memory Model и volatile, атомарные операции, явные блокировки, пулы потоков и CompletableFuture, координация и виртуальные потоки.</p></a><a class="tile" href="/courses/java-jvm/"><b>JVM и сборка мусора</b><span>7 уроков</span><p>Память JVM и устройство объекта, поколения и алгоритмы сборки мусора, типы ссылок, тюнинг GC, загрузка классов, JIT и бенчмаркинг.</p></a><a class="tile" href="/courses/spring-boot/"><b>Spring Boot</b><span>18 уроков</span><p>Контейнер и бины, конфигурация и AOP, Spring MVC и REST, валидация, данные и транзакции, Spring Boot и Actuator, Spring Security, тестирование.</p></a><a class="tile" href="/courses/databases/"><b>Базы данных для бэкенда</b><span>10 уроков</span><p>SQL и JOIN, индексы и планы запросов, транзакции и изоляция, JDBC и ORM, моделирование данных, Redis и кэширование, обзор NoSQL.</p></a><a class="tile" href="/courses/brokers/"><b>Брокеры сообщений и Kafka</b><span>11 уроков</span><p>Очереди и pub/sub, гарантии доставки, Kafka изнутри — продюсер, потребитель, репликация, эксплуатация и экосистема, RabbitMQ, повторы и DLQ, проектирование событий, саги и CDC.</p></a><a class="tile" href="/courses/system-design/"><b>System design</b><span>11 уроков</span><p>Масштабирование, CAP и согласованность, кэширование и CDN, надёжность и идемпотентность, микросервисы, проектирование API, CQRS, наблюдаемость, выкатка без простоя, безопасность и оценка нагрузки.</p></a></div>
   <h2 class="sub">Ещё на платформе</h2>
   <div class="tiles">
     <a class="tile" href="/questions/"><b>Вопросы с собеседований</b><span>1044 вопроса</span><p>Короткий ответ, разбор, что хотят услышать и частые ошибки — по разделам и подборкам.</p></a>
@@ -50,7 +55,9 @@
 <footer><div class="wrap">
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>

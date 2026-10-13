@@ -16,16 +16,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/learn.css">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
-  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css">
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
 <section class="bank card-page article"><div class="wrap narrow">
   <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#spring">Spring</a> <span>/</span> <span>Spring Kafka</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/articles/#spring"},{"@type":"ListItem","position":3,"name":"Spring Kafka"}]}</script>
   <h1>Spring Kafka</h1>
@@ -57,6 +60,7 @@ void on(OrderPaid event, Acknowledgment ack) {
 <p>Exactly-once в пределах Kafka даёт транзакционный consume-process-produce (read_committed + транзакции продюсера). Но как только в цепочке появляется внешняя БД, «ровно один раз» обеспечивают не распределённой транзакцией, а идемпотентностью потребителя и/или transactional outbox.</p>
 <h2>Как отвечать на собеседовании</h2>
 <p>Свяжите producer (KafkaTemplate, key → партиционирование и порядок внутри партиции) и consumer (<code>@KafkaListener</code> + listener container, concurrency ≤ числа партиций в группе). Разберите три семантики доставки через момент commit offset (at-most/at-least/exactly-once) и почему at-least-once требует идемпотентности. Назовите ретраи + DLT (DefaultErrorHandler/DeadLetterPublishingRecoverer) и что DLT не заменяет идемпотентность; для БД+Kafka — transactional outbox, а не 2PC. Упомяните rebalancing при изменении состава группы.</p></article>
+  <section class="block lesson-check" data-lesson="spring/sb-lesson-spring-kafka"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/spring/kafkatemplate-send/">Что важно задавать при отправке через KafkaTemplate?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/kafkalistener-container-commit/">Как @KafkaListener связан с listener container и offset commit?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/spring-kafka-retry-dlt/">Как в Spring Kafka обычно строят retry и dead letter topic?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/kafka-listener-concurrency/">У топика 6 партиций. Что даст параметр concurrency = 3 у @KafkaListener и что произойдёт при concurrency = 10?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/kafkalistener-basic/">Что делает аннотация @KafkaListener?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/spring/integration-batch-api/">Spring Batch, Integration и API styles</a><p>Batch jobs, enterprise integration patterns, Spring Data REST, HATEOAS и GraphQL.</p></li><li><a href="/articles/brokers/kafka-consumer/">Kafka Consumer и consumer group</a><p>Группа и распределение партиций, poll-цикл, heartbeat и таймауты, модели commit offset, ребаланс и роль идемпотентности.</p></li></ul></section>
 </div></section>
@@ -73,7 +77,9 @@ void on(OrderPaid event, Acknowledgment ack) {
 <footer><div class="wrap">
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>

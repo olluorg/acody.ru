@@ -16,16 +16,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/learn.css">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
-  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css">
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
 <section class="bank card-page article"><div class="wrap narrow">
   <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>GC: тюнинг и мониторинг</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"GC: тюнинг и мониторинг"}]}</script>
   <h1>GC: тюнинг и мониторинг</h1>
@@ -54,6 +57,7 @@ java -Xlog:gc*,safepoint:file=gc.log:time,uptime,level:filecount=5,filesize=20M 
 <p>Длинные паузы при большой куче: повод перейти на ZGC. OutOfMemoryError: снять heap dump (-XX:+HeapDumpOnOutOfMemoryError) и искать доминаторы.</p>
 <h2>Как отвечать на собеседовании</h2>
 <p>Покажите дисциплину «цель → измерение → один параметр → замер», назовите базовые флаги (-Xms/-Xmx, выбор сборщика, цель пауз для G1), источники данных (unified -Xlog:gc, JFR) и ключевые метрики (паузы, throughput, allocation/promotion rate). Свяжите частые full GC с утечкой/premature promotion, а не с «надо больше памяти».</p></article>
+  <section class="block lesson-check" data-lesson="java/jc-lesson-gc-tuning"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="java-jvm"><a class="course-title" href="/courses/java-jvm/">Курс «JVM и сборка мусора»</a><span>урок 5 из 7</span><a href="/articles/java/gc-algorithms/">← GC: алгоритмы и сборщики</a><a class="next" href="/articles/java/classloading/">Загрузка классов и class loaders →</a></nav>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/gc-tuning-start/">С чего правильно начинать настройку сборщика мусора?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/frequent-full-gc/">В приложении участились длинные паузы full GC, при этом старое поколение почти всегда заполнено. О чём это говорит?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/allocation-promotion-rate/">Что показывают метрики allocation rate и promotion rate?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jvm-heap-in-container/">Java-приложение запускают в контейнере с лимитом памяти. Как правильно задать размер кучи?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/gc-latency-diagnosis/">В проде выросли задержки, подозрение на GC. Опиши порядок диагностики — от сбора данных до вывода.</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/gc-algorithms/">GC: алгоритмы и сборщики</a><p>Mark-sweep-compact и копирование, stop-the-world и safepoints, конкурентная маркировка, G1 и ZGC и выбор по throughput/latency.</p></li><li><a href="/articles/java/gc-references/">GC: корни, достижимость и типы ссылок</a><p>GC roots и reachability, strong/soft/weak/phantom-ссылки, Cleaner вместо finalize и утечки через сильные ссылки.</p></li></ul></section>
 </div></section>
@@ -70,7 +74,9 @@ java -Xlog:gc*,safepoint:file=gc.log:time,uptime,level:filecount=5,filesize=20M 
 <footer><div class="wrap">
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>

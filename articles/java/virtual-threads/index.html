@@ -16,16 +16,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/learn.css">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
-  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css">
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
 <section class="bank card-page article"><div class="wrap narrow">
   <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Виртуальные потоки (Project Loom)</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Виртуальные потоки (Project Loom)"}]}</script>
   <h1>Виртуальные потоки (Project Loom)</h1>
@@ -48,6 +51,7 @@
 <p>Главный подводный камень — pinning: виртуальный поток, который не может размонтироваться, «прибивает» carrier. В Java 21–23 это происходило при блокировке внутри synchronized-блока, поэтому для длинных критических секций советовали ReentrantLock. В JDK 24 (JEP 491) synchronized больше не прибивает поток, и совет актуален только для старых версий. Остаётся закрепление на нативных вызовах (JNI) — его находят по событию JFR jdk.VirtualThreadPinned. И не кладут тяжёлые объекты в ThreadLocal: виртуальных потоков миллионы.</p>
 <h2>Как отвечать на собеседовании</h2>
 <p>Объясните выгоду: блокирующий стиль кода + масштаб реактивного за счёт монтирования/размонтирования на carrier при блокировке. Подчеркните — для IO-bound, не для CPU-bound; не пулить (поток на задачу); и знайте про pinning на synchronized/нативных вызовах (лечится ReentrantLock). Бонус — упомяните structured concurrency (StructuredTaskScope) для управления группой подзадач.</p></article>
+  <section class="block lesson-check" data-lesson="java/jc-lesson-virtual-threads"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="java-concurrency"><a class="course-title" href="/courses/java-concurrency/">Курс «Многопоточность в Java»</a><span>урок 11 из 11</span><a href="/articles/java/concurrent-collections/">← Конкурентные коллекции</a><a class="next" href="/courses/java-concurrency/">К итогам курса →</a></nav>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/virtual-threads/">Чем виртуальный поток отличается от обычного платформенного?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/virtual-threads-practice/">Что верно про практическое применение виртуальных потоков?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/virtual-thread-pinning/">Что такое pinning виртуального потока и в каких случаях он всё ещё возможен в актуальных версиях Java?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/virtual-thread-unmount/">Что происходит с виртуальным потоком, когда он выполняет блокирующий сетевой вызов?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/threads/">Потоки: создание, состояния и отмена</a><p>Thread и Runnable, стоимость платформенных потоков, состояния жизненного цикла, кооперативное прерывание и daemon-потоки.</p></li><li><a href="/articles/java/executors/">Пулы потоков и ExecutorService</a><p>Зачем пул, параметры ThreadPoolExecutor, ловушки фабрик Executors, выбор размера и корректное завершение.</p></li></ul></section>
 </div></section>
@@ -64,7 +68,9 @@
 <footer><div class="wrap">
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>

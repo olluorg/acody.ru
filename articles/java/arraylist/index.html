@@ -16,16 +16,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/learn.css">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
-  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css">
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
 <section class="bank card-page article"><div class="wrap narrow">
   <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>ArrayList: динамический массив изнутри</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"ArrayList: динамический массив изнутри"}]}</script>
   <h1>ArrayList: динамический массив изнутри</h1>
@@ -52,6 +55,7 @@ elementData = Arrays.copyOf(elementData, newCapacity);</code></pre>
 <p><code>subList</code> возвращает view на исходный список, а не копию: структурное изменение оригинала ломает view. Это частый источник тонких багов.</p>
 <h2>Как отвечать на собеседовании</h2>
 <p>Объясните различие size/capacity, рост в 1.5× и амортизированную O(1) (через суммарную стоимость), назовите O(n) на вставку в середину из-за arraycopy и упомяните задание начальной ёмкости как оптимизацию. Это сразу показывает понимание, а не зубрёжку.</p></article>
+  <section class="block lesson-check" data-lesson="java/jc-lesson-arraylist"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="java-collections"><a class="course-title" href="/courses/java-collections/">Курс «Коллекции Java»</a><span>урок 2 из 10</span><a href="/articles/java/collections-overview/">← Collections Framework: карта и выбор структуры</a><a class="next" href="/articles/java/linkedlist/">LinkedList и миф о дешёвой вставке →</a></nav>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/arraylist-vs-linkedlist/">Чем ArrayList отличается от LinkedList и что брать по умолчанию?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/arraylist-amortized-add/">Почему добавление в конец ArrayList считается амортизированно O(1), хотя иногда требует копирования всего массива?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jc-152/">Сколько стоит удаление элемента из середины ArrayList и почему?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jc-153/">Что верно про управление ёмкостью ArrayList?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/arraylist-internals/">Что лежит в основе ArrayList?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/collections-overview/">Collections Framework: карта и выбор структуры</a><p>Иерархия интерфейсов, сложности операций основных структур, неизменяемые коллекции и принцип выбора по паттерну доступа.</p></li><li><a href="/articles/java/linkedlist/">LinkedList и миф о дешёвой вставке</a><p>Двусвязные узлы, реальная стоимость операций, cache locality и почему ArrayList/ArrayDeque почти всегда лучше.</p></li></ul></section>
 </div></section>
@@ -68,7 +72,9 @@ elementData = Arrays.copyOf(elementData, newCapacity);</code></pre>
 <footer><div class="wrap">
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>

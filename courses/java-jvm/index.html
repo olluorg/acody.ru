@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Курс «JVM и сборка мусора» — бесплатно, с проверками</title>
+<meta name="description" content="Память JVM и устройство объекта, поколения и алгоритмы сборки мусора, типы ссылок, тюнинг GC, загрузка классов, JIT и бенчмаркинг.">
+<link rel="canonical" href="https://learn.getsotto.ru/courses/java-jvm/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/courses/java-jvm/">
+<meta property="og:title" content="Курс «JVM и сборка мусора» — бесплатно, с проверками">
+<meta property="og:description" content="Память JVM и устройство объекта, поколения и алгоритмы сборки мусора, типы ссылок, тюнинг GC, загрузка классов, JIT и бенчмаркинг.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/" class=on>Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
+<section class="bank card-page course" data-course="java-jvm"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/courses/">Курсы</a> <span>/</span> <span>JVM и сборка мусора</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Курсы","item":"https://learn.getsotto.ru/courses/"},{"@type":"ListItem","position":2,"name":"JVM и сборка мусора"}]}</script>
+  <h1>JVM и сборка мусора</h1>
+  <p class="lead">Память JVM и устройство объекта, поколения и алгоритмы сборки мусора, типы ссылок, тюнинг GC, загрузка классов, JIT и бенчмаркинг.</p>
+  <p class="course-meta">7 уроков · проверка после каждого урока · карта «<a href="/roadmap/java/">Java</a>»</p>
+  <div class="course-status" hidden></div>
+  <p><a class="btn primary" href="/articles/java/jvm-memory/">Начать курс</a></p>
+  <section class="block"><h2>Уроки</h2><ol class="links course-lessons"><li data-lesson="java/jc-lesson-jvm-memory"><a href="/articles/java/jvm-memory/">Память JVM и устройство объекта</a><p>Runtime data areas, стек против кучи, заголовок объекта и выравнивание, compressed oops и metaspace.</p></li><li data-lesson="java/jc-lesson-gc-references"><a href="/articles/java/gc-references/">GC: корни, достижимость и типы ссылок</a><p>GC roots и reachability, strong/soft/weak/phantom-ссылки, Cleaner вместо finalize и утечки через сильные ссылки.</p></li><li data-lesson="java/jc-lesson-gc-generations"><a href="/articles/java/gc-generations/">GC: поколения и продвижение объектов</a><p>Гипотеза о поколениях, Eden и Survivor, minor GC через копирование, tenuring и преждевременное продвижение.</p></li><li data-lesson="java/jc-lesson-gc-algorithms"><a href="/articles/java/gc-algorithms/">GC: алгоритмы и сборщики</a><p>Mark-sweep-compact и копирование, stop-the-world и safepoints, конкурентная маркировка, G1 и ZGC и выбор по throughput/latency.</p></li><li data-lesson="java/jc-lesson-gc-tuning"><a href="/articles/java/gc-tuning/">GC: тюнинг и мониторинг</a><p>Ключевые флаги, unified GC-логи, метрики (паузы, throughput, allocation/promotion rate) и диагностика частых проблем.</p></li><li data-lesson="java/jc-lesson-classloading"><a href="/articles/java/classloading/">Загрузка классов и class loaders</a><p>Жизненный цикл класса (loading/linking/initialization), иерархия загрузчиков с делегированием, триггеры инициализации и изоляция.</p></li><li data-lesson="java/jc-lesson-modern-java-performance"><a href="/articles/java/modern-java-performance/">JIT, оптимизации и бенчмаркинг</a><p>Tiered compilation C1/C2, ключевые оптимизации JIT (inlining, escape analysis), деоптимизация и прогрев, корректные микробенчмарки на JMH.</p></li></ol></section>
+  <section class="block"><h2>Что отметит на карте</h2>
+    <p class="muted">Когда все проверки уроков сданы, эти темы отмечаются пройденными на карте и в ИПР.</p>
+    <ul class="links covers"><li><a href="/roadmap/java/jvm-memory/">Память JVM</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/roadmap/java/gc/">Сборка мусора</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/roadmap/java/classloading-jit/">Загрузка классов и JIT</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

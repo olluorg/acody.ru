@@ -16,16 +16,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/learn.css">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
-  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css">
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
 <section class="bank card-page article"><div class="wrap narrow">
   <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Поведенческие паттерны</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Поведенческие паттерны"}]}</script>
   <h1>Поведенческие паттерны</h1>
@@ -73,6 +76,7 @@ class PaymentService {
 <p>На каждый паттерн держите пример из платформы: Comparator — Strategy, <code>HttpServlet.service</code> — Template Method, <code>@EventListener</code> и Reactive Streams — Observer, Runnable в ExecutorService — Command, сервлетные фильтры и Spring Security — Chain of Responsibility, <code>java.util.Iterator</code> — Iterator, FileVisitor — Visitor.</p>
 <p>Обязательно упомяните современный срез: <code>java.util.Observable</code> устарел с Java 9, стратегии и команды сегодня чаще лямбды, а sealed-типы с pattern matching заменяют визитор с проверкой исчерпываемости на компиляторе. Это показывает, что вы знаете не книгу 1994 года, а актуальную платформу.</p>
 <p>И держите в запасе одну фразу про меру: паттерны — общий словарь для обсуждения дизайна; называть их полезно, натягивать на задачу, где хватает обычного метода, — вредно.</p></article>
+  <section class="block lesson-check" data-lesson="java/jc-lesson-patterns-behavioral"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/comparator-strategy/">Какой паттерн представляет java.util.Comparator?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/template-method-vs-strategy/">В чём принципиальная разница между Template Method и Strategy?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/observer-modern-java/">Что верно про реализацию паттерна Observer в современной Java?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/chain-of-responsibility/">Какой паттерн реализуют цепочка сервлетных фильтров и фильтр-цепочка Spring Security?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/state-vs-strategy/">State и Strategy структурно почти одинаковы. Что их различает?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/visitor/">Зачем нужен паттерн Visitor, какова его цена и чем его можно заменить в современной Java?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/behavioral-patterns/">Что описывают поведенческие паттерны?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/patterns-structural/">Структурные паттерны</a><p>Adapter, Decorator, Proxy и чем они отличаются друг от друга, Facade, Composite, Bridge и Flyweight — на примерах java.io, java.lang.reflect.Proxy и Spring AOP.</p></li><li><a href="/articles/java/lambdas/">Лямбды и функциональные интерфейсы</a><p>SAM-интерфейсы, лямбда против анонимного класса, замыкания и effectively final, ссылки на методы и стандартные интерфейсы.</p></li><li><a href="/articles/java/sealed-pattern/">Sealed-типы и pattern matching</a><p>Закрытые иерархии через sealed, pattern matching в instanceof и switch, деконструкция записей и проверка исчерпываемости.</p></li><li><a href="/articles/java/solid/">SOLID: пять принципов дизайна</a><p>SRP, OCP, LSP, ISP, DIP — что каждая буква значит на самом деле, как выглядит нарушение в Java-коде, чем DIP отличается от DI и IoC.</p></li></ul></section>
 </div></section>
@@ -89,7 +93,9 @@ class PaymentService {
 <footer><div class="wrap">
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>

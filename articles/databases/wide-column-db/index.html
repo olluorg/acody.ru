@@ -16,16 +16,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/learn.css">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
-  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css">
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
 <section class="bank card-page article"><div class="wrap narrow">
   <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>Колоночные БД: wide-column и аналитические</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"Колоночные БД: wide-column и аналитические"}]}</script>
   <h1>Колоночные БД: wide-column и аналитические</h1>
@@ -84,6 +87,7 @@ CREATE TABLE events_by_day (
 <p>Назовите LSM-дерево и главное следствие: запись идёт в commit log и memtable, затем сбрасывается неизменяемыми SSTable — случайная запись превращается в последовательную, отсюда высокий throughput. И честно назовите цену: чтение задевает несколько SSTable, нужен compaction, а tombstone'ы от удалений замедляют чтение.</p>
 <p>Про OLAP отвечайте механизмом: колонки лежат отдельно, поэтому агрегат по одной колонке не читает остальные, а однородные данные в колонке сжимаются в разы (RLE, dictionary, delta) и обрабатываются векторизованно. Цена — дорогие точечные вставки и обновления, то есть OLTP-нагрузка противопоказана.</p>
 <p>Завершите архитектурным выводом: транзакции живут в OLTP-базе, аналитику выгружают в OLAP через ETL или CDC, а тяжёлые отчёты прямо на боевой базе — типичная причина деградации прода.</p></article>
+  <section class="block lesson-check" data-lesson="databases/db-lesson-wide-column-db"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/databases/cassandra-primary-key/">Из чего состоит первичный ключ в Cassandra?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/lsm-write-path/">Как устроен путь записи в LSM-дереве, лежащем в основе Cassandra и подобных хранилищ?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/databases/cassandra-denormalization/">Почему в Cassandra нормально хранить одни и те же данные в нескольких таблицах?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/columnar-analytics/">Почему колоночное хранение выигрывает у строчного в аналитических нагрузках?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/oltp-vs-olap/">Чем нагрузка OLAP отличается от OLTP?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/databases/nosql-overview/">NoSQL: семейства и когда их выбирать</a><p>Почему появился NoSQL, моделирование от access patterns, четыре семейства хранилищ, BASE против ACID и горизонтальное масштабирование.</p></li><li><a href="/articles/databases/indexes/">Индексы и планы запросов</a><p>Устройство B-tree, hash vs B-tree, составной и covering индекс, цена записи и когда индекс не используется.</p></li></ul></section>
 </div></section>
@@ -100,7 +104,9 @@ CREATE TABLE events_by_day (
 <footer><div class="wrap">
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>

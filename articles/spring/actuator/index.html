@@ -16,16 +16,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/learn.css">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
-  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css">
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
 <section class="bank card-page article"><div class="wrap narrow">
   <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#spring">Spring</a> <span>/</span> <span>Actuator и наблюдаемость</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/articles/#spring"},{"@type":"ListItem","position":3,"name":"Actuator и наблюдаемость"}]}</script>
   <h1>Actuator и наблюдаемость</h1>
@@ -50,6 +53,7 @@ Order create(@RequestBody NewOrder req) { /* ... */ }</code></pre>
 <p>Практика: наружу отдавать только health (и то ограниченно), остальное — на отдельном порту/сети и под аутентификацией (Spring Security). Управляют экспозицией и доступом раздельно для web и для отдельных эндпоинтов.</p>
 <h2>Как отвечать на собеседовании</h2>
 <p>Назовите Actuator как набор production-эндпоинтов и подчеркните управление экспозицией. Разберите health + разницу liveness/readiness probes (перезапуск vs балансировка) для Kubernetes. Объясните Micrometer как фасад метрик (counter/gauge/timer, экспортёр Prometheus) и упомяните трассировку (trace/span). Обязательно — безопасность: env/heapdump не выставлять наружу.</p></article>
+  <section class="block lesson-check" data-lesson="spring/sb-lesson-actuator"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="spring-boot"><a class="course-title" href="/courses/spring-boot/">Курс «Spring Boot»</a><span>урок 8 из 18</span><a href="/articles/spring/boot/">← Spring Boot: автоконфигурация и starters</a><a class="next" href="/articles/spring/servlet-runtime/">Сервлеты, фильтры и встроенный контейнер →</a></nav>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/spring/liveness-vs-readiness/">Чем liveness probe отличается от readiness probe?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/micrometer-latency-percentiles/">Как в Spring Boot собрать перцентили времени ответа HTTP-запросов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/actuator-exposure/">Что важно учесть при выставлении наружу эндпоинтов Actuator?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/readiness-external-dependency/">Сервис зависит от внешнего платёжного API. Стоит ли включать проверку его доступности в readiness-пробу?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/actuator-health-basic/">Для чего нужен эндпоинт /actuator/health?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/spring/boot/">Spring Boot: автоконфигурация и starters</a><p>@SpringBootApplication и starters, механизм автоконфигурации по условиям, переопределение через @ConditionalOnMissingBean, внешняя конфигурация и её приоритеты.</p></li><li><a href="/articles/spring/resilience-observability/">Resilience: таймауты, ретраи и circuit breaker</a><p>Защита от каскадных отказов: таймауты, безопасные ретраи, состояния circuit breaker, bulkhead и rate limiter, fallback и порядок паттернов.</p></li></ul></section>
 </div></section>
@@ -66,7 +70,9 @@ Order create(@RequestBody NewOrder req) { /* ... */ }</code></pre>
 <footer><div class="wrap">
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>

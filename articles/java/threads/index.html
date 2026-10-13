@@ -16,16 +16,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/learn.css">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
-  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css">
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
 <section class="bank card-page article"><div class="wrap narrow">
   <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Потоки: создание, состояния и отмена</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Потоки: создание, состояния и отмена"}]}</script>
   <h1>Потоки: создание, состояния и отмена</h1>
@@ -57,6 +60,7 @@
 <p><code>join()</code> позволяет дождаться завершения другого потока — между его завершением и возвратом из join есть happens-before, поэтому результаты работы потока видны после join.</p>
 <h2>Как отвечать на собеседовании</h2>
 <p>Отличайте <code>start()</code>/<code>run()</code>, назовите состояния и разницу BLOCKED/WAITING (для чтения thread dump), и грамотно объясните кооперативную отмену: <code>interrupt()</code> — это флаг, InterruptedException нельзя глотать (восстановить флаг), а <code>stop()</code> удалён. Упомяните дороговизну платформенных потоков как мотивацию пулов и виртуальных потоков.</p></article>
+  <section class="block lesson-check" data-lesson="java/jc-lesson-threads"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="java-concurrency"><a class="course-title" href="/courses/java-concurrency/">Курс «Многопоточность в Java»</a><span>урок 1 из 11</span><a class="next" href="/articles/java/synchronized/">synchronized, мониторы и wait/notify →</a></nav>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/thread-runnable-callable/">Чем Thread, Runnable и Callable отличаются?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/thread-states/">Поток пытается войти в synchronized-блок, занятый другим потоком. В каком состоянии он находится?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/thread-interrupt/">Что верно про прерывание потока через interrupt()?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/daemon-threads/">Что верно про daemon-потоки?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/thread-start-vs-run/">Чем вызов start() у потока отличается от прямого вызова run()?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/synchronized/">synchronized, мониторы и wait/notify</a><p>Взаимное исключение и видимость через монитор, reentrancy, guarded blocks с wait/notify и причины deadlock.</p></li><li><a href="/articles/java/jmm/">Java Memory Model: happens-before и volatile</a><p>Зачем нужна модель памяти, видимость и переупорядочивание, отношение happens-before, семантика volatile и final, гонки данных.</p></li></ul></section>
 </div></section>
@@ -73,7 +77,9 @@
 <footer><div class="wrap">
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>

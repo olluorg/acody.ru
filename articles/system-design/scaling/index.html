@@ -16,16 +16,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/learn.css">
+<link rel="stylesheet" href="/assets/style.css?v=52739f85ce">
+<link rel="stylesheet" href="/assets/learn.css?v=52739f85ce">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=52739f85ce" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
-  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css">
+<link rel="stylesheet" href="/assets/bank.css?v=52739f85ce">
 <section class="bank card-page article"><div class="wrap narrow">
   <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#system-design">System design</a> <span>/</span> <span>Масштабирование</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/articles/#system-design"},{"@type":"ListItem","position":3,"name":"Масштабирование"}]}</script>
   <h1>Масштабирование</h1>
@@ -73,6 +76,7 @@
 <p>Держите в голове порядок шагов и проговаривайте его: устранить очевидную неэффективность, вырасти вертикально, сделать сервис stateless и вырасти горизонтально, добавить реплики на чтение, и только потом шардировать. Такой порядок показывает, что вы понимаете стоимость каждого шага, а не просто знаете слова.</p>
 <p>Каждый выбранный шаг называйте вместе с его ценой: реплики дают лаг и не помогают записи, шардинг убирает джойны и транзакции и требует выбора ключа, автоскейл упирается в холодный старт и способен добить базу, привязка сессий ломает выкатку. Именно перечисление цены отличает ответ уровня senior.</p>
 <p>Заканчивайте проверкой: по каким метрикам будет видно, что стало лучше. Задержка на девяносто девятом перцентиле, насыщение пулов, лаг реплик, распределение нагрузки по шардам. Решение без способа убедиться в его пользе — это гипотеза, а не инженерия.</p></article>
+  <section class="block lesson-check" data-lesson="system-design/sd-lesson-scaling"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="system-design"><a class="course-title" href="/courses/system-design/">Курс «System design»</a><span>урок 1 из 11</span><a class="next" href="/articles/system-design/cap/">CAP и согласованность →</a></nav>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/system-design/horizontal-vs-vertical-scaling/">Чем горизонтальное масштабирование отличается от вертикального?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/system-design/stateless-services/">Почему для горизонтального масштабирования сервис делают stateless?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/scaling-database-reads/">Как масштабировать чтение базы данных под высокой нагрузкой?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/consistent-hashing-vs-modulo/">Какую задачу решает consistent hashing по сравнению с обычным hash(key) % N?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/blockers-of-horizontal-scaling/">Сервис планируют масштабировать горизонтально. Какие его свойства придётся устранить, чтобы инстансы можно было свободно добавлять и снимать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/skewed-sharding/">Данные шардированы по хешу от идентификатора клиента. Несколько крупных клиентов дают около 80% нагрузки, и она приходится на один шард. Что здесь поможет?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/system-design/more-instances-no-gain/">Сервис работает на двадцати инстансах. Добавление ещё десяти не уменьшает время ответа. Как вы будете искать причину и что предпримете?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/system-design/cap/">CAP и согласованность</a><p>Точная формулировка CAP и типичные искажения, неизбежность разделения и выбор C/A по операции, спектр согласованности и сессионные гарантии, кворумы N/R/W и их пределы, PACELC и разрешение конфликтов.</p></li><li><a href="/articles/system-design/caching/">Кэширование и CDN</a><p>Кэш как размен согласованности на задержку, hit rate и слои, стратегии чтения и записи, инвалидация и гонка с записью, stampede и лавина, вытеснение и горячие ключи, CDN и ключ кэша.</p></li><li><a href="/articles/system-design/estimation/">Оценка нагрузки и ресурсов</a><p>Как считать на салфетке: QPS из аудитории, пиковые коэффициенты, объём хранения и трафик, порядки задержек, узкое место и типичные ошибки оценки на интервью.</p></li><li><a href="/articles/system-design/microservices/">Монолит, микросервисы и границы сервисов</a><p>Когда микросервисы оправданы, а когда вредны; bounded context и DDD как способ резать систему; распределённый монолит и его признаки; база на сервис и организационная цена.</p></li></ul></section>
 </div></section>
@@ -89,7 +93,9 @@
 <footer><div class="wrap">
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>

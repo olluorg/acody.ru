@@ -6,7 +6,9 @@
   const N = { junior: "Junior", middle: "Middle", senior: "Senior" };
   const $ = (s) => document.querySelector(s);
   const from = $("#pf-from"), to = $("#pf-to"), opt = $("#pf-opt"), week = $("#pf-week");
-  const branch = $("#pf-branch");   // выбор ветки (язык в карте Backend), если карта его предлагает
+  const branch = $("#pf-branch");
+  // Пройденное (account.js помечает .pg.done для вошедшего) — не в плане.
+  const hideDone = $("#pf-hide-done");   // выбор ветки (язык в карте Backend), если карта его предлагает
   if (!from) return;
 
   function apply() {
@@ -21,7 +23,8 @@
         const hours = JSON.parse(n.dataset.hours || "{}");
         let h = 0, shown = false;
         n.querySelectorAll(".pg").forEach((p) => {
-          const i = G.indexOf(p.dataset.g), on = okKind && i > lo && i <= hi;
+          const passed = hideDone && hideDone.checked && p.classList.contains("done");
+          const i = G.indexOf(p.dataset.g), on = okKind && !passed && i > lo && i <= hi;
           p.hidden = !on;
           if (on) { shown = true; h += hours[p.dataset.g] || 0; }
         });
@@ -93,6 +96,7 @@
     URL.revokeObjectURL(a.href);
   });
 
-  [from, to, opt, week, branch].forEach((el) => el && el.addEventListener("input", apply));
+  [from, to, opt, week, branch, hideDone].forEach((el) => el && el.addEventListener("input", apply));
+  document.addEventListener("learn:progress", apply);
   apply();
 })();
