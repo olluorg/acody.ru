@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set: HashSet, LinkedHashSet, TreeSet — разбор для собеседования</title>
+<meta name="description" content="Почему Set построен поверх Map, три реализации и их гарантии порядка, роль equals/hashCode.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/sets/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/sets/">
+<meta property="og:title" content="Set: HashSet, LinkedHashSet, TreeSet — разбор для собеседования">
+<meta property="og:description" content="Почему Set построен поверх Map, три реализации и их гарантии порядка, роль equals/hashCode.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Set: HashSet, LinkedHashSet, TreeSet</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Set: HashSet, LinkedHashSet, TreeSet"}]}</script>
+  <h1>Set: HashSet, LinkedHashSet, TreeSet</h1>
+  <p class="lead">Почему Set построен поверх Map, три реализации и их гарантии порядка, роль equals/hashCode.</p>
+  <article class="md"><h2>Set поверх Map</h2>
+<p>HashSet внутри — это HashMap, где элементы множества лежат как ключи, а значением служит общий объект-заглушка PRESENT. Поэтому уникальность и производительность HashSet полностью определяются устройством HashMap.</p>
+<p>Это объясняет, почему у Set нет доступа по индексу: под капотом хеш-таблица, а не последовательность.</p>
+<pre class="lang-java"><code>// упрощённо изнутри HashSet:
+private transient HashMap&lt;E, Object&gt; map;
+private static final Object PRESENT = new Object();
+public boolean add(E e) { return map.put(e, PRESENT) == null; }</code></pre>
+<h2>Три реализации</h2>
+<p>HashSet — без гарантий порядка, операции в среднем O(1). LinkedHashSet — сохраняет порядок вставки (поверх LinkedHashMap), почти та же скорость. TreeSet — упорядоченное множество поверх TreeMap, O(log n), с навигацией NavigableSet (floor/ceiling/<code>subSet</code>).</p>
+<p>Выбор тот же, что и для соответствующих Map: нужен порядок вставки — LinkedHashSet, нужна сортировка и диапазоны — TreeSet, иначе HashSet.</p>
+<h2>Уникальность и контракт</h2>
+<p>В HashSet/LinkedHashSet уникальность определяется equals/<code>hashCode</code> элементов, в TreeSet — результатом сравнения (<code>compareTo</code>/compare). Положив объект с «плохим» equals/<code>hashCode</code>, легко получить дубликаты или потерю элементов.</p>
+<p>Как и с ключами Map, изменять поля элемента, влияющие на хеш или сравнение, после добавления в Set нельзя — элемент станет недостижим.</p>
+<h2>Операции над множествами</h2>
+<p>Set умеет теоретико-множественные операции прямо из коробки: <code>addAll</code> — объединение, <code>retainAll</code> — пересечение, <code>removeAll</code> — разность. Читается это компактно, но у <code>removeAll</code> и <code>retainAll</code> есть ловушка производительности, о которой почти не пишут.</p>
+<p><code>AbstractSet.removeAll</code> выбирает направление обхода по размерам: если аргумент меньше самого множества, он перебирает аргумент и удаляет элементы; иначе перебирает своё содержимое и спрашивает contains у аргумента. Во втором случае всё упирается в скорость contains у переданной коллекции — а у списка это O(n).</p>
+<p>Отсюда практическое правило: передавать в такие операции List нельзя, если он хоть сколько-нибудь большой. Обернуть его в HashSet — одна строка, которая превращает квадратичную операцию в линейную.</p>
+<pre class="lang-java"><code>Set&lt;Long&gt; active = ...;      // 50 000 элементов
+List&lt;Long&gt; banned = ...;     // 100 000 элементов — больше множества
+
+active.removeAll(banned);                 // O(n*m): обход active и contains по списку
+active.removeAll(new HashSet&lt;&gt;(banned));  // O(n+m): contains по хешу</code></pre>
+<h2>null и неизменяемые множества</h2>
+<p>Правила про null у реализаций разные, и это регулярный источник NPE. HashSet и LinkedHashSet допускают ровно один null. TreeSet не допускает его вовсе: элемент нужно сравнивать, а сравнить null естественным порядком нельзя — получите NullPointerException уже на добавлении.</p>
+<p>Фабрики <code>Set.of</code> строже всех: они запрещают null, а на повторяющемся элементе бросают IllegalArgumentException прямо при создании. Ещё одна их особенность специально сделана неудобной — порядок итерации у <code>Set.of</code> рандомизирован и меняется между запусками JVM, чтобы никто не начал на него полагаться.</p>
+<p>Наконец, стоит различать копию и представление: <code>Set.copyOf</code> делает независимый снимок, а <code>Collections.unmodifiableSet</code> возвращает лишь неизменяемый вид поверх исходного множества. Если оригинал продолжают менять, изменения будут видны через «неизменяемую» обёртку.</p>
+<h2>EnumSet: множество на битовой маске</h2>
+<p>Для элементов-перечислений в JDK есть специализированная реализация, о которой часто забывают и зря кладут enum в HashSet.</p>
+<p>EnumSet хранит множество как битовую маску: одно значение long на 64 константы, а для перечислений покрупнее — массив long. Принадлежность, добавление и удаление превращаются в побитовые операции, объединение и пересечение — в OR и AND над словами. Это быстрее хеш-таблицы и на порядок компактнее по памяти, а итерация идёт в порядке объявления констант.</p>
+<p>Правило простое: если элементы — enum, берите EnumSet (и EnumMap для карт). Исключение только одно — null в EnumSet положить нельзя.</p>
+<pre class="lang-java"><code>enum Role { USER, EDITOR, ADMIN }
+
+EnumSet&lt;Role&gt; editors = EnumSet.of(Role.EDITOR, Role.ADMIN);
+EnumSet&lt;Role&gt; all = EnumSet.allOf(Role.class);
+EnumSet&lt;Role&gt; readers = EnumSet.complementOf(editors);  // {USER}
+
+boolean canEdit = editors.contains(user.role());   // проверка бита</code></pre>
+<h2>Как отвечать на собеседовании</h2>
+<p>Ключевой инсайт: HashSet — это HashMap с элементами-ключами. Дальше выбор реализации (Hash/Linked/Tree) и зависимость уникальности от equals/<code>hashCode</code> (или сравнения в TreeSet) показывают системное понимание, а не заучивание трёх классов.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/hashset-linkedhashset-treeset/">Чем HashSet, LinkedHashSet и TreeSet отличаются?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/jc-160/">Как устроен HashSet внутри?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jc-161/">В TreeSet добавили два объекта, для которых equals возвращает false, но компаратор считает их равными. Что произойдёт?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jc-162/">Объект добавили в HashSet, после чего изменили у него поле, участвующее в hashCode. Что теперь вернёт contains для этого же объекта?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/hashset-add-duplicate/">Что произойдёт при добавлении в HashSet элемента, который там уже есть?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/hashmap/">HashMap изнутри: бакеты, treeify, resize</a><p>Таблица бакетов, перемешивание хеша и индекс, превращение цепочки в дерево, ресайз и load factor, контракт ключа.</p></li><li><a href="/articles/java/treemap/">TreeMap, TreeSet и сортировка</a><p>Красно-чёрное дерево, NavigableMap, Comparable против Comparator, согласованность с equals и TimSort.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Set: HashSet, LinkedHashSet, TreeSet","description":"Почему Set построен поверх Map, три реализации и их гарантии порядка, роль equals/hashCode.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/sets/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

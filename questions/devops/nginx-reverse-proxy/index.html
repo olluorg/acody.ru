@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое reverse proxy и какие задачи решает nginx перед приложением? — вопрос с собеседования</title>
+<meta name="description" content="Reverse proxy стоит перед серверами и принимает запросы от их имени (forward proxy — наоборот, от имени клиентов). Задачи nginx: терминация TLS…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/nginx-reverse-proxy/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/nginx-reverse-proxy/">
+<meta property="og:title" content="Что такое reverse proxy и какие задачи решает nginx перед приложением? — вопрос с собеседования">
+<meta property="og:description" content="Reverse proxy стоит перед серверами и принимает запросы от их имени (forward proxy — наоборот, от имени клиентов). Задачи nginx: терминация TLS…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Что такое reverse proxy и какие задачи решает nginx перед приложением?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Что такое reverse proxy и какие задачи решает nginx перед приложением?"}]}</script>
+  <h1>Что такое reverse proxy и какие задачи решает nginx перед приложением?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Сети и прокси</span><span class="chip">nginx</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем forward proxy отличается от reverse proxy?</li><li>Что означает ошибка 502 Bad Gateway?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Reverse proxy</b> стоит перед серверами и принимает запросы от их имени (forward proxy — наоборот, от имени клиентов). Задачи nginx: <b>терминация TLS</b>, <b>балансировка</b> между экземплярами, <b>маршрутизация</b> по домену и пути, <b>статика</b>, <b>сжатие</b>, <b>кэширование</b>, <b>лимиты</b> (rate limit, размер тела), <b>таймауты</b> и защита приложения от медленных клиентов.</p><ul><li>502 — upstream недоступен или оборвал соединение; 504 — upstream не ответил вовремя</li><li>Заголовки X-Forwarded-For и X-Forwarded-Proto — чтобы приложение знало реальный IP и схему</li><li>Буферизация ответа освобождает приложение от медленных клиентов</li></ul><p class="extra"><span>А ещё</span> В Kubernetes ту же роль играет ingress-контроллер</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Коды ошибок прокси:</b></p>
+<div class="table"><table><thead><tr><th>код</th><th>причина</th></tr></thead><tbody><tr><td>502</td><td>приложение не слушает порт, упало, ответило мусором</td></tr><tr><td>504</td><td>приложение не уложилось в proxy_read_timeout</td></tr><tr><td>413</td><td>тело запроса больше client_max_body_size</td></tr><tr><td>499</td><td>клиент закрыл соединение, не дождавшись ответа (лог nginx)</td></tr></tbody></table></div>
+<p>Причина 502 — в <code>error.log</code> nginx: «connect() failed (111: Connection refused)» или «upstream prematurely closed connection».</p>
+<p><b>Подводные камни:</b></p>
+<ul><li><code>proxy_pass</code> со слешем на конце и без — разная подстановка пути;</li><li>приложение за прокси без доверенных X-Forwarded-* строит неверные редиректы (http вместо https) и видит IP прокси;</li><li>WebSocket требует заголовков Upgrade и Connection;</li><li>nginx кэширует DNS upstream при старте — смена IP требует resolver.</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-nginx"><code>upstream orders { server 10.0.1.11:8080; server 10.0.1.12:8080; }
+
+server {
+    listen 443 ssl;
+    server_name api.example.com;
+    ssl_certificate     /etc/ssl/api.crt;
+    ssl_certificate_key /etc/ssl/api.key;
+    client_max_body_size 10m;
+
+    location /orders/ {
+        proxy_pass http://orders;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 30s;
+    }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Назначение reverse proxy и функции nginx.</li><li>Различие 502 и 504.</li><li>Заголовки проброса и типичные ошибки конфигурации.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/load-balancing-l4-l7/">Чем балансировщик L4 отличается от L7?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/k8s-service-ingress/">Какие бывают Service в Kubernetes и чем Service отличается от Ingress?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/tls-handshake/">Как работает HTTPS и TLS-рукопожатие?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое reverse proxy и какие задачи решает nginx перед приложением?","acceptedAnswer":{"@type":"Answer","text":"Reverse proxy стоит перед серверами и принимает запросы от их имени (forward proxy — наоборот, от имени клиентов). Задачи nginx: терминация TLS, балансировка между экземплярами, маршрутизация по домену и пути, статика, сжатие, кэширование, лимиты (rate limit, размер тела), таймауты и защита приложения от медленных клиентов. 502 — upstream недоступен или оборвал соединение; 504 — upstream не ответил вовремя Заголовки X-Forwarded-For и X-Forwarded-Proto — чтобы приложение знало реальный IP и схему Буферизация ответа освобождает приложение от медленных клиентов В Kubernetes ту же роль играет ingress-контроллер Коды ошибок прокси: | код | причина | | --- | --- | | 502 | приложение не слушает порт, упало, ответило мусором | | 504 | приложение не уложилось в proxy_read_timeout | | 413 | тело запроса больше client_max_body_size | | 499 | клиент закрыл соединение, не дождавшись ответа (лог nginx) | Причина 502 — в error.log nginx: «connect() failed (111: Connection refused)» или «upstream prematurely closed connection». Подводные камни: - proxy_pass со слешем на конце и без — разная подстановка пути; - приложение за прокси без доверенных X-Forwarded- строит неверные редиректы (http вместо https) и видит IP прокси; - WebSocket требует заголовков Upgrade и Connection; - nginx кэширует DNS upstream при старте — смена IP требует resolver."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

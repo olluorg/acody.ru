@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как выбрать модель для LLM-продукта — большая или маленькая, своя или по API? — вопрос с собеседования</title>
+<meta name="description" content="Начинать с сильной модели по API, чтобы понять потолок качества на своей задаче, собрать оценочный набор, затем пробовать модели дешевле и меньше и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/model-selection/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/model-selection/">
+<meta property="og:title" content="Как выбрать модель для LLM-продукта — большая или маленькая, своя или по API? — вопрос с собеседования">
+<meta property="og:description" content="Начинать с сильной модели по API, чтобы понять потолок качества на своей задаче, собрать оценочный набор, затем пробовать модели дешевле и меньше и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как выбрать модель для LLM-продукта — большая или маленькая, своя или по API?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как выбрать модель для LLM-продукта — большая или маленькая, своя или по API?"}]}</script>
+  <h1>Как выбрать модель для LLM-продукта — большая или маленькая, своя или по API?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">LLM в продакшене</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Когда разворачивать открытую модель у себя?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Начинать с <b>сильной модели по API</b>, чтобы понять потолок качества на своей задаче, собрать <b>оценочный набор</b>, затем пробовать модели дешевле и меньше и сравнивать на нём. <b>Своя открытая модель</b> оправдана при требованиях к данным (контур компании, ПДн), больших и стабильных объёмах, необходимости дообучения или жёстких требованиях к задержке.</p><ul><li>Маршрутизация: простые запросы — маленькой модели, сложные — большой</li><li>Своя модель — это GPU, инференс-сервер, мониторинг, обновления: полная стоимость владения</li><li>Публичные бенчмарки плохо предсказывают качество на конкретной задаче</li></ul><p class="extra"><span>А ещё</span> Привязка к одному провайдеру — риск; абстракция над API упрощает переключение</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Критерии:</b></p>
+<ul><li><b>качество на своей задаче</b> — только по своему оценочному набору;</li><li><b>стоимость</b> — цена за токены × объём, либо стоимость GPU и эксплуатации;</li><li><b>задержка</b> — TTFT и скорость генерации, особенно для голоса и интерфейсов реального времени;</li><li><b>данные и комплаенс</b> — можно ли отправлять данные внешнему провайдеру, где расположены серверы;</li><li><b>контроль</b> — дообучение, стабильность версии, независимость от изменений провайдера.</li></ul>
+<p><b>Типичная эволюция продукта:</b> прототип на лучшей модели по API → оценочный набор → оптимизация промптов → маршрутизация и кэширование → для массовых узких задач — маленькая или дистиллированная модель, иногда своя.</p>
+<p><b>Своя модель:</b> vLLM или аналог, квантизация, автоскейл на GPU, свои обновления и безопасность. Окупается при большом стабильном трафике или жёстких требованиях к данным.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Порядок выбора: потолок качества → оценка → удешевление.</li><li>Критерии API против своей модели.</li><li>Маршрутизация и полная стоимость владения.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/llm-cost-latency/">Как снизить стоимость и задержку приложения на LLM?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/quantization/">Что такое квантизация модели и чем приходится за неё платить?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/distillation/">Что такое дистилляция модели?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-evaluation/">Как оценивать качество ответов LLM?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как выбрать модель для LLM-продукта — большая или маленькая, своя или по API?","acceptedAnswer":{"@type":"Answer","text":"Начинать с сильной модели по API, чтобы понять потолок качества на своей задаче, собрать оценочный набор, затем пробовать модели дешевле и меньше и сравнивать на нём. Своя открытая модель оправдана при требованиях к данным (контур компании, ПДн), больших и стабильных объёмах, необходимости дообучения или жёстких требованиях к задержке. Маршрутизация: простые запросы — маленькой модели, сложные — большой Своя модель — это GPU, инференс-сервер, мониторинг, обновления: полная стоимость владения Публичные бенчмарки плохо предсказывают качество на конкретной задаче Привязка к одному провайдеру — риск; абстракция над API упрощает переключение Критерии: - качество на своей задаче — только по своему оценочному набору; - стоимость — цена за токены × объём, либо стоимость GPU и эксплуатации; - задержка — TTFT и скорость генерации, особенно для голоса и интерфейсов реального времени; - данные и комплаенс — можно ли отправлять данные внешнему провайдеру, где расположены серверы; - контроль — дообучение, стабильность версии, независимость от изменений провайдера. Типичная эволюция продукта: прототип на лучшей модели по API → оценочный набор → оптимизация промптов → маршрутизация и кэширование → для массовых узких задач — маленькая или дистиллированная модель, иногда своя. Своя модель: vLLM или аналог, квантизация, автоскейл на GPU, свои обновления и безопасность. Окупается при большом стабильном трафике или жёстких требованиях к данным."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему нельзя останавливать A/B-тест, как только результат стал значимым? — вопрос с собеседования</title>
+<meta name="description" content="p-value колеблется по ходу теста, и если проверять каждый день и остановиться на первом p &lt; 0,05, доля ложных срабатываний вырастает с 5% до 20–30%…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/peeking-problem/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/peeking-problem/">
+<meta property="og:title" content="Почему нельзя останавливать A/B-тест, как только результат стал значимым? — вопрос с собеседования">
+<meta property="og:description" content="p-value колеблется по ходу теста, и если проверять каждый день и остановиться на первом p &lt; 0,05, доля ложных срабатываний вырастает с 5% до 20–30%…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Почему нельзя останавливать A/B-тест, как только результат стал значимым?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Почему нельзя останавливать A/B-тест, как только результат стал значимым?"}]}</script>
+  <h1>Почему нельзя останавливать A/B-тест, как только результат стал значимым?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">A/B-тесты</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое проблема подглядывания (peeking)?</li><li>Что такое последовательное тестирование?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">p-value колеблется по ходу теста, и если <b>проверять каждый день и остановиться на первом p &lt; 0,05</b>, доля ложных срабатываний вырастает с 5% до 20–30%. Это те же множественные сравнения во времени. Правильно: зафиксировать размер выборки и смотреть один раз — или применять <b>последовательные методы</b>, рассчитанные на промежуточные проверки.</p><ul><li>Смотреть на тест для контроля здоровья (SRM, ошибки) можно — нельзя принимать решение по значимости</li><li>Последовательные методы: групповые последовательные планы (O'Brien-Fleming), always-valid p-values, mSPRT</li><li>Ранняя остановка по ограничителю (метрика резко ухудшилась) допустима и нужна</li></ul><p class="extra"><span>А ещё</span> Байесовский подход не освобождает от проблемы полностью — решения тоже должны быть спланированы</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Сотни A/B-тестов: ложные срабатывания, подглядывание и мощность</p><script type="module" src="/widgets/ab-simulator.js"></script><sotto-ab-simulator theme="dark"></sotto-ab-simulator></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Почему так.</b> В начале теста данных мало, и случайные колебания большие. При ежедневной проверке у нулевого эффекта есть много шансов случайно «пересечь» порог значимости. Каждая проверка — ещё одна попытка выиграть в лотерею ложного открытия.</p>
+<p><b>Решения:</b></p>
+<ul><li><b>фиксированный горизонт</b> — рассчитать выборку, анализировать один раз в конце;</li><li><b>групповой последовательный план</b> — заранее заданные точки проверки с более строгими порогами в начале (O'Brien-Fleming), общий уровень ошибки остаётся 5%;</li><li><b>always-valid inference</b> (mSPRT) — можно смотреть в любой момент; используется в экспериментальных платформах;</li><li><b>правила остановки по вреду</b> — отдельные ограничители для быстрого отключения неудачного варианта.</li></ul>
+<p><b>Связанная проблема</b> — продление теста «ещё на недельку», потому что почти значимо. Это тоже подгонка.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Почему ранняя остановка повышает ложные срабатывания.</li><li>Фиксированный горизонт и последовательные методы.</li><li>Разница между мониторингом здоровья и решением.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/ab-sample-size/">Как рассчитать размер выборки и длительность A/B-теста?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/analytics/multiple-testing/">Что такое проблема множественных сравнений?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему нельзя останавливать A/B-тест, как только результат стал значимым?","acceptedAnswer":{"@type":"Answer","text":"p-value колеблется по ходу теста, и если проверять каждый день и остановиться на первом p < 0,05, доля ложных срабатываний вырастает с 5% до 20–30%. Это те же множественные сравнения во времени. Правильно: зафиксировать размер выборки и смотреть один раз — или применять последовательные методы, рассчитанные на промежуточные проверки. Смотреть на тест для контроля здоровья (SRM, ошибки) можно — нельзя принимать решение по значимости Последовательные методы: групповые последовательные планы (O'Brien-Fleming), always-valid p-values, mSPRT Ранняя остановка по ограничителю (метрика резко ухудшилась) допустима и нужна Байесовский подход не освобождает от проблемы полностью — решения тоже должны быть спланированы Почему так. В начале теста данных мало, и случайные колебания большие. При ежедневной проверке у нулевого эффекта есть много шансов случайно «пересечь» порог значимости. Каждая проверка — ещё одна попытка выиграть в лотерею ложного открытия. Решения: - фиксированный горизонт — рассчитать выборку, анализировать один раз в конце; - групповой последовательный план — заранее заданные точки проверки с более строгими порогами в начале (O'Brien-Fleming), общий уровень ошибки остаётся 5%; - always-valid inference (mSPRT) — можно смотреть в любой момент; используется в экспериментальных платформах; - правила остановки по вреду — отдельные ограничители для быстрого отключения неудачного варианта. Связанная проблема — продление теста «ещё на недельку», потому что почти значимо. Это тоже подгонка."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

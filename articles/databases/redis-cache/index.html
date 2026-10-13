@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redis и кэширование — разбор для собеседования</title>
+<meta name="description" content="Cache-aside и стратегии записи, TTL и eviction, защита от stampede и аккуратные распределённые блокировки.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/databases/redis-cache/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/databases/redis-cache/">
+<meta property="og:title" content="Redis и кэширование — разбор для собеседования">
+<meta property="og:description" content="Cache-aside и стратегии записи, TTL и eviction, защита от stampede и аккуратные распределённые блокировки.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>Redis и кэширование</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"Redis и кэширование"}]}</script>
+  <h1>Redis и кэширование</h1>
+  <p class="lead">Cache-aside и стратегии записи, TTL и eviction, защита от stampede и аккуратные распределённые блокировки.</p>
+  <article class="md"><h2>Зачем кэш и что кэшировать</h2>
+<p>Кэш ускоряет повторное чтение дорогих или горячих данных, снимая нагрузку с БД. Источником истины остаётся база — кэш лишь её ускоряет, и его в любой момент можно потерять без потери данных.</p>
+<p>Кэшировать стоит то, что часто читается и редко меняется; постоянно меняющиеся данные дают низкий hit rate и много инвалидаций.</p>
+<h2>Cache-aside</h2>
+<p>В cache-aside (lazy loading) приложение само управляет кэшем: при чтении сначала смотрит кэш, при промахе читает БД, кладёт значение в кэш и возвращает. При записи кэш инвалидируют или обновляют.</p>
+<p>Главный риск — рассинхронизация: между записью в БД и инвалидацией кэша возможно окно с устаревшими данными. TTL ограничивает длительность такой рассинхронизации.</p>
+<pre class="lang-java"><code>User user = cache.get(id);
+if (user == null) {            // cache miss
+    user = repository.findById(id);
+    cache.set(id, user, ttl);  // заполняем кэш
+}
+return user;</code></pre>
+<figure><img src="/articles/assets/cache-patterns.webp" alt="Три паттерна кэширования: cache-aside (приложение читает кэш, при промахе идёт в БД и заполняет кэш), write-through (запись в кэш синхронно в БД), write-back (запись в кэш, в БД асинхронно позже)." loading="lazy"><figcaption>Cache-aside, write-through и write-back — как приложение, кэш и БД обмениваются данными при чтении и записи.</figcaption></figure>
+<h2>Стратегии записи и eviction</h2>
+<p>Кроме cache-aside есть write-through (пишем в кэш и БД синхронно — проще консистентность, дороже запись) и write-behind (пишем в кэш, в БД асинхронно — быстрее, но риск потери при сбое). Выбор зависит от требований к согласованности.</p>
+<p>TTL даёт кэшу самовосстанавливаться. Eviction policy (LRU/LFU, allkeys/volatile) определяет, что Redis удалит при нехватке памяти — её подбирают под профиль доступа.</p>
+<div class="widget-in"><script type="module" src="/widgets/lru-cache.js"></script><sotto-lru-cache theme="dark"></sotto-lru-cache></div>
+<h2>Cache stampede</h2>
+<p>Stampede (thundering herd) — когда популярный ключ истёк и множество запросов одновременно промахиваются и разом идут в БД, перегружая её. Особенно опасно при одинаковом TTL у тысяч горячих ключей.</p>
+<p>Защита: добавить jitter к TTL (рандомизировать срок), single-flight/lock (пересчитывает один, остальные ждут или получают старое значение), stale-while-revalidate и прогрев горячих ключей.</p>
+<h2>Инвалидация: что именно ломается</h2>
+<p>«В программировании две сложные задачи: инвалидация кэша и придумывание имён» — шутка про реальную проблему. Разберём, откуда берётся рассинхронизация в cache-aside.</p>
+<p>Порядок операций при записи важнее, чем кажется. Сначала обновить БД, потом удалить ключ — правильный порядок: окно рассинхронизации короткое, а при падении между шагами спасёт TTL. Обратный порядок (сначала удалить кэш, потом писать в БД) оставляет зазор, в который параллельный читатель успевает подтянуть из БД СТАРОЕ значение и снова положить его в кэш — теперь уже надолго.</p>
+<p>Поэтому предпочитают удаление ключа, а не его обновление: два параллельных писателя могут положить свои значения в кэш в порядке, обратном порядку их коммитов в БД, и кэш «застынет» на устаревшем. Удаление такого эффекта не даёт — следующий читатель просто перечитает актуальное.</p>
+<p>Отдельная ловушка — инвалидация до коммита транзакции: ключ удалён, а изменение ещё не видно другим, и читатель кладёт в кэш дореформенное значение. Инвалидировать надо ПОСЛЕ commit (в Spring это <code>@TransactionalEventListener</code> с фазой AFTER_COMMIT).</p>
+<p>Плюс два системных решения на будущее: держать короткий TTL как страховку от любых пропущенных инвалидаций и версионировать ключи (user:42:v3), чтобы при смене формата данных не разгребать старьё, а просто перестать его читать.</p>
+<h2>Распределённые блокировки</h2>
+<p>Redis-lock делают через SET key token NX PX ttl: уникальный token и TTL обязательны, а снятие должно проверять token (через Lua/CAS), чтобы не снять чужую блокировку. TTL защищает от вечного lock при падении владельца.</p>
+<p>Тонкость, ради которой нужен token: если владелец затормозил дольше TTL, блокировка уже перешла к другому, и простой DEL снимет ЧУЖУЮ — двое окажутся в критической секции одновременно. Сравнение token'а при снятии обязано быть атомарным, отсюда Lua-скрипт: проверка и удаление в одной операции.</p>
+<p>И честная оговорка про границы: redis-lock не даёт гарантий при сетевых задержках, паузах GC и failover'е на реплику, где ключ мог не успеть реплицироваться. Для критичных финансовых инвариантов надёжнее транзакции БД (SELECT ... FOR UPDATE, unique-ограничение) или строгий координатор.</p>
+<pre><code>SET lock:order:42 &lt;token&gt; NX PX 30000   -- захват: только если ключа нет, с TTL
+
+-- снятие: удалить, только если это НАША блокировка (атомарно, одним скриптом)
+if redis.call(&#x27;get&#x27;, KEYS[1]) == ARGV[1] then
+  return redis.call(&#x27;del&#x27;, KEYS[1])
+else
+  return 0
+end</code></pre>
+<h2>Как отвечать на собеседовании</h2>
+<p>Начните с рамки, которая задаёт весь ответ: кэш — это УСКОРЕНИЕ, а не источник истины. Его можно потерять целиком без потери данных, и приложение обязано это переживать. Дальше сразу критерий, что кэшировать: часто читается, редко меняется; постоянно меняющиеся данные дают низкий hit rate и бесконечные инвалидации.</p>
+<p>Опишите cache-aside по шагам (читаем кэш → промах → читаем БД → кладём в кэш) и честно назовите его слабое место — окно рассинхронизации между записью в БД и инвалидацией, которое ограничивает TTL. Добавьте про порядок: сначала БД, потом удаление ключа, и только после commit.</p>
+<p>Разведите стратегии записи одной фразой каждая: write-through — проще согласованность, дороже запись; write-behind — быстрее, но есть риск потери при сбое.</p>
+<p>Stampede — вопрос, который любят: горячий ключ истёк, тысячи запросов одновременно промахнулись и разом пошли в БД. Назовите защиты: jitter к TTL, single-flight (пересчитывает один, остальные ждут), stale-while-revalidate, прогрев ключей.</p>
+<p>Если дойдёт до распределённых блокировок, покажите, что знаете про token и атомарное снятие, и завершите зрелой оговоркой: там, где цена ошибки — деньги, полагаться стоит на транзакции БД, а не на lock в Redis.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/databases/cache-aside-read/">Как работает паттерн cache-aside при чтении?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/cache-stampede-db/">Что такое cache stampede?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/redis-production/">Что важно учитывать при работе с Redis в production?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/redis-distributed-lock/">Что обязательно при реализации распределённой блокировки на Redis?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/databases/cache-ttl/">Зачем ключам в кэше задают TTL?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/databases/query-performance/">Практика оптимизации запросов</a><p>EXPLAIN и чтение плана, порядок колонок индекса, keyset-пагинация и ловушки, мешающие индексу.</p></li><li><a href="/articles/databases/data-modeling/">Моделирование данных и целостность</a><p>Ключи и constraints, нормальные формы простыми словами, осознанная денормализация и каскадные действия.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Redis и кэширование","description":"Cache-aside и стратегии записи, TTL и eviction, защита от stampede и аккуратные распределённые блокировки.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/databases/redis-cache/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

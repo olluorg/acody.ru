@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Пользователь сохранил изменения, обновил страницу — а изменений нет. Что происходит и как это исправить? — вопрос с собеседования</title>
+<meta name="description" content="Запись ушла в лидера, а чтение — на асинхронную реплику, которая ещё не догнала. Это нормальное поведение асинхронной репликации; приложение должно…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/replication-lag/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/replication-lag/">
+<meta property="og:title" content="Пользователь сохранил изменения, обновил страницу — а изменений нет. Что происходит и как это исправить? — вопрос с собеседования">
+<meta property="og:description" content="Запись ушла в лидера, а чтение — на асинхронную реплику, которая ещё не догнала. Это нормальное поведение асинхронной репликации; приложение должно…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Пользователь сохранил изменения, обновил страницу — а изменений нет. Что происходит и как это исправить?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Пользователь сохранил изменения, обновил страницу — а изменений нет. Что происходит и как это исправить?"}]}</script>
+  <h1>Пользователь сохранил изменения, обновил страницу — а изменений нет. Что происходит и как это исправить?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Репликация</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое отставание реплики?</li><li>Как обеспечить read-your-writes при чтении с реплик?</li><li>Что такое монотонное чтение?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Запись ушла в лидера, а чтение — на асинхронную <b>реплику, которая ещё не догнала</b>. Это нормальное поведение асинхронной репликации; приложение должно давать нужные гарантии само.</p><ul><li>Read-your-writes: свои данные после записи читать с лидера (или с реплики, догнавшей нужную позицию)</li><li>Монотонное чтение: привязать пользователя к одной реплике, чтобы не «откатываться назад» при обновлении</li><li>Причинная согласованность: ответ не должен появиться раньше вопроса</li></ul><p class="extra"><span>А ещё</span> Мониторить отставание и выводить из балансировки сильно отставшие реплики</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>При асинхронной репликации лидер подтверждает запись, не дожидаясь реплик. Обычно реплики отстают на миллисекунды, но под нагрузкой, при долгих транзакциях, тяжёлых миграциях или сетевых проблемах — на секунды и минуты. Тогда возможны аномалии:</p>
+<ul><li><b>не вижу своё изменение</b> — сохранил профиль, а при перезагрузке страницы прочитал старую версию с отставшей реплики;</li><li><b>откат во времени</b> — первый запрос попал на свежую реплику, второй — на отставшую: комментарий появился и исчез;</li><li><b>нарушение причинности</b> — вижу ответ на вопрос, которого ещё нет (они на разных репликах или шардах).</li></ul>
+<p><b>Решения для «вижу своё» (read-your-writes):</b></p>
+<ul><li>читать <b>с лидера</b> данные, которые пользователь мог менять (свой профиль, свои заказы), а чужие — с реплик;</li><li>читать с лидера в течение короткого времени после записи пользователя (метка «писал в последние N секунд» в сессии или cookie);</li><li>запоминать <b>позицию журнала</b> (LSN в PostgreSQL, GTID в MySQL) после записи и читать только с реплики, которая её применила, — иначе с лидера. Так делают ProxySQL, драйверы с causal consistency в MongoDB;</li><li>синхронная репликация для критичных данных — дороже по задержке записи.</li></ul>
+<p><b>Монотонное чтение</b> — закрепить пользователя за одной репликой (хеш user_id), чтобы последовательные чтения не шли назад во времени.</p>
+<p><b>Причинная согласованность</b> — писать связанные данные в один шард или передавать «версию» прочитанного, чтобы зависимые данные читались не старше неё.</p>
+<p><b>В интерфейсе</b> иногда достаточно оптимистичного обновления: показать сохранённое сразу из ответа на запись, не перечитывая.</p>
+<p><b>Эксплуатация:</b></p>
+<ul><li>метрика отставания каждой реплики (<code>pg_stat_replication</code>, <code>replay_lag</code>; <code>Seconds_Behind_Master</code>) и алерт;</li><li>исключать из балансировки реплики с отставанием выше порога;</li><li>не гонять на репликах для пользовательских запросов тяжёлую аналитику — она тормозит применение журнала (или конфликтует с ним).</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>def get_profile(user_id, session):
+    # недавно писал — читаем с лидера, иначе с реплики
+    if session.get(&quot;wrote_at&quot;, 0) &gt; time.time() - 5:
+        return primary.fetch_profile(user_id)
+    return replica_for(user_id).fetch_profile(user_id)    # одна реплика на пользователя — монотонно</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Причина: асинхронная реплика отстаёт.</li><li>Названия гарантий: read-your-writes, монотонное чтение, причинность.</li><li>Конкретные приёмы: чтение с лидера после записи, позиция журнала, привязка к реплике.</li><li>Мониторинг отставания и вывод отставших реплик.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Лечить включением синхронной репликации для всего.</li><li>Не различать чтение своих и чужих данных.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/sync-async-replication/">Чем синхронная репликация отличается от асинхронной и что выбрать?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/replication-models/">Какие бывают схемы репликации и чем они отличаются?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/read-model-lag/">После перехода на отдельное хранилище для чтения пользователи жалуются: сохранённое изменение не сразу видно в списке. Как правильно к этому отнестись?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/read-your-writes-feed/">Пользователь публикует комментарий и должен сразу видеть его в ленте, а остальным допустима задержка в несколько секунд. Какие гарантии согласованности вы заложите и как это реализуете?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/consistency-spectrum/">Какие промежуточные гарантии находятся между строгой и итоговой согласованностью?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Пользователь сохранил изменения, обновил страницу — а изменений нет. Что происходит и как это исправить?","acceptedAnswer":{"@type":"Answer","text":"Запись ушла в лидера, а чтение — на асинхронную реплику, которая ещё не догнала. Это нормальное поведение асинхронной репликации; приложение должно давать нужные гарантии само. Read-your-writes: свои данные после записи читать с лидера (или с реплики, догнавшей нужную позицию) Монотонное чтение: привязать пользователя к одной реплике, чтобы не «откатываться назад» при обновлении Причинная согласованность: ответ не должен появиться раньше вопроса Мониторить отставание и выводить из балансировки сильно отставшие реплики При асинхронной репликации лидер подтверждает запись, не дожидаясь реплик. Обычно реплики отстают на миллисекунды, но под нагрузкой, при долгих транзакциях, тяжёлых миграциях или сетевых проблемах — на секунды и минуты. Тогда возможны аномалии: - не вижу своё изменение — сохранил профиль, а при перезагрузке страницы прочитал старую версию с отставшей реплики; - откат во времени — первый запрос попал на свежую реплику, второй — на отставшую: комментарий появился и исчез; - нарушение причинности — вижу ответ на вопрос, которого ещё нет (они на разных репликах или шардах). Решения для «вижу своё» (read-your-writes): - читать с лидера данные, которые пользователь мог менять (свой профиль, свои заказы), а чужие — с реплик; - читать с лидера в течение короткого времени после записи пользователя (метка «писал в последние N секунд» в сессии или cookie); - запоминать позицию журнала (LSN в…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

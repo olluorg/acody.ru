@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем процесс отличается от потока? — вопрос с собеседования</title>
+<meta name="description" content="Процесс — запущенная программа со своим адресным пространством и ресурсами. Поток — ход выполнения внутри процесса; потоки делят память процесса. У…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/process-vs-thread/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/process-vs-thread/">
+<meta property="og:title" content="Чем процесс отличается от потока? — вопрос с собеседования">
+<meta property="og:description" content="Процесс — запущенная программа со своим адресным пространством и ресурсами. Поток — ход выполнения внутри процесса; потоки делят память процесса. У…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Чем процесс отличается от потока?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Чем процесс отличается от потока?"}]}</script>
+  <h1>Чем процесс отличается от потока?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Операционные системы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое процесс и поток в операционной системе?</li><li>Что общего у потоков одного процесса?</li><li>Почему падение потока может уронить весь процесс?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Процесс</b> — запущенная программа со своим адресным пространством и ресурсами. <b>Поток</b> — ход выполнения внутри процесса; потоки делят память процесса.</p><ul><li>У каждого потока свой стек, регистры и счётчик команд</li><li>Общие у потоков: куча, глобальные переменные, открытые файлы</li><li>Процессы изолированы — общаться через каналы, сокеты, общую память</li></ul><p class="extra"><span>А ещё</span> Поток дешевле создать и переключить, но ошибка в нём бьёт по всему процессу</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Процесс</b> — единица изоляции. Операционная система выдаёт ему виртуальное адресное пространство (код, данные, куча, стеки), таблицу открытых файлов, идентификатор, права пользователя. Один процесс не может прочитать память другого — это защищает систему от чужих ошибок.</p>
+<p><b>Поток</b> — единица планирования: последовательность инструкций, которую планировщик ставит на ядро процессора. В процессе есть хотя бы один поток. Потоки одного процесса видят одну и ту же память, поэтому обмениваться данными им просто — достаточно общей переменной. Но ровно отсюда гонки данных и необходимость синхронизации.</p>
+<p>У каждого потока своё:</p>
+<ul><li><b>стек</b> — локальные переменные и цепочка вызовов;</li><li><b>регистры</b> и <b>счётчик команд</b>;</li><li>состояние планирования (работает, готов, ждёт).</li></ul>
+<p>Общее у потоков процесса — куча, статические данные, код, открытые файлы и сокеты, рабочий каталог.</p>
+<p><b>Цена.</b> Создать процесс дороже: нужно новое адресное пространство (в Linux <code>fork</code> копирует таблицы страниц, а сами страницы — лениво, copy-on- write). Переключение между процессами дороже переключения потоков: меняется адресное пространство, сбрасывается часть кэша трансляции адресов (TLB).</p>
+<p><b>Изоляция против удобства.</b> Ошибка доступа к памяти в одном потоке убивает весь процесс. Поэтому браузеры запускают вкладки отдельными процессами, а веб-серверы вроде nginx и PostgreSQL используют рабочие процессы. Обмен между процессами — через каналы (pipe), сокеты, общую память, файлы.</p>
+<p><b>Связь с языками.</b> В Java поток <code>Thread</code> — поток ОС (виртуальные потоки Java 21 — лёгкие, их много на одном потоке ОС). В Python потоки — тоже потоки ОС, но GIL не даёт им одновременно исполнять байт-код, поэтому для вычислений берут процессы (<code>multiprocessing</code>).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>from threading import Thread
+from multiprocessing import Process
+
+counter = 0
+def inc():
+    global counter
+    counter += 1
+
+t = Thread(target=inc); t.start(); t.join()
+print(counter)   # 1 — поток изменил общую переменную
+
+p = Process(target=inc); p.start(); p.join()
+print(counter)   # всё ещё 1 — у процесса своя копия памяти</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Процесс — изоляция и ресурсы, поток — выполнение внутри процесса.</li><li>Что общее у потоков и что своё (стек, регистры).</li><li>Сравнение цены создания и переключения.</li><li>Как процессы общаются и почему падение потока роняет процесс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Поток — это маленький процесс» без объяснения общей памяти.</li><li>Считать, что у потоков разные кучи.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/context-switch/">Что такое переключение контекста и почему оно дорогое?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/race-condition/">Что такое состояние гонки?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/stack-vs-heap/">Чем стек отличается от кучи?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/virtual-memory/">Что такое виртуальная память?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем процесс отличается от потока?","acceptedAnswer":{"@type":"Answer","text":"Процесс — запущенная программа со своим адресным пространством и ресурсами. Поток — ход выполнения внутри процесса; потоки делят память процесса. У каждого потока свой стек, регистры и счётчик команд Общие у потоков: куча, глобальные переменные, открытые файлы Процессы изолированы — общаться через каналы, сокеты, общую память Поток дешевле создать и переключить, но ошибка в нём бьёт по всему процессу Процесс — единица изоляции. Операционная система выдаёт ему виртуальное адресное пространство (код, данные, куча, стеки), таблицу открытых файлов, идентификатор, права пользователя. Один процесс не может прочитать память другого — это защищает систему от чужих ошибок. Поток — единица планирования: последовательность инструкций, которую планировщик ставит на ядро процессора. В процессе есть хотя бы один поток. Потоки одного процесса видят одну и ту же память, поэтому обмениваться данными им просто — достаточно общей переменной. Но ровно отсюда гонки данных и необходимость синхронизации. У каждого потока своё: - стек — локальные переменные и цепочка вызовов; - регистры и счётчик команд; - состояние планирования (работает, готов, ждёт). Общее у потоков процесса — куча, статические данные, код, открытые файлы и сокеты, рабочий каталог. Цена. Создать процесс дороже: нужно новое адресное…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

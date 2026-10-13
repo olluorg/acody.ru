@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему время ответа измеряют перцентилями, а не средним? — вопрос с собеседования</title>
+<meta name="description" content="Распределение задержек сильно скошено: большинство запросов быстрые, но есть длинный хвост. Среднее его прячет, а p95/p99 показывает, что видят самые…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/latency-percentiles/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/latency-percentiles/">
+<meta property="og:title" content="Почему время ответа измеряют перцентилями, а не средним? — вопрос с собеседования">
+<meta property="og:description" content="Распределение задержек сильно скошено: большинство запросов быстрые, но есть длинный хвост. Среднее его прячет, а p95/p99 показывает, что видят самые…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Почему время ответа измеряют перцентилями, а не средним?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Почему время ответа измеряют перцентилями, а не средним?"}]}</script>
+  <h1>Почему время ответа измеряют перцентилями, а не средним?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Задержка, пропускная способность и очереди</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое p99 и зачем он нужен?</li><li>Почему среднее время ответа обманывает?</li><li>Почему хвостовые задержки важны при fan-out?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Распределение задержек сильно скошено: большинство запросов быстрые, но есть длинный хвост. Среднее его прячет, а <b>p95/p99</b> показывает, что видят самые невезучие пользователи.</p><ul><li>p99 = 300 мс: 99% запросов быстрее, 1% — медленнее</li><li>Страница делает 100 запросов к бэкенду — почти каждый пользователь попадает в чужой p99</li><li>Перцентили нельзя усреднять между серверами — нужны гистограммы</li></ul><p class="extra"><span>А ещё</span> SLO формулируют так: «p99 &lt; 300 мс за 28 дней» и следят за бюджетом ошибок</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Очередь и утилизация: почему при 90% всё тормозит</p><script type="module" src="/widgets/queueing.js"></script><sotto-queueing theme="dark"></sotto-queueing></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Время ответа почти никогда не распределено нормально. Основная масса запросов укладывается в несколько миллисекунд, но часть ждёт сборку мусора, промах кэша, блокировку, повтор после потери пакета, очередь на перегруженном экземпляре. Получается длинный правый хвост.</p>
+<p><b>Почему среднее плохо:</b></p>
+<ul><li>99 запросов по 10 мс и один по 5 секунд дают среднее 60 мс — ни один запрос так не работал;</li><li>среднее почти не реагирует на деградацию хвоста, а пользователи реагируют;</li><li>медиана (p50) показывает типичный опыт, но тоже не видит хвоста.</li></ul>
+<p><b>Перцентили.</b> p95 — значение, быстрее которого 95% запросов. Смотрят обычно p50, p95, p99, p99.9 и максимум.</p>
+<p><b>Почему хвост важнее, чем кажется:</b></p>
+<ul><li>самые медленные запросы часто у самых ценных клиентов — у них больше данных, длиннее корзины;</li><li><b>fan-out</b>: если ответ собирается из N параллельных вызовов, он ждёт самый медленный. Вероятность, что все 100 вызовов уложатся в свой p99, — 0,99¹⁰⁰ ≈ 37%. Значит, у 63% ответов задержка не лучше p99 одного бэкенда;</li><li>одна страница — десятки запросов: за сессию пользователь почти наверняка встретит p99.</li></ul>
+<p><b>Как правильно измерять:</b></p>
+<ul><li><b>гистограммы</b>, а не готовые перцентили: перцентили с разных серверов нельзя усреднять, а гистограммы можно сложить и посчитать перцентиль по сумме (Prometheus histogram, HdrHistogram);</li><li>измерять на стороне клиента, а не только сервера — сервер не видит время в очереди перед собой и сеть;</li><li><b>coordinated omission</b> — генератор нагрузки, который ждёт ответа перед следующим запросом, во время зависания просто не отправляет запросы и занижает хвост. Нужен генератор с постоянной скоростью (wrk2, k6 с arrival rate).</li></ul>
+<p><b>SLO.</b> Цель формулируют через перцентиль и окно: «99% запросов за 28 дней быстрее 300 мс». Остаток до 100% — бюджет ошибок: пока он есть, можно выкатывать рискованное.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>Задержки 10 000 запросов:
+p50 = 12 мс   p90 = 25 мс   p99 = 180 мс   p99.9 = 1,4 с   среднее = 21 мс
+Агрегатор вызывает 50 таких сервисов параллельно:
+вероятность, что все быстрее p99: 0,99^50 ≈ 0,61 → 39% ответов агрегатора ≥ 180 мс</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Скошенное распределение и почему среднее вводит в заблуждение.</li><li>Смысл p95/p99 и что они показывают.</li><li>Эффект fan-out на хвост с расчётом.</li><li>Гистограммы, измерение у клиента, coordinated omission — для middle+.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Усреднять p99 по серверам.</li><li>Ставить SLO на среднее время ответа.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/tail-latency/">Как бороться с хвостовыми задержками в распределённой системе?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/queueing-utilization/">Почему при загрузке сервера 90% время ответа растёт в разы, хотя запас ещё есть?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/measuring-latency/">Что верно про измерение времени ответа сервиса?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/latency-numbers/">Какие порядки задержек нужно знать разработчику?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему время ответа измеряют перцентилями, а не средним?","acceptedAnswer":{"@type":"Answer","text":"Распределение задержек сильно скошено: большинство запросов быстрые, но есть длинный хвост. Среднее его прячет, а p95/p99 показывает, что видят самые невезучие пользователи. p99 = 300 мс: 99% запросов быстрее, 1% — медленнее Страница делает 100 запросов к бэкенду — почти каждый пользователь попадает в чужой p99 Перцентили нельзя усреднять между серверами — нужны гистограммы SLO формулируют так: «p99 < 300 мс за 28 дней» и следят за бюджетом ошибок Время ответа почти никогда не распределено нормально. Основная масса запросов укладывается в несколько миллисекунд, но часть ждёт сборку мусора, промах кэша, блокировку, повтор после потери пакета, очередь на перегруженном экземпляре. Получается длинный правый хвост. Почему среднее плохо: - 99 запросов по 10 мс и один по 5 секунд дают среднее 60 мс — ни один запрос так не работал; - среднее почти не реагирует на деградацию хвоста, а пользователи реагируют; - медиана (p50) показывает типичный опыт, но тоже не видит хвоста. Перцентили. p95 — значение, быстрее которого 95% запросов. Смотрят обычно p50, p95, p99, p99.9 и максимум. Почему хвост важнее, чем кажется: - самые медленные запросы часто у самых ценных клиентов — у них больше данных, длиннее корзины; - fan-out: если ответ собирается из N параллельных вызовов, он ждёт самый медленный. Вероятность, что все 100 вызовов уложатся в свой…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

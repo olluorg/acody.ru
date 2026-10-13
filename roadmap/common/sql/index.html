@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL и реляционные базы — карта «ИИ-инженер»</title>
+<meta name="description" content="Таблицы, запросы, JOIN, индексы и транзакции — хранение пользователей, диалогов и документов.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/common/sql/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/common/sql/">
+<meta property="og:title" content="SQL и реляционные базы — карта «ИИ-инженер»">
+<meta property="og:description" content="Таблицы, запросы, JOIN, индексы и транзакции — хранение пользователей, диалогов и документов.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/ai-engineer/#backend">ИИ-инженер</a> <span>/</span> <a href="/roadmap/ai-engineer/backend/">Бэкенд для ИИ-сервисов</a> <span>/</span> <span>SQL и реляционные базы</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"ИИ-инженер","item":"https://learn.getsotto.ru/roadmap/ai-engineer/#backend"},{"@type":"ListItem","position":3,"name":"Бэкенд для ИИ-сервисов","item":"https://learn.getsotto.ru/roadmap/ai-engineer/backend/"},{"@type":"ListItem","position":4,"name":"SQL и реляционные базы"}]}</script>
+  <h1>SQL и реляционные базы</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Таблицы, запросы, JOIN, индексы и транзакции — хранение пользователей, диалогов и документов.</p>
+  <article class="md"><p>Почти любой сервис хранит данные в реляционной базе, чаще всего в PostgreSQL. Для LLM-продуктов это пользователи и права, история диалогов, документы и их фрагменты, оценки ответов, расходы на модели.</p>
+<pre class="lang-sql"><code>SELECT d.id, count(m.id) AS messages, avg(f.score) AS rating
+FROM dialogs d
+JOIN messages m ON m.dialog_id = d.id
+LEFT JOIN feedback f ON f.message_id = m.id
+WHERE d.created_at &gt; now() - interval &#x27;7 days&#x27;
+GROUP BY d.id
+ORDER BY rating NULLS LAST;</code></pre>
+<h3>Что важно знать</h3>
+<ul><li>SELECT, JOIN (INNER, LEFT), GROUP BY, подзапросы, оконные функции.</li><li>Первичные и внешние ключи, нормализация без фанатизма.</li><li>Индексы: когда помогают, когда мешают, как читать EXPLAIN.</li><li>Транзакции и изоляция: два запроса меняют одну запись одновременно.</li><li>Только параметризованные запросы — никакой склейки строк.</li><li>pgvector превращает PostgreSQL в векторную базу — часто это лучший старт для RAG.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 16 ч</small></h3><ul><li>Пишет запросы с фильтрами, сортировкой, JOIN и GROUP BY</li><li>Проектирует таблицы для пользователей, диалогов и сообщений с внешними ключами</li><li>Использует параметризованные запросы и объясняет, как они защищают от SQL-инъекций</li></ul><p class="rm-practice"><b>Практика.</b> Спроектировать схему БД для чат-ассистента (пользователи, диалоги, сообщения, оценки ответов) и написать 5 запросов для аналитики диалогов.</p></div><div class="rm-grade"><h3>Middle <small>≈ 12 ч</small></h3><ul><li>Находит медленный запрос через EXPLAIN и ускоряет его индексом</li><li>Объясняет транзакции и выбирает уровень изоляции для конкурентных обновлений</li><li>Хранит эмбеддинги в PostgreSQL с pgvector рядом с обычными данными</li></ul><p class="rm-practice"><b>Практика.</b> Добавить в схему pgvector-таблицу фрагментов документов с фильтром по правам доступа, замерить время поиска до и после индекса HNSW.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/databases/foreign-key/">Что обеспечивает foreign key?</a> <span class="lvl lvl-junior">Junior</span><p>Внешний ключ гарантирует ссылочную целостность: нельзя сослаться на несуществующую строку и нельзя удалить строку, на которую ссылаются (если не задано иное).</p></li><li><a href="/questions/cs/b-tree/">Почему индексы в базах данных устроены как B-дерево?</a> <span class="lvl lvl-middle">Middle</span><p>B-дерево — сбалансированное дерево с широкими узлами: в узле сотни ключей, узел = страница на диске (8–16 КБ). Высота 3–4 даже для миллиардов строк — значит, 3–4 чтения страницы.</p></li><li><a href="/questions/cs/sql-injection/">Что такое SQL-инъекция и как от неё защититься?</a> <span class="lvl lvl-junior">Junior</span><p>Инъекция — данные пользователя попадают в текст запроса и меняют его смысл: &#x27; OR &#x27;1&#x27;=&#x27;1 превращает проверку пароля в «всегда истина».</p></li></ul></section><section class="block"><h2>Документация</h2><ul class="links"><li><a href="https://www.postgresql.org/docs/current/tutorial.html" rel="noopener" target="_blank">PostgreSQL: учебник ↗</a></li></ul></section><div class="prep-links"><span>Есть в картах:</span> <a class="chip" href="/roadmap/ai-engineer/">ИИ-инженер</a> <a class="chip" href="/roadmap/backend/">Backend-разработчик</a> <a class="chip" href="/roadmap/data-science/">Data Scientist</a></div>
+  <nav class="rm-pager"><a href="/roadmap/common/http/">← HTTP и HTTPS</a><a class="next" href="/roadmap/common/docker/">Docker →</a></nav>
+  <p class="rm-back"><a href="/roadmap/ai-engineer/#backend">← Вся карта «ИИ-инженер»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"SQL и реляционные базы","description":"Таблицы, запросы, JOIN, индексы и транзакции — хранение пользователей, диалогов и документов.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/common/sql/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

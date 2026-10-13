@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зачем нужен context.Context? — вопрос с собеседования</title>
+<meta name="description" content="Context переносит отмену, дедлайн и значения запроса через цепочку вызовов и горутин. Создают от входящего запроса, передают первым аргументом во все…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/go/context/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/go/context/">
+<meta property="og:title" content="Зачем нужен context.Context? — вопрос с собеседования">
+<meta property="og:description" content="Context переносит отмену, дедлайн и значения запроса через цепочку вызовов и горутин. Создают от входящего запроса, передают первым аргументом во все…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/go/">Go</a> <span>/</span> <span>Зачем нужен context.Context?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Go","item":"https://learn.getsotto.ru/questions/go/"},{"@type":"ListItem","position":3,"name":"Зачем нужен context.Context?"}]}</script>
+  <h1>Зачем нужен context.Context?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Горутины и каналы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как в Go отменить запрос и передать таймаут вниз по вызовам?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Context переносит <b>отмену, дедлайн и значения запроса</b> через цепочку вызовов и горутин. Создают от входящего запроса, передают <b>первым аргументом</b> во все функции с вводом-выводом. <b>WithTimeout/WithCancel</b> порождают дочерний контекст; отмена родителя отменяет всех потомков.</p><ul><li>Обязательно вызывать cancel() (через defer) — иначе утечка таймера</li><li>ctx.Done() — канал, закрывающийся при отмене; ctx.Err() — причина</li><li>Значения (WithValue) — только для данных запроса: trace id, пользователь</li></ul><p class="extra"><span>А ещё</span> Не хранить context в структурах — передавать явно</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Проблема.</b> Клиент отключился или истёк таймаут — а сервис продолжает ходить в базу и другие сервисы, тратя ресурсы. Context даёт единый способ сообщить всем участникам: «работа больше не нужна».</p>
+<p><b>Дерево контекстов.</b> <code>context.Background()</code> — корень; HTTP-сервер даёт <code>r.Context()</code>, который отменяется при разрыве соединения. Производные контексты добавляют таймаут или отмену; дедлайн потомка не может быть позже родительского.</p>
+<p><b>Поддержка в библиотеках:</b> <code>http.NewRequestWithContext</code>, <code>db.QueryContext</code>, клиенты gRPC, Redis, Kafka принимают контекст и прерывают операцию.</p>
+<p><b>Свои долгие функции</b> проверяют <code>ctx.Err()</code> или слушают <code>ctx.Done()</code> в select.</p>
+<p><b>WithValue</b> — не замена параметрам: только сквозные данные запроса, ключ — неэкспортируемый тип, чтобы не было коллизий.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-go"><code>func handler(w http.ResponseWriter, r *http.Request) {
+    ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+    defer cancel()
+
+    user, err := repo.Get(ctx, id)        // драйвер БД прервёт запрос при отмене
+    if errors.Is(err, context.DeadlineExceeded) {
+        http.Error(w, &quot;timeout&quot;, 504); return
+    }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Отмена и дедлайны через дерево контекстов.</li><li>Передача первым аргументом и cancel.</li><li>Ограничения WithValue.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/goroutine-leak/">Что такое утечка горутин и как её избежать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/go/select/">Как работает select в Go?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/asyncio-cancellation/">Как в asyncio работают отмена задач и таймауты?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Зачем нужен context.Context?","acceptedAnswer":{"@type":"Answer","text":"Context переносит отмену, дедлайн и значения запроса через цепочку вызовов и горутин. Создают от входящего запроса, передают первым аргументом во все функции с вводом-выводом. WithTimeout/WithCancel порождают дочерний контекст; отмена родителя отменяет всех потомков. Обязательно вызывать cancel() (через defer) — иначе утечка таймера ctx.Done() — канал, закрывающийся при отмене; ctx.Err() — причина Значения (WithValue) — только для данных запроса: trace id, пользователь Не хранить context в структурах — передавать явно Проблема. Клиент отключился или истёк таймаут — а сервис продолжает ходить в базу и другие сервисы, тратя ресурсы. Context даёт единый способ сообщить всем участникам: «работа больше не нужна». Дерево контекстов. context.Background() — корень; HTTP-сервер даёт r.Context(), который отменяется при разрыве соединения. Производные контексты добавляют таймаут или отмену; дедлайн потомка не может быть позже родительского. Поддержка в библиотеках: http.NewRequestWithContext, db.QueryContext, клиенты gRPC, Redis, Kafka принимают контекст и прерывают операцию. Свои долгие функции проверяют ctx.Err() или слушают ctx.Done() в select. WithValue — не замена параметрам: только сквозные данные запроса, ключ — неэкспортируемый тип, чтобы не было коллизий."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

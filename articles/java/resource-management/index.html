@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Управление ресурсами: try-with-resources — разбор для собеседования</title>
+<meta name="description" content="Беды ручного finally, автозакрытие AutoCloseable, suppressed-исключения и разница Closeable/AutoCloseable.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/resource-management/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/resource-management/">
+<meta property="og:title" content="Управление ресурсами: try-with-resources — разбор для собеседования">
+<meta property="og:description" content="Беды ручного finally, автозакрытие AutoCloseable, suppressed-исключения и разница Closeable/AutoCloseable.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Управление ресурсами: try-with-resources</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Управление ресурсами: try-with-resources"}]}</script>
+  <h1>Управление ресурсами: try-with-resources</h1>
+  <p class="lead">Беды ручного finally, автозакрытие AutoCloseable, suppressed-исключения и разница Closeable/AutoCloseable.</p>
+  <article class="md"><h2>Беды ручного finally</h2>
+<p>До Java 7 ресурсы (файлы, соединения, потоки) закрывали в finally. Это многословно, требует вложенных try для нескольких ресурсов и легко ошибиться: если <code>close()</code> в finally сам бросит исключение, оно ЗАТРЁТ исходное исключение из тела try — и настоящая первопричина потеряется.</p>
+<p>Плюс типичная ловушка: если ресурс не создался (исключение в инициализации), переменная остаётся null, и <code>close()</code> в finally даёт ещё и NullPointerException.</p>
+<h2>try-with-resources</h2>
+<p>try-with-resources автоматически закрывает всё, что реализует AutoCloseable, объявленное в круглых скобках try — гарантированно, даже при исключении или return в теле. Это убирает boilerplate и весь класс ошибок ручного закрытия.</p>
+<p>Никогда не «глотайте» исключение пустым catch — это прячет ошибки и усложняет отладку.</p>
+<pre class="lang-java"><code>try (var in = Files.newInputStream(path);
+     var out = Files.newOutputStream(dst)) {
+    in.transferTo(out);          // оба ресурса закроются автоматически,
+} catch (IOException e) {         // out — раньше in (обратный порядок)
+    throw new UncheckedIOException(e);
+}</code></pre>
+<h2>Suppressed-исключения</h2>
+<p>try-with-resources решает проблему «затирания»: если исключение бросает И тело try, И <code>close()</code>, то основным остаётся исключение из тела, а исключение из <code>close()</code> не теряется — оно прикрепляется к основному как suppressed и доступно через <code>Throwable.getSuppressed()</code>.</p>
+<p>Это противоположно поведению ручного finally (где побеждало исключение из close). В stack trace такие добавки печатаются с пометкой «Suppressed:» — первопричина видна.</p>
+<pre class="lang-java"><code>Throwable[] suppressed = primary.getSuppressed(); // что бросили close() при раскрутке</code></pre>
+<h2>Несколько ресурсов и порядок</h2>
+<p>Ресурсы закрываются в порядке, ОБРАТНОМ объявлению (последний открытый закрывается первым) — это логично для зависимых ресурсов (Writer поверх OutputStream).</p>
+<p>С Java 9 в try-with-resources можно перечислять уже существующие effectively final переменные, а не только объявлять новые на месте: try (resource) { ... }.</p>
+<h2>AutoCloseable против Closeable</h2>
+<p>AutoCloseable — базовый интерфейс с единственным методом <code>close()</code> throws Exception; его достаточно для участия в try-with-resources. Closeable (из java.io) — его наследник, у которого <code>close()</code> throws более узкое IOException и по контракту должен быть идемпотентным (повторный close безвреден).</p>
+<p>Свой ресурс делают AutoCloseable; <code>close()</code> желательно делать идемпотентным и по возможности не бросающим — исключение из close усложняет жизнь вызывающим.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Объясните, чем плох ручной finally (затирание исходного исключения, NPE на null-ресурсе), как try-with-resources закрывает AutoCloseable в обратном порядке, и главное — механизм suppressed-исключений (исключение из close прикрепляется, а не затирает; <code>getSuppressed</code>). Различите AutoCloseable (Exception, общий) и Closeable (IOException, идемпотентный).</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/try-with-resources/">Что делает конструкция try-with-resources?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/suppressed-exceptions/">В try-with-resources исключение бросают и тело блока, и метод close(). Какое исключение получит вызывающий код?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/autocloseable-vs-closeable/">Чем интерфейс AutoCloseable отличается от Closeable?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/twr-close-order/">Код открывает соединение, затем в том же try создаёт из него statement, и оба объявлены в скобках try-with-resources. В каком порядке они закроются?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/exceptions/">Исключения: иерархия и checked/unchecked</a><p>Дерево Throwable, философия checked против unchecked, раскрутка стека и стоимость, цепочки причин и практики обработки.</p></li><li><a href="/articles/java/io/">Потоки ввода-вывода: байты, символы, буферы</a><p>Байтовые и символьные потоки, кодировки и Charset, буферизация и системные вызовы, декоратор-паттерн и современный файловый API.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Управление ресурсами: try-with-resources","description":"Беды ручного finally, автозакрытие AutoCloseable, suppressed-исключения и разница Closeable/AutoCloseable.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/resource-management/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

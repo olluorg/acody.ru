@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем горизонтальное масштабирование отличается от вертикального? — вопрос с собеседования</title>
+<meta name="description" content="Вертикальное (scale up) — мощнее одна машина; горизонтальное (scale out) — больше машин под балансировщиком. Вертикальное — просто, без изменений…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/horizontal-vs-vertical-scaling/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/horizontal-vs-vertical-scaling/">
+<meta property="og:title" content="Чем горизонтальное масштабирование отличается от вертикального? — вопрос с собеседования">
+<meta property="og:description" content="Вертикальное (scale up) — мощнее одна машина; горизонтальное (scale out) — больше машин под балансировщиком. Вертикальное — просто, без изменений…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Чем горизонтальное масштабирование отличается от вертикального?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Чем горизонтальное масштабирование отличается от вертикального?"}]}</script>
+  <h1>Чем горизонтальное масштабирование отличается от вертикального?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Масштабирование</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое scale up и scale out?</li><li>Когда достаточно купить сервер помощнее?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Вертикальное</b> (scale up) — мощнее одна машина; <b>горизонтальное</b> (scale out) — больше машин под балансировщиком.</p><ul><li>Вертикальное — просто, без изменений кода, но есть потолок железа и одна точка отказа</li><li>Горизонтальное — почти без потолка и с отказоустойчивостью, но сервис должен быть stateless</li><li>Состояние (сессии, файлы, кэш в памяти) выносят в общие хранилища</li></ul><p class="extra"><span>А ещё</span> Базы данных масштабируют сначала вертикально и репликами, горизонтально — шардированием, это дороже</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Вертикальное масштабирование</b> — больше CPU, памяти, быстрее диски на той же машине. Плюсы: код не меняется, нет распределённых проблем, транзакции и JOIN остаются локальными. Минусы: есть потолок (самая мощная машина конечна, а цена растёт быстрее мощности), машина остаётся единственной точкой отказа, апгрейд часто требует простоя.</p>
+<p><b>Горизонтальное масштабирование</b> — несколько одинаковых экземпляров за балансировщиком. Плюсы: мощность растёт добавлением машин, отказ одной не роняет сервис, можно автоматически подстраиваться под нагрузку. Условия:</p>
+<ul><li>сервис <b>stateless</b> — любой экземпляр может обработать любой запрос; сессии — в Redis или токене, файлы — в объектном хранилище, локальный кэш допустим только как необязательное ускорение;</li><li>балансировщик и проверки здоровья;</li><li>общие ресурсы (база, кэш, очередь) тоже должны выдерживать рост — иначе узкое место просто переедет в них.</li></ul>
+<p><b>На практике</b> сочетают: серверы приложений — горизонтально, базу — вертикально плюс реплики для чтения, а шардирование — когда вертикальный рост исчерпан. Добавление серверов перестаёт помогать, если упираемся в общий ресурс (закон Амдала).</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определения и пример каждого вида.</li><li>Плюсы и минусы: потолок и точка отказа против сложности распределённой системы.</li><li>Требование stateless и что делать с состоянием.</li><li>Что база масштабируется иначе, чем серверы приложений.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать горизонтальное масштабирование бесплатным: общие ресурсы становятся узким местом.</li><li>Забывать про сессии в памяти экземпляра.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Горизонтальное — добавить ещё машины; вертикальное — усилить одну машину</li><li class="no"><span class="mark">✗</span>Горизонтальное — усилить одну машину; вертикальное — добавить машины</li><li class="no"><span class="mark">✗</span>Это одно и то же</li><li class="no"><span class="mark">✗</span>Горизонтальное работает только для баз данных</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что мешает масштабировать stateful-сервис?</li><li>Зачем нужен load balancer?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/scaling/">Масштабирование</a><p>Что именно упирается, вертикальный и горизонтальный рост, stateless и балансировка, шардинг и consistent hashing, реплики на чтение и лаг, автоскейл и поиск настоящего узкого места.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/stateless-services/">Почему для горизонтального масштабирования сервис делают stateless?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/blockers-of-horizontal-scaling/">Сервис планируют масштабировать горизонтально. Какие его свойства придётся устранить, чтобы инстансы можно было свободно добавлять и снимать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/amdahl-scalability/">Почему удвоение числа серверов не удваивает пропускную способность?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/load-balancing-l4-l7/">Чем балансировщик L4 отличается от L7?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем горизонтальное масштабирование отличается от вертикального?","acceptedAnswer":{"@type":"Answer","text":"Вертикальное (scale up) — мощнее одна машина; горизонтальное (scale out) — больше машин под балансировщиком. Вертикальное — просто, без изменений кода, но есть потолок железа и одна точка отказа Горизонтальное — почти без потолка и с отказоустойчивостью, но сервис должен быть stateless Состояние (сессии, файлы, кэш в памяти) выносят в общие хранилища Базы данных масштабируют сначала вертикально и репликами, горизонтально — шардированием, это дороже Вертикальное масштабирование — больше CPU, памяти, быстрее диски на той же машине. Плюсы: код не меняется, нет распределённых проблем, транзакции и JOIN остаются локальными. Минусы: есть потолок (самая мощная машина конечна, а цена растёт быстрее мощности), машина остаётся единственной точкой отказа, апгрейд часто требует простоя. Горизонтальное масштабирование — несколько одинаковых экземпляров за балансировщиком. Плюсы: мощность растёт добавлением машин, отказ одной не роняет сервис, можно автоматически подстраиваться под нагрузку. Условия: - сервис stateless — любой экземпляр может обработать любой запрос; сессии — в Redis или токене, файлы — в объектном хранилище, локальный кэш допустим только как необязательное ускорение; - балансировщик и проверки здоровья; - общие ресурсы (база, кэш, очередь) тоже должны выдерживать рост — иначе узкое место просто переедет в них. На практике…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

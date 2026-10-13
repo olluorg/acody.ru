@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORM и доступ к данным — карта «Backend-разработчик»</title>
+<meta name="description" content="Hibernate, SQLAlchemy и аналоги — persistence context, ленивая загрузка, N+1.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/backend/orm/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/backend/orm/">
+<meta property="og:title" content="ORM и доступ к данным — карта «Backend-разработчик»">
+<meta property="og:description" content="Hibernate, SQLAlchemy и аналоги — persistence context, ленивая загрузка, N+1.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/#databases">Backend-разработчик</a> <span>/</span> <a href="/roadmap/backend/databases/">Базы данных</a> <span>/</span> <span>ORM и доступ к данным</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://learn.getsotto.ru/roadmap/backend/#databases"},{"@type":"ListItem","position":3,"name":"Базы данных","item":"https://learn.getsotto.ru/roadmap/backend/databases/"},{"@type":"ListItem","position":4,"name":"ORM и доступ к данным"}]}</script>
+  <h1>ORM и доступ к данным</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Hibernate, SQLAlchemy и аналоги — persistence context, ленивая загрузка, N+1.</p>
+  <article class="md"><h3>Что важно знать</h3>
+<ul><li>ORM отображает строки на объекты и избавляет от рутины, но SQL под ним никуда не исчезает — его нужно видеть в логах.</li><li><b>N+1</b>: загрузили список, а связанные сущности подгружаются по одной. Лечится JOIN FETCH, entity graph, пакетной загрузкой.</li><li><b>Persistence context</b>: кэш первого уровня, отслеживание изменений, сброс при коммите.</li><li><b>Ленивая загрузка</b> вне транзакции — LazyInitializationException и аналоги.</li><li>Отчёты и сложные выборки — часто лучше SQL или проекции.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 6 ч</small></h3><ul><li>Сохраняет и загружает сущности через ORM и пишет параметризованные запросы</li></ul><p class="rm-practice"><b>Практика.</b> Реализовать репозиторий заказов через ORM с тестами на реальной базе.</p></div><div class="rm-grade"><h3>Middle <small>≈ 8 ч</small></h3><ul><li>Находит и устраняет проблему N+1 жадной загрузкой или отдельным запросом</li><li>Объясняет жизненный цикл сущности и persistence context</li><li>Решает, когда писать SQL вручную вместо ORM</li></ul><p class="rm-practice"><b>Практика.</b> Найти N+1 в учебном проекте по логу SQL, исправить и замерить число запросов до и после.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/databases/prepared-statement/">Чем PreparedStatement безопаснее обычного Statement?</a> <span class="lvl lvl-junior">Junior</span><p>PreparedStatement передаёт текст запроса и значения раздельно: значение никогда не разбирается как SQL — инъекция невозможна. Statement склеивает строку и выполняет как есть.</p></li><li><a href="/questions/databases/n-plus-one/">Что такое проблема N+1 запросов и как её решать?</a> <span class="lvl lvl-middle">Middle</span><p>N+1 — один запрос за списком и ещё по запросу на связанные данные каждого элемента: 100 заказов → 101 запрос. Причина — ленивая загрузка связей в цикле.</p></li><li><a href="/questions/databases/what-is-jdbc/">Что такое JDBC?</a> <span class="lvl lvl-junior">Junior</span><p>JDBC — стандартный API Java для работы с реляционными базами: Connection, PreparedStatement, ResultSet. Реализацию для конкретной СУБД поставляет драйвер.</p></li><li><a href="/questions/databases/jdbc-manual-transaction/">Как в JDBC выполнить несколько операций в одной транзакции вручную?</a> <span class="lvl lvl-middle">Middle</span><p>conn.setAutoCommit(false) → операции → commit(); при исключении rollback(); в finally вернуть autocommit и закрыть соединение.</p></li><li><a href="/questions/databases/what-is-orm/">Что делает ORM?</a> <span class="lvl lvl-junior">Junior</span><p>ORM связывает объекты и таблицы: вы работаете с сущностями, а SQL для загрузки и сохранения генерируется автоматически.</p></li><li><a href="/questions/databases/lazy-initialization-exception/">Почему возникает LazyInitializationException в Hibernate и как его правильно лечить?</a> <span class="lvl lvl-middle">Middle</span><p>Ленивую связь трогают после закрытия сессии (вне транзакции, в контроллере или сериализаторе) — прокси не может выполнить запрос и бросает исключение.</p></li></ul></section><section class="block"><h2>Разборы темы</h2><ul class="links"><li><a href="/articles/databases/jdbc/">JDBC и безопасные запросы</a><p>Connection/Statement/ResultSet, PreparedStatement против инъекций, ручные транзакции, ресурсы и пул соединений.</p></li><li><a href="/articles/databases/orm/">ORM, persistence context и N+1</a><p>Что делает ORM, lazy/eager и proxy, механизм N+1, способы лечения и типичные грабли.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/backend/data-modeling/">← Моделирование данных</a><a class="next" href="/roadmap/backend/nosql/">NoSQL-хранилища →</a></nav>
+  <p class="rm-back"><a href="/roadmap/backend/#databases">← Вся карта «Backend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"ORM и доступ к данным","description":"Hibernate, SQLAlchemy и аналоги — persistence context, ленивая загрузка, N+1.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/backend/orm/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

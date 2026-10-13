@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Явные блокировки: ReentrantLock, RW и Condition — разбор для собеседования</title>
+<meta name="description" content="Когда synchronized мало, ReentrantLock с tryLock/fairness, ReadWriteLock и StampedLock, Condition вместо wait/notify.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/locks/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/locks/">
+<meta property="og:title" content="Явные блокировки: ReentrantLock, RW и Condition — разбор для собеседования">
+<meta property="og:description" content="Когда synchronized мало, ReentrantLock с tryLock/fairness, ReadWriteLock и StampedLock, Condition вместо wait/notify.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Явные блокировки: ReentrantLock, RW и Condition</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Явные блокировки: ReentrantLock, RW и Condition"}]}</script>
+  <h1>Явные блокировки: ReentrantLock, RW и Condition</h1>
+  <p class="lead">Когда synchronized мало, ReentrantLock с tryLock/fairness, ReadWriteLock и StampedLock, Condition вместо wait/notify.</p>
+  <article class="md"><h2>Зачем явные Lock</h2>
+<p>synchronized прост и хорош по умолчанию, но негибок: нельзя попробовать взять замок без блокировки, прервать ожидание, задать честность или иметь несколько условий ожидания. Для этого есть <code>java.util.concurrent.locks.Lock</code> и его реализация ReentrantLock.</p>
+<p>ReentrantLock даёт <code>tryLock()</code> (взять, если свободен), <code>tryLock(timeout)</code> (с таймаутом — мощное средство против deadlock), <code>lockInterruptibly()</code> (прерываемое ожидание), опциональную fairness (FIFO-порядок ценой пропускной способности) и несколько Condition.</p>
+<h2>Дисциплина unlock в finally</h2>
+<p>В отличие от synchronized, явный замок не освобождается автоматически. Его ОБЯЗАТЕЛЬНО снимают в finally: иначе исключение в критической секции оставит замок навсегда удержанным, и все ожидающие потоки зависнут.</p>
+<p><code>lock()</code> ставят перед try, а <code>unlock()</code> — в finally.</p>
+<pre class="lang-java"><code>lock.lock();
+try {
+    updateState();
+} finally {
+    lock.unlock(); // всегда, даже при исключении
+}</code></pre>
+<h2>ReadWriteLock и StampedLock</h2>
+<p>ReentrantReadWriteLock разделяет доступ: много читателей одновременно ИЛИ один писатель. Выгоден для read-heavy данных, где чтения далеко преобладают; при частой записи выигрыша нет, а накладные расходы выше.</p>
+<p>StampedLock (не реентерабельный!) добавляет оптимистичное чтение: <code>tryOptimisticRead()</code> возвращает «штамп», читаете данные, затем <code>validate(stamp)</code> проверяет, не было ли записи; если была — перечитываете под обычным read-локом. Это очень быстро для read-mostly, но требует аккуратности и не поддерживает reentrancy/Condition.</p>
+<h2>Condition</h2>
+<p>Condition — это аналог wait/notify для явных замков: <code>lock.newCondition()</code> даёт объект с <code>await()</code>/<code>signal()</code>/<code>signalAll()</code>. Главное преимущество — несколько разных условий на одном замке (например, <code>notFull</code> и <code>notEmpty</code> в ограниченной очереди), чего synchronized-монитор не умеет.</p>
+<p>Правила те же: <code>await()</code> вызывают в цикле while по условию и под удерживаемым замком.</p>
+<pre class="lang-java"><code>Condition notEmpty = lock.newCondition();
+// потребитель:
+lock.lock();
+try { while (queue.isEmpty()) notEmpty.await(); take(); }
+finally { lock.unlock(); }</code></pre>
+<h2>Как отвечать на собеседовании</h2>
+<p>Назовите, что даёт ReentrantLock сверх synchronized (<code>tryLock</code>/timeout/interruptible/fairness/несколько Condition), подчеркните unlock в finally, объясните выигрыш ReadWriteLock на read-heavy и оптимистичное чтение StampedLock (не reentrant). Свяжите Condition с несколькими условиями на одном замке.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/reentrantlock-vs-synchronized/">Какие возможности даёт ReentrantLock, недоступные при использовании synchronized?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/deadlock/">Что такое deadlock и как его предотвращать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/stampedlock-optimistic-read/">Что даёт оптимистичное чтение в StampedLock и о каком его ограничении важно помнить?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/reentrantlock-unlock-finally/">Где должен располагаться вызов unlock() при работе с ReentrantLock?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/synchronized/">synchronized, мониторы и wait/notify</a><p>Взаимное исключение и видимость через монитор, reentrancy, guarded blocks с wait/notify и причины deadlock.</p></li><li><a href="/articles/java/executors/">Пулы потоков и ExecutorService</a><p>Зачем пул, параметры ThreadPoolExecutor, ловушки фабрик Executors, выбор размера и корректное завершение.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Явные блокировки: ReentrantLock, RW и Condition","description":"Когда synchronized мало, ReentrantLock с tryLock/fairness, ReadWriteLock и StampedLock, Condition вместо wait/notify.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/locks/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тестирование Spring Boot — карта «Spring»</title>
+<meta name="description" content="Срезы контекста, MockMvc, Testcontainers и контрактные тесты.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/spring/testing/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/spring/testing/">
+<meta property="og:title" content="Тестирование Spring Boot — карта «Spring»">
+<meta property="og:description" content="Срезы контекста, MockMvc, Testcontainers и контрактные тесты.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/">Backend-разработчик</a> <span>/</span> <a href="/roadmap/java/">Java</a> <span>/</span> <a href="/roadmap/spring/#testing">Spring</a> <span>/</span> <span>Тестирование Spring Boot</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://learn.getsotto.ru/roadmap/backend/"},{"@type":"ListItem","position":3,"name":"Java","item":"https://learn.getsotto.ru/roadmap/java/"},{"@type":"ListItem","position":4,"name":"Spring","item":"https://learn.getsotto.ru/roadmap/spring/#testing"},{"@type":"ListItem","position":5,"name":"Тестирование Spring Boot"}]}</script>
+  <h1>Тестирование Spring Boot</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Срезы контекста, MockMvc, Testcontainers и контрактные тесты.</p>
+  <article class="md"><h3>Что важно знать</h3>
+<ul><li><b>Срезы</b>: <code>@WebMvcTest</code>, <code>@DataJpaTest</code> — часть контекста, быстрее.</li><li><code>@SpringBootTest</code> — весь контекст; кэшируется между тестами с одинаковой конфигурацией.</li><li><code>@MockitoBean</code> (Spring Boot 3.4+) вместо устаревшего <code>@MockBean</code>.</li><li>Testcontainers и <code>@ServiceConnection</code> вместо H2.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 4 ч</small></h3><ul><li>Пишет тесты контроллеров через @WebMvcTest и MockMvc</li></ul><p class="rm-practice"><b>Практика.</b> Покрыть контроллер заказов тестами MockMvc на успешные ответы и ошибки валидации.</p></div><div class="rm-grade"><h3>Middle <small>≈ 6 ч</small></h3><ul><li>Пишет интеграционные тесты на Testcontainers с переиспользованием контейнеров</li><li>Подменяет бины через @MockitoBean и ускоряет тесты кэшированием контекста</li></ul><p class="rm-practice"><b>Практика.</b> Перевести интеграционные тесты с H2 на Testcontainers PostgreSQL и сократить время прогона за счёт общего контекста.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/spring/unit-vs-integration/">Чем unit-тест отличается от интеграционного?</a> <span class="lvl lvl-junior">Junior</span><p>Unit-тест проверяет изолированную логику без внешних зависимостей (моки), быстро. Интеграционный — что компоненты правильно связаны между собой и с реальными системами: база…</p></li><li><a href="/questions/spring/contract-tests/">Что проверяют контрактные тесты между сервисами?</a> <span class="lvl lvl-middle">Middle</span><p>Контрактные тесты проверяют, что провайдер API не ломает ожидания потребителя: потребитель фиксирует, какие запросы делает и какие поля читает, провайдер в своей сборке проверяет…</p></li><li><a href="/questions/spring/webmvctest-vs-springboottest/">Что делает slice-тест вроде @WebMvcTest по сравнению с @SpringBootTest?</a> <span class="lvl lvl-middle">Middle</span><p>@SpringBootTest поднимает весь контекст — медленно, но реалистично. Slice-тесты — узкий срез: @WebMvcTest (контроллеры, фильтры, MockMvc), @DataJpaTest (репозитории и база)…</p></li><li><a href="/questions/spring/h2-vs-testcontainers/">Почему интеграционные тесты на H2 вместо реальной СУБД считают ненадёжными?</a> <span class="lvl lvl-middle">Middle</span><p>H2 — не та база, что в проде: другой диалект, типы, функции, блокировки и изоляция. Тест проходит на H2 и падает в PostgreSQL. Testcontainers поднимает настоящую базу в Docker на…</p></li><li><a href="/questions/spring/test-pyramid/">Что верно про пирамиду тестов в Spring-приложении?</a> <span class="lvl lvl-middle">Middle</span><p>Внизу — много быстрых unit-тестов логики без Spring, в середине — интеграционные (slice-тесты, Testcontainers, контракты), наверху — единицы сквозных.</p></li></ul></section><section class="block"><h2>Разборы темы</h2><ul class="links"><li><a href="/articles/spring/testcontainers-contracts/">Тестирование Spring Boot</a><p>Пирамида тестов, unit без Spring, slice-тесты, @SpringBootTest и @MockBean, MockMvc/WebTestClient, Testcontainers и контрактные тесты.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/spring/security/">← Spring Security</a><a class="next" href="/roadmap/spring/messaging/">Сообщения в Spring →</a></nav>
+  <p class="rm-back"><a href="/roadmap/spring/#testing">← Вся карта «Spring»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Тестирование Spring Boot","description":"Срезы контекста, MockMvc, Testcontainers и контрактные тесты.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/spring/testing/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

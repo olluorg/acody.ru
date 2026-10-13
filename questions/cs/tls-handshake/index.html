@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работает HTTPS и TLS-рукопожатие? — вопрос с собеседования</title>
+<meta name="description" content="TLS даёт шифрование, целостность и подлинность сервера. В рукопожатии стороны согласуют общий ключ (обмен Диффи — Хеллмана), сервер доказывает…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/tls-handshake/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/tls-handshake/">
+<meta property="og:title" content="Как работает HTTPS и TLS-рукопожатие? — вопрос с собеседования">
+<meta property="og:description" content="TLS даёт шифрование, целостность и подлинность сервера. В рукопожатии стороны согласуют общий ключ (обмен Диффи — Хеллмана), сервер доказывает…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Как работает HTTPS и TLS-рукопожатие?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Как работает HTTPS и TLS-рукопожатие?"}]}</script>
+  <h1>Как работает HTTPS и TLS-рукопожатие?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Сети</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как браузер проверяет сертификат сайта?</li><li>Зачем в TLS и асимметричное, и симметричное шифрование?</li><li>Что такое TLS 1.3 и чем он лучше 1.2?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">TLS даёт <b>шифрование, целостность и подлинность сервера</b>. В рукопожатии стороны согласуют общий ключ (обмен Диффи — Хеллмана), сервер доказывает владение сертификатом, дальше данные шифруются быстрым симметричным шифром.</p><ul><li>Сертификат подписан удостоверяющим центром, браузер проверяет цепочку до доверенного корня и имя домена</li><li>TLS 1.3: 1 RTT на рукопожатие, 0-RTT при повторе, только стойкие шифры с прямой секретностью</li><li>Асимметрия — чтобы договориться о ключе, симметрия — чтобы быстро шифровать</li></ul><p class="extra"><span>А ещё</span> mTLS — сертификат предъявляет и клиент; в сервисах внутри компании</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Что защищает TLS:</b></p>
+<ul><li><b>конфиденциальность</b> — посредник видит только адреса и объём;</li><li><b>целостность</b> — подменённый байт обнаружится (AEAD-шифры: AES-GCM, ChaCha20-Poly1305);</li><li><b>подлинность</b> — клиент уверен, что говорит с владельцем домена.</li></ul>
+<p><b>Рукопожатие TLS 1.3</b> (после TCP-рукопожатия):</p>
+<ol><li><b>ClientHello</b> — поддерживаемые шифры, случайное число, публичная часть ключа Диффи — Хеллмана (на эллиптических кривых, X25519), имя сервера (SNI);</li><li><b>ServerHello</b> — выбранный шифр и своя публичная часть DH. Теперь обе стороны независимо вычисляют общий секрет, не передавая его по сети. Дальше всё зашифровано;</li><li>сервер шлёт <b>сертификат</b> и <b>CertificateVerify</b> — подпись хода рукопожатия своим закрытым ключом: доказательство, что ключ у него;</li><li>обе стороны шлют <b>Finished</b>, и клиент может сразу отправлять запрос — один RTT от начала.</li></ol>
+<p><b>Проверка сертификата.</b> Сертификат связывает домен с публичным ключом и подписан удостоверяющим центром (CA). Браузер проверяет цепочку подписей до корневого сертификата из доверенного хранилища ОС или браузера, срок действия, совпадение имени (SAN) и отзыв. Самоподписанный сертификат не проходит проверку, потому что цепочка не ведёт к доверенному корню.</p>
+<p><b>Почему две криптографии.</b> Асимметричные операции медленные, поэтому используются только в рукопожатии — для согласования ключа и подписи. Данные шифруются симметричным шифром с этим общим ключом — это быстро, AES ускорен аппаратно.</p>
+<p><b>Прямая секретность.</b> Ключ сессии получается из эфемерных ключей DH и не зависит от закрытого ключа сертификата. Утечка ключа сервера потом не позволит расшифровать записанный ранее трафик. В TLS 1.3 это обязательно; в 1.2 был режим с RSA-обменом без прямой секретности.</p>
+<p><b>TLS 1.3 против 1.2:</b> рукопожатие за 1 RTT вместо 2, 0-RTT при возобновлении (с риском повтора запроса — только для идемпотентных), выкинуты устаревшие шифры и RSA-обмен, зашифрована большая часть рукопожатия.</p>
+<p><b>На практике</b> TLS обычно терминируют на балансировщике или ingress; между сервисами — mTLS через service mesh. Сертификаты выпускают автоматически (Let's Encrypt, ACME) — срок жизни короткий.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>$ openssl s_client -connect example.com:443 -servername example.com &lt;/dev/null 2&gt;/dev/null | grep -E &quot;Protocol|Cipher|subject|issuer&quot;
+subject=CN = example.com
+issuer=C = US, O = DigiCert Inc, CN = DigiCert Global G3 TLS ECC SHA384 2020 CA1
+Protocol  : TLSv1.3
+Cipher    : TLS_AES_256_GCM_SHA384</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Три свойства: конфиденциальность, целостность, подлинность.</li><li>Обмен ключом без передачи ключа, подпись сервера, затем симметричное шифрование.</li><li>Проверка сертификата: цепочка до корня, имя, срок.</li><li>TLS 1.3: 1 RTT, прямая секретность; 0-RTT и его риск — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Браузер шифрует данные публичным ключом сервера» — так данные не шифруют.</li><li>Считать, что HTTPS скрывает, к какому домену идёт запрос (SNI и DNS видны, если не ECH/DoH).</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/symmetric-asymmetric/">Чем симметричное шифрование отличается от асимметричного и что такое цифровая подпись?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/tcp-handshake/">Как устанавливается и закрывается TCP-соединение?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/http-versions/">Чем отличаются HTTP/1.1, HTTP/2 и HTTP/3?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/hashing-vs-encryption/">Чем хеширование отличается от шифрования и кодирования?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работает HTTPS и TLS-рукопожатие?","acceptedAnswer":{"@type":"Answer","text":"TLS даёт шифрование, целостность и подлинность сервера. В рукопожатии стороны согласуют общий ключ (обмен Диффи — Хеллмана), сервер доказывает владение сертификатом, дальше данные шифруются быстрым симметричным шифром. Сертификат подписан удостоверяющим центром, браузер проверяет цепочку до доверенного корня и имя домена TLS 1.3: 1 RTT на рукопожатие, 0-RTT при повторе, только стойкие шифры с прямой секретностью Асимметрия — чтобы договориться о ключе, симметрия — чтобы быстро шифровать mTLS — сертификат предъявляет и клиент; в сервисах внутри компании Что защищает TLS: - конфиденциальность — посредник видит только адреса и объём; - целостность — подменённый байт обнаружится (AEAD-шифры: AES-GCM, ChaCha20-Poly1305); - подлинность — клиент уверен, что говорит с владельцем домена. Рукопожатие TLS 1.3 (после TCP-рукопожатия): 1. ClientHello — поддерживаемые шифры, случайное число, публичная часть ключа Диффи — Хеллмана (на эллиптических кривых, X25519), имя сервера (SNI); 2. ServerHello — выбранный шифр и своя публичная часть DH. Теперь обе стороны независимо вычисляют общий секрет, не передавая его по сети. Дальше всё зашифровано; 3. сервер шлёт сертификат и CertificateVerify — подпись хода рукопожатия своим закрытым ключом: доказательство, что ключ у него; 4. обе стороны шлют Finished, и клиент может сразу отправлять запрос — один RTT от начала. Проверка сертификата. Сертификат связывает домен с публичным ключом и подписан…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

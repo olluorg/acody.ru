@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работает браузер — карта «Frontend-разработчик»</title>
+<meta name="description" content="Движки, разбор HTML и CSS, построение DOM и CSSOM, отрисовка и DevTools.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/frontend/browsers/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/frontend/browsers/">
+<meta property="og:title" content="Как работает браузер — карта «Frontend-разработчик»">
+<meta property="og:description" content="Движки, разбор HTML и CSS, построение DOM и CSSOM, отрисовка и DevTools.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/frontend/#internet">Frontend-разработчик</a> <span>/</span> <a href="/roadmap/frontend/internet/">Интернет и браузер</a> <span>/</span> <span>Как работает браузер</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Frontend-разработчик","item":"https://learn.getsotto.ru/roadmap/frontend/#internet"},{"@type":"ListItem","position":3,"name":"Интернет и браузер","item":"https://learn.getsotto.ru/roadmap/frontend/internet/"},{"@type":"ListItem","position":4,"name":"Как работает браузер"}]}</script>
+  <h1>Как работает браузер</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Движки, разбор HTML и CSS, построение DOM и CSSOM, отрисовка и DevTools.</p>
+  <article class="md"><p>Браузер — сложная программа: сетевой слой, движок отрисовки (Blink в Chrome и Edge, WebKit в Safari, Gecko в Firefox) и движок JavaScript (V8, JavaScriptCore, SpiderMonkey).</p>
+<h3>Конвейер отрисовки</h3>
+<ol><li>HTML разбирается в <b>DOM</b>, CSS — в <b>CSSOM</b>.</li><li>Вместе они дают <b>дерево отрисовки</b> — только видимые элементы с вычисленными стилями.</li><li><b>Layout</b> (reflow) — расчёт размеров и положения.</li><li><b>Paint</b> — заливка пикселей по слоям.</li><li><b>Composite</b> — сборка слоёв на GPU.</li></ol>
+<p>Синхронный <code>&lt;script&gt;</code> останавливает разбор HTML, пока скрипт не загрузится и не выполнится, — поэтому скрипты подключают с <code>defer</code> или <code>type=&quot;module&quot;</code>.</p>
+<h3>DevTools</h3>
+<p>Elements (DOM и стили), Console, Network (запросы, тайминги, кэш), Performance (что занимает время на кадре), Application (cookies, localStorage, service worker), Lighthouse (аудит). Уверенное владение DevTools — то, что отличает джуна, который ищет ошибку час, от того, кто находит её за минуту.</p></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 6 ч</small></h3><ul><li>Описывает конвейер отрисовки — DOM, CSSOM, layout, paint, composite</li><li>Находит ошибку и медленный запрос с помощью Elements, Console и Network в DevTools</li></ul><p class="rm-practice"><b>Практика.</b> Найти через DevTools 3 проблемы на учебной странице — ошибку в консоли, неудачный запрос, неприменённый стиль — и исправить.</p></div><div class="rm-grade"><h3>Middle <small>≈ 4 ч</small></h3><ul><li>Записывает и читает профиль во вкладке Performance, находит долгие задачи и лишние пересчёты раскладки</li><li>Объясняет, почему синхронный скрипт блокирует разбор HTML</li></ul><p class="rm-practice"><b>Практика.</b> Записать профиль загрузки и взаимодействия тяжёлой страницы и письменно объяснить, на что уходит время кадра.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/frontend/rendering-pipeline/">Как браузер отрисовывает страницу и чем reflow отличается от repaint?</a> <span class="lvl lvl-junior">Junior</span><p>HTML → DOM, CSS → CSSOM, вместе → дерево отрисовки → layout (геометрия: размеры и позиции) → paint (пиксели слоёв) → composite (сборка слоёв на GPU). Reflow — пересчёт раскладки…</p></li><li><a href="/questions/frontend/script-async-defer/">Чем отличаются атрибуты async и defer у тега script?</a> <span class="lvl lvl-junior">Junior</span><p>Обычный &lt;script&gt; останавливает разбор HTML до загрузки и выполнения. defer — загрузка параллельно, выполнение после разбора HTML, по порядку подключения. async — загрузка…</p></li><li><a href="/questions/qa/devtools/">Как вы используете DevTools при тестировании?</a> <span class="lvl lvl-junior">Junior</span><p>DevTools помогают локализовать баг: Network — запросы и ответы, Console — ошибки JavaScript, Application — cookies и хранилища, Elements — вёрстка.</p></li></ul></section><section class="block"><h2>Документация</h2><ul class="links"><li><a href="https://web.dev/articles/howbrowserswork" rel="noopener" target="_blank">web.dev: Как работают браузеры ↗</a></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/common/domains-hosting/">← Домены, хостинг и CDN</a><a class="next" href="/roadmap/frontend/html/">HTML →</a></nav>
+  <p class="rm-back"><a href="/roadmap/frontend/#internet">← Вся карта «Frontend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Как работает браузер","description":"Движки, разбор HTML и CSS, построение DOM и CSSOM, отрисовка и DevTools.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/frontend/browsers/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

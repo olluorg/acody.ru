@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Современный синтаксис: var, текстовые блоки, switch — разбор для собеседования</title>
+<meta name="description" content="Локальный вывод типа var, многострочные текстовые блоки, switch-выражения и другие удобства новых версий.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/modern-syntax/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/modern-syntax/">
+<meta property="og:title" content="Современный синтаксис: var, текстовые блоки, switch — разбор для собеседования">
+<meta property="og:description" content="Локальный вывод типа var, многострочные текстовые блоки, switch-выражения и другие удобства новых версий.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Современный синтаксис: var, текстовые блоки, switch</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Современный синтаксис: var, текстовые блоки, switch"}]}</script>
+  <h1>Современный синтаксис: var, текстовые блоки, switch</h1>
+  <p class="lead">Локальный вывод типа var, многострочные текстовые блоки, switch-выражения и другие удобства новых версий.</p>
+  <article class="md"><h2>var: локальный вывод типа</h2>
+<p>var (Java 10) позволяет не писать тип локальной переменной — компилятор выводит его из инициализатора. Важно: это НЕ динамическая типизация — тип статический и фиксируется на компиляции, просто не пишется руками. var работает только для локальных переменных с инициализатором (не для полей, параметров и без значения).</p>
+<p>Когда уместно: когда тип очевиден из правой части (var users = <code>new ArrayList&lt;User&gt;()</code>) — убирает дублирование. Когда вредит: когда из правой части тип неочевиден (var x = <code>service.process()</code>) — теряется читаемость. var — про устранение шума, а не про сокрытие типов.</p>
+<h2>Текстовые блоки</h2>
+<p>Текстовый блок (Java 15) — многострочный строковый литерал в тройных кавычках: убирает ад экранирования и конкатенации для встроенного JSON, SQL, HTML.</p>
+<p>Компилятор аккуратно убирает «случайные» отступы (incidental whitespace) по самой левой значимой строке, поэтому блок можно красиво выровнять по коду. Это обычная String — просто удобный способ её записать.</p>
+<pre class="lang-java"><code>String json = &quot;&quot;&quot;
+    {
+      &quot;id&quot;: 42,
+      &quot;name&quot;: &quot;Ann&quot;
+    }
+    &quot;&quot;&quot;;</code></pre>
+<h2>switch-выражения</h2>
+<p>switch-выражение (Java 14) возвращает значение и использует стрелочный синтаксис case L -&gt; …, у которого нет проваливания (fall-through) и не нужен break. Для блока с вычислением значение отдают через yield.</p>
+<p>Плюс исчерпываемость: switch-выражение по enum (или sealed-типу) обязано покрыть все варианты — компилятор это проверяет, что надёжнее старого statement-switch с легко забываемым break и default.</p>
+<pre class="lang-java"><code>int days = switch (month) {
+    case FEB -&gt; 28;
+    case APR, JUN, SEP, NOV -&gt; 30;
+    default -&gt; 31;
+};</code></pre>
+<h2>Прочие удобства</h2>
+<p>enhanced instanceof с паттерном (instanceof String s) — см. урок про pattern matching. Helpful NullPointerExceptions (Java 14, по умолчанию с 15) точно указывают, ЧТО именно было null в цепочке <code>a.b().c</code> — резко ускоряет отладку.</p>
+<p>Эти мелочи по отдельности невелики, но вместе делают современную Java заметно лаконичнее и безопаснее, чем «Java 8 из памяти».</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Подчеркните, что var — статический вывод типа (не динамика), только для локальных переменных, и его уместность зависит от очевидности правой части. Назовите текстовые блоки (JSON/SQL без экранирования, incidental whitespace) и switch-выражения (возвращает значение, без fall-through, yield, исчерпываемость по enum/sealed). Бонус — helpful NPE messages.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/var-type-inference/">Что верно про var (Java 10)?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/switch-expression/">Чем switch-выражение (case L -&gt; …) надёжнее старого switch?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/text-blocks/">Что такое текстовый блок и как в нём работают отступы?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/records/">Records: компактные носители данных</a><p>Что генерирует record, канонический и компактный конструкторы, ограничения и когда применять.</p></li><li><a href="/articles/java/method-semantics/">Методы: pass-by-value, перегрузка, varargs</a><p>Почему Java всегда pass-by-value, разрешение перегрузки на этапе компиляции и устройство varargs.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Современный синтаксис: var, текстовые блоки, switch","description":"Локальный вывод типа var, многострочные текстовые блоки, switch-выражения и другие удобства новых версий.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/modern-syntax/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как браузер отрисовывает страницу и чем reflow отличается от repaint? — вопрос с собеседования</title>
+<meta name="description" content="HTML → DOM, CSS → CSSOM, вместе → дерево отрисовки → layout (геометрия: размеры и позиции) → paint (пиксели слоёв) → composite (сборка слоёв на GPU)…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/rendering-pipeline/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/rendering-pipeline/">
+<meta property="og:title" content="Как браузер отрисовывает страницу и чем reflow отличается от repaint? — вопрос с собеседования">
+<meta property="og:description" content="HTML → DOM, CSS → CSSOM, вместе → дерево отрисовки → layout (геометрия: размеры и позиции) → paint (пиксели слоёв) → composite (сборка слоёв на GPU)…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Как браузер отрисовывает страницу и чем reflow отличается от repaint?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Как браузер отрисовывает страницу и чем reflow отличается от repaint?"}]}</script>
+  <h1>Как браузер отрисовывает страницу и чем reflow отличается от repaint?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Браузер и DOM</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое критический путь рендеринга?</li><li>Почему анимировать transform лучше, чем top и left?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">HTML → <b>DOM</b>, CSS → <b>CSSOM</b>, вместе → дерево отрисовки → <b>layout</b> (геометрия: размеры и позиции) → <b>paint</b> (пиксели слоёв) → <b>composite</b> (сборка слоёв на GPU). <b>Reflow</b> — пересчёт раскладки при изменении геометрии, дорогой; <b>repaint</b> — перерисовка без изменения геометрии (цвет), дешевле.</p><ul><li>transform и opacity меняются на этапе композиции — без layout и paint</li><li>Чтение offsetHeight после записи стилей вызывает принудительный синхронный reflow</li><li>CSS блокирует отрисовку, синхронный script — разбор HTML</li></ul><p class="extra"><span>А ещё</span> Чередование чтений и записей в цикле — layout thrashing</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Этапы:</b></p>
+<ol><li><b>Разбор HTML</b> в DOM; встретив синхронный <code>&lt;script&gt;</code>, парсер останавливается, пока скрипт не загрузится и не выполнится.</li><li><b>CSSOM</b> — стили; пока CSS не загружен, страница не отрисовывается.</li><li><b>Дерево отрисовки</b> — видимые элементы с вычисленными стилями.</li><li><b>Layout</b> — размеры и позиции каждого блока.</li><li><b>Paint</b> — заполнение пикселей по слоям.</li><li><b>Composite</b> — сборка слоёв, часто на GPU.</li></ol>
+<p><b>Что вызывает reflow:</b> изменение размеров, шрифтов, содержимого, добавление элементов, чтение геометрии (<code>offsetWidth</code>, <code>getBoundingClientRect</code>) после изменений.</p>
+<p><b>Layout thrashing:</b></p>
+<pre class="lang-js"><code>for (const el of items) {
+  el.style.width = box.offsetWidth + &quot;px&quot;;   // чтение после записи — reflow на каждой итерации
+}
+// сначала все чтения, потом все записи
+const w = box.offsetWidth;
+for (const el of items) el.style.width = w + &quot;px&quot;;</code></pre>
+<p><b>Анимации:</b> <code>transform</code> и <code>opacity</code> обрабатываются компоновщиком — плавно даже при занятом основном потоке. <code>will-change</code> подсказывает вынести элемент в свой слой (не злоупотреблять: слои стоят памяти).</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Этапы конвейера.</li><li>Reflow, repaint, composite.</li><li>Как избегать лишних reflow.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/event-loop/">Как работает event loop в JavaScript — макрозадачи и микрозадачи?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/script-async-defer/">Чем отличаются атрибуты async и defer у тега script?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/what-happens-url/">Что происходит, когда вы вводите адрес сайта в браузере и нажимаете Enter?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как браузер отрисовывает страницу и чем reflow отличается от repaint?","acceptedAnswer":{"@type":"Answer","text":"HTML → DOM, CSS → CSSOM, вместе → дерево отрисовки → layout (геометрия: размеры и позиции) → paint (пиксели слоёв) → composite (сборка слоёв на GPU). Reflow — пересчёт раскладки при изменении геометрии, дорогой; repaint — перерисовка без изменения геометрии (цвет), дешевле. transform и opacity меняются на этапе композиции — без layout и paint Чтение offsetHeight после записи стилей вызывает принудительный синхронный reflow CSS блокирует отрисовку, синхронный script — разбор HTML Чередование чтений и записей в цикле — layout thrashing Этапы: 1. Разбор HTML в DOM; встретив синхронный <script>, парсер останавливается, пока скрипт не загрузится и не выполнится. 2. CSSOM — стили; пока CSS не загружен, страница не отрисовывается. 3. Дерево отрисовки — видимые элементы с вычисленными стилями. 4. Layout — размеры и позиции каждого блока. 5. Paint — заполнение пикселей по слоям. 6. Composite — сборка слоёв, часто на GPU. Что вызывает reflow: изменение размеров, шрифтов, содержимого, добавление элементов, чтение геометрии (offsetWidth, getBoundingClientRect) после изменений. Layout thrashing: Анимации: transform и opacity обрабатываются компоновщиком — плавно даже при занятом основном потоке. will-change подсказывает вынести элемент в свой слой (не злоупотреблять: слои стоят памяти)."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

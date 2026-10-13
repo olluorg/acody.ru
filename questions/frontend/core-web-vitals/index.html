@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое Core Web Vitals и как их улучшить? — вопрос с собеседования</title>
+<meta name="description" content="Три метрики Google, измеряемые на реальных пользователях: LCP — когда отрисован главный элемент (хорошо ≤ 2,5 с), INP — задержка реакции на действия…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/core-web-vitals/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/core-web-vitals/">
+<meta property="og:title" content="Что такое Core Web Vitals и как их улучшить? — вопрос с собеседования">
+<meta property="og:description" content="Три метрики Google, измеряемые на реальных пользователях: LCP — когда отрисован главный элемент (хорошо ≤ 2,5 с), INP — задержка реакции на действия…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Что такое Core Web Vitals и как их улучшить?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Что такое Core Web Vitals и как их улучшить?"}]}</script>
+  <h1>Что такое Core Web Vitals и как их улучшить?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Производительность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое LCP, INP и CLS?</li><li>Как ускорить загрузку страницы?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Три метрики Google, измеряемые <b>на реальных пользователях</b>: <b>LCP</b> — когда отрисован главный элемент (хорошо ≤ 2,5 с), <b>INP</b> — задержка реакции на действия пользователя (≤ 200 мс), <b>CLS</b> — сдвиги вёрстки при загрузке (≤ 0,1). LCP улучшают быстрым ответом сервера, приоритетом главной картинки и меньшим блокирующим JS/CSS; INP — дроблением долгих задач и лёгкими обработчиками; CLS — явными размерами картинок и зарезервированным местом под динамический контент.</p><ul><li>Оценивается 75-й перцентиль пользователей, а не среднее</li><li>Lighthouse — лабораторный замер; правду показывают данные реальных пользователей (CrUX, web-vitals)</li><li>Метрики влияют на ранжирование в поиске Google</li></ul><p class="extra"><span>А ещё</span> INP заменил FID в 2024 году: учитывается задержка всех взаимодействий, а не только первого</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>LCP (Largest Contentful Paint):</b></p>
+<ul><li>ответ сервера: кэш, CDN, SSR или статическая генерация;</li><li>главная картинка: <code>fetchpriority=&quot;high&quot;</code>, без <code>loading=&quot;lazy&quot;</code>, современный формат, правильный размер;</li><li>меньше блокирующего CSS и JS на критическом пути, предзагрузка шрифтов.</li></ul>
+<p><b>INP (Interaction to Next Paint):</b></p>
+<ul><li>долгие задачи (&gt; 50 мс) дробить, отдавать управление браузеру;</li><li>тяжёлые вычисления — в Web Worker;</li><li>не перерисовывать большие деревья на каждый ввод (React: <code>useTransition</code>, мемоизация, виртуализация);</li><li>меньше стороннего JS.</li></ul>
+<p><b>CLS (Cumulative Layout Shift):</b></p>
+<ul><li><code>width</code>/<code>height</code> или <code>aspect-ratio</code> у картинок и видео;</li><li>место под рекламу, баннеры, подгружаемые блоки;</li><li><code>font-display</code> и подбор запасного шрифта по метрикам.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Что измеряет каждая метрика и пороги.</li><li>Конкретные способы улучшения каждой.</li><li>Разница лабораторных и полевых данных.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/rendering-pipeline/">Как браузер отрисовывает страницу и чем reflow отличается от repaint?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/script-async-defer/">Чем отличаются атрибуты async и defer у тега script?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/performance-budget/">Как держать производительность большого фронтенд-приложения под контролем?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое Core Web Vitals и как их улучшить?","acceptedAnswer":{"@type":"Answer","text":"Три метрики Google, измеряемые на реальных пользователях: LCP — когда отрисован главный элемент (хорошо ≤ 2,5 с), INP — задержка реакции на действия пользователя (≤ 200 мс), CLS — сдвиги вёрстки при загрузке (≤ 0,1). LCP улучшают быстрым ответом сервера, приоритетом главной картинки и меньшим блокирующим JS/CSS; INP — дроблением долгих задач и лёгкими обработчиками; CLS — явными размерами картинок и зарезервированным местом под динамический контент. Оценивается 75-й перцентиль пользователей, а не среднее Lighthouse — лабораторный замер; правду показывают данные реальных пользователей (CrUX, web-vitals) Метрики влияют на ранжирование в поиске Google INP заменил FID в 2024 году: учитывается задержка всех взаимодействий, а не только первого LCP (Largest Contentful Paint): - ответ сервера: кэш, CDN, SSR или статическая генерация; - главная картинка: fetchpriority=\"high\", без loading=\"lazy\", современный формат, правильный размер; - меньше блокирующего CSS и JS на критическом пути, предзагрузка шрифтов. INP (Interaction to Next Paint): - долгие задачи (> 50 мс) дробить, отдавать управление браузеру; - тяжёлые вычисления — в Web Worker; - не перерисовывать большие деревья на каждый ввод (React: useTransition, мемоизация, виртуализация); - меньше стороннего JS. CLS (Cumulative Layout Shift): - width/height или aspect-ratio у картинок и видео; - место под рекламу, баннеры, подгружаемые блоки; - font-display и подбор запасного шрифта по метрикам."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

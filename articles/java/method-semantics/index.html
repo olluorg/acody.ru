@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Методы: pass-by-value, перегрузка, varargs — разбор для собеседования</title>
+<meta name="description" content="Почему Java всегда pass-by-value, разрешение перегрузки на этапе компиляции и устройство varargs.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/method-semantics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/method-semantics/">
+<meta property="og:title" content="Методы: pass-by-value, перегрузка, varargs — разбор для собеседования">
+<meta property="og:description" content="Почему Java всегда pass-by-value, разрешение перегрузки на этапе компиляции и устройство varargs.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Методы: pass-by-value, перегрузка, varargs</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Методы: pass-by-value, перегрузка, varargs"}]}</script>
+  <h1>Методы: pass-by-value, перегрузка, varargs</h1>
+  <p class="lead">Почему Java всегда pass-by-value, разрешение перегрузки на этапе компиляции и устройство varargs.</p>
+  <article class="md"><h2>Java всегда pass-by-value</h2>
+<p>Java передаёт аргументы только по значению. Для примитива копируется его значение. Для объекта копируется ЗНАЧЕНИЕ ССЫЛКИ (адрес), а не сам объект — поэтому метод может менять состояние объекта через копию ссылки, но НЕ может переприсвоить ссылку вызывающего.</p>
+<p>Отсюда развенчание мифа «объекты передаются по ссылке»: если внутри метода сделать param = <code>new Something()</code>, у вызывающего ничего не поменяется. Меняется состояние — да; меняется ссылка вызывающего — нет.</p>
+<pre class="lang-java"><code>void rename(User u) { u.setName(&quot;X&quot;); } // видно снаружи (меняем объект)
+void reassign(User u) { u = new User(); } // НЕ видно снаружи (копия ссылки)</code></pre>
+<h2>Перегрузка разрешается на компиляции</h2>
+<p>Перегрузка (overloading) — несколько методов с одним именем и разными списками параметров. В отличие от переопределения (overriding, выбор по фактическому типу в рантайме), перегрузка разрешается компилятором по СТАТИЧЕСКИМ типам аргументов.</p>
+<p>Поэтому это разные механизмы: перегрузка — compile-time (статическая диспетчеризация), переопределение — runtime (динамическая). Путать их — частая ошибка.</p>
+<h2>Порядок выбора перегрузки</h2>
+<p>Компилятор ищет наиболее специфичный подходящий метод в три фазы: сначала без боксинга и varargs (точное совпадение и расширение примитивов, например int→long), затем с autoboxing/unboxing, и лишь в последнюю очередь — через varargs.</p>
+<p>Эта приоритетность объясняет неожиданные выборы: например, при наличии перегрузок <code>f(int)</code> и <code>f(Integer)</code> вызов <code>f(5)</code> выберет примитивную версию (расширение раньше боксинга). Неоднозначность приводит к ошибке компиляции.</p>
+<h2>varargs</h2>
+<p>Параметр-varargs (Type... args) — это синтаксический сахар над массивом: внутри метода args является <code>Type[]</code>, а на вызове компилятор сам собирает аргументы в массив (можно передать и готовый массив).</p>
+<p>Тонкости: varargs участвует в разрешении перегрузки последним; передача null как varargs неоднозначна (null трактуется как сам массив); и каждый вызов создаёт массив — в горячем коде это лишние аллокации.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Чётко скажите: Java — pass-by-value всегда, для объектов копируется значение ссылки (состояние менять можно, ссылку вызывающего — нет). Противопоставьте перегрузку (compile-time, по статическим типам) и переопределение (runtime), назовите три фазы выбора перегрузки (расширение → боксинг → varargs) и природу varargs как массива.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/overloading-vs-overriding/">Что такое перегрузка метода (overloading)?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/pass-by-value-reference/">Метод принимает StringBuilder и внутри выполняет sb.append(&quot;x&quot;), а затем sb = new StringBuilder(). Что увидит вызывающий код?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/list-remove-overload/">У списка есть перегрузки remove(int index) и remove(Object o). Что сделает list.remove(1) для List&lt;Integer&gt;?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/varargs/">Что верно про varargs?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/pass-by-value/">Что происходит с примитивным аргументом, переданным в метод, если внутри метода его изменить?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/oop/">ООП и его принципы</a><p>Инкапсуляция, наследование, полиморфизм, абстракция — зачем они нужны, как работают внутри и почему композицию предпочитают наследованию.</p></li><li><a href="/articles/java/primitives/">Примитивы, обёртки и Integer cache</a><p>Восемь примитивов и их диапазоны, autoboxing, кэш Integer и ловушка ==, NPE при распаковке и цена боксинга.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Методы: pass-by-value, перегрузка, varargs","description":"Почему Java всегда pass-by-value, разрешение перегрузки на этапе компиляции и устройство varargs.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/method-semantics/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

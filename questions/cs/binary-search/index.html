@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работает бинарный поиск? — вопрос с собеседования</title>
+<meta name="description" content="В отсортированном массиве сравниваем искомое с серединой и отбрасываем половину, где его быть не может: O(log n) шагов. Миллион элементов — не больше…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/binary-search/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/binary-search/">
+<meta property="og:title" content="Как работает бинарный поиск? — вопрос с собеседования">
+<meta property="og:description" content="В отсортированном массиве сравниваем искомое с серединой и отбрасываем половину, где его быть не может: O(log n) шагов. Миллион элементов — не больше…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Как работает бинарный поиск?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Как работает бинарный поиск?"}]}</script>
+  <h1>Как работает бинарный поиск?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Поиск</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Какая сложность у бинарного поиска?</li><li>Как найти первое вхождение элемента в отсортированном массиве?</li><li>Что такое бинарный поиск по ответу?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">В <b>отсортированном</b> массиве сравниваем искомое с серединой и <b>отбрасываем половину</b>, где его быть не может: <b>O(log n)</b> шагов.</p><ul><li>Миллион элементов — не больше 20 сравнений, миллиард — 30</li><li>Типичные ошибки: границы, бесконечный цикл, переполнение <code>(lo + hi) / 2</code> в языках с фиксированными целыми</li></ul><p class="extra"><span>А ещё</span> Обобщение — поиск по ответу: на монотонной функции найти первую точку, где условие стало истинным</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Бинарный поиск против линейного</p><script type="module" src="/widgets/binary-search.js"></script><sotto-binary-search theme="dark"></sotto-binary-search></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Условие</b> — данные упорядочены. Держим границы <code>lo</code> и <code>hi</code>, внутри которых может быть искомое. Смотрим на средний элемент:</p>
+<ul><li>равен искомому — нашли;</li><li>меньше — искомое правее, <code>lo = mid + 1</code>;</li><li>больше — левее, <code>hi = mid - 1</code>.</li></ul>
+<p>Каждый шаг уменьшает область вдвое, поэтому шагов не больше log₂ n + 1. Для сравнения: линейный поиск в худшем случае смотрит все n элементов.</p>
+<p><b>Частые ошибки:</b></p>
+<ul><li>неверные границы и условие цикла (<code>&lt;</code> против <code>&lt;=</code>), из-за чего пропускается последний элемент или цикл не заканчивается;</li><li>в языках с переполнением целых — <code>(lo + hi) / 2</code> может переполниться; безопасно <code>lo + (hi - lo) / 2</code>;</li><li>поиск в неотсортированных данных.</li></ul>
+<p><b>Варианты:</b> найти первое или последнее вхождение (lower bound / upper bound — не останавливаться при равенстве, а сдвигать границу), найти место вставки (<code>bisect</code> в Python). <b>Поиск по ответу</b> — когда есть монотонное условие: «минимальная пропускная способность, при которой всё успеем», «первая сломанная версия» (<code>git bisect</code>).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>def lower_bound(a, target):
+    &quot;&quot;&quot;Первый индекс i, где a[i] &gt;= target (или len(a)).&quot;&quot;&quot;
+    lo, hi = 0, len(a)
+    while lo &lt; hi:
+        mid = (lo + hi) // 2
+        if a[mid] &lt; target:
+            lo = mid + 1
+        else:
+            hi = mid
+    return lo
+
+a = [1, 3, 3, 3, 7, 9]
+lower_bound(a, 3)   # 1 — первое вхождение
+lower_bound(a, 4)   # 4 — место вставки</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Условие отсортированности и идея деления пополам.</li><li>Сложность O(log n) и интуиция, сколько это шагов.</li><li>Рабочий код без ошибок в границах.</li><li>Варианты: первое вхождение, поиск по ответу — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Бесконечный цикл из-за <code>lo = mid</code> при <code>lo &lt; hi</code> с округлением вниз.</li><li>Применять к неотсортированным данным.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/binary-search-tree/">Что такое двоичное дерево поиска и зачем его балансировать?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/big-o/">Что такое О-большое (Big O) и зачем оценивать сложность алгоритма?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работает бинарный поиск?","acceptedAnswer":{"@type":"Answer","text":"В отсортированном массиве сравниваем искомое с серединой и отбрасываем половину, где его быть не может: O(log n) шагов. Миллион элементов — не больше 20 сравнений, миллиард — 30 Типичные ошибки: границы, бесконечный цикл, переполнение (lo + hi) / 2 в языках с фиксированными целыми Обобщение — поиск по ответу: на монотонной функции найти первую точку, где условие стало истинным Условие — данные упорядочены. Держим границы lo и hi, внутри которых может быть искомое. Смотрим на средний элемент: - равен искомому — нашли; - меньше — искомое правее, lo = mid + 1; - больше — левее, hi = mid - 1. Каждый шаг уменьшает область вдвое, поэтому шагов не больше log₂ n + 1. Для сравнения: линейный поиск в худшем случае смотрит все n элементов. Частые ошибки: - неверные границы и условие цикла (< против <=), из-за чего пропускается последний элемент или цикл не заканчивается; - в языках с переполнением целых — (lo + hi) / 2 может переполниться; безопасно lo + (hi - lo) / 2; - поиск в неотсортированных данных. Варианты: найти первое или последнее вхождение (lower bound / upper bound — не останавливаться при равенстве, а сдвигать границу), найти место вставки (bisect в Python). Поиск по ответу — когда есть монотонное условие: «минимальная пропускная способность, при которой…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

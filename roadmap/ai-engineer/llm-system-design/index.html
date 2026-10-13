@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Системный дизайн LLM-приложений — карта «ИИ-инженер»</title>
+<meta name="description" content="Компоненты ассистента, поток запроса, масштабирование, отказоустойчивость и стоимость.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/ai-engineer/llm-system-design/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/ai-engineer/llm-system-design/">
+<meta property="og:title" content="Системный дизайн LLM-приложений — карта «ИИ-инженер»">
+<meta property="og:description" content="Компоненты ассистента, поток запроса, масштабирование, отказоустойчивость и стоимость.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/ai-engineer/#llm-architecture">ИИ-инженер</a> <span>/</span> <a href="/roadmap/ai-engineer/llm-architecture/">Архитектура LLM-продукта</a> <span>/</span> <span>Системный дизайн LLM-приложений</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"ИИ-инженер","item":"https://learn.getsotto.ru/roadmap/ai-engineer/#llm-architecture"},{"@type":"ListItem","position":3,"name":"Архитектура LLM-продукта","item":"https://learn.getsotto.ru/roadmap/ai-engineer/llm-architecture/"},{"@type":"ListItem","position":4,"name":"Системный дизайн LLM-приложений"}]}</script>
+  <h1>Системный дизайн LLM-приложений</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-middle">с Middle</span></div>
+  <p class="lead">Компоненты ассистента, поток запроса, масштабирование, отказоустойчивость и стоимость.</p>
+  <article class="md"><p>Типовая архитектура ассистента:</p>
+<pre><code>клиент → API (авторизация, лимиты) → оркестратор
+         ├─ guardrails входа
+         ├─ поиск: векторный + полнотекстовый → реранкер
+         ├─ инструменты: CRM, заказы, база знаний
+         ├─ шлюз к моделям: маршрутизация, повторы, учёт затрат
+         └─ guardrails выхода → потоковый ответ
+хранилища: диалоги, документы и фрагменты, трассы, оценки
+фон: индексация, оценка качества, аналитика</code></pre>
+<h3>Что важно знать</h3>
+<ul><li><b>Требования</b> сначала: объём, задержка, точность, данные и права, бюджет. От них зависит всё остальное.</li><li><b>Оценка нагрузки</b>: запросов в секунду, токенов на запрос, стоимость в месяц, лимиты провайдера.</li><li><b>Шлюз к моделям</b> — единая точка для ключей, лимитов, учёта затрат, резервных моделей и логирования.</li><li><b>Состояние</b>: история диалогов, кэш, индексы — где хранится и как масштабируется.</li><li><b>Деградация</b>: что видит пользователь, если модель, поиск или инструмент недоступны.</li><li><b>Наблюдаемость и оценка</b> — часть архитектуры, а не надстройка.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Middle <small>≈ 16 ч</small></h3><ul><li>Рисует архитектуру RAG-ассистента от запроса до ответа с хранилищами и очередями</li><li>Оценивает задержку и стоимость одного запроса по компонентам</li><li>Предусматривает деградацию при недоступности провайдера модели</li></ul><p class="rm-practice"><b>Практика.</b> Описать архитектуру ассистента поддержки на 10 тысяч диалогов в день — компоненты, хранилища, поток запроса, оценка стоимости в месяц.</p></div><div class="rm-grade"><h3>Senior <small>≈ 24 ч</small></h3><ul><li>Проводит секцию системного дизайна LLM-продукта с требованиями, оценками нагрузки и компромиссами</li><li>Проектирует общий шлюз к моделям для нескольких команд (лимиты, учёт затрат, маршрутизация)</li><li>Обосновывает выбор между внешним API и своими моделями по стоимости, рискам и данным</li></ul><p class="rm-practice"><b>Практика.</b> Провести и записать разбор системного дизайна «поиск по документам компании на 5 млн страниц с правами доступа» с расчётом нагрузки, стоимости и планом развития.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/ai/llm-system-design/">Спроектируйте ассистента поддержки интернет-магазина на LLM.</a> <span class="lvl lvl-senior">Senior</span><p>Начать с требований: какие вопросы закрывает бот (статус заказа, возврат, доставка), объём (например, 20 тысяч диалогов в день), допустимая задержка, доля передачи оператору…</p></li><li><a href="/questions/ai/llm-gateway/">Зачем компании единый шлюз к LLM и что в нём должно быть?</a> <span class="lvl lvl-senior">Senior</span><p>Когда LLM используют несколько команд, каждая заново решает одни задачи: ключи, лимиты, повторы, учёт затрат, логирование, защиту данных. Шлюз — единая точка доступа к моделям…</p></li><li><a href="/questions/ai/build-vs-buy-models/">Когда переходить с внешнего API моделей на собственные модели?</a> <span class="lvl lvl-senior">Senior</span><p>Решение принимают по четырём осям: данные (можно ли отправлять наружу — 152-ФЗ, коммерческая тайна), стоимость при реальной нагрузке, качество на своих задачах и команда (кто…</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/ai-engineer/llm-architecture/">← Архитектура LLM-продукта</a><a class="next" href="/roadmap/ai-engineer/conversation-memory/">Диалоги и память →</a></nav>
+  <p class="rm-back"><a href="/roadmap/ai-engineer/#llm-architecture">← Вся карта «ИИ-инженер»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Системный дизайн LLM-приложений","description":"Компоненты ассистента, поток запроса, масштабирование, отказоустойчивость и стоимость.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/ai-engineer/llm-system-design/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

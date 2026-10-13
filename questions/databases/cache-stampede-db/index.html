@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое cache stampede? — вопрос с собеседования</title>
+<meta name="description" content="Давка — популярный ключ истёк или кэш перезапустился, и множество запросов одновременно идут в базу за одним значением. Разброс TTL — ключи не…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/cache-stampede-db/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/cache-stampede-db/">
+<meta property="og:title" content="Что такое cache stampede? — вопрос с собеседования">
+<meta property="og:description" content="Давка — популярный ключ истёк или кэш перезапустился, и множество запросов одновременно идут в базу за одним значением. Разброс TTL — ключи не…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Что такое cache stampede?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Что такое cache stampede?"}]}</script>
+  <h1>Что такое cache stampede?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Redis и кэширование</span><span class="chip">Redis</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое thundering herd в кэше?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Давка</b> — популярный ключ истёк или кэш перезапустился, и множество запросов одновременно идут в базу за одним значением.</p><ul><li>Разброс TTL — ключи не истекают синхронно</li><li>Single flight — пересчитывает один запрос (блокировка <code>SET NX</code>), остальные ждут или берут старое</li><li>Stale-while-revalidate — отдать устаревшее, обновить в фоне; ранний пересчёт до истечения</li></ul><p class="extra"><span>А ещё</span> Холодный старт кэша — прогрев и ограничитель нагрузки на базу</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Как возникает.</b> Популярный ключ (главная страница, конфигурация, товар дня) читают тысячи раз в секунду. Когда он истекает, все запросы в эту секунду промахиваются и идут в базу за одним и тем же. База получает сотни одинаковых тяжёлых запросов и может не выдержать. То же при массовом истечении ключей с одинаковым TTL и при перезапуске кэша.</p>
+<p><b>Приёмы:</b></p>
+<ul><li><b>разброс TTL</b> — <code>ttl + random(0..10%)</code>: истечения разнесены во времени;</li><li><b>single flight</b> — при промахе запрос пытается взять блокировку <code>SET lock:key 1 NX EX 5</code>; получивший идёт в базу и обновляет кэш, остальные ждут коротко и перечитывают кэш (или получают предыдущее значение). В одном процессе — объединение запросов в памяти (singleflight в Go, <code>Caffeine.get(key, loader)</code>);</li><li><b>stale-while-revalidate</b> — хранить значение дольше TTL с меткой свежести: после «мягкого» истечения отдавать старое и обновлять в фоне;</li><li><b>ранний вероятностный пересчёт</b> — чем ближе истечение, тем выше шанс, что запрос обновит значение заранее (XFetch);</li><li><b>прогрев</b> после перезапуска и ограничитель параллельных запросов к базе.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механизм давки и когда она случается.</li><li>Несколько приёмов защиты и их сравнение.</li><li>Холодный старт кэша — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Одинаковый TTL у всех ключей.</li><li>Блокировка без таймаута: упавший держатель вешает всех.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Множество запросов одновременно промахиваются по горячему ключу и разом идут в БД</li><li class="no"><span class="mark">✗</span>Переполнение кэша из-за слишком большого TTL</li><li class="no"><span class="mark">✗</span>Очистка кэша при перезапуске приложения</li><li class="no"><span class="mark">✗</span>Шифрование данных, лежащих в кэше</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое hot key?</li><li>Как Redis SET NX PX помогает lock-у?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/redis-cache/">Redis и кэширование</a><p>Cache-aside и стратегии записи, TTL и eviction, защита от stampede и аккуратные распределённые блокировки.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/cache-stampede/">Популярный ключ истекает, и сотни параллельных запросов одновременно уходят в базу за одним значением. Какие приёмы защищают от этого?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/hot-keys/">Что делать с горячими ключами, на которые приходится непропорционально большая нагрузка?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/cache-hit-ratio/">Как оценить, насколько кэш разгружает базу, и что будет, если он упадёт?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое cache stampede?","acceptedAnswer":{"@type":"Answer","text":"Давка — популярный ключ истёк или кэш перезапустился, и множество запросов одновременно идут в базу за одним значением. Разброс TTL — ключи не истекают синхронно Single flight — пересчитывает один запрос (блокировка SET NX), остальные ждут или берут старое Stale-while-revalidate — отдать устаревшее, обновить в фоне; ранний пересчёт до истечения Холодный старт кэша — прогрев и ограничитель нагрузки на базу Как возникает. Популярный ключ (главная страница, конфигурация, товар дня) читают тысячи раз в секунду. Когда он истекает, все запросы в эту секунду промахиваются и идут в базу за одним и тем же. База получает сотни одинаковых тяжёлых запросов и может не выдержать. То же при массовом истечении ключей с одинаковым TTL и при перезапуске кэша. Приёмы: - разброс TTL — ttl + random(0..10%): истечения разнесены во времени; - single flight — при промахе запрос пытается взять блокировку SET lock:key 1 NX EX 5; получивший идёт в базу и обновляет кэш, остальные ждут коротко и перечитывают кэш (или получают предыдущее значение). В одном процессе — объединение запросов в памяти (singleflight в Go, Caffeine.get(key, loader)); - stale-while-revalidate — хранить значение дольше TTL с меткой свежести: после «мягкого» истечения отдавать старое и обновлять в фоне; - ранний вероятностный пересчёт — чем…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

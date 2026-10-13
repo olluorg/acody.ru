@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое компромисс смещения и разброса (bias-variance tradeoff)? — вопрос с собеседования</title>
+<meta name="description" content="Ошибку модели раскладывают на смещение (bias — модель слишком проста и систематически ошибается), разброс (variance — модель слишком чувствительна к…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/bias-variance/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/bias-variance/">
+<meta property="og:title" content="Что такое компромисс смещения и разброса (bias-variance tradeoff)? — вопрос с собеседования">
+<meta property="og:description" content="Ошибку модели раскладывают на смещение (bias — модель слишком проста и систематически ошибается), разброс (variance — модель слишком чувствительна к…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Что такое компромисс смещения и разброса (bias-variance tradeoff)?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Что такое компромисс смещения и разброса (bias-variance tradeoff)?"}]}</script>
+  <h1>Что такое компромисс смещения и разброса (bias-variance tradeoff)?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Основы машинного обучения</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как сложность модели связана с переобучением?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Ошибку модели раскладывают на <b>смещение</b> (bias — модель слишком проста и систематически ошибается), <b>разброс</b> (variance — модель слишком чувствительна к конкретной выборке) и неустранимый шум. Рост сложности уменьшает смещение и увеличивает разброс; оптимум — посередине.</p><ul><li>Высокий bias — недообучение: плохо и на обучении, и на валидации</li><li>Высокий variance — переобучение: хорошо на обучении, плохо на валидации</li><li>Разброс снижают данные, регуляризация, ансамбли (бэггинг); смещение — более сложная модель и признаки</li></ul><p class="extra"><span>А ещё</span> Большие нейросети показывают «двойной спуск» — после порога сложности ошибка снова падает</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Интуиция.</b> Представьте, что модель обучили много раз на разных выборках из одного источника.</p>
+<ul><li><b>Смещение</b> — насколько средний прогноз этих моделей далёк от правды. Линейная модель на нелинейной зависимости ошибается одинаково на любой выборке.</li><li><b>Разброс</b> — насколько прогнозы разных моделей отличаются друг от друга. Глубокое дерево на маленькой выборке каждый раз выучивает свой шум.</li></ul>
+<p>Ожидаемая квадратичная ошибка = смещение² + разброс + шум.</p>
+<p><b>Как диагностировать:</b> кривые обучения — ошибка на обучении и валидации в зависимости от объёма данных или сложности модели. Большой разрыв между ними — разброс; обе высокие и близкие — смещение.</p>
+<p><b>Что делать:</b></p>
+<div class="table"><table><thead><tr><th>проблема</th><th>меры</th></tr></thead><tbody><tr><td>высокое смещение</td><td>сложнее модель, больше признаков, меньше регуляризации</td></tr><tr><td>высокий разброс</td><td>больше данных, регуляризация, проще модель, бэггинг, ранняя остановка</td></tr></tbody></table></div>
+<p><b>Ансамбли:</b> бэггинг (случайный лес) усредняет модели и снижает разброс; бустинг последовательно исправляет ошибки и снижает смещение.</p>
+<p><b>Современная оговорка:</b> у сильно перепараметризованных нейросетей наблюдают «двойной спуск» — классическая U-образная кривая работает не везде, но для табличных моделей это рабочая рамка.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определения смещения и разброса.</li><li>Связь со сложностью модели, недо- и переобучением.</li><li>Как диагностировать и лечить каждое.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/overfitting/">Что такое переобучение модели и как с ним бороться?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/regularization/">Что такое регуляризация и чем L1 отличается от L2?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/cross-validation/">Что такое кросс-валидация и как правильно валидировать модель на временных данных?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое компромисс смещения и разброса (bias-variance tradeoff)?","acceptedAnswer":{"@type":"Answer","text":"Ошибку модели раскладывают на смещение (bias — модель слишком проста и систематически ошибается), разброс (variance — модель слишком чувствительна к конкретной выборке) и неустранимый шум. Рост сложности уменьшает смещение и увеличивает разброс; оптимум — посередине. Высокий bias — недообучение: плохо и на обучении, и на валидации Высокий variance — переобучение: хорошо на обучении, плохо на валидации Разброс снижают данные, регуляризация, ансамбли (бэггинг); смещение — более сложная модель и признаки Большие нейросети показывают «двойной спуск» — после порога сложности ошибка снова падает Интуиция. Представьте, что модель обучили много раз на разных выборках из одного источника. - Смещение — насколько средний прогноз этих моделей далёк от правды. Линейная модель на нелинейной зависимости ошибается одинаково на любой выборке. - Разброс — насколько прогнозы разных моделей отличаются друг от друга. Глубокое дерево на маленькой выборке каждый раз выучивает свой шум. Ожидаемая квадратичная ошибка = смещение² + разброс + шум. Как диагностировать: кривые обучения — ошибка на обучении и валидации в зависимости от объёма данных или сложности модели. Большой разрыв между ними — разброс; обе высокие и близкие — смещение. Что делать: | проблема | меры | | --- | --- | | высокое смещение | сложнее модель, больше признаков, меньше регуляризации | | высокий разброс | больше данных, регуляризация, проще модель, бэггинг, ранняя остановка | Ансамбли: бэггинг (случайный лес) усредняет…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

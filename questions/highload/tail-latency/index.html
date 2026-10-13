@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как бороться с хвостовыми задержками в распределённой системе? — вопрос с собеседования</title>
+<meta name="description" content="Хвосты неизбежны: сборка мусора, фоновые задачи, соседи по машине, переключения. При fan-out они становятся нормой. Главные приёмы — не ждать…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/tail-latency/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/tail-latency/">
+<meta property="og:title" content="Как бороться с хвостовыми задержками в распределённой системе? — вопрос с собеседования">
+<meta property="og:description" content="Хвосты неизбежны: сборка мусора, фоновые задачи, соседи по машине, переключения. При fan-out они становятся нормой. Главные приёмы — не ждать…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Как бороться с хвостовыми задержками в распределённой системе?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Как бороться с хвостовыми задержками в распределённой системе?"}]}</script>
+  <h1>Как бороться с хвостовыми задержками в распределённой системе?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Задержка, пропускная способность и очереди</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое hedged requests?</li><li>Как снизить p99 при fan-out на много серверов?</li><li>Откуда берутся медленные запросы, если все серверы здоровы?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Хвосты неизбежны: сборка мусора, фоновые задачи, соседи по машине, переключения. При fan-out они становятся нормой. Главные приёмы — <b>не ждать медленного</b>: дублирующие запросы, умная балансировка, частичные ответы.</p><ul><li>Hedged request: нет ответа за p95 — отправить копию на другую реплику, взять первый ответ</li><li>Балансировка по нагрузке (least requests, power of two choices) вместо round robin</li><li>Разделять тяжёлые и лёгкие запросы, ограничивать очереди</li></ul><p class="extra"><span>А ещё</span> Частичный ответ лучше позднего: поиск без одного шарда, лента без одного блока</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Откуда хвосты</b> даже на здоровых машинах:</p>
+<ul><li>паузы сборщика мусора и JIT-компиляция;</li><li>фоновые задачи: compaction в LSM, VACUUM, бэкапы, ротация логов;</li><li>общие ресурсы: соседние контейнеры, throttling CPU в Kubernetes, шумные соседи по диску и сети;</li><li>очереди: временный всплеск на одном экземпляре;</li><li>потери пакетов и повторная передача TCP (200 мс на RTO);</li><li>холодные кэши после перезапуска.</li></ul>
+<p>Устранить всё нельзя, поэтому строят системы, <b>терпимые к хвостам</b> (идея статьи Google «The Tail at Scale»).</p>
+<p><b>Приёмы:</b></p>
+<ul><li><b>hedged requests</b> — отправить запрос одной реплике; если ответа нет дольше p95, отправить копию другой и взять тот, что придёт первым. Добавляет ~5% нагрузки, а хвост срезает в разы. Только для идемпотентных чтений;</li><li><b>tied requests</b> — отправить сразу двум, и когда один начал обработку, он отменяет копию у другого;</li><li><b>балансировка с учётом нагрузки</b> — round robin продолжает слать на тормозящий экземпляр; least outstanding requests, power of two choices и выбрасывание медленных (outlier detection) уводят трафик;</li><li><b>разные очереди и пулы</b> для тяжёлых и лёгких запросов, чтобы отчёт на 10 секунд не стоял перед запросом на 5 мс;</li><li><b>частичные ответы</b> — агрегатор с дедлайном отдаёт то, что успело прийти: поисковая выдача без одного шарда, лента без рекомендаций;</li><li><b>меньше fan-out</b> — меньше шардов на запрос, предагрегация, кэш на уровне агрегатора;</li><li><b>дедлайны вместо таймаутов</b> — передавать оставшееся время по цепочке, чтобы не делать работу, результат которой уже не нужен.</li></ul>
+<p><b>Измерять</b> — по гистограммам на стороне клиента, отдельно для каждой зависимости; смотреть не только p99, но и p99.9 — при большом fan-out именно он определяет p99 агрегатора.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>async def hedged(get, replicas, hedge_after=0.05):
+    first = asyncio.create_task(get(replicas[0]))
+    done, _ = await asyncio.wait({first}, timeout=hedge_after)   # ждём ~p95
+    if done:
+        return first.result()
+    second = asyncio.create_task(get(replicas[1]))               # дублируем
+    done, pending = await asyncio.wait({first, second}, return_when=asyncio.FIRST_COMPLETED)
+    for t in pending: t.cancel()
+    return done.pop().result()</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Источники хвостов на здоровых машинах.</li><li>Hedged requests и почему они дёшевы.</li><li>Балансировка с учётом нагрузки и изоляция тяжёлых запросов.</li><li>Частичные ответы и дедлайны.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Дублировать неидемпотентные запросы.</li><li>Пытаться «победить» хвост только тюнингом GC.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/latency-percentiles/">Почему время ответа измеряют перцентилями, а не средним?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/balancing-algorithms/">Какие алгоритмы балансировки нагрузки вы знаете и когда какой лучше?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/timeouts-retries/">Как правильно настраивать таймауты и повторы запросов?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как бороться с хвостовыми задержками в распределённой системе?","acceptedAnswer":{"@type":"Answer","text":"Хвосты неизбежны: сборка мусора, фоновые задачи, соседи по машине, переключения. При fan-out они становятся нормой. Главные приёмы — не ждать медленного: дублирующие запросы, умная балансировка, частичные ответы. Hedged request: нет ответа за p95 — отправить копию на другую реплику, взять первый ответ Балансировка по нагрузке (least requests, power of two choices) вместо round robin Разделять тяжёлые и лёгкие запросы, ограничивать очереди Частичный ответ лучше позднего: поиск без одного шарда, лента без одного блока Откуда хвосты даже на здоровых машинах: - паузы сборщика мусора и JIT-компиляция; - фоновые задачи: compaction в LSM, VACUUM, бэкапы, ротация логов; - общие ресурсы: соседние контейнеры, throttling CPU в Kubernetes, шумные соседи по диску и сети; - очереди: временный всплеск на одном экземпляре; - потери пакетов и повторная передача TCP (200 мс на RTO); - холодные кэши после перезапуска. Устранить всё нельзя, поэтому строят системы, терпимые к хвостам (идея статьи Google «The Tail at Scale»). Приёмы: - hedged requests — отправить запрос одной реплике; если ответа нет дольше p95, отправить копию другой и взять тот, что придёт первым. Добавляет ~5% нагрузки, а хвост срезает в разы. Только для идемпотентных чтений; - tied requests — отправить сразу двум, и когда один начал обработку, он отменяет копию у другого; - балансировка с учётом нагрузки — round robin продолжает слать на тормозящий…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

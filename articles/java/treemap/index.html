@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TreeMap, TreeSet и сортировка — разбор для собеседования</title>
+<meta name="description" content="Красно-чёрное дерево, NavigableMap, Comparable против Comparator, согласованность с equals и TimSort.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/treemap/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/treemap/">
+<meta property="og:title" content="TreeMap, TreeSet и сортировка — разбор для собеседования">
+<meta property="og:description" content="Красно-чёрное дерево, NavigableMap, Comparable против Comparator, согласованность с equals и TimSort.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>TreeMap, TreeSet и сортировка</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"TreeMap, TreeSet и сортировка"}]}</script>
+  <h1>TreeMap, TreeSet и сортировка</h1>
+  <p class="lead">Красно-чёрное дерево, NavigableMap, Comparable против Comparator, согласованность с equals и TimSort.</p>
+  <article class="md"><h2>Красно-чёрное дерево</h2>
+<p>TreeMap — это самобалансирующееся красно-чёрное дерево (разновидность бинарного дерева поиска). Балансировка через цвета узлов и повороты держит высоту порядка log n, поэтому get/put/remove — O(log n).</p>
+<p>Главное отличие от HashMap — данные всегда упорядочены по ключу, что и даёт диапазонные операции, недоступные хеш-таблице.</p>
+<h2>NavigableMap: диапазоны и навигация</h2>
+<p>TreeMap реализует NavigableMap: <code>floorKey</code>/<code>ceilingKey</code> (ближайший не больше/не меньше), <code>higherKey</code>/<code>lowerKey</code> (строго), <code>firstKey</code>/<code>lastKey</code>, а также представления <code>headMap</code>/<code>tailMap</code>/<code>subMap</code> и <code>descendingMap</code>.</p>
+<p>Это делает TreeMap инструментом для запросов «найти ближайшее», «всё в диапазоне», «топ-N по порядку» — там, где HashMap бессилен.</p>
+<h2>Comparable против Comparator</h2>
+<p>Порядок задаётся либо естественным (ключ реализует <code>Comparable.compareTo</code>), либо внешним Comparator, переданным в конструктор. Comparator гибко собирается: <code>Comparator.comparing(...).thenComparing(...).reversed()</code>.</p>
+<p>Важная тонкость: в TreeMap равенство определяется результатом сравнения (<code>compareTo</code>/compare == 0), а не equals. Если сравнение не согласовано с equals, карта будет вести себя «странно» с точки зрения контракта Map — например, два equals-различных ключа со сравнением 0 будут считаться одним.</p>
+<pre class="lang-java"><code>Comparator&lt;User&gt; byAgeThenName =
+    Comparator.comparingInt(User::age).thenComparing(User::name);
+TreeMap&lt;User, Order&gt; m = new TreeMap&lt;&gt;(byAgeThenName);</code></pre>
+<h2>Сортировка коллекций</h2>
+<p><code>List.sort</code>/<code>Collections.sort</code> используют TimSort — стабильный адаптивный алгоритм со сложностью O(n log n), который очень быстр на частично упорядоченных данных (находит и сливает уже отсортированные «прогоны»). Стабильность означает, что равные элементы сохраняют исходный порядок.</p>
+<p><code>Arrays.sort</code> для примитивов использует dual-pivot quicksort (нестабильный, но без оверхеда на объекты). Нарушение контракта Comparator (нетранзитивное сравнение) приводит к IllegalArgumentException «Comparison method violates its general contract».</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Назовите основу (красно-чёрное дерево, O(log n)), приведите навигационные операции как причину выбора TreeMap вместо HashMap, объясните согласованность <code>compareTo</code> с equals и упомяните TimSort (стабильный, адаптивный) для сортировки списков.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/comparable-vs-comparator/">Чем Comparable отличается от Comparator и что значит согласованность порядка с equals?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/hashset-linkedhashset-treeset/">Чем HashSet, LinkedHashSet и TreeSet отличаются?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/jc-166/">Нужно быстро находить ближайшую запись с ключом не больше заданного и выбирать все записи в диапазоне дат. Какая структура подходит?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jc-167/">Что произойдёт при попытке положить null-ключ в TreeMap?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/treemap-order/">В каком порядке TreeMap отдаёт свои ключи при обходе?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/hashmap/">HashMap изнутри: бакеты, treeify, resize</a><p>Таблица бакетов, перемешивание хеша и индекс, превращение цепочки в дерево, ресайз и load factor, контракт ключа.</p></li><li><a href="/articles/java/sets/">Set: HashSet, LinkedHashSet, TreeSet</a><p>Почему Set построен поверх Map, три реализации и их гарантии порядка, роль equals/hashCode.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"TreeMap, TreeSet и сортировка","description":"Красно-чёрное дерево, NavigableMap, Comparable против Comparator, согласованность с equals и TimSort.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/treemap/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

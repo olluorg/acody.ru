@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как оценивать качество ответов LLM? — вопрос с собеседования</title>
+<meta name="description" content="Собрать набор тестовых примеров с ожидаемым результатом, выбрать метрики под задачу и прогонять его при каждом изменении промпта, модели или поиска…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/llm-evaluation/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/llm-evaluation/">
+<meta property="og:title" content="Как оценивать качество ответов LLM? — вопрос с собеседования">
+<meta property="og:description" content="Собрать набор тестовых примеров с ожидаемым результатом, выбрать метрики под задачу и прогонять его при каждом изменении промпта, модели или поиска…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как оценивать качество ответов LLM?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как оценивать качество ответов LLM?"}]}</script>
+  <h1>Как оценивать качество ответов LLM?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Оценка качества</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как понять, что новый промпт лучше старого?</li><li>Что такое LLM-as-a-judge?</li><li>Как тестировать приложение на LLM?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Собрать <b>набор тестовых примеров</b> с ожидаемым результатом, выбрать <b>метрики под задачу</b> и прогонять его <b>при каждом изменении</b> промпта, модели или поиска.</p><ul><li>Автоматические проверки: точное совпадение, валидность формата, наличие ключевых фактов</li><li>Модель-судья (LLM-as-a-judge) для открытых ответов — с рубрикой и проверкой на людях</li></ul><p class="extra"><span>А ещё</span> Плюс онлайн-метрики: оценки пользователей, доля исправленных ответов</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Ответы LLM недетерминированы, а «улучшение» на одном примере легко ломает другие. Поэтому качество меряют на наборе.</p>
+<p><b>Тестовый набор (golden set):</b> реальные запросы разной сложности, крайние случаи, вопросы без ответа, попытки взлома. Для каждого — ожидаемый ответ или критерии.</p>
+<p><b>Метрики по типу задачи:</b></p>
+<ul><li><b>классификация и извлечение</b> — точность, полнота, F1, доля валидного JSON;</li><li><b>RAG</b> — отдельно поиск (recall@k) и ответ: соответствие контексту (faithfulness), релевантность, полнота;</li><li><b>открытые ответы</b> — оценка по рубрике людьми или моделью-судьёй.</li></ul>
+<p><b>LLM-as-a-judge</b> — другая модель оценивает ответ по рубрике. Быстро и дёшево, но у судьи есть перекосы: предпочитает длинные ответы, свой стиль, первый вариант при сравнении. Поэтому рубрика должна быть конкретной, порядок вариантов — перемешан, а согласие судьи с людьми — проверено на выборке.</p>
+<p><b>Процесс:</b> прогон набора как регрессионный тест при каждом изменении, сравнение с базовой версией, несколько прогонов из-за случайности. В продакшене — сбор обратной связи, разбор неудачных диалогов и пополнение набора.</p>
+<p>Отдельно меряют <b>стоимость и задержку</b> — улучшение качества может быть слишком дорогим.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Набор тестовых примеров как основа.</li><li>Метрики под тип задачи, отдельная оценка поиска и генерации в RAG.</li><li>LLM-as-a-judge с ограничениями.</li><li>Регрессионные прогоны и онлайн-метрики.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Оценивать «на глаз» по нескольким диалогам.</li><li>Безоговорочно доверять модели-судье.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/ai/hallucinations/">Что такое галлюцинации LLM и как с ними бороться?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/rag-quality/">Как улучшить качество RAG, если он отвечает плохо?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/prompt-engineering/">Как писать хорошие промпты?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как оценивать качество ответов LLM?","acceptedAnswer":{"@type":"Answer","text":"Собрать набор тестовых примеров с ожидаемым результатом, выбрать метрики под задачу и прогонять его при каждом изменении промпта, модели или поиска. Автоматические проверки: точное совпадение, валидность формата, наличие ключевых фактов Модель-судья (LLM-as-a-judge) для открытых ответов — с рубрикой и проверкой на людях Плюс онлайн-метрики: оценки пользователей, доля исправленных ответов Ответы LLM недетерминированы, а «улучшение» на одном примере легко ломает другие. Поэтому качество меряют на наборе. Тестовый набор (golden set): реальные запросы разной сложности, крайние случаи, вопросы без ответа, попытки взлома. Для каждого — ожидаемый ответ или критерии. Метрики по типу задачи: - классификация и извлечение — точность, полнота, F1, доля валидного JSON; - RAG — отдельно поиск (recall@k) и ответ: соответствие контексту (faithfulness), релевантность, полнота; - открытые ответы — оценка по рубрике людьми или моделью-судьёй. LLM-as-a-judge — другая модель оценивает ответ по рубрике. Быстро и дёшево, но у судьи есть перекосы: предпочитает длинные ответы, свой стиль, первый вариант при сравнении. Поэтому рубрика должна быть конкретной, порядок вариантов — перемешан, а согласие судьи с людьми — проверено на выборке. Процесс: прогон набора как регрессионный тест при каждом…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

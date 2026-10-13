@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работает useEffect и что такое массив зависимостей? — вопрос с собеседования</title>
+<meta name="description" content="useEffect запускает побочный эффект после отрисовки: подписки, таймеры, запросы, синхронизацию с внешней системой. Зависимости определяют, когда…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/react-useeffect/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/react-useeffect/">
+<meta property="og:title" content="Как работает useEffect и что такое массив зависимостей? — вопрос с собеседования">
+<meta property="og:description" content="useEffect запускает побочный эффект после отрисовки: подписки, таймеры, запросы, синхронизацию с внешней системой. Зависимости определяют, когда…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Как работает useEffect и что такое массив зависимостей?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Как работает useEffect и что такое массив зависимостей?"}]}</script>
+  <h1>Как работает useEffect и что такое массив зависимостей?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">React</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Зачем useEffect возвращает функцию?</li><li>Почему эффект срабатывает дважды в режиме разработки?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">useEffect запускает <b>побочный эффект после отрисовки</b>: подписки, таймеры, запросы, синхронизацию с внешней системой. <b>Зависимости</b> определяют, когда эффект перезапускается: [] — один раз после монтирования, [a, b] — при изменении a или b, без массива — после каждого рендера. Возвращённая функция — <b>очистка</b> перед следующим запуском и при размонтировании.</p><ul><li>В зависимостях — всё, что эффект читает из компонента; линтер exhaustive-deps проверяет</li><li>StrictMode в разработке монтирует дважды — проверка, что очистка корректна</li><li>Вычисление данных из props — не эффект, а обычный код рендера</li></ul><p class="extra"><span>А ещё</span> Запросы данных лучше через библиотеки (TanStack Query) — кэш, гонки, отмена</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Модель:</b> эффект синхронизирует компонент с чем-то вне React. При каждом изменении зависимостей React сначала вызывает очистку предыдущего эффекта, затем новый эффект.</p>
+<p><b>Типичные ошибки:</b></p>
+<ul><li>пропущенная зависимость — эффект видит устаревшие значения (замыкание из старого рендера);</li><li>объект или функция, создаваемые в рендере, в зависимостях — эффект срабатывает каждый раз; выносить наружу, useMemo/useCallback или зависеть от примитивов;</li><li>setState в эффекте без условия — бесконечный цикл;</li><li>отсутствие очистки — утечки подписок, гонки запросов (ответ на старый id приходит позже нового).</li></ul>
+<p><b>Не нужен эффект</b>, когда значение можно вычислить из props и state при рендере, или когда реакция на действие пользователя — это код в обработчике события.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-jsx"><code>useEffect(() =&gt; {
+  const controller = new AbortController();
+  fetch(`/api/users/${id}`, { signal: controller.signal })
+    .then(r =&gt; r.json())
+    .then(setUser)
+    .catch(e =&gt; { if (e.name !== &quot;AbortError&quot;) setError(e); });
+  return () =&gt; controller.abort();     // отменить при смене id и размонтировании
+}, [id]);</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Когда выполняется эффект и роль зависимостей.</li><li>Очистка.</li><li>Типичные ошибки и когда эффект не нужен.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/react-hooks-rules/">Какие правила хуков в React и почему их нельзя вызывать в условиях?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/closures/">Что такое замыкание в JavaScript и где оно применяется?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работает useEffect и что такое массив зависимостей?","acceptedAnswer":{"@type":"Answer","text":"useEffect запускает побочный эффект после отрисовки: подписки, таймеры, запросы, синхронизацию с внешней системой. Зависимости определяют, когда эффект перезапускается: [] — один раз после монтирования, [a, b] — при изменении a или b, без массива — после каждого рендера. Возвращённая функция — очистка перед следующим запуском и при размонтировании. В зависимостях — всё, что эффект читает из компонента; линтер exhaustive-deps проверяет StrictMode в разработке монтирует дважды — проверка, что очистка корректна Вычисление данных из props — не эффект, а обычный код рендера Запросы данных лучше через библиотеки (TanStack Query) — кэш, гонки, отмена Модель: эффект синхронизирует компонент с чем-то вне React. При каждом изменении зависимостей React сначала вызывает очистку предыдущего эффекта, затем новый эффект. Типичные ошибки: - пропущенная зависимость — эффект видит устаревшие значения (замыкание из старого рендера); - объект или функция, создаваемые в рендере, в зависимостях — эффект срабатывает каждый раз; выносить наружу, useMemo/useCallback или зависеть от примитивов; - setState в эффекте без условия — бесконечный цикл; - отсутствие очистки — утечки подписок, гонки запросов (ответ на старый id приходит позже нового). Не нужен эффект, когда значение можно вычислить из props и state при рендере, или когда реакция на действие пользователя — это код в обработчике события."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

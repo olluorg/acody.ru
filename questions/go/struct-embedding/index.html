@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как в Go обходятся без наследования — что такое встраивание (embedding)? — вопрос с собеседования</title>
+<meta name="description" content="Наследования нет. Встраивание — поле без имени: методы и поля встроенного типа продвигаются во внешний и вызываются напрямую. Это композиция, а не…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/go/struct-embedding/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/go/struct-embedding/">
+<meta property="og:title" content="Как в Go обходятся без наследования — что такое встраивание (embedding)? — вопрос с собеседования">
+<meta property="og:description" content="Наследования нет. Встраивание — поле без имени: методы и поля встроенного типа продвигаются во внешний и вызываются напрямую. Это композиция, а не…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/go/">Go</a> <span>/</span> <span>Как в Go обходятся без наследования — что такое встраивание (embedding)?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Go","item":"https://learn.getsotto.ru/questions/go/"},{"@type":"ListItem","position":3,"name":"Как в Go обходятся без наследования — что такое встраивание (embedding)?"}]}</script>
+  <h1>Как в Go обходятся без наследования — что такое встраивание (embedding)?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Методы и интерфейсы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Есть ли в Go наследование?</li><li>Композиция вместо наследования в Go</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Наследования нет. <b>Встраивание</b> — поле без имени: методы и поля встроенного типа <b>продвигаются</b> во внешний и вызываются напрямую. Это <b>композиция</b>, а не наследование: нет переопределения с полиморфизмом — встроенный тип не знает о внешнем.</p><ul><li>Внешний тип может объявить метод с тем же именем — он перекроет продвинутый</li><li>Встроенный тип вызывает свои методы, а не «переопределённые» внешним</li><li>Полиморфизм в Go — через интерфейсы</li></ul><p class="extra"><span>А ещё</span> Встраивание интерфейса в структуру — частичная реализация, остальные методы паникуют на nil</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Продвижение.</b> Поля и методы встроенного типа доступны как свои: <code>s.Log()</code>, <code>s.prefix</code>. Методы встроенного типа входят в набор методов внешнего, поэтому <code>Service</code> удовлетворяет интерфейсам, которым удовлетворяет <code>Logger</code>.</p>
+<p><b>Почему это не наследование.</b> Если <code>Logger.Log</code> вызывает <code>l.format()</code>, а <code>Service</code> объявил свой <code>format</code>, вызовется <code>Logger.format</code> — никакой виртуальной диспетчеризации. Нет и преобразования <code>Service</code> к <code>Logger</code>: это разные типы.</p>
+<p><b>Встраивание интерфейсов</b> в интерфейсы — сборка контрактов: <code>type ReadWriter interface { Reader; Writer }</code>.</p>
+<p><b>Когда осторожно:</b> встраивание расширяет публичный API внешнего типа всеми методами встроенного; встроенный <code>sync.Mutex</code> делает <code>Lock</code> доступным снаружи — обычно лучше именованное поле <code>mu sync.Mutex</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-go"><code>type Logger struct{ prefix string }
+func (l Logger) Log(msg string) { fmt.Println(l.prefix, msg) }
+
+type Service struct {
+    Logger              // встраивание
+    db *sql.DB
+}
+
+s := Service{Logger: Logger{prefix: &quot;[svc]&quot;}}
+s.Log(&quot;старт&quot;)          // продвинутый метод</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Продвижение полей и методов.</li><li>Отличие от наследования.</li><li>Полиморфизм через интерфейсы.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/interfaces-implicit/">Как работают интерфейсы в Go и что значит неявная реализация?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/stack-extends-vector/">Почему java.util.Stack, унаследованный от Vector, считают ошибкой дизайна?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как в Go обходятся без наследования — что такое встраивание (embedding)?","acceptedAnswer":{"@type":"Answer","text":"Наследования нет. Встраивание — поле без имени: методы и поля встроенного типа продвигаются во внешний и вызываются напрямую. Это композиция, а не наследование: нет переопределения с полиморфизмом — встроенный тип не знает о внешнем. Внешний тип может объявить метод с тем же именем — он перекроет продвинутый Встроенный тип вызывает свои методы, а не «переопределённые» внешним Полиморфизм в Go — через интерфейсы Встраивание интерфейса в структуру — частичная реализация, остальные методы паникуют на nil Продвижение. Поля и методы встроенного типа доступны как свои: s.Log(), s.prefix. Методы встроенного типа входят в набор методов внешнего, поэтому Service удовлетворяет интерфейсам, которым удовлетворяет Logger. Почему это не наследование. Если Logger.Log вызывает l.format(), а Service объявил свой format, вызовется Logger.format — никакой виртуальной диспетчеризации. Нет и преобразования Service к Logger: это разные типы. Встраивание интерфейсов в интерфейсы — сборка контрактов: type ReadWriter interface { Reader; Writer }. Когда осторожно: встраивание расширяет публичный API внешнего типа всеми методами встроенного; встроенный sync.Mutex делает Lock доступным снаружи — обычно лучше именованное поле mu sync.Mutex."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

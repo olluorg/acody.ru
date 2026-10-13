@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем отличаются threading, multiprocessing и asyncio? — вопрос с собеседования</title>
+<meta name="description" content="Потоки и asyncio — для ожидания ввода-вывода, процессы — для вычислений на нескольких ядрах. threading: несколько потоков одного процесса, общая…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/threading-multiprocessing-asyncio/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/threading-multiprocessing-asyncio/">
+<meta property="og:title" content="Чем отличаются threading, multiprocessing и asyncio? — вопрос с собеседования">
+<meta property="og:description" content="Потоки и asyncio — для ожидания ввода-вывода, процессы — для вычислений на нескольких ядрах. threading: несколько потоков одного процесса, общая…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Чем отличаются threading, multiprocessing и asyncio?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Чем отличаются threading, multiprocessing и asyncio?"}]}</script>
+  <h1>Чем отличаются threading, multiprocessing и asyncio?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Конкурентность</span><span class="chip">asyncio</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Когда использовать потоки, а когда процессы?</li><li>Что выбрать для параллельных HTTP-запросов?</li><li>Как распараллелить вычисления в Python?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Потоки</b> и <b>asyncio</b> — для ожидания ввода-вывода, <b>процессы</b> — для вычислений на нескольких ядрах.</p><ul><li>threading: несколько потоков одного процесса, общая память, ограничены GIL</li><li>multiprocessing: отдельные процессы со своей памятью и своим GIL, данные передаются сериализацией</li><li>asyncio: один поток, кооперативная многозадачность, тысячи соединений дёшево</li></ul><p class="extra"><span>А ещё</span> Для типового выбора удобен concurrent.futures: ThreadPoolExecutor / ProcessPoolExecutor</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>threading.</b> Потоки внутри одного процесса делят память, поэтому обмен данными простой, но общее состояние надо защищать блокировками. Из-за GIL байткод выполняется одним потоком за раз, поэтому потоки подходят для I/O-bound задач: сетевые запросы, работа с диском, ожидание базы. Переключает потоки операционная система — в любой момент.</p>
+<p><b>multiprocessing.</b> Отдельные процессы с собственным интерпретатором — настоящий параллелизм на ядрах. Подходит для CPU-bound задач: расчёты, обработка изображений, парсинг больших файлов. Цена — запуск процессов дороже, память не общая, аргументы и результаты сериализуются (pickle).</p>
+<p><b>asyncio.</b> Один поток и цикл событий. Корутины сами отдают управление в точках <code>await</code> — пока одна ждёт ответа сети, работают другие. Тысячи одновременных соединений обходятся дёшево. Требует асинхронных библиотек (aiohttp, asyncpg); блокирующий вызов внутри корутины останавливает весь цикл.</p>
+<p>Как выбирать:</p>
+<ul><li>много сетевых запросов, веб-сервер — asyncio (или потоки, если библиотеки синхронные);</li><li>немного параллельного ввода-вывода в синхронном коде — ThreadPoolExecutor;</li><li>тяжёлые вычисления — ProcessPoolExecutor.</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+import urllib.request
+
+def fetch(url):
+    with urllib.request.urlopen(url, timeout=10) as r:
+        return len(r.read())
+
+urls = [&quot;https://example.com&quot;] * 10
+with ThreadPoolExecutor(max_workers=10) as pool:      # I/O — потоки
+    sizes = list(pool.map(fetch, urls))
+
+def heavy(n):
+    return sum(i * i for i in range(n))
+
+if __name__ == &quot;__main__&quot;:
+    with ProcessPoolExecutor() as pool:                 # CPU — процессы
+        results = list(pool.map(heavy, [10**7] * 4))</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Связь выбора с типом задачи: I/O-bound или CPU-bound.</li><li>Роль GIL для потоков.</li><li>Цена процессов: память, сериализация, запуск.</li><li>Модель asyncio: один поток, <code>await</code>, опасность блокирующих вызовов.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Распараллеливать вычисления потоками и ждать ускорения.</li><li>Вызывать <code>time.sleep</code> или синхронный <code>requests</code> внутри корутины.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/async-await/">Как работают async и await?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/gil/">Что такое GIL?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/generators/">Что такое генератор и чем он полезен?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем отличаются threading, multiprocessing и asyncio?","acceptedAnswer":{"@type":"Answer","text":"Потоки и asyncio — для ожидания ввода-вывода, процессы — для вычислений на нескольких ядрах. threading: несколько потоков одного процесса, общая память, ограничены GIL multiprocessing: отдельные процессы со своей памятью и своим GIL, данные передаются сериализацией asyncio: один поток, кооперативная многозадачность, тысячи соединений дёшево Для типового выбора удобен concurrent.futures: ThreadPoolExecutor / ProcessPoolExecutor threading. Потоки внутри одного процесса делят память, поэтому обмен данными простой, но общее состояние надо защищать блокировками. Из-за GIL байткод выполняется одним потоком за раз, поэтому потоки подходят для I/O-bound задач: сетевые запросы, работа с диском, ожидание базы. Переключает потоки операционная система — в любой момент. multiprocessing. Отдельные процессы с собственным интерпретатором — настоящий параллелизм на ядрах. Подходит для CPU-bound задач: расчёты, обработка изображений, парсинг больших файлов. Цена — запуск процессов дороже, память не общая, аргументы и результаты сериализуются (pickle). asyncio. Один поток и цикл событий. Корутины сами отдают управление в точках await — пока одна ждёт ответа сети, работают другие. Тысячи одновременных соединений обходятся дёшево. Требует асинхронных библиотек (aiohttp, asyncpg); блокирующий вызов внутри корутины останавливает…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

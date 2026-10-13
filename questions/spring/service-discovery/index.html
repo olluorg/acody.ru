@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое service discovery и где здесь Eureka? — вопрос с собеседования</title>
+<meta name="description" content="Service discovery — реестр живых экземпляров сервисов: сервис регистрируется при старте, клиенты находят адреса по имени. Eureka — реестр Netflix в…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/service-discovery/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/service-discovery/">
+<meta property="og:title" content="Что такое service discovery и где здесь Eureka? — вопрос с собеседования">
+<meta property="og:description" content="Service discovery — реестр живых экземпляров сервисов: сервис регистрируется при старте, клиенты находят адреса по имени. Eureka — реестр Netflix в…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Что такое service discovery и где здесь Eureka?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Что такое service discovery и где здесь Eureka?"}]}</script>
+  <h1>Что такое service discovery и где здесь Eureka?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Spring Cloud</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как сервисы находят друг друга в микросервисах?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Service discovery</b> — реестр живых экземпляров сервисов: сервис регистрируется при старте, клиенты находят адреса по имени. <b>Eureka</b> — реестр Netflix в Spring Cloud; в <b>Kubernetes</b> discovery встроен через Service и DNS.</p><ul><li>Клиентский поиск: клиент получает список и сам балансирует (Spring Cloud LoadBalancer)</li><li>Серверный: запрос идёт на стабильное имя, балансирует инфраструктура (Kubernetes Service)</li><li>Регистрация с heartbeat — мёртвые экземпляры выпадают</li></ul><p class="extra"><span>А ещё</span> В Kubernetes Eureka обычно не нужна</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Проблема:</b> экземпляры сервисов появляются и исчезают (автомасштабирование, выкатки, падения), адреса меняются. Захардкоженные адреса не работают.</p>
+<p><b>Реестр:</b></p>
+<ul><li>сервис при старте регистрируется (имя, адрес, порт, метаданные) и периодически шлёт heartbeat;</li><li>пропал heartbeat — запись удаляется;</li><li>клиенты запрашивают список экземпляров по имени.</li></ul>
+<p><b>Два подхода:</b></p>
+<ul><li><b>клиентский</b> (Eureka + Spring Cloud LoadBalancer): клиент получает список экземпляров и сам выбирает, куда слать (<code>lb://orders</code> в WebClient/RestClient с <code>@LoadBalanced</code>). Гибко, но логика в каждом клиенте;</li><li><b>серверный</b> (Kubernetes Service, Consul + прокси, облачные балансировщики): клиент обращается к стабильному имени <code>orders</code>, DNS и kube-proxy или service mesh распределяют запросы. Клиент проще.</li></ul>
+<p><b>Eureka</b> — AP-реестр: при сетевых проблемах предпочитает отдавать возможно устаревший список, чем ничего (self-preservation mode). Альтернативы — Consul, ZooKeeper, etcd.</p>
+<p><b>Kubernetes:</b> Service с селектором подов, Endpoints обновляются по readiness-пробам, имя резолвится через DNS. Отдельный реестр не нужен; Spring Cloud Kubernetes умеет читать сервисы из API при необходимости.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Зачем нужен discovery.</li><li>Регистрация, heartbeat, поиск по имени.</li><li>Клиентский и серверный подходы.</li><li>Eureka и Kubernetes.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ставить Eureka в Kubernetes «по привычке».</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Шифрование трафика между сервисами</li><li class="no"><span class="mark">✗</span>Централизованное хранилище конфигурации</li><li class="ok"><span class="mark">✓</span>Поиск сервисов по логическому имени вместо статического host:port; Eureka — реестр (в Kubernetes часто заменяется Service/DNS)</li><li class="no"><span class="mark">✗</span>Очередь сообщений между сервисами</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое client-side load balancing?</li><li>Чем discovery отличается от config server?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/cloud-platform/">Spring Cloud: config, discovery, gateway, tracing</a><p>Config Server, Eureka/DiscoveryClient, Spring Cloud Gateway и распределённая трассировка.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/service-discovery-basic/">Зачем нужен service discovery в системе из многих сервисов?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/spring/spring-cloud-gateway/">Какая основная роль Spring Cloud Gateway?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/balancing-algorithms/">Какие алгоритмы балансировки нагрузки вы знаете и когда какой лучше?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое service discovery и где здесь Eureka?","acceptedAnswer":{"@type":"Answer","text":"Service discovery — реестр живых экземпляров сервисов: сервис регистрируется при старте, клиенты находят адреса по имени. Eureka — реестр Netflix в Spring Cloud; в Kubernetes discovery встроен через Service и DNS. Клиентский поиск: клиент получает список и сам балансирует (Spring Cloud LoadBalancer) Серверный: запрос идёт на стабильное имя, балансирует инфраструктура (Kubernetes Service) Регистрация с heartbeat — мёртвые экземпляры выпадают В Kubernetes Eureka обычно не нужна Проблема: экземпляры сервисов появляются и исчезают (автомасштабирование, выкатки, падения), адреса меняются. Захардкоженные адреса не работают. Реестр: - сервис при старте регистрируется (имя, адрес, порт, метаданные) и периодически шлёт heartbeat; - пропал heartbeat — запись удаляется; - клиенты запрашивают список экземпляров по имени. Два подхода: - клиентский (Eureka + Spring Cloud LoadBalancer): клиент получает список экземпляров и сам выбирает, куда слать (lb://orders в WebClient/RestClient с @LoadBalanced). Гибко, но логика в каждом клиенте; - серверный (Kubernetes Service, Consul + прокси, облачные балансировщики): клиент обращается к стабильному имени orders, DNS и kube-proxy или service mesh распределяют запросы. Клиент проще. Eureka — AP-реестр: при сетевых проблемах предпочитает отдавать возможно устаревший список, чем ничего (self-preservation mode). Альтернативы — Consul…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

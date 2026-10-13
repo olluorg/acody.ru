@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как спроектировать дашборд, которым будут пользоваться? — вопрос с собеседования</title>
+<meta name="description" content="Начинать с вопросов и решений, которые дашборд должен поддерживать, и с аудитории: руководителю — несколько ключевых метрик с динамикой и сравнением…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/dashboard-design/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/dashboard-design/">
+<meta property="og:title" content="Как спроектировать дашборд, которым будут пользоваться? — вопрос с собеседования">
+<meta property="og:description" content="Начинать с вопросов и решений, которые дашборд должен поддерживать, и с аудитории: руководителю — несколько ключевых метрик с динамикой и сравнением…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Как спроектировать дашборд, которым будут пользоваться?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Как спроектировать дашборд, которым будут пользоваться?"}]}</script>
+  <h1>Как спроектировать дашборд, которым будут пользоваться?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Аналитические кейсы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Какие ошибки делают в дашбордах?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Начинать с <b>вопросов и решений</b>, которые дашборд должен поддерживать, и с аудитории: руководителю — несколько ключевых метрик с динамикой и сравнением с планом, команде — детализация и разрезы. Каждой метрике — <b>определение</b>, сравнение (с прошлым периодом, планом), понятный тип графика. Меньше — лучше.</p><ul><li>Линейный график для динамики, столбцы для сравнения категорий, без круговых диаграмм на много долей</li><li>Ось Y с нуля для столбцов; подписи единиц и периода</li><li>Свежесть данных и источник — на виду</li></ul><p class="extra"><span>А ещё</span> Дашборд без владельца и определений метрик быстро превращается в источник споров</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Структура:</b></p>
+<ul><li>сверху — главные метрики с изменением к прошлому периоду и плану;</li><li>ниже — разложение по дереву метрик и ключевым сегментам;</li><li>фильтры по периоду, платформе, региону;</li><li>ссылка на определения метрик и время обновления данных.</li></ul>
+<p><b>Частые ошибки:</b></p>
+<ul><li>«всё на одном экране» — десятки графиков без иерархии;</li><li>метрики без определений — разные отделы считают по-разному;</li><li>средние без распределения там, где есть длинный хвост;</li><li>накопительные итоги, на которых не видно изменений;</li><li>отсутствие сравнения — число само по себе ничего не говорит.</li></ul>
+<p><b>Инструменты:</b> Yandex DataLens, Superset, Metabase, Tableau, Power BI — выбор менее важен, чем дисциплина определений и источников.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Отталкиваться от решений и аудитории.</li><li>Сравнения, определения, свежесть данных.</li><li>Типичные ошибки визуализации.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/metric-tree/">Что такое North Star Metric и дерево метрик?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/analytics/dau-mau-stickiness/">Что такое DAU, MAU и stickiness и как ими пользоваться?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как спроектировать дашборд, которым будут пользоваться?","acceptedAnswer":{"@type":"Answer","text":"Начинать с вопросов и решений, которые дашборд должен поддерживать, и с аудитории: руководителю — несколько ключевых метрик с динамикой и сравнением с планом, команде — детализация и разрезы. Каждой метрике — определение, сравнение (с прошлым периодом, планом), понятный тип графика. Меньше — лучше. Линейный график для динамики, столбцы для сравнения категорий, без круговых диаграмм на много долей Ось Y с нуля для столбцов; подписи единиц и периода Свежесть данных и источник — на виду Дашборд без владельца и определений метрик быстро превращается в источник споров Структура: - сверху — главные метрики с изменением к прошлому периоду и плану; - ниже — разложение по дереву метрик и ключевым сегментам; - фильтры по периоду, платформе, региону; - ссылка на определения метрик и время обновления данных. Частые ошибки: - «всё на одном экране» — десятки графиков без иерархии; - метрики без определений — разные отделы считают по-разному; - средние без распределения там, где есть длинный хвост; - накопительные итоги, на которых не видно изменений; - отсутствие сравнения — число само по себе ничего не говорит. Инструменты: Yandex DataLens, Superset, Metabase, Tableau, Power BI — выбор менее важен, чем дисциплина определений и источников."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

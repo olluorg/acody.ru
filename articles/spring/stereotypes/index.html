@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Стереотипы, @Bean и автосвязывание — разбор для собеседования</title>
+<meta name="description" content="Стереотипные аннотации и их семантика, @Bean против @Component, component-scan, @Autowired и разрешение неоднозначности.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/spring/stereotypes/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/spring/stereotypes/">
+<meta property="og:title" content="Стереотипы, @Bean и автосвязывание — разбор для собеседования">
+<meta property="og:description" content="Стереотипные аннотации и их семантика, @Bean против @Component, component-scan, @Autowired и разрешение неоднозначности.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#spring">Spring</a> <span>/</span> <span>Стереотипы, @Bean и автосвязывание</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/articles/#spring"},{"@type":"ListItem","position":3,"name":"Стереотипы, @Bean и автосвязывание"}]}</script>
+  <h1>Стереотипы, @Bean и автосвязывание</h1>
+  <p class="lead">Стереотипные аннотации и их семантика, @Bean против @Component, component-scan, @Autowired и разрешение неоднозначности.</p>
+  <article class="md"><h2>Стереотипы</h2>
+<p><code>@Component</code> помечает класс как бин — Spring находит его через component-scan и сам инстанцирует. <code>@Service</code>, <code>@Repository</code>, <code>@Controller</code>/<code>@RestController</code> — специализации <code>@Component</code>: технически тот же эффект, но семантически обозначают слой.</p>
+<p>У <code>@Repository</code> есть и реальное поведение, а не только семантика: он включает exception translation — перевод низкоуровневых исключений JDBC/JPA в единую иерархию Spring DataAccessException (unchecked), чтобы код доступа к данным не зависел от конкретной технологии.</p>
+<h2>@Bean против @Component</h2>
+<p><code>@Component</code> (и специализации) — для СВОИХ классов, которые можно пометить аннотацией. <code>@Bean</code>-метод в <code>@Configuration</code> — для ЧУЖИХ/библиотечных классов, которые пометить нельзя: вы сами создаёте объект и отдаёте контейнеру.</p>
+<p>Так конфигурация остаётся явной: свой код сканируется, внешние объекты регистрируются руками (и помните про full mode <code>@Configuration</code> из урока про контекст).</p>
+<pre class="lang-java"><code>@Configuration
+class AppConfig {
+    @Bean ObjectMapper objectMapper() { return new ObjectMapper(); } // сторонний класс
+}</code></pre>
+<h2>Component scan</h2>
+<p>Чтобы стереотипы нашлись, нужен component-scan. В Spring Boot он включён через <code>@SpringBootApplication</code>, который сканирует пакет главного класса и все вложенные — поэтому компоненты обычно держат в том же или нижележащем пакете.</p>
+<p>Область и правила настраивают <code>@ComponentScan</code> (<code>basePackages</code>, include/<code>excludeFilters</code>). Частая ошибка новичка — положить бин вне сканируемого пакета и удивляться, что его «нет».</p>
+<h2>Автосвязывание @Autowired</h2>
+<p>Внедрение по умолчанию идёт by type: контейнер ищет бин подходящего типа. Если кандидат один — всё просто; на конструкторе с одним вариантом <code>@Autowired</code> даже не нужен.</p>
+<p>Если по типу подходящих несколько, Spring пытается разрешить by name (по имени поля/параметра). Если и это не помогает — ошибка NoUniqueBeanDefinitionException на старте.</p>
+<h2>Разрешение неоднозначности</h2>
+<p>Когда бинов одного типа несколько, выбор уточняют: <code>@Primary</code> помечает кандидата по умолчанию, а <code>@Qualifier(&quot;name&quot;)</code> в точке инъекции выбирает конкретного. Можно внедрить и ВСЕ бины типа сразу — как <code>List&lt;Handler&gt;</code> или <code>Map&lt;String, Handler&gt;</code> (имя бина → бин), что удобно для паттерна «стратегия/реестр».</p>
+<p>Существуют и стандартные аналоги: <code>@Resource</code> (JSR-250, by name) и <code>@Inject</code> (JSR-330, как <code>@Autowired</code>) — но в Spring-проектах обычно используют <code>@Autowired</code> + <code>@Qualifier</code>.</p>
+<pre class="lang-java"><code>@Service
+class Dispatcher {
+    private final Map&lt;String, Handler&gt; handlers; // имя бина -&gt; Handler, все реализации
+    Dispatcher(Map&lt;String, Handler&gt; handlers) { this.handlers = handlers; }
+}</code></pre>
+<h2>Как отвечать на собеседовании</h2>
+<p>Назовите стереотипы и подчеркните, что <code>@Repository</code> не просто семантика, а exception translation в DataAccessException. Различите <code>@Component</code> (свой класс, скан) и <code>@Bean</code> (чужой класс, <code>@Configuration</code>). Объясните автосвязывание (by type → by name) и разрешение конфликтов (<code>@Primary</code>/<code>@Qualifier</code>, а также инъекцию List/Map всех бинов типа). Упомяните типичную ошибку с пакетом вне component-scan.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/spring/component-vs-bean/">Чем @Component отличается от @Bean?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/constructor-vs-field-injection/">Почему внедрение через конструктор предпочтительнее внедрения в поле?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/qualifier-beats-primary/">Интерфейс PaymentGateway реализуют два бина: один помечен @Primary, другой имеет имя sbpGateway. В точке внедрения стоит @Qualifier(&quot;sbpGateway&quot;). Какой бин будет внедрён?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/repository-exception-translation/">Чем @Repository отличается от @Component помимо семантики?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/autowired-basic/">Что делает аннотация @Autowired?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/spring/ioc/">IoC и Dependency Injection</a><p>Принцип инверсии управления, DI как его форма, три способа внедрения и почему конструктор, разрешение циклических зависимостей.</p></li><li><a href="/articles/spring/context-config/">ApplicationContext и конфигурация</a><p>BeanFactory против ApplicationContext, способы конфигурации, @Configuration full/lite, профили и Environment, @Conditional.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Стереотипы, @Bean и автосвязывание","description":"Стереотипные аннотации и их семантика, @Bean против @Component, component-scan, @Autowired и разрешение неоднозначности.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/spring/stereotypes/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

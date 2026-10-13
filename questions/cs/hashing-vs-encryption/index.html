@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем хеширование отличается от шифрования и кодирования? — вопрос с собеседования</title>
+<meta name="description" content="Кодирование (Base64, URL-кодирование) — смена формата, обратимо без секрета. Шифрование — обратимо только с ключом. Хеширование — необратимый…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/hashing-vs-encryption/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/hashing-vs-encryption/">
+<meta property="og:title" content="Чем хеширование отличается от шифрования и кодирования? — вопрос с собеседования">
+<meta property="og:description" content="Кодирование (Base64, URL-кодирование) — смена формата, обратимо без секрета. Шифрование — обратимо только с ключом. Хеширование — необратимый…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Чем хеширование отличается от шифрования и кодирования?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Чем хеширование отличается от шифрования и кодирования?"}]}</script>
+  <h1>Чем хеширование отличается от шифрования и кодирования?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Безопасность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Base64 — это шифрование?</li><li>Можно ли расшифровать хеш?</li><li>Что такое HMAC?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Кодирование</b> (Base64, URL-кодирование) — смена формата, обратимо без секрета. <b>Шифрование</b> — обратимо только с ключом. <b>Хеширование</b> — необратимый отпечаток фиксированной длины.</p><ul><li>Base64 не защищает ничего — это не шифрование</li><li>Криптографический хеш (SHA-256): нельзя подобрать вход по выходу и найти два входа с одним хешем</li><li>HMAC — хеш с секретным ключом: проверка, что сообщение не подделано</li></ul><p class="extra"><span>А ещё</span> Хеш-функция для хеш-таблицы и криптографическая — разные требования</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Кодирование</b> меняет представление данных, чтобы их можно было передать: Base64 превращает байты в печатные символы для JSON, почты и URL; процентное кодирование — для адресов; UTF-8 — для текста. Ключа нет, раскодировать может любой. Пароль в Base64 в конфиге или заголовок <code>Authorization: Basic</code> без HTTPS — это открытый текст.</p>
+<p><b>Шифрование</b> превращает данные в шифротекст, который без ключа прочитать нельзя, а с ключом — можно восстановить исходное. Нужно, когда данные потом понадобятся: передача по сети (TLS), хранение номеров карт и персональных данных, бэкапы. Симметричное (AES) — один ключ, асимметричное (RSA, эллиптические кривые) — пара ключей.</p>
+<p><b>Хеширование</b> превращает вход любой длины в отпечаток фиксированной длины. Обратной операции нет. От <b>криптографического</b> хеша (SHA-256, SHA-3, BLAKE2) требуется:</p>
+<ul><li>по хешу нельзя найти вход (стойкость к нахождению прообраза);</li><li>нельзя найти два разных входа с одинаковым хешем (стойкость к коллизиям);</li><li>малейшее изменение входа полностью меняет хеш (лавинный эффект).</li></ul>
+<p>MD5 и SHA-1 для безопасности больше не годятся — коллизии находятся.</p>
+<p><b>Где хеш:</b> проверка целостности файлов (контрольные суммы), git (адресация объектов), цифровая подпись (подписывают хеш), дедупликация, хранение паролей — но <b>специальными медленными</b> функциями.</p>
+<p><b>HMAC</b> — хеш от сообщения вместе с секретным ключом. Проверяет, что сообщение отправил тот, у кого есть ключ, и оно не изменено. Применения: подпись вебхуков (платёжные системы, GitHub), подпись JWT алгоритмом HS256, подпись ссылок. Сравнивать подписи нужно за постоянное время (<code>hmac.compare_digest</code>), иначе можно подобрать по времени ответа.</p>
+<p><b>Не путать</b> с хеш-функцией для хеш-таблицы: там нужна скорость и равномерность, а стойкость к атакам — нет (хотя для защиты от искусственных коллизий Python и Java используют рандомизацию или деревья в корзинах).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import base64, hashlib, hmac
+base64.b64encode(b&quot;secret&quot;)               # b&#x27;c2VjcmV0&#x27; — раскодирует любой
+hashlib.sha256(b&quot;secret&quot;).hexdigest()     # &#x27;2bb80d53…&#x27; — обратно не получить
+sig = hmac.new(b&quot;webhook-key&quot;, b&#x27;{&quot;paid&quot;:true}&#x27;, &quot;sha256&quot;).hexdigest()
+hmac.compare_digest(sig, received_sig)    # проверка подписи вебхука</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Три понятия: обратимо без ключа, обратимо с ключом, необратимо.</li><li>Свойства криптографического хеша и где он применяется.</li><li>Base64 — не защита.</li><li>HMAC и подпись сообщений — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Пароли шифруем SHA-256» — это хеш, и для паролей он слишком быстрый.</li><li>Называть Base64 шифрованием.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/password-storage/">Как правильно хранить пароли пользователей?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/symmetric-asymmetric/">Чем симметричное шифрование отличается от асимметричного и что такое цифровая подпись?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/hash-table/">Как устроена хеш-таблица?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/tls-handshake/">Как работает HTTPS и TLS-рукопожатие?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем хеширование отличается от шифрования и кодирования?","acceptedAnswer":{"@type":"Answer","text":"Кодирование (Base64, URL-кодирование) — смена формата, обратимо без секрета. Шифрование — обратимо только с ключом. Хеширование — необратимый отпечаток фиксированной длины. Base64 не защищает ничего — это не шифрование Криптографический хеш (SHA-256): нельзя подобрать вход по выходу и найти два входа с одним хешем HMAC — хеш с секретным ключом: проверка, что сообщение не подделано Хеш-функция для хеш-таблицы и криптографическая — разные требования Кодирование меняет представление данных, чтобы их можно было передать: Base64 превращает байты в печатные символы для JSON, почты и URL; процентное кодирование — для адресов; UTF-8 — для текста. Ключа нет, раскодировать может любой. Пароль в Base64 в конфиге или заголовок Authorization: Basic без HTTPS — это открытый текст. Шифрование превращает данные в шифротекст, который без ключа прочитать нельзя, а с ключом — можно восстановить исходное. Нужно, когда данные потом понадобятся: передача по сети (TLS), хранение номеров карт и персональных данных, бэкапы. Симметричное (AES) — один ключ, асимметричное (RSA, эллиптические кривые) — пара ключей. Хеширование превращает вход любой длины в отпечаток фиксированной длины. Обратной операции нет. От криптографического хеша (SHA-256, SHA-3, BLAKE2) требуется: - по хешу нельзя найти вход (стойкость к нахождению прообраза); - нельзя найти два…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

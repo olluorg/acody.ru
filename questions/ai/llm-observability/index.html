@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как наблюдать за LLM-приложением в продакшене? — вопрос с собеседования</title>
+<meta name="description" content="Трассировать каждый шаг: промпт и ответ, найденные документы, вызовы инструментов, модель и версию промпта, токены, стоимость, задержку (TTFT и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/llm-observability/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/llm-observability/">
+<meta property="og:title" content="Как наблюдать за LLM-приложением в продакшене? — вопрос с собеседования">
+<meta property="og:description" content="Трассировать каждый шаг: промпт и ответ, найденные документы, вызовы инструментов, модель и версию промпта, токены, стоимость, задержку (TTFT и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как наблюдать за LLM-приложением в продакшене?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как наблюдать за LLM-приложением в продакшене?"}]}</script>
+  <h1>Как наблюдать за LLM-приложением в продакшене?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">LLM в продакшене</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что логировать в приложении на LLM?</li><li>Как отлаживать агента?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Трассировать <b>каждый шаг</b>: промпт и ответ, найденные документы, вызовы инструментов, модель и версию промпта, токены, стоимость, задержку (TTFT и общую). Плюс <b>качество</b>: пользовательская обратная связь, автоматические оценки на выборке трафика, отслеживание дрейфа запросов. Обычные метрики сервиса (ошибки, задержки) тоже нужны, но их мало.</p><ul><li>Без трассировки агент — чёрный ящик: неясно, на каком шаге он ошибся</li><li>Стоимость считают по пользователю, фиче и модели — иначе бюджет неуправляем</li><li>Персональные данные в логах промптов маскируют</li></ul><p class="extra"><span>А ещё</span> Инструменты: Langfuse, LangSmith, Phoenix, OpenTelemetry с семантическими соглашениями для GenAI</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Что собирать:</b></p>
+<ul><li><b>трассы</b> — дерево шагов запроса: поиск, реранкинг, вызовы модели, инструменты, с входами и выходами;</li><li><b>метрики</b> — задержка (TTFT, полная), токены на входе и выходе, стоимость, доля ошибок и таймаутов провайдера, доля отказов модели;</li><li><b>качество</b> — лайки и дизлайки, повторные вопросы, ручная разметка выборки, автоматические оценки (LLM-as-judge) на сэмплах;</li><li><b>версии</b> — модель, промпт, параметры, конфигурация поиска: без этого регресс нельзя связать с изменением.</li></ul>
+<p><b>Цикл улучшения:</b> проблемные трассы из продакшена → пополнение оценочного набора → изменение промпта или конвейера → прогон оценки → выкатка. Оценочный набор, собранный из реальных отказов, ценнее любого бенчмарка.</p>
+<p><b>Безопасность и приватность:</b> маскирование персональных данных, срок хранения, доступ к логам промптов только у нужных людей.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Что трассировать и какие метрики.</li><li>Связь мониторинга с оценкой качества.</li><li>Приватность логов.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/llm-evaluation/">Как оценивать качество ответов LLM?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-as-judge/">Что такое LLM как судья (LLM-as-a-judge) и какие у этого подхода ловушки?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/agent-design/">Как проектировать LLM-агента и почему агенты ломаются?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/elasticsearch-use/">Для чего Elasticsearch обычно используют в backend-системах?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как наблюдать за LLM-приложением в продакшене?","acceptedAnswer":{"@type":"Answer","text":"Трассировать каждый шаг: промпт и ответ, найденные документы, вызовы инструментов, модель и версию промпта, токены, стоимость, задержку (TTFT и общую). Плюс качество: пользовательская обратная связь, автоматические оценки на выборке трафика, отслеживание дрейфа запросов. Обычные метрики сервиса (ошибки, задержки) тоже нужны, но их мало. Без трассировки агент — чёрный ящик: неясно, на каком шаге он ошибся Стоимость считают по пользователю, фиче и модели — иначе бюджет неуправляем Персональные данные в логах промптов маскируют Инструменты: Langfuse, LangSmith, Phoenix, OpenTelemetry с семантическими соглашениями для GenAI Что собирать: - трассы — дерево шагов запроса: поиск, реранкинг, вызовы модели, инструменты, с входами и выходами; - метрики — задержка (TTFT, полная), токены на входе и выходе, стоимость, доля ошибок и таймаутов провайдера, доля отказов модели; - качество — лайки и дизлайки, повторные вопросы, ручная разметка выборки, автоматические оценки (LLM-as-judge) на сэмплах; - версии — модель, промпт, параметры, конфигурация поиска: без этого регресс нельзя связать с изменением. Цикл улучшения: проблемные трассы из продакшена → пополнение оценочного набора → изменение промпта или конвейера → прогон оценки → выкатка. Оценочный набор, собранный из реальных отказов, ценнее любого бенчмарка. Безопасность и приватность: маскирование персональных данных, срок хранения, доступ к логам промптов только у нужных людей."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

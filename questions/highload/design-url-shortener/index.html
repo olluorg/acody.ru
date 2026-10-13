@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Спроектируйте сервис коротких ссылок. — вопрос с собеседования</title>
+<meta name="description" content="Чтений в 100 раз больше записей: редирект из кэша за миллисекунды, код — base62 от уникального числа (счётчик с выдачей диапазонов или Snowflake)…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/design-url-shortener/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/design-url-shortener/">
+<meta property="og:title" content="Спроектируйте сервис коротких ссылок. — вопрос с собеседования">
+<meta property="og:description" content="Чтений в 100 раз больше записей: редирект из кэша за миллисекунды, код — base62 от уникального числа (счётчик с выдачей диапазонов или Snowflake)…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Спроектируйте сервис коротких ссылок.</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Спроектируйте сервис коротких ссылок."}]}</script>
+  <h1>Спроектируйте сервис коротких ссылок.</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Задачи на проектирование</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как устроен bit.ly или clck.ru?</li><li>Как генерировать короткие уникальные коды для ссылок?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Чтений в 100 раз больше записей: <b>редирект из кэша</b> за миллисекунды, код — <b>base62 от уникального числа</b> (счётчик с выдачей диапазонов или Snowflake), хранилище key-value с шардированием по коду.</p><ul><li>7 символов base62 — 3,5 трлн кодов, на годы вперёд</li><li>Хеш от URL с обрезкой даёт коллизии — нужна проверка; счётчик даёт предсказуемые коды — перемешивать</li><li>301 кэшируется браузером (меньше нагрузки, но не посчитать клики), 302 — каждый клик доходит до нас</li></ul><p class="extra"><span>А ещё</span> Аналитика кликов — асинхронно через очередь, не в пути редиректа</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Требования (уточнить у интервьюера):</b> создать короткую ссылку, редирект по ней, свой алиас, срок жизни, статистика переходов. Нефункциональные: редирект быстрый (&lt; 50 мс) и очень доступный, коды не угадываются подряд, ссылки живут годами.</p>
+<p><b>Оценка:</b> 100 млн новых ссылок в месяц ≈ 40 в секунду (пик ×3 — 120); чтений в 100 раз больше — 4000/с, пик 12 000/с. Запись ~500 байт — 50 ГБ в месяц, ~3 ТБ за 5 лет. Нагрузка умеренная; основная трудность — чтения и доступность.</p>
+<p><b>API:</b></p>
+<ul><li><code>POST /api/links {url, alias?, ttl?}</code> → <code>{code, short_url}</code>;</li><li><code>GET /{code}</code> → <code>302 Location: &lt;url&gt;</code> (или 301);</li><li><code>GET /api/links/{code}/stats</code>.</li></ul>
+<p><b>Генерация кода:</b></p>
+<ul><li><b>base62 от уникального числа</b> — счётчик в базе или распределённый генератор. Чтобы не ходить в общий счётчик на каждую ссылку, сервис берёт <b>диапазон</b> (по 10 000 номеров) и выдаёт из памяти. Чтобы коды не шли подряд (перебор чужих ссылок), число перемешивают обратимой функцией (умножение на нечётную константу по модулю, Feistel);</li><li><b>хеш от URL</b> (MD5/SHA → первые 7 символов base62) — одинаковые URL дают один код (дедупликация), но обрезанный хеш даёт коллизии: при вставке проверять и при конфликте добавлять соль;</li><li><b>случайный код</b> с проверкой уникальности — просто, при заполнении пространства коллизии учащаются. Фильтр Блума ускоряет проверку.</li></ul>
+<p><b>Хранилище:</b> таблица <code>code → url, owner, created, expires</code>. Доступ только по ключу — key-value или PostgreSQL с шардированием по коду (хешем). Реплики для чтения.</p>
+<p><b>Чтение:</b></p>
+<ul><li>кэш (Redis или локальный) <code>code → url</code>: популярные ссылки следуют Ципфу, hit ratio высокий; отрицательное кэширование для несуществующих кодов;</li><li>CDN или edge-функция для самых горячих;</li><li><b>301 или 302</b>: 301 браузер кэширует навсегда — меньше нагрузки, но нельзя поменять цель и посчитать повторные клики; обычно 302.</li></ul>
+<p><b>Статистика</b> — событие клика в Kafka асинхронно (не задерживая редирект), агрегирование в ClickHouse; уникальные — HyperLogLog.</p>
+<p><b>Остальное:</b> проверка URL на фишинг и вредоносность при создании, лимиты создания на пользователя, удаление истёкших (TTL в хранилище или фоновая чистка), защита алиасов от занятых слов.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>ALPHABET = &quot;0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;
+
+def encode(n: int) -&gt; str:
+    s = &quot;&quot;
+    while n:
+        n, r = divmod(n, 62)
+        s = ALPHABET[r] + s
+    return s or &quot;0&quot;
+
+def scramble(n: int) -&gt; int:                      # обратимое перемешивание, чтобы коды не шли подряд
+    return (n * 0x5DEECE66D) % 62**7
+
+encode(scramble(1_000_001))                       # 7 символов, соседние номера дают несвязанные коды</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Уточнение требований и оценка: чтения доминируют.</li><li>Способ генерации кода и его недостатки; выдача диапазонов.</li><li>Хранилище по ключу, шардирование, кэш на чтение.</li><li>301 против 302, асинхронная аналитика.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Хеш от URL с обрезкой без обработки коллизий.</li><li>Писать статистику кликов синхронно в основную базу на каждый редирект.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/design-unique-id/">Как генерировать уникальные идентификаторы в распределённой системе?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/design-view-counter/">Спроектируйте счётчик просмотров для видео с миллионами просмотров в минуту.</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/cache-hit-ratio/">Как оценить, насколько кэш разгружает базу, и что будет, если он упадёт?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/sharding-strategies/">Как выбрать ключ и стратегию шардирования?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/bloom-filter/">Что такое фильтр Блума и где он применяется?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Спроектируйте сервис коротких ссылок.","acceptedAnswer":{"@type":"Answer","text":"Чтений в 100 раз больше записей: редирект из кэша за миллисекунды, код — base62 от уникального числа (счётчик с выдачей диапазонов или Snowflake), хранилище key-value с шардированием по коду. 7 символов base62 — 3,5 трлн кодов, на годы вперёд Хеш от URL с обрезкой даёт коллизии — нужна проверка; счётчик даёт предсказуемые коды — перемешивать 301 кэшируется браузером (меньше нагрузки, но не посчитать клики), 302 — каждый клик доходит до нас Аналитика кликов — асинхронно через очередь, не в пути редиректа Требования (уточнить у интервьюера): создать короткую ссылку, редирект по ней, свой алиас, срок жизни, статистика переходов. Нефункциональные: редирект быстрый (< 50 мс) и очень доступный, коды не угадываются подряд, ссылки живут годами. Оценка: 100 млн новых ссылок в месяц ≈ 40 в секунду (пик ×3 — 120); чтений в 100 раз больше — 4000/с, пик 12 000/с. Запись ~500 байт — 50 ГБ в месяц, ~3 ТБ за 5 лет. Нагрузка умеренная; основная трудность — чтения и доступность. API: - POST /api/links {url, alias?, ttl?} → {code, short_url}; - GET /{code} → 302 Location: <url> (или 301); - GET /api/links/{code}/stats. Генерация кода: - base62 от уникального числа — счётчик в базе или распределённый генератор. Чтобы не ходить в общий счётчик на каждую ссылку, сервис берёт диапазон (по 10 000 номеров) и выдаёт из памяти. Чтобы коды не шли подряд (перебор чужих ссылок), число перемешивают обратимой…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

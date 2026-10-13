@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем синхронная репликация отличается от асинхронной и что выбрать? — вопрос с собеседования</title>
+<meta name="description" content="Синхронная — лидер подтверждает запись, когда реплика её сохранила: потерь при падении лидера нет, но задержка записи растёт, а отказ реплики может…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/sync-async-replication/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/sync-async-replication/">
+<meta property="og:title" content="Чем синхронная репликация отличается от асинхронной и что выбрать? — вопрос с собеседования">
+<meta property="og:description" content="Синхронная — лидер подтверждает запись, когда реплика её сохранила: потерь при падении лидера нет, но задержка записи растёт, а отказ реплики может…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Чем синхронная репликация отличается от асинхронной и что выбрать?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Чем синхронная репликация отличается от асинхронной и что выбрать?"}]}</script>
+  <h1>Чем синхронная репликация отличается от асинхронной и что выбрать?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Репликация</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое полусинхронная репликация?</li><li>Можно ли потерять данные при падении лидера?</li><li>Что такое RPO и RTO?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Синхронная</b> — лидер подтверждает запись, когда реплика её сохранила: потерь при падении лидера нет, но задержка записи растёт, а отказ реплики может остановить запись. <b>Асинхронная</b> — подтверждает сразу: быстро, но последние записи могут потеряться.</p><ul><li>Полусинхронная / кворумная: ждём одну (или K) реплик из нескольких — компромисс</li><li>RPO — сколько данных можно потерять; RTO — сколько можно простоять</li><li>Синхронная реплика в другом дата-центре добавляет сетевую задержку к каждому коммиту</li></ul><p class="extra"><span>А ещё</span> Failover при асинхронной репликации без проверки отставания = потеря подтверждённых записей</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Асинхронная репликация.</b> Лидер фиксирует транзакцию у себя (WAL на диск), отвечает клиенту и отправляет изменения репликам в фоне. Задержка записи минимальна, реплики не влияют на доступность записи. Но если лидер умер безвозвратно, а реплика отставала, записи, подтверждённые клиентам, потеряны. При переключении на такую реплику «сделанные» заказы исчезают, а старый лидер, вернувшись, может их «вспомнить» — конфликт.</p>
+<p><b>Синхронная репликация.</b> Лидер ждёт, пока реплика подтвердит получение (или запись на диск, или даже применение — уровни <code>synchronous_commit</code> в PostgreSQL: <code>remote_write</code>, <code>on</code>, <code>remote_apply</code>). Потерь при отказе одного узла нет — RPO = 0. Цена:</p>
+<ul><li>задержка каждого коммита + RTT до реплики. В пределах дата-центра — доли миллисекунды, между городами — 10+ мс;</li><li>если единственная синхронная реплика недоступна, запись останавливается — доступность записи ниже, чем у одной машины.</li></ul>
+<p><b>Компромиссы:</b></p>
+<ul><li><b>полусинхронная</b> (MySQL semi-sync) — ждём подтверждения, что реплика получила событие, но не применила; при таймауте откатываемся к асинхронной (и в этот момент снова возможны потери);</li><li><b>кворумная</b> — ждём K из N реплик (<code>ANY 1 (r1, r2)</code> в PostgreSQL, <code>min.insync.replicas</code> и <code>acks=all</code> в Kafka). Отказ одной реплики не останавливает запись, а данные на двух узлах;</li><li><b>консенсус</b> (Raft, Paxos) — запись подтверждается большинством, лидер выбирается так, чтобы он гарантированно имел все подтверждённые записи (etcd, CockroachDB, Patroni с синхронным режимом).</li></ul>
+<p><b>RPO и RTO</b> — язык требований: RPO (recovery point objective) — какое окно данных допустимо потерять (0 для платежей, минуты для аналитики), RTO (recovery time objective) — за сколько восстановиться. Синхронная репликация отвечает за RPO, автоматический failover — за RTO.</p>
+<p><b>Практика:</b> синхронная реплика в том же регионе (другой зоне доступности) плюс асинхронные — в другом регионе для катастроф; автоматический failover с проверкой, что новый лидер не потерял подтверждённое (Patroni, Orchestrator).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code># PostgreSQL: коммит ждёт любую одну из двух реплик в соседних зонах
+synchronous_standby_names = &#x27;ANY 1 (replica_az2, replica_az3)&#x27;
+synchronous_commit = on        # реплика записала WAL на диск
+# Kafka: запись подтверждается, когда её получили все синхронные реплики, а их не меньше двух
+acks=all, min.insync.replicas=2, replication.factor=3</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Когда лидер отвечает клиенту в каждом режиме.</li><li>Цена синхронной: задержка и доступность записи; риск асинхронной: потеря данных.</li><li>Полусинхронная и кворумная как компромисс.</li><li>RPO и RTO — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что реплика = бэкап без потерь при асинхронной репликации.</li><li>Делать единственную синхронную реплику в другом регионе.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/consensus-leader-election/">Как в кластере выбирают лидера и что такое split brain?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/replication-models/">Какие бывают схемы репликации и чем они отличаются?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/replication-lag/">Пользователь сохранил изменения, обновил страницу — а изменений нет. Что происходит и как это исправить?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/wal/">Что такое журнал предзаписи (WAL) и зачем он нужен?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем синхронная репликация отличается от асинхронной и что выбрать?","acceptedAnswer":{"@type":"Answer","text":"Синхронная — лидер подтверждает запись, когда реплика её сохранила: потерь при падении лидера нет, но задержка записи растёт, а отказ реплики может остановить запись. Асинхронная — подтверждает сразу: быстро, но последние записи могут потеряться. Полусинхронная / кворумная: ждём одну (или K) реплик из нескольких — компромисс RPO — сколько данных можно потерять; RTO — сколько можно простоять Синхронная реплика в другом дата-центре добавляет сетевую задержку к каждому коммиту Failover при асинхронной репликации без проверки отставания = потеря подтверждённых записей Асинхронная репликация. Лидер фиксирует транзакцию у себя (WAL на диск), отвечает клиенту и отправляет изменения репликам в фоне. Задержка записи минимальна, реплики не влияют на доступность записи. Но если лидер умер безвозвратно, а реплика отставала, записи, подтверждённые клиентам, потеряны. При переключении на такую реплику «сделанные» заказы исчезают, а старый лидер, вернувшись, может их «вспомнить» — конфликт. Синхронная репликация. Лидер ждёт, пока реплика подтвердит получение (или запись на диск, или даже применение — уровни synchronous_commit в PostgreSQL: remote_write, on, remote_apply). Потерь при отказе одного узла нет — RPO = 0. Цена: - задержка каждого коммита + RTT до реплики. В пределах дата-центра — доли миллисекунды, между городами — 10+ мс; - если единственная синхронная реплика недоступна, запись останавливается — доступность записи ниже, чем у одной машины…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

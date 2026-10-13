@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как выбрать сборщик мусора: Parallel, G1 или ZGC? — вопрос с собеседования</title>
+<meta name="description" content="Ось выбора — пропускная способность против задержки. Parallel — максимум throughput, паузы растут с кучей: батчи. G1 (по умолчанию с JDK 9) — баланс…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/choose-gc/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/choose-gc/">
+<meta property="og:title" content="Как выбрать сборщик мусора: Parallel, G1 или ZGC? — вопрос с собеседования">
+<meta property="og:description" content="Ось выбора — пропускная способность против задержки. Parallel — максимум throughput, паузы растут с кучей: батчи. G1 (по умолчанию с JDK 9) — баланс…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Как выбрать сборщик мусора: Parallel, G1 или ZGC?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Как выбрать сборщик мусора: Parallel, G1 или ZGC?"}]}</script>
+  <h1>Как выбрать сборщик мусора: Parallel, G1 или ZGC?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">JVM и сборка мусора</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Сервис с кучей 16 ГБ должен держать задержку в десятках миллисекунд. Какой сборщик выбрать?</li><li>Сервис с кучей в 16 ГБ должен держать задержку ответа в пределах десятков миллисекунд. Какой сборщик выберешь и почему?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Ось выбора — <b>пропускная способность против задержки</b>. <b>Parallel</b> — максимум throughput, паузы растут с кучей: батчи. <b>G1</b> (по умолчанию с JDK 9) — баланс с целевой паузой MaxGCPauseMillis. <b>ZGC</b> (или Shenandoah) — паузы под миллисекунду почти независимо от размера кучи ценой CPU.</p><ul><li>16 ГБ и SLA в десятки мс — ZGC; на JDK 21+ поколенческий</li><li>Маленькая куча и 1–2 CPU — JVM сама выберет Serial</li><li>Выбор подтверждают нагрузочным тестом по перцентилям пауз, а не среднему</li></ul><p class="extra"><span>А ещё</span> Сборщик не лечит высокий темп аллокаций и утечки</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><div class="table"><table><thead><tr><th></th><th>Parallel</th><th>G1</th><th>ZGC</th></tr></thead><tbody><tr><td>цель</td><td>throughput</td><td>баланс</td><td>минимальные паузы</td></tr><tr><td>паузы</td><td>сотни мс — секунды, растут с кучей</td><td>десятки — сотни мс, цель задаётся</td><td>&lt; 1 мс</td></tr><tr><td>плата</td><td>длинные паузы</td><td>средняя</td><td>~10–15% CPU, больше памяти</td></tr><tr><td>где</td><td>батчи, аналитика</td><td>большинство сервисов</td><td>low-latency, большие кучи</td></tr></tbody></table></div>
+<p><b>Parallel</b> собирает всё в паузе, но многими потоками — максимальная доля времени на полезную работу.</p>
+<p><b>G1</b> делит кучу на регионы, собирает в первую очередь самые «мусорные» (отсюда Garbage First) и подбирает объём работы под цель <code>-XX:MaxGCPauseMillis</code> (по умолчанию 200 мс). Маркировка старого поколения конкурентная, эвакуация — в паузе.</p>
+<p><b>ZGC</b> выполняет и маркировку, и перемещение конкурентно, опираясь на барьеры чтения и цветные указатели. Остановки — только короткие служебные этапы. С JDK 21 есть поколенческий режим (с JDK 23 — по умолчанию), который заметно снижает накладные расходы. Shenandoah — похожий подход от Red Hat.</p>
+<p><b>Порядок решения:</b> сформулировать SLA (p99 паузы), измерить на текущем сборщике, попробовать альтернативу под той же нагрузкой, сравнить и паузы, и потребление CPU.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Компромисс throughput и latency.</li><li>Свойства каждого сборщика.</li><li>Выбор под конкретный SLA и подтверждение измерениями.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«ZGC всегда лучше» — без учёта цены по CPU.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Parallel — максимум throughput при терпимых паузах (батч/аналитика); G1 (дефолт) — баланс и предсказуемые паузы; ZGC — суб-мс паузы на больших кучах при жёстких SLA на задержки</li><li class="no"><span class="mark">✗</span>ZGC всегда лучше — и максимальный throughput, и минимальные паузы сразу</li><li class="no"><span class="mark">✗</span>Serial — для продакшена, остальные только для тестов</li><li class="no"><span class="mark">✗</span>CMS — современный дефолт для низколатентных сервисов</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что значит garbage-first в G1?</li><li>За счёт чего ZGC держит паузы суб-мс?</li><li>Что такое safepoint и почему пауза может затянуться из-за него?</li><li>В каком случае Parallel окажется лучшим выбором?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/gc-algorithms/">GC: алгоритмы и сборщики</a><p>Mark-sweep-compact и копирование, stop-the-world и safepoints, конкурентная маркировка, G1 и ZGC и выбор по throughput/latency.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/stop-the-world/">Что означает пауза stop-the-world при сборке мусора?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/stop-the-world-safepoint/">Что такое stop-the-world и safepoint в работе GC?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/gc-write-barriers/">Зачем при конкурентной маркировке сборщику нужны барьеры записи?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/gc-latency-diagnosis/">В проде выросли задержки, подозрение на GC. Опиши порядок диагностики — от сбора данных до вывода.</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как выбрать сборщик мусора: Parallel, G1 или ZGC?","acceptedAnswer":{"@type":"Answer","text":"Ось выбора — пропускная способность против задержки. Parallel — максимум throughput, паузы растут с кучей: батчи. G1 (по умолчанию с JDK 9) — баланс с целевой паузой MaxGCPauseMillis. ZGC (или Shenandoah) — паузы под миллисекунду почти независимо от размера кучи ценой CPU. 16 ГБ и SLA в десятки мс — ZGC; на JDK 21+ поколенческий Маленькая куча и 1–2 CPU — JVM сама выберет Serial Выбор подтверждают нагрузочным тестом по перцентилям пауз, а не среднему Сборщик не лечит высокий темп аллокаций и утечки | | Parallel | G1 | ZGC | | --- | --- | --- | --- | | цель | throughput | баланс | минимальные паузы | | паузы | сотни мс — секунды, растут с кучей | десятки — сотни мс, цель задаётся | < 1 мс | | плата | длинные паузы | средняя | ~10–15% CPU, больше памяти | | где | батчи, аналитика | большинство сервисов | low-latency, большие кучи | Parallel собирает всё в паузе, но многими потоками — максимальная доля времени на полезную работу. G1 делит кучу на регионы, собирает в первую очередь самые «мусорные» (отсюда Garbage First) и подбирает объём работы под цель -XX:MaxGCPauseMillis (по умолчанию 200 мс). Маркировка старого поколения конкурентная, эвакуация — в паузе. ZGC выполняет и маркировку, и перемещение конкурентно, опираясь на барьеры чтения и цветные указатели. Остановки — только короткие служебные этапы. С JDK 21 есть поколенческий режим (с JDK 23 — по умолчанию), который заметно…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

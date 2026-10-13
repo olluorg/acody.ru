@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как в компьютере хранятся отрицательные целые числа? — вопрос с собеседования</title>
+<meta name="description" content="Почти везде — дополнительный код (two&#x27;s complement): старший бит отрицательный, его вес −2ⁿ⁻¹. −x = инвертировать все биты и прибавить 1 Сложение…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/twos-complement/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/twos-complement/">
+<meta property="og:title" content="Как в компьютере хранятся отрицательные целые числа? — вопрос с собеседования">
+<meta property="og:description" content="Почти везде — дополнительный код (two&#x27;s complement): старший бит отрицательный, его вес −2ⁿ⁻¹. −x = инвертировать все биты и прибавить 1 Сложение…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Как в компьютере хранятся отрицательные целые числа?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Как в компьютере хранятся отрицательные целые числа?"}]}</script>
+  <h1>Как в компьютере хранятся отрицательные целые числа?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Числа в компьютере</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое дополнительный код?</li><li>Почему диапазон byte от -128 до 127, а не до 128?</li><li>Как получить -x из x на уровне битов?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Почти везде — <b>дополнительный код</b> (two's complement): старший бит отрицательный, его вес −2ⁿ⁻¹.</p><ul><li>−x = инвертировать все биты и прибавить 1</li><li>Сложение одинаковое для знаковых и беззнаковых — процессору не нужна отдельная схема</li><li>Диапазон n бит: от −2ⁿ⁻¹ до 2ⁿ⁻¹−1, у byte — от −128 до 127, ноль один</li></ul><p class="extra"><span>А ещё</span> Отрицательных на одно больше, поэтому abs(MIN_VALUE) = MIN_VALUE</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Число изнутри: дополнительный код и плавающая точка</p><script type="module" src="/widgets/number-bits.js"></script><sotto-number-bits theme="dark"></sotto-number-bits></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Целое число в n битах — просто n нулей и единиц. Вопрос в том, как договориться о знаке. Исторически было три способа:</p>
+<ul><li><b>прямой код</b> — старший бит знак, остальные модуль. Два нуля (+0 и −0) и сложение требует отдельной логики для знаков;</li><li><b>обратный код</b> — отрицательное число получается инверсией битов. Тоже два нуля;</li><li><b>дополнительный код</b> — старшему биту приписывается вес −2ⁿ⁻¹, остальные как обычно. Ноль один, а сложение и вычитание работают теми же схемами, что и для беззнаковых чисел: результат просто берётся по модулю 2ⁿ.</li></ul>
+<p>Поэтому все современные процессоры используют дополнительный код, а Java, C# и Go закрепляют его в спецификации (в C++ — с C++20).</p>
+<p><b>Как получить −x:</b> инвертировать все биты и прибавить единицу. Для 8 бит: 5 = <code>0000 0101</code>, инверсия <code>1111 1010</code>, плюс 1 — <code>1111 1011</code> = −5. Проверка: −128 + 64 + 32 + 16 + 8 + 2 + 1 = −5.</p>
+<p><b>Асимметрия диапазона.</b> Битовых комбинаций 2ⁿ, одна занята нулём, поэтому отрицательных на одно больше: в byte от −128 до 127. Отсюда ловушка: <code>Math.abs(Integer.MIN_VALUE)</code> возвращает отрицательное число, потому что +2³¹ не помещается в int.</p>
+<p><b>Расширение знака.</b> При переводе в больший тип старший бит копируется влево: −5 в 16 битах — <code>1111 1111 1111 1011</code>. Поэтому в Java <code>(int) b</code> для byte −1 даёт −1, а не 255; беззнаковое значение получают маской <code>b &amp; 0xFF</code>.</p>
+<p>Сдвиги тоже различаются: <code>&gt;&gt;</code> в Java сохраняет знак (арифметический сдвиг), <code>&gt;&gt;&gt;</code> заполняет нулями (логический).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>def to_bits(x, n=8):
+    return format(x &amp; (1 &lt;&lt; n) - 1, f&quot;0{n}b&quot;)   # маска: младшие n бит
+
+to_bits(5)    # &#x27;00000101&#x27;
+to_bits(-5)   # &#x27;11111011&#x27;  = инверсия 5 и +1
+to_bits(-128) # &#x27;10000000&#x27;</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Название — дополнительный код — и правило «инвертировать и прибавить 1».</li><li>Почему он победил: один ноль и общая схема сложения.</li><li>Диапазон и асимметрия, abs(MIN_VALUE).</li><li>Расширение знака и беззнаковое чтение через маску — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Говорить, что старший бит «просто знак», а остальные — модуль.</li><li>Думать, что −x получается только инверсией битов, без +1.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/integer-overflow/">Что происходит при переполнении целого числа?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/bitwise-ops/">Какие битовые операции вы знаете и где они применяются?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/floating-point/">Почему 0.1 + 0.2 не равно 0.3?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как в компьютере хранятся отрицательные целые числа?","acceptedAnswer":{"@type":"Answer","text":"Почти везде — дополнительный код (two's complement): старший бит отрицательный, его вес −2ⁿ⁻¹. −x = инвертировать все биты и прибавить 1 Сложение одинаковое для знаковых и беззнаковых — процессору не нужна отдельная схема Диапазон n бит: от −2ⁿ⁻¹ до 2ⁿ⁻¹−1, у byte — от −128 до 127, ноль один Отрицательных на одно больше, поэтому abs(MIN_VALUE) = MIN_VALUE Целое число в n битах — просто n нулей и единиц. Вопрос в том, как договориться о знаке. Исторически было три способа: - прямой код — старший бит знак, остальные модуль. Два нуля (+0 и −0) и сложение требует отдельной логики для знаков; - обратный код — отрицательное число получается инверсией битов. Тоже два нуля; - дополнительный код — старшему биту приписывается вес −2ⁿ⁻¹, остальные как обычно. Ноль один, а сложение и вычитание работают теми же схемами, что и для беззнаковых чисел: результат просто берётся по модулю 2ⁿ. Поэтому все современные процессоры используют дополнительный код, а Java, C# и Go закрепляют его в спецификации (в C++ — с C++20). Как получить −x: инвертировать все биты и прибавить единицу. Для 8 бит: 5 = 0000 0101, инверсия 1111 1010, плюс 1 — 1111 1011 = −5. Проверка: −128 + 64 + 32 + 16 + 8 + 2 + 1 = −5. Асимметрия диапазона. Битовых комбинаций 2ⁿ, одна занята…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

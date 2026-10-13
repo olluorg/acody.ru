@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>final, static и порядок инициализации — разбор для собеседования</title>
+<meta name="description" content="Семантика final (и почему это не immutable), static-члены, порядок инициализации класса и объекта, константы и ловушки.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/initialization/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/initialization/">
+<meta property="og:title" content="final, static и порядок инициализации — разбор для собеседования">
+<meta property="og:description" content="Семантика final (и почему это не immutable), static-члены, порядок инициализации класса и объекта, константы и ловушки.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>final, static и порядок инициализации</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"final, static и порядок инициализации"}]}</script>
+  <h1>final, static и порядок инициализации</h1>
+  <p class="lead">Семантика final (и почему это не immutable), static-члены, порядок инициализации класса и объекта, константы и ловушки.</p>
+  <article class="md"><h2>final</h2>
+<p>final у переменной запрещает переприсваивание (для поля — это blank final, которое надо инициализировать ровно один раз в объявлении или конструкторе), у метода запрещает переопределение, у класса — наследование.</p>
+<p>Важно: final ≠ immutable. <code>final List&lt;String&gt;</code> нельзя переприсвоить, но сам список можно менять. Неизменяемость объекта — это отдельное свойство, обеспечиваемое инкапсуляцией.</p>
+<h2>Безопасная публикация и final-поля</h2>
+<p>Публикация объекта — это передача ссылки на него туда, где его увидит другой код или поток: запись в общее поле, добавление в коллекцию, возврат из метода. В многопоточной программе тут есть тонкость: из-за кэшей процессора и переупорядочивания записей другой поток может увидеть ССЫЛКУ на объект раньше, чем ему станут видны записи полей этого объекта в конструкторе. Тогда он наблюдает «полупостроенный» объект с полями по умолчанию (null/0) — это и есть небезопасная публикация.</p>
+<p>Для final-полей JMM даёт специальную гарантию (final field freeze): значения final-полей, записанные в конструкторе, гарантированно видны любому потоку, который получит ссылку на полностью построенный объект, — без всякой синхронизации. Поэтому неизменяемый объект (все поля final, и ссылка this не утекла наружу из конструктора) можно безопасно публиковать и делить между потоками просто так. Это и есть фундамент тезиса «immutable-объекты потокобезопасны».</p>
+<p>Для НЕ-final полей такой гарантии нет: их безопасно публикуют через volatile-поле, запись под synchronized, потокобезопасную коллекцию или иное happens-before-ребро. Подробно про happens-before и видимость — в уроке «Java Memory Model».</p>
+<h2>static</h2>
+<p>static-члены принадлежат классу, а не экземпляру: одно поле на все объекты, метод вызывается без экземпляра. static-блок выполняется при инициализации класса.</p>
+<p>Оправданное применение — утилиты без состояния и константы. Изменяемое static-поле — это глобальное изменяемое состояние со всеми его бедами (гонки, скрытые связи, сложность тестирования), поэтому его избегают.</p>
+<h2>Порядок инициализации</h2>
+<p>При первой активной загрузке класса один раз выполняются static-поля и static-блоки — в порядке их объявления в коде.</p>
+<p>При создании объекта порядок такой: сначала отрабатывает конструктор суперкласса (<code>super(...)</code>), затем инициализаторы полей и instance-блоки в порядке объявления, и только потом — тело конструктора. Понимание этого порядка объясняет многие тонкие баги инициализации.</p>
+<pre class="lang-java"><code>class A {
+    static int s = init(&quot;static A&quot;);   // 1) при загрузке класса
+    int i = init(&quot;field A&quot;);            // 3) при new, после super
+    A() { log(&quot;ctor A&quot;); }              // 4) тело конструктора
+}</code></pre>
+<h2>Константы времени компиляции</h2>
+<p>static final поле примитивного типа или String, инициализированное константным выражением, — это compile-time constant: компилятор подставляет его ЗНАЧЕНИЕ прямо в место использования (inlining).</p>
+<p>Практическое следствие: если изменить такую константу в библиотеке, но не перекомпилировать клиентов, они продолжат использовать старое зашитое значение. Это нюанс версионирования API, о котором забывают.</p>
+<h2>Ловушки инициализации</h2>
+<p>Вызов переопределяемого метода из конструктора опасен: к моменту вызова поля подкласса ещё не инициализированы (конструктор подкласса не дошёл до своего тела), и метод увидит значения по умолчанию (null/0).</p>
+<p>Другие грабли: циклические зависимости при инициализации классов (forward reference к ещё не готовому static) и публикация this из конструктора (передача недостроенного объекта наружу/в другой поток).</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Различите final для переменной/метода/класса и подчеркните final ≠ immutable (+ safe publication). Точно изложите порядок инициализации (static один раз при загрузке; для объекта: super → поля/блоки → конструктор), назовите инлайнинг compile-time констант и ловушку вызова переопределяемого метода из конструктора.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/final-reference/">Что означает final для переменной-ссылки?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/final-modifier/">Что верно про модификатор final в Java?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/initialization-order/">В каком порядке выполняется инициализация при создании объекта подкласса?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/compile-time-constant-inlining/">Библиотека объявляет public static final String VERSION = &quot;1.0&quot;. В новой версии значение изменили на &quot;2.0&quot; и заменили только jar библиотеки. Что увидит уже скомпилированное приложение?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/jmm/">Java Memory Model: happens-before и volatile</a><p>Зачем нужна модель памяти, видимость и переупорядочивание, отношение happens-before, семантика volatile и final, гонки данных.</p></li><li><a href="/articles/java/oop/">ООП и его принципы</a><p>Инкапсуляция, наследование, полиморфизм, абстракция — зачем они нужны, как работают внутри и почему композицию предпочитают наследованию.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"final, static и порядок инициализации","description":"Семантика final (и почему это не immutable), static-члены, порядок инициализации класса и объекта, константы и ловушки.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/initialization/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

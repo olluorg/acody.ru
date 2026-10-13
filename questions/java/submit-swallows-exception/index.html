@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Задача, отправленная в пул через submit(), бросает RuntimeException, но в логах ничего нет. Почему? — вопрос с собеседования</title>
+<meta name="description" content="submit() прячет исключение в Future: оно появится только при get() в ExecutionException. Если результат никто не запрашивает — ошибка исчезает…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/submit-swallows-exception/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/submit-swallows-exception/">
+<meta property="og:title" content="Задача, отправленная в пул через submit(), бросает RuntimeException, но в логах ничего нет. Почему? — вопрос с собеседования">
+<meta property="og:description" content="submit() прячет исключение в Future: оно появится только при get() в ExecutionException. Если результат никто не запрашивает — ошибка исчезает…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Задача, отправленная в пул через submit(), бросает RuntimeException, но в логах ничего нет. Почему?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Задача, отправленная в пул через submit(), бросает RuntimeException, но в логах ничего нет. Почему?"}]}</script>
+  <h1>Задача, отправленная в пул через submit(), бросает RuntimeException, но в логах ничего нет. Почему?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Многопоточность</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>submit() прячет исключение в Future</b>: оно появится только при <code>get()</code> в ExecutionException. Если результат никто не запрашивает — ошибка исчезает бесследно. <b>execute()</b> пропускает исключение до UncaughtExceptionHandler, и оно попадает в лог.</p><ul><li>Fire-and-forget задачи — execute или try/catch с логированием внутри</li><li>Можно переопределить afterExecute у ThreadPoolExecutor</li><li>CompletableFuture — то же: ошибку нужно обработать в exceptionally или whenComplete</li></ul><p class="extra"><span>А ещё</span> Классическая причина «тихо пропавших» задач</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Это классическая причина «тихо пропавших» задач. Разница принципиальная: execute(Runnable) даёт исключению дойти до обработчика непойманных исключений потока, а submit() оборачивает задачу в FutureTask и складывает исключение внутрь — если результат никто не запрашивает, ошибка исчезает бесследно. Отсюда практика: либо всегда обрабатывать результат Future, либо ловить исключения внутри самой задачи, либо использовать execute для задач без результата. Для запланированных задач это ещё опаснее: исключение в ScheduledExecutorService отменяет все последующие запуски.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Различие submit и execute.</li><li>Способы не потерять ошибку.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что достаточно настроить UncaughtExceptionHandler — при submit он не сработает.</li><li>Забывать, что упавшая периодическая задача больше не перезапустится.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>submit() заворачивает задачу в Future: исключение сохраняется в нём и всплывает только при вызове get() как ExecutionException</li><li class="no"><span class="mark">✗</span>Пул подавляет все исключения задач по спецификации</li><li class="no"><span class="mark">✗</span>Исключение ушло в UncaughtExceptionHandler, который по умолчанию молчит</li><li class="no"><span class="mark">✗</span>RuntimeException в пуле потоков просто игнорируется, логировать нужно только checked-исключения</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что произойдёт с периодической задачей при исключении?</li><li>Чем в этом смысле удобнее CompletableFuture?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/executors/">Пулы потоков и ExecutorService</a><p>Зачем пул, параметры ThreadPoolExecutor, ловушки фабрик Executors, выбор размера и корректное завершение.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/executors-factories-danger/">Почему фабрики из класса Executors считают опасными в production-коде?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/future/">Что представляет собой объект Future?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/future-vs-completablefuture/">Какое ограничение Future решает CompletableFuture?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Задача, отправленная в пул через submit(), бросает RuntimeException, но в логах ничего нет. Почему?","acceptedAnswer":{"@type":"Answer","text":"submit() прячет исключение в Future: оно появится только при get() в ExecutionException. Если результат никто не запрашивает — ошибка исчезает бесследно. execute() пропускает исключение до UncaughtExceptionHandler, и оно попадает в лог. Fire-and-forget задачи — execute или try/catch с логированием внутри Можно переопределить afterExecute у ThreadPoolExecutor CompletableFuture — то же: ошибку нужно обработать в exceptionally или whenComplete Классическая причина «тихо пропавших» задач Это классическая причина «тихо пропавших» задач. Разница принципиальная: execute(Runnable) даёт исключению дойти до обработчика непойманных исключений потока, а submit() оборачивает задачу в FutureTask и складывает исключение внутрь — если результат никто не запрашивает, ошибка исчезает бесследно. Отсюда практика: либо всегда обрабатывать результат Future, либо ловить исключения внутри самой задачи, либо использовать execute для задач без результата. Для запланированных задач это ещё опаснее: исключение в ScheduledExecutorService отменяет все последующие запуски."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

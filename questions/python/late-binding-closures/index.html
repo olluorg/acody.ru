@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему лямбды, созданные в цикле, возвращают одно и то же значение? — вопрос с собеседования</title>
+<meta name="description" content="Замыкание захватывает переменную, а не её значение: значение читается в момент вызова. К моменту вызова цикл закончился, и все лямбды видят последнее…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/late-binding-closures/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/late-binding-closures/">
+<meta property="og:title" content="Почему лямбды, созданные в цикле, возвращают одно и то же значение? — вопрос с собеседования">
+<meta property="og:description" content="Замыкание захватывает переменную, а не её значение: значение читается в момент вызова. К моменту вызова цикл закончился, и все лямбды видят последнее…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Почему лямбды, созданные в цикле, возвращают одно и то же значение?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Почему лямбды, созданные в цикле, возвращают одно и то же значение?"}]}</script>
+  <h1>Почему лямбды, созданные в цикле, возвращают одно и то же значение?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Функции</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое позднее связывание в замыканиях Python?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Замыкание захватывает <b>переменную, а не её значение</b>: значение читается в момент <b>вызова</b>. К моменту вызова цикл закончился, и все лямбды видят последнее значение <code>i</code>. Исправление — зафиксировать значение: <b>аргумент по умолчанию</b> (<code>lambda i=i: i</code>) или <b>functools.partial</b>.</p><ul><li>[lambda: i for i in range(3)] → все возвращают 2</li><li>Значения по умолчанию вычисляются при определении функции — здесь это и нужно</li><li>Та же проблема с колбэками в цикле (кнопки GUI, обработчики)</li></ul><p class="extra"><span>А ещё</span> Отличие от Java: там лямбда захватывает значение effectively final переменной</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><pre class="lang-python"><code>funcs = [lambda: i for i in range(3)]
+print([f() for f in funcs])        # [2, 2, 2]
+
+funcs = [lambda i=i: i for i in range(3)]
+print([f() for f in funcs])        # [0, 1, 2]
+
+from functools import partial
+funcs = [partial(lambda x: x, i) for i in range(3)]</code></pre>
+<p><b>Почему.</b> Замыкание хранит ссылку на ячейку (cell) переменной внешней области. Все лямбды ссылаются на одну ячейку <code>i</code>; при вызове каждая читает её текущее значение.</p>
+<p>Это связывание по имени — то же правило LEGB, что и для обычных функций. Связь с ловушкой изменяемого аргумента по умолчанию обратная: там «раннее» вычисление по умолчанию мешает, здесь — помогает.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Захват переменной, а не значения.</li><li>Два способа исправить.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/closures/">Что такое замыкание?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/scope-legb/">Как работают области видимости в Python?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/mutable-default-arg/">Почему нельзя использовать изменяемый объект как значение аргумента по умолчанию?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему лямбды, созданные в цикле, возвращают одно и то же значение?","acceptedAnswer":{"@type":"Answer","text":"Замыкание захватывает переменную, а не её значение: значение читается в момент вызова. К моменту вызова цикл закончился, и все лямбды видят последнее значение i. Исправление — зафиксировать значение: аргумент по умолчанию (lambda i=i: i) или functools.partial. [lambda: i for i in range(3)] → все возвращают 2 Значения по умолчанию вычисляются при определении функции — здесь это и нужно Та же проблема с колбэками в цикле (кнопки GUI, обработчики) Отличие от Java: там лямбда захватывает значение effectively final переменной Почему. Замыкание хранит ссылку на ячейку (cell) переменной внешней области. Все лямбды ссылаются на одну ячейку i; при вызове каждая читает её текущее значение. Это связывание по имени — то же правило LEGB, что и для обычных функций. Связь с ловушкой изменяемого аргумента по умолчанию обратная: там «раннее» вычисление по умолчанию мешает, здесь — помогает."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

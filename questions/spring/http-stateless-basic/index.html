@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему HTTP называют протоколом без состояния (stateless)? — вопрос с собеседования</title>
+<meta name="description" content="Каждый запрос HTTP независим: сервер не помнит предыдущие. Чтобы связать запросы одного пользователя, нужен явный механизм — cookie с идентификатором…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/http-stateless-basic/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/http-stateless-basic/">
+<meta property="og:title" content="Почему HTTP называют протоколом без состояния (stateless)? — вопрос с собеседования">
+<meta property="og:description" content="Каждый запрос HTTP независим: сервер не помнит предыдущие. Чтобы связать запросы одного пользователя, нужен явный механизм — cookie с идентификатором…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Почему HTTP называют протоколом без состояния (stateless)?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Почему HTTP называют протоколом без состояния (stateless)?"}]}</script>
+  <h1>Почему HTTP называют протоколом без состояния (stateless)?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">HTTP, cookies и сессии</span><span class="chip">Spring</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему серверу нужны cookie?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Каждый запрос HTTP <b>независим</b>: сервер не помнит предыдущие. Чтобы связать запросы одного пользователя, нужен явный механизм — <b>cookie с идентификатором сессии</b> или <b>токен</b>.</p><ul><li>Сессия: данные на сервере, в cookie — только id</li><li>Токен: данные подписаны и лежат у клиента</li><li>Stateless упрощает масштабирование серверов</li></ul><p class="extra"><span>А ещё</span> Keep-alive переиспользует соединение, но состояние не добавляет</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Отсутствие состояния относится к протоколу, а не к приложению: данные сервер, конечно, хранит, но не обязан помнить контекст предыдущего обращения. Именно поэтому появились cookie: браузер прикладывает их автоматически, и сервер узнаёт пользователя. Отсюда же берётся уязвимость к CSRF — раз cookie отправляется автоматически, чужой сайт может спровоцировать запрос от имени пользователя. Постоянное соединение (keep-alive) существует, но к состоянию отношения не имеет — это оптимизация транспорта.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Смысл stateless.</li><li>Механизмы связывания запросов.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Путать отсутствие состояния в протоколе с отсутствием данных на сервере.</li><li>Считать, что каждый запрос обязательно открывает новое соединение.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Сервер не обязан помнить предыдущие запросы: каждый запрос самодостаточен, а связь между ними обеспечивают cookie или токены</li><li class="no"><span class="mark">✗</span>Потому что сервер не хранит никаких данных вообще</li><li class="no"><span class="mark">✗</span>Потому что соединение закрывается после каждого запроса</li><li class="no"><span class="mark">✗</span>Потому что запросы нельзя отправлять параллельно</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем cookie отличается от серверной сессии?</li><li>Почему сессионная модель уязвима к CSRF?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/http-security/">HTTP, cookies и сессии</a><p>Семантика HTTP-методов и кэширование, cookies и их флаги безопасности, stateful против stateless сессий, HTTPS и граница authn/authz.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/cookie-vs-session/">Чем cookie отличается от server-side session?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему HTTP называют протоколом без состояния (stateless)?","acceptedAnswer":{"@type":"Answer","text":"Каждый запрос HTTP независим: сервер не помнит предыдущие. Чтобы связать запросы одного пользователя, нужен явный механизм — cookie с идентификатором сессии или токен. Сессия: данные на сервере, в cookie — только id Токен: данные подписаны и лежат у клиента Stateless упрощает масштабирование серверов Keep-alive переиспользует соединение, но состояние не добавляет Отсутствие состояния относится к протоколу, а не к приложению: данные сервер, конечно, хранит, но не обязан помнить контекст предыдущего обращения. Именно поэтому появились cookie: браузер прикладывает их автоматически, и сервер узнаёт пользователя. Отсюда же берётся уязвимость к CSRF — раз cookie отправляется автоматически, чужой сайт может спровоцировать запрос от имени пользователя. Постоянное соединение (keep-alive) существует, но к состоянию отношения не имеет — это оптимизация транспорта."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

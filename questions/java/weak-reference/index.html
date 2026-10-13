@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем слабая ссылка (WeakReference) отличается от обычной? — вопрос с собеседования</title>
+<meta name="description" content="Слабая ссылка позволяет обратиться к объекту, но не удерживает его от сборки: если обычных ссылок нет, объект соберут. get() может вернуть null в…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/weak-reference/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/weak-reference/">
+<meta property="og:title" content="Чем слабая ссылка (WeakReference) отличается от обычной? — вопрос с собеседования">
+<meta property="og:description" content="Слабая ссылка позволяет обратиться к объекту, но не удерживает его от сборки: если обычных ссылок нет, объект соберут. get() может вернуть null в…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Чем слабая ссылка (WeakReference) отличается от обычной?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Чем слабая ссылка (WeakReference) отличается от обычной?"}]}</script>
+  <h1>Чем слабая ссылка (WeakReference) отличается от обычной?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">JVM и сборка мусора</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Какие типы ссылок есть в Java?</li><li>Что такое WeakHashMap?</li><li>Чем SoftReference отличается от WeakReference?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Слабая ссылка позволяет обратиться к объекту, но <b>не удерживает его от сборки</b>: если обычных ссылок нет, объект соберут.</p><ul><li>get() может вернуть null в любой момент — результат проверяют</li><li>WeakHashMap — запись исчезает, когда ключ больше никому не нужен</li></ul><p class="extra"><span>А ещё</span> Ещё есть Soft (держится до нехватки памяти) и Phantom (для действий после сборки)</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Обычная (сильная) ссылка удерживает объект: пока она достижима, объект живёт. Пакет <code>java.lang.ref</code> даёт более слабые ссылки:</p>
+<ul><li><b>WeakReference</b> — не мешает сборке: если на объект остались только слабые ссылки, при ближайшей сборке он будет удалён, а <code>get()</code> вернёт <code>null</code>;</li><li><b>SoftReference</b> — сборщик удаляет такие объекты, только когда памяти не хватает. Исторически их использовали для кэшей, но поведение плохо предсказуемо — для кэша лучше библиотека с явными лимитами;</li><li><b>PhantomReference</b> — объект уже недоступен, ссылка нужна, чтобы узнать о его сборке и освободить связанные ресурсы (<code>Cleaner</code>).</li></ul>
+<p>Где пригодится слабая ссылка: хранить дополнительные данные об объекте, не продлевая ему жизнь. <code>WeakHashMap</code> держит ключи слабо: когда объект- ключ больше никому не нужен, запись исчезает сама.</p>
+<p>Правило работы: значение <code>get()</code> может стать <code>null</code> в любой момент, поэтому его сохраняют в локальную переменную и проверяют.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>WeakReference&lt;byte[]&gt; ref = new WeakReference&lt;&gt;(new byte[1_000_000]);
+byte[] data = ref.get();   // может быть null
+if (data != null) {
+    use(data);
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>WeakReference не удерживает объект.</li><li>Обязательная проверка на null.</li><li>Пример применения — WeakHashMap.</li><li>Soft и Phantom ссылки — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Использовать полученное значение без проверки на отсутствие.</li><li>Считать мягкие ссылки надёжным механизмом кэширования.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Она не удерживает объект от сборки: если других, обычных ссылок нет, объект будет собран</li><li class="no"><span class="mark">✗</span>Она указывает на копию объекта, а не на оригинал</li><li class="no"><span class="mark">✗</span>Она автоматически восстанавливает объект после сборки</li><li class="no"><span class="mark">✗</span>Она работает только с объектами вне кучи</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем мягкая ссылка отличается от слабой по моменту очистки?</li><li>Зачем нужны фантомные ссылки?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/gc-references/">GC: корни, достижимость и типы ссылок</a><p>GC roots и reachability, strong/soft/weak/phantom-ссылки, Cleaner вместо finalize и утечки через сильные ссылки.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/finalize-cleaner/">Почему finalize() признан неудачным механизмом и что использовать вместо него?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/gc-roots/">Что относится к GC roots — корням достижимости?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/reference-types/">Что верно про типы ссылок в Java?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/gc-reachability/">Какие объекты удаляет сборщик мусора?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем слабая ссылка (WeakReference) отличается от обычной?","acceptedAnswer":{"@type":"Answer","text":"Слабая ссылка позволяет обратиться к объекту, но не удерживает его от сборки: если обычных ссылок нет, объект соберут. get() может вернуть null в любой момент — результат проверяют WeakHashMap — запись исчезает, когда ключ больше никому не нужен Ещё есть Soft (держится до нехватки памяти) и Phantom (для действий после сборки) Обычная (сильная) ссылка удерживает объект: пока она достижима, объект живёт. Пакет java.lang.ref даёт более слабые ссылки: - WeakReference — не мешает сборке: если на объект остались только слабые ссылки, при ближайшей сборке он будет удалён, а get() вернёт null; - SoftReference — сборщик удаляет такие объекты, только когда памяти не хватает. Исторически их использовали для кэшей, но поведение плохо предсказуемо — для кэша лучше библиотека с явными лимитами; - PhantomReference — объект уже недоступен, ссылка нужна, чтобы узнать о его сборке и освободить связанные ресурсы (Cleaner). Где пригодится слабая ссылка: хранить дополнительные данные об объекте, не продлевая ему жизнь. WeakHashMap держит ключи слабо: когда объект- ключ больше никому не нужен, запись исчезает сама. Правило работы: значение get() может стать null в любой момент, поэтому его сохраняют в локальную переменную и…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

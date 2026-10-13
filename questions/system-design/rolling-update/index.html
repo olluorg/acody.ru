@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое rolling update при выкатке новой версии? — вопрос с собеседования</title>
+<meta name="description" content="Экземпляры заменяются постепенно: поднимается новый, проходит readiness, старый снимается. Сервис отвечает всё время. Поведение по умолчанию в…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/rolling-update/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/rolling-update/">
+<meta property="og:title" content="Что такое rolling update при выкатке новой версии? — вопрос с собеседования">
+<meta property="og:description" content="Экземпляры заменяются постепенно: поднимается новый, проходит readiness, старый снимается. Сервис отвечает всё время. Поведение по умолчанию в…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Что такое rolling update при выкатке новой версии?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Что такое rolling update при выкатке новой версии?"}]}</script>
+  <h1>Что такое rolling update при выкатке новой версии?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Выкатка и миграции</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как работает rolling update в Kubernetes?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Экземпляры заменяются <b>постепенно</b>: поднимается новый, проходит readiness, старый снимается. Сервис отвечает всё время.</p><ul><li>Поведение по умолчанию в Kubernetes: maxSurge и maxUnavailable</li><li>Во время выкатки работают <b>обе версии</b> — нужна совместимость API и схемы</li><li>Нужны readiness-проба и корректное завершение старых экземпляров</li></ul><p class="extra"><span>А ещё</span> Blue-green — переключение комплекта целиком, canary — доля трафика с анализом метрик</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Это поведение по умолчанию в оркестраторах: дёшево по ресурсам и без простоя. Главное следствие, о котором часто забывают: во время выкатки в бою одновременно работают старая и новая версии, поэтому они обязаны быть совместимы и по API, и по схеме данных. Полное переключение целого комплекта — это blue-green, а раскатка на малую долю трафика с наблюдением за метриками — canary.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механика постепенной замены.</li><li>Сосуществование версий и требование совместимости.</li><li>Отличие от blue-green и canary.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Забывать о совместимости соседних версий во время выкатки.</li><li>Путать три стратегии между собой.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Постепенная замена экземпляров по одному или небольшими группами, без остановки обслуживания</li><li class="no"><span class="mark">✗</span>Одновременная остановка всех экземпляров и запуск новой версии</li><li class="no"><span class="mark">✗</span>Запуск полной копии окружения рядом с боевым и мгновенное переключение трафика</li><li class="no"><span class="mark">✗</span>Направление небольшой доли трафика на новую версию для сравнения метрик</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как выкатить изменение схемы базы без простоя?</li><li>Чем canary отличается по радиусу поражения?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/delivery/">Выкатка без простоя и миграции схемы</a><p>Rolling, blue-green и canary с их ценой, отделение деплоя от релиза через feature flags, expand–contract для схемы БД, совместимость соседних версий и стратегия отката.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/rolling-update-compatibility/">Во время rolling update в проде одновременно работают старая и новая версии сервиса. Какое требование из этого следует?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/canary-vs-blue-green/">Чем canary-выкатка принципиально отличается от blue-green?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/signals-shutdown/">Чем SIGTERM отличается от SIGKILL и как правильно завершать сервис?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/health-checks/">Как балансировщик понимает, что экземпляр сервиса нездоров?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое rolling update при выкатке новой версии?","acceptedAnswer":{"@type":"Answer","text":"Экземпляры заменяются постепенно: поднимается новый, проходит readiness, старый снимается. Сервис отвечает всё время. Поведение по умолчанию в Kubernetes: maxSurge и maxUnavailable Во время выкатки работают обе версии — нужна совместимость API и схемы Нужны readiness-проба и корректное завершение старых экземпляров Blue-green — переключение комплекта целиком, canary — доля трафика с анализом метрик Это поведение по умолчанию в оркестраторах: дёшево по ресурсам и без простоя. Главное следствие, о котором часто забывают: во время выкатки в бою одновременно работают старая и новая версии, поэтому они обязаны быть совместимы и по API, и по схеме данных. Полное переключение целого комплекта — это blue-green, а раскатка на малую долю трафика с наблюдением за метриками — canary."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как гарантировать, что изменение вашего API не сломает потребителей, которых вы не контролируете? — вопрос с собеседования</title>
+<meta name="description" content="По уровням: дисциплина совместимых изменений → схема как источник истины → автоматическая проверка совместимости в CI → контрактные тесты от…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/api-contract-safety/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/api-contract-safety/">
+<meta property="og:title" content="Как гарантировать, что изменение вашего API не сломает потребителей, которых вы не контролируете? — вопрос с собеседования">
+<meta property="og:description" content="По уровням: дисциплина совместимых изменений → схема как источник истины → автоматическая проверка совместимости в CI → контрактные тесты от…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Как гарантировать, что изменение вашего API не сломает потребителей, которых вы не контролируете?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Как гарантировать, что изменение вашего API не сломает потребителей, которых вы не контролируете?"}]}</script>
+  <h1>Как гарантировать, что изменение вашего API не сломает потребителей, которых вы не контролируете?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Проектирование API</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как не сломать потребителей API при изменениях?</li><li>Что такое consumer-driven contract testing?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">По уровням: <b>дисциплина совместимых изменений → схема как источник истины → автоматическая проверка совместимости в CI → контрактные тесты от потребителей</b>.</p><ul><li>Схема (OpenAPI, protobuf, Avro) — первична; из неё генерируются клиенты и документация</li><li>Диф схем в сборке: ломающее изменение валит пайплайн</li><li>Consumer-driven contracts (Pact): потребители фиксируют, что им нужно, провайдер проверяет каждый релиз</li></ul><p class="extra"><span>А ещё</span> Неизбежные изменения — expand–contract, метрики использования старой версии и политика поддержки</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>1. Дисциплина изменений.</b> По умолчанию — только добавления; клиенты — толерантные читатели.</p>
+<p><b>2. Схема — источник истины.</b> OpenAPI для REST, protobuf для gRPC, Avro/JSON Schema для событий. Клиенты генерируются из схемы, а не пишутся по документации, которая отстаёт от кода.</p>
+<p><b>3. Автоматическая проверка совместимости.</b> В CI сравнивается новая схема со старой (openapi-diff, buf breaking для protobuf); для событий — Schema Registry с режимом совместимости BACKWARD или FORWARD: реестр не даст зарегистрировать ломающую версию.</p>
+<p><b>4. Контрактные тесты, управляемые потребителем.</b> Каждый потребитель описывает запросы, которые он делает, и поля, которые читает (Pact). Провайдер в своей сборке проверяет, что удовлетворяет всем опубликованным контрактам, — и узнаёт о поломке до выкатки. Это позволяет отказаться от хрупких сквозных тестов всей системы и общего релизного поезда.</p>
+<p><b>5. Когда ломать необходимо:</b> expand–contract (новое рядом со старым), метрики, кто ещё зовёт старую версию (по заголовку клиента или ключу API), объявленный срок поддержки и уведомление потребителей.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Многоуровневый ответ, а не одна мера.</li><li>Схема как первичный артефакт и проверка совместимости в CI.</li><li>Контрактные тесты от потребителей и чем они лучше сквозных.</li><li>Процесс для неизбежных ломающих изменений.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Полагаться только на документацию и внимательность.</li><li>Проверять совместимость сквозными тестами всей системы.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как вы узнаете, что старой версией больше никто не пользуется?</li><li>Чем контрактные тесты отличаются от тестов по схеме?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/api-design/">Проектирование API: REST, gRPC и события</a><p>Выбор стиля взаимодействия, семантика и идемпотентность HTTP, формат ошибок, курсорная пагинация против offset, версионирование и обратная совместимость, контрактное тестирование.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/api-backward-compatibility/">Какие изменения REST API обратно совместимы для существующих клиентов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/rolling-update-compatibility/">Во время rolling update в проде одновременно работают старая и новая версии сервиса. Какое требование из этого следует?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как гарантировать, что изменение вашего API не сломает потребителей, которых вы не контролируете?","acceptedAnswer":{"@type":"Answer","text":"По уровням: дисциплина совместимых изменений → схема как источник истины → автоматическая проверка совместимости в CI → контрактные тесты от потребителей. Схема (OpenAPI, protobuf, Avro) — первична; из неё генерируются клиенты и документация Диф схем в сборке: ломающее изменение валит пайплайн Consumer-driven contracts (Pact): потребители фиксируют, что им нужно, провайдер проверяет каждый релиз Неизбежные изменения — expand–contract, метрики использования старой версии и политика поддержки 1. Дисциплина изменений. По умолчанию — только добавления; клиенты — толерантные читатели. 2. Схема — источник истины. OpenAPI для REST, protobuf для gRPC, Avro/JSON Schema для событий. Клиенты генерируются из схемы, а не пишутся по документации, которая отстаёт от кода. 3. Автоматическая проверка совместимости. В CI сравнивается новая схема со старой (openapi-diff, buf breaking для protobuf); для событий — Schema Registry с режимом совместимости BACKWARD или FORWARD: реестр не даст зарегистрировать ломающую версию. 4. Контрактные тесты, управляемые потребителем. Каждый потребитель описывает запросы, которые он делает, и поля, которые читает (Pact). Провайдер в своей сборке проверяет, что удовлетворяет всем опубликованным контрактам, — и узнаёт о поломке до выкатки. Это позволяет отказаться от хрупких сквозных тестов всей системы и общего релизного поезда. 5. Когда ломать необходимо…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

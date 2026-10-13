@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое кросс-валидация и как правильно валидировать модель на временных данных? — вопрос с собеседования</title>
+<meta name="description" content="K-fold: данные делят на k частей, модель обучают k раз, каждый раз оставляя одну часть для проверки, и усредняют метрику — оценка надёжнее одного…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/cross-validation/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/cross-validation/">
+<meta property="og:title" content="Что такое кросс-валидация и как правильно валидировать модель на временных данных? — вопрос с собеседования">
+<meta property="og:description" content="K-fold: данные делят на k частей, модель обучают k раз, каждый раз оставляя одну часть для проверки, и усредняют метрику — оценка надёжнее одного…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Что такое кросс-валидация и как правильно валидировать модель на временных данных?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Что такое кросс-валидация и как правильно валидировать модель на временных данных?"}]}</script>
+  <h1>Что такое кросс-валидация и как правильно валидировать модель на временных данных?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Основы машинного обучения</span><span class="chip">scikit-learn</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем k-fold отличается от hold-out?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>K-fold</b>: данные делят на k частей, модель обучают k раз, каждый раз оставляя одну часть для проверки, и усредняют метрику — оценка надёжнее одного разбиения. Для <b>временных данных</b> перемешивать нельзя: обучаются на прошлом, проверяются на будущем (<b>скользящее окно</b> или расширяющееся окно).</p><ul><li>Stratified k-fold сохраняет долю классов в каждой части — важно при дисбалансе</li><li>Group k-fold — объекты одного пользователя не попадают и в обучение, и в проверку</li><li>Тестовая выборка всё равно откладывается отдельно и используется один раз</li></ul><p class="extra"><span>А ещё</span> Перемешивание временного ряда — классическая утечка «из будущего»</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Зачем.</b> Одно случайное разбиение даёт шумную оценку: повезло с тестом — метрика завышена. K-fold использует все данные и для обучения, и для проверки, и показывает разброс метрики между частями.</p>
+<p><b>Виды:</b></p>
+<ul><li><b>k-fold</b> (обычно k = 5 или 10);</li><li><b>stratified</b> — для классификации, особенно при редком классе;</li><li><b>group</b> — когда у одного объекта несколько строк (сессии пользователя, снимки одного пациента), иначе модель «узнаёт» объект;</li><li><b>time series split</b> — каждое следующее окно проверки позже обучающих данных.</li></ul>
+<p><b>Временные данные:</b></p>
+<pre><code>обучение: [янв-март]        проверка: [апр]
+обучение: [янв-апр]         проверка: [май]
+обучение: [янв-май]         проверка: [июнь]</code></pre>
+<p>Иногда между обучением и проверкой делают зазор (gap), если целевая переменная становится известна с задержкой.</p>
+<p><b>Где ещё ошибаются:</b> нормализацию и отбор признаков делают на всех данных до разбиения — это утечка; правильно — внутри каждого фолда (Pipeline в sklearn).</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механика k-fold и зачем она нужна.</li><li>Stratified и group варианты.</li><li>Валидация на временных данных.</li><li>Предобработка внутри фолдов.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/train-val-test/">Зачем делить данные на обучающую, валидационную и тестовую выборки?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/data-leakage/">Что такое утечка данных (data leakage) в машинном обучении?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/hyperparameter-tuning/">Как подбирать гиперпараметры модели?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое кросс-валидация и как правильно валидировать модель на временных данных?","acceptedAnswer":{"@type":"Answer","text":"K-fold: данные делят на k частей, модель обучают k раз, каждый раз оставляя одну часть для проверки, и усредняют метрику — оценка надёжнее одного разбиения. Для временных данных перемешивать нельзя: обучаются на прошлом, проверяются на будущем (скользящее окно или расширяющееся окно). Stratified k-fold сохраняет долю классов в каждой части — важно при дисбалансе Group k-fold — объекты одного пользователя не попадают и в обучение, и в проверку Тестовая выборка всё равно откладывается отдельно и используется один раз Перемешивание временного ряда — классическая утечка «из будущего» Зачем. Одно случайное разбиение даёт шумную оценку: повезло с тестом — метрика завышена. K-fold использует все данные и для обучения, и для проверки, и показывает разброс метрики между частями. Виды: - k-fold (обычно k = 5 или 10); - stratified — для классификации, особенно при редком классе; - group — когда у одного объекта несколько строк (сессии пользователя, снимки одного пациента), иначе модель «узнаёт» объект; - time series split — каждое следующее окно проверки позже обучающих данных. Временные данные: Иногда между обучением и проверкой делают зазор (gap), если целевая переменная становится известна с задержкой. Где ещё ошибаются: нормализацию и отбор признаков делают на всех данных до разбиения — это утечка; правильно — внутри каждого фолда (Pipeline в sklearn)."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

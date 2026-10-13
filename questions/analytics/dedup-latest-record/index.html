@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как удалить дубликаты и оставить последнюю версию записи? — вопрос с собеседования</title>
+<meta name="description" content="Найти: GROUP BY ключ HAVING COUNT() &gt; 1. Оставить последнюю версию: пронумеровать строки внутри ключа ROW_NUMBER() OVER (PARTITION BY ключ ORDER BY…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/dedup-latest-record/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/dedup-latest-record/">
+<meta property="og:title" content="Как удалить дубликаты и оставить последнюю версию записи? — вопрос с собеседования">
+<meta property="og:description" content="Найти: GROUP BY ключ HAVING COUNT() &gt; 1. Оставить последнюю версию: пронумеровать строки внутри ключа ROW_NUMBER() OVER (PARTITION BY ключ ORDER BY…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Как удалить дубликаты и оставить последнюю версию записи?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Как удалить дубликаты и оставить последнюю версию записи?"}]}</script>
+  <h1>Как удалить дубликаты и оставить последнюю версию записи?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">SQL для аналитика</span><span class="chip">SQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как найти дубликаты в таблице?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Найти: <code>GROUP BY ключ HAVING COUNT(*) &gt; 1</code>. Оставить последнюю версию: пронумеровать строки внутри ключа <code>ROW_NUMBER() OVER (PARTITION BY ключ ORDER BY updated_at DESC)</code> и взять <code>rn = 1</code> — в выборке или в DELETE с этим условием.</p><ul><li>Главный вопрос — что считать дубликатом: полное совпадение или один бизнес-ключ</li><li>Порядок «какую версию оставить» нужно определить явно, с тай-брейкером</li><li>В хранилищах с событиями дубли — норма (повторная доставка): дедуплицируют по id события</li></ul><p class="extra"><span>А ещё</span> В ClickHouse для этого есть ReplacingMergeTree и argMax</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Откуда дубли:</b> повторная доставка событий (at-least-once), повторный импорт файла, отсутствие уникального ограничения, разный регистр или пробелы в ключе (<code>Ivan@Mail.ru</code> и <code>ivan@mail.ru</code>).</p>
+<p><b>Порядок действий:</b> уточнить ключ уникальности и правило выбора версии → посмотреть масштаб (сколько групп с дублями) → проверить нормализацию ключа (lower, trim) → удалить или исключить в витрине → добавить ограничение UNIQUE или дедупликацию на загрузке, чтобы дубли не вернулись.</p>
+<p><b>Аналитика по событиям:</b> события дедуплицируют по event_id, а не по содержимому — два одинаковых клика подряд могут быть настоящими.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-sql"><code>-- найти
+SELECT email, COUNT(*) FROM users GROUP BY email HAVING COUNT(*) &gt; 1;
+
+-- оставить последнюю версию в запросе
+SELECT * FROM (
+  SELECT u.*, ROW_NUMBER() OVER (PARTITION BY email
+                                 ORDER BY updated_at DESC, id DESC) AS rn
+  FROM users u
+) t WHERE rn = 1;
+
+-- удалить лишние (PostgreSQL)
+DELETE FROM users WHERE id IN (
+  SELECT id FROM (
+    SELECT id, ROW_NUMBER() OVER (PARTITION BY email ORDER BY updated_at DESC, id DESC) rn
+    FROM users) t
+  WHERE rn &gt; 1);</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Поиск через GROUP BY HAVING.</li><li>Выбор версии через ROW_NUMBER.</li><li>Определение ключа и предотвращение повторения.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/top-n-per-group/">Как выбрать топ-N записей в каждой группе, например три самых дорогих заказа каждого клиента?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/join-fanout/">Почему после JOIN суммы в отчёте оказались больше, чем должны быть?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как удалить дубликаты и оставить последнюю версию записи?","acceptedAnswer":{"@type":"Answer","text":"Найти: GROUP BY ключ HAVING COUNT() > 1. Оставить последнюю версию: пронумеровать строки внутри ключа ROW_NUMBER() OVER (PARTITION BY ключ ORDER BY updated_at DESC) и взять rn = 1 — в выборке или в DELETE с этим условием. Главный вопрос — что считать дубликатом: полное совпадение или один бизнес-ключ Порядок «какую версию оставить» нужно определить явно, с тай-брейкером В хранилищах с событиями дубли — норма (повторная доставка): дедуплицируют по id события В ClickHouse для этого есть ReplacingMergeTree и argMax Откуда дубли: повторная доставка событий (at-least-once), повторный импорт файла, отсутствие уникального ограничения, разный регистр или пробелы в ключе (Ivan@Mail.ru и ivan@mail.ru). Порядок действий: уточнить ключ уникальности и правило выбора версии → посмотреть масштаб (сколько групп с дублями) → проверить нормализацию ключа (lower, trim) → удалить или исключить в витрине → добавить ограничение UNIQUE или дедупликацию на загрузке, чтобы дубли не вернулись. Аналитика по событиям: события дедуплицируют по event_id, а не по содержимому — два одинаковых клика подряд могут быть настоящими."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работает токенизация в LLM и что такое BPE? — вопрос с собеседования</title>
+<meta name="description" content="BPE (byte-pair encoding) строит словарь подслов: начинает с байтов или символов и многократно объединяет самую частую соседнюю пару в новый токен…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/tokenization-bpe/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/tokenization-bpe/">
+<meta property="og:title" content="Как работает токенизация в LLM и что такое BPE? — вопрос с собеседования">
+<meta property="og:description" content="BPE (byte-pair encoding) строит словарь подслов: начинает с байтов или символов и многократно объединяет самую частую соседнюю пару в новый токен…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как работает токенизация в LLM и что такое BPE?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как работает токенизация в LLM и что такое BPE?"}]}</script>
+  <h1>Как работает токенизация в LLM и что такое BPE?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Нейросети и трансформеры</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему русский текст «дороже» английского в токенах?</li><li>Почему LLM плохо считает буквы в слове?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>BPE</b> (byte-pair encoding) строит словарь подслов: начинает с байтов или символов и многократно объединяет самую частую соседнюю пару в новый токен. Частые слова становятся одним токеном, редкие разбиваются на части. Модель видит <b>номера токенов</b>, а не буквы.</p><ul><li>Словари обучены в основном на английском — русский текст разбивается на больше токенов, а значит дороже и занимает больше контекста</li><li>Посимвольные задачи (посчитать буквы, перевернуть слово) трудны, потому что буквы спрятаны внутри токенов</li><li>Числа режутся непредсказуемо — одна из причин ошибок в арифметике</li></ul><p class="extra"><span>А ещё</span> У каждой модели свой токенизатор — считать токены нужно её инструментом</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Обучение BPE:</b></p>
+<ol><li>Исходный словарь — все байты (byte-level BPE) — поэтому неизвестных символов не бывает.</li><li>Подсчитать частоты соседних пар в корпусе.</li><li>Объединить самую частую пару в новый токен, добавить в словарь.</li><li>Повторять до нужного размера словаря (десятки — сотни тысяч).</li></ol>
+<p>Варианты: WordPiece (BERT), Unigram/SentencePiece (T5, Llama).</p>
+<p><b>Следствия для инженера:</b></p>
+<ul><li><b>стоимость и лимиты</b> считаются в токенах; для русского — в 1,5–3 раза больше токенов на тот же смысл, чем для английского;</li><li><b>контекстное окно</b> заполняется быстрее на «неудобных» языках и в коде с длинными идентификаторами;</li><li><b>буквы и цифры</b> — модель не «видит» отдельных символов, поэтому ошибки в подсчёте букв, рифмах, арифметике с длинными числами;</li><li><b>пробел перед словом</b> часто часть токена — «кот» и « кот» разные токены.</li></ul>
+<p><b>Практика:</b> оценивать стоимость промпта реальным токенизатором модели (tiktoken, токенизатор из библиотеки transformers или счётчик токенов API).</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Алгоритм BPE.</li><li>Почему язык влияет на число токенов.</li><li>Следствия: стоимость, контекст, ошибки с буквами и числами.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/tokens-context-window/">Что такое токены и контекстное окно LLM?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/attention-transformer/">Как работает механизм внимания (self-attention) и архитектура трансформера?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-cost-latency/">Как снизить стоимость и задержку приложения на LLM?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работает токенизация в LLM и что такое BPE?","acceptedAnswer":{"@type":"Answer","text":"BPE (byte-pair encoding) строит словарь подслов: начинает с байтов или символов и многократно объединяет самую частую соседнюю пару в новый токен. Частые слова становятся одним токеном, редкие разбиваются на части. Модель видит номера токенов, а не буквы. Словари обучены в основном на английском — русский текст разбивается на больше токенов, а значит дороже и занимает больше контекста Посимвольные задачи (посчитать буквы, перевернуть слово) трудны, потому что буквы спрятаны внутри токенов Числа режутся непредсказуемо — одна из причин ошибок в арифметике У каждой модели свой токенизатор — считать токены нужно её инструментом Обучение BPE: 1. Исходный словарь — все байты (byte-level BPE) — поэтому неизвестных символов не бывает. 2. Подсчитать частоты соседних пар в корпусе. 3. Объединить самую частую пару в новый токен, добавить в словарь. 4. Повторять до нужного размера словаря (десятки — сотни тысяч). Варианты: WordPiece (BERT), Unigram/SentencePiece (T5, Llama). Следствия для инженера: - стоимость и лимиты считаются в токенах; для русского — в 1,5–3 раза больше токенов на тот же смысл, чем для английского; - контекстное окно заполняется быстрее на «неудобных» языках и в коде с длинными идентификаторами; - буквы и цифры — модель не «видит» отдельных символов, поэтому ошибки в подсчёте букв, рифмах, арифметике с длинными числами; - пробел перед словом часто часть токена — «кот» и « кот» разные токены. Практика: оценивать стоимость промпта реальным токенизатором модели (tiktoken, токенизатор из библиотеки…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

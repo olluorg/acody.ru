@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое оконные функции в SQL и чем они отличаются от GROUP BY? — вопрос с собеседования</title>
+<meta name="description" content="GROUP BY схлопывает группу в одну строку; оконная функция считает по группе строк (окну), сохраняя все строки. Окно задаёт OVER (PARTITION BY … ORDER…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/window-functions/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/window-functions/">
+<meta property="og:title" content="Что такое оконные функции в SQL и чем они отличаются от GROUP BY? — вопрос с собеседования">
+<meta property="og:description" content="GROUP BY схлопывает группу в одну строку; оконная функция считает по группе строк (окну), сохраняя все строки. Окно задаёт OVER (PARTITION BY … ORDER…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Что такое оконные функции в SQL и чем они отличаются от GROUP BY?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Что такое оконные функции в SQL и чем они отличаются от GROUP BY?"}]}</script>
+  <h1>Что такое оконные функции в SQL и чем они отличаются от GROUP BY?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">SQL для аналитика</span><span class="chip">SQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем ROW_NUMBER отличается от RANK и DENSE_RANK?</li><li>Как посчитать нарастающий итог в SQL?</li><li>Что делают LAG и LEAD?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">GROUP BY <b>схлопывает</b> группу в одну строку; оконная функция считает по группе строк (окну), <b>сохраняя все строки</b>. Окно задаёт <code>OVER (PARTITION BY … ORDER BY … ROWS …)</code>. Основные: ранжирующие (ROW_NUMBER, RANK, DENSE_RANK), смещения (LAG, LEAD), агрегаты по окну (SUM, AVG, COUNT) — нарастающие итоги и скользящие средние.</p><ul><li>ROW_NUMBER — 1, 2, 3, 4; RANK — 1, 2, 2, 4; DENSE_RANK — 1, 2, 2, 3</li><li>Окна вычисляются после WHERE и GROUP BY — фильтр по результату окна делают во внешнем запросе</li><li>SUM(x) OVER (ORDER BY d) без явной рамки берёт RANGE: строки с одинаковой датой суммируются вместе</li></ul><p class="extra"><span>А ещё</span> В PostgreSQL и ClickHouse есть фильтр QUALIFY (ClickHouse) или подзапрос/CTE для отбора по окну</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><pre class="lang-sql"><code>SELECT
+  user_id,
+  order_date,
+  amount,
+  ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY order_date)        AS order_no,
+  LAG(order_date) OVER (PARTITION BY user_id ORDER BY order_date)     AS prev_order,
+  SUM(amount) OVER (PARTITION BY user_id ORDER BY order_date
+                    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total,
+  AVG(amount) OVER (ORDER BY order_date
+                    ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)         AS ma_7
+FROM orders;</code></pre>
+<p><b>Части окна:</b></p>
+<ul><li><b>PARTITION BY</b> — на какие независимые группы делить (как GROUP BY, но без схлопывания);</li><li><b>ORDER BY</b> — порядок внутри окна, нужен ранжирующим функциям, LAG и нарастающим итогам;</li><li><b>рамка</b> (ROWS / RANGE BETWEEN …) — какие строки относительно текущей входят в расчёт.</li></ul>
+<p><b>Ловушка рамки по умолчанию.</b> При наличии ORDER BY рамка по умолчанию — <code>RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code>: все строки с той же датой считаются «текущими», и нарастающий итог прыгает сразу на сумму дня. Для построчного итога явно пишут ROWS.</p>
+<p><b>Типичные задачи:</b> номер заказа клиента, время с прошлой покупки (LAG), доля строки в сумме группы (<code>amount / SUM(amount) OVER (PARTITION BY …)</code>), топ-N в группе, скользящее среднее, разница с прошлым месяцем.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Отличие окна от GROUP BY.</li><li>PARTITION BY, ORDER BY и рамка.</li><li>Различие ROW_NUMBER, RANK, DENSE_RANK.</li><li>LAG/LEAD и нарастающий итог.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Фильтровать по оконной функции в WHERE.</li><li>Не задавать рамку и получать нарастающий итог «скачками».</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/analytics/top-n-per-group/">Как выбрать топ-N записей в каждой группе, например три самых дорогих заказа каждого клиента?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/gaps-and-islands/">Как найти самую длинную серию дней подряд, когда пользователь был активен?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/databases/second-highest-salary/">Напиши SQL-запрос, возвращающий вторую по величине зарплату из таблицы employee(id, salary).</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/databases/having-vs-where/">Чем HAVING отличается от WHERE?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое оконные функции в SQL и чем они отличаются от GROUP BY?","acceptedAnswer":{"@type":"Answer","text":"GROUP BY схлопывает группу в одну строку; оконная функция считает по группе строк (окну), сохраняя все строки. Окно задаёт OVER (PARTITION BY … ORDER BY … ROWS …). Основные: ранжирующие (ROW_NUMBER, RANK, DENSE_RANK), смещения (LAG, LEAD), агрегаты по окну (SUM, AVG, COUNT) — нарастающие итоги и скользящие средние. ROW_NUMBER — 1, 2, 3, 4; RANK — 1, 2, 2, 4; DENSE_RANK — 1, 2, 2, 3 Окна вычисляются после WHERE и GROUP BY — фильтр по результату окна делают во внешнем запросе SUM(x) OVER (ORDER BY d) без явной рамки берёт RANGE: строки с одинаковой датой суммируются вместе В PostgreSQL и ClickHouse есть фильтр QUALIFY (ClickHouse) или подзапрос/CTE для отбора по окну Части окна: - PARTITION BY — на какие независимые группы делить (как GROUP BY, но без схлопывания); - ORDER BY — порядок внутри окна, нужен ранжирующим функциям, LAG и нарастающим итогам; - рамка (ROWS / RANGE BETWEEN …) — какие строки относительно текущей входят в расчёт. Ловушка рамки по умолчанию. При наличии ORDER BY рамка по умолчанию — RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW: все строки с той же датой считаются «текущими», и нарастающий итог прыгает сразу на сумму дня. Для построчного итога явно пишут ROWS. Типичные задачи: номер заказа клиента, время с прошлой покупки (LAG), доля строки в сумме группы (amount / SUM(amount) OVER (PARTITION BY …)), топ-N в группе, скользящее среднее, разница с прошлым месяцем."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

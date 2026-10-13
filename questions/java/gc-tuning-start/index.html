@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>С чего правильно начинать настройку сборщика мусора? — вопрос с собеседования</title>
+<meta name="description" content="Начинать с измерений: включить логи GC и понять, в чём проблема — длинные паузы, частые сборки или рост живых данных. Логи: -Xlog:gc — длительность и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/gc-tuning-start/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/gc-tuning-start/">
+<meta property="og:title" content="С чего правильно начинать настройку сборщика мусора? — вопрос с собеседования">
+<meta property="og:description" content="Начинать с измерений: включить логи GC и понять, в чём проблема — длинные паузы, частые сборки или рост живых данных. Логи: -Xlog:gc — длительность и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>С чего правильно начинать настройку сборщика мусора?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"С чего правильно начинать настройку сборщика мусора?"}]}</script>
+  <h1>С чего правильно начинать настройку сборщика мусора?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">JVM и сборка мусора</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как диагностировать проблемы со сборщиком мусора?</li><li>Как включить логи GC?</li><li>С чего корректно начинать тюнинг GC?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Начинать с <b>измерений</b>: включить логи GC и понять, в чём проблема — <b>длинные паузы, частые сборки</b> или <b>рост живых данных</b>.</p><ul><li>Логи: <code>-Xlog:gc*</code> — длительность и частота пауз, сколько памяти остаётся после сборки</li><li>Часто проблема не в сборщике, а в коде: лишние объекты или удержание ненужных</li></ul><p class="extra"><span>А ещё</span> Флаги «из статьи» без данных — перебор наугад</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Настройка сборщика без данных превращается в подбор флагов наугад: можно ухудшить ситуацию и не понять почему. Поэтому сначала собирают факты.</p>
+<p>Что смотреть в логах GC (<code>-Xlog:gc*:file=gc.log</code>):</p>
+<ul><li><b>длительность пауз</b> и их распределение — влияют на время ответа;</li><li><b>частота сборок</b> — частые молодые сборки говорят о высокой скорости выделения объектов;</li><li><b>объём живых данных после полной сборки</b> — если растёт со временем, похоже на утечку;</li><li>доля времени, которую приложение тратит на сборку.</li></ul>
+<p>Дополнительные инструменты: <code>jstat</code> для онлайн-статистики, Java Flight Recorder и профилировщики выделения памяти, дамп кучи (<code>jcmd &lt;pid&gt; GC.heap_dump</code>) для поиска утечек.</p>
+<p>Часто выясняется, что проблема в коде: создание лишних объектов в горячем цикле, неограниченный кэш, удержание больших коллекций. Это лечится правкой кода, а не флагами.</p>
+<p>Если дело всё-таки в настройках, типичные шаги: подобрать размер кучи (<code>-Xms</code>/<code>-Xmx</code>), выбрать сборщик под цель (задержка или пропускная способность), задать цель паузы для G1 (<code>-XX:MaxGCPauseMillis</code>).</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Сначала измерения, потом настройка.</li><li>Что смотреть в логах GC.</li><li>Понимание, что проблема часто в коде.</li><li>Инструменты диагностики — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Крутить флаги, не посмотрев логи сборки.</li><li>Наращивать кучу при утечке — это только отсрочит проблему.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>С измерения: включить логи сборки и понять, есть ли проблема и в чём она — в длительности пауз или в частоте сборок</li><li class="no"><span class="mark">✗</span>С увеличения размера кучи до максимально возможного</li><li class="no"><span class="mark">✗</span>С переключения на самый современный сборщик</li><li class="no"><span class="mark">✗</span>С отключения сборки мусора на время нагрузки</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>О чём говорит рост занятости старого поколения после каждой сборки?</li><li>Что показывает скорость выделения объектов?</li><li>Какие базовые флаги задают первым делом?</li><li>Что даёт unified logging -Xlog:gc?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/gc-tuning/">GC: тюнинг и мониторинг</a><p>Ключевые флаги, unified GC-логи, метрики (паузы, throughput, allocation/promotion rate) и диагностика частых проблем.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/jvm-heap-in-container/">Java-приложение запускают в контейнере с лимитом памяти. Как правильно задать размер кучи?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/gc-latency-diagnosis/">В проде выросли задержки, подозрение на GC. Опиши порядок диагностики — от сбора данных до вывода.</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/allocation-promotion-rate/">Что показывают метрики allocation rate и promotion rate?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/frequent-full-gc/">В приложении участились длинные паузы full GC, при этом старое поколение почти всегда заполнено. О чём это говорит?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"С чего правильно начинать настройку сборщика мусора?","acceptedAnswer":{"@type":"Answer","text":"Начинать с измерений: включить логи GC и понять, в чём проблема — длинные паузы, частые сборки или рост живых данных. Логи: -Xlog:gc — длительность и частота пауз, сколько памяти остаётся после сборки Часто проблема не в сборщике, а в коде: лишние объекты или удержание ненужных Флаги «из статьи» без данных — перебор наугад Настройка сборщика без данных превращается в подбор флагов наугад: можно ухудшить ситуацию и не понять почему. Поэтому сначала собирают факты. Что смотреть в логах GC (-Xlog:gc:file=gc.log): - длительность пауз и их распределение — влияют на время ответа; - частота сборок — частые молодые сборки говорят о высокой скорости выделения объектов; - объём живых данных после полной сборки — если растёт со временем, похоже на утечку; - доля времени, которую приложение тратит на сборку. Дополнительные инструменты: jstat для онлайн-статистики, Java Flight Recorder и профилировщики выделения памяти, дамп кучи (jcmd <pid> GC.heap_dump) для поиска утечек. Часто выясняется, что проблема в коде: создание лишних объектов в горячем цикле, неограниченный кэш, удержание больших коллекций. Это лечится правкой кода, а не флагами. Если дело всё-таки в настройках, типичные шаги: подобрать размер кучи…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

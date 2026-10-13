@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как выбрать топ-N записей в каждой группе, например три самых дорогих заказа каждого клиента? — вопрос с собеседования</title>
+<meta name="description" content="Пронумеровать строки внутри группы оконной функцией и отфильтровать номер во внешнем запросе: ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/top-n-per-group/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/top-n-per-group/">
+<meta property="og:title" content="Как выбрать топ-N записей в каждой группе, например три самых дорогих заказа каждого клиента? — вопрос с собеседования">
+<meta property="og:description" content="Пронумеровать строки внутри группы оконной функцией и отфильтровать номер во внешнем запросе: ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Как выбрать топ-N записей в каждой группе, например три самых дорогих заказа каждого клиента?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Как выбрать топ-N записей в каждой группе, например три самых дорогих заказа каждого клиента?"}]}</script>
+  <h1>Как выбрать топ-N записей в каждой группе, например три самых дорогих заказа каждого клиента?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">SQL для аналитика</span><span class="chip">SQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как взять последнюю запись для каждого пользователя?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Пронумеровать строки внутри группы оконной функцией и отфильтровать номер во внешнем запросе: <code>ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY amount DESC)</code> и <code>WHERE rn &lt;= 3</code>. Если важны «ничьи» — DENSE_RANK или RANK вместо ROW_NUMBER.</p><ul><li>ROW_NUMBER при равных суммах выберет произвольный из них — добавляют второй ключ сортировки</li><li>В PostgreSQL для «одной последней» записи удобно DISTINCT ON</li><li>Альтернатива без окон — LATERAL JOIN с LIMIT (эффективно при индексе)</li></ul><p class="extra"><span>А ещё</span> Коррелированный подзапрос «сколько дороже меня» работает, но медленнее</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Почему не GROUP BY.</b> <code>MAX(amount)</code> по клиенту даёт значение, но не всю строку заказа. Оконная функция сохраняет строки и позволяет выбрать нужные.</p>
+<p><b>Ничьи.</b> Если у клиента три заказа по 1000 рублей, ROW_NUMBER возьмёт два из них произвольно; DENSE_RANK ≤ 3 вернёт все заказы с тремя наибольшими различными суммами. Выбор зависит от формулировки задачи — уточнить у интервьюера.</p>
+<p><b>Производительность.</b> Окно сортирует всю таблицу по группе. Если групп много, а нужен топ-1 и есть индекс (customer_id, amount DESC), LATERAL-подзапрос с LIMIT 1 на каждого клиента может быть быстрее.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-sql"><code>WITH ranked AS (
+  SELECT o.*,
+         ROW_NUMBER() OVER (PARTITION BY customer_id
+                            ORDER BY amount DESC, order_id) AS rn
+  FROM orders o
+)
+SELECT * FROM ranked WHERE rn &lt;= 3;
+
+-- PostgreSQL: последний заказ каждого клиента
+SELECT DISTINCT ON (customer_id) *
+FROM orders
+ORDER BY customer_id, created_at DESC;</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Решение через ROW_NUMBER и фильтр снаружи.</li><li>Обработка равных значений.</li><li>Альтернативы: DISTINCT ON, LATERAL.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/window-functions/">Что такое оконные функции в SQL и чем они отличаются от GROUP BY?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/dedup-latest-record/">Как удалить дубликаты и оставить последнюю версию записи?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как выбрать топ-N записей в каждой группе, например три самых дорогих заказа каждого клиента?","acceptedAnswer":{"@type":"Answer","text":"Пронумеровать строки внутри группы оконной функцией и отфильтровать номер во внешнем запросе: ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY amount DESC) и WHERE rn <= 3. Если важны «ничьи» — DENSE_RANK или RANK вместо ROW_NUMBER. ROW_NUMBER при равных суммах выберет произвольный из них — добавляют второй ключ сортировки В PostgreSQL для «одной последней» записи удобно DISTINCT ON Альтернатива без окон — LATERAL JOIN с LIMIT (эффективно при индексе) Коррелированный подзапрос «сколько дороже меня» работает, но медленнее Почему не GROUP BY. MAX(amount) по клиенту даёт значение, но не всю строку заказа. Оконная функция сохраняет строки и позволяет выбрать нужные. Ничьи. Если у клиента три заказа по 1000 рублей, ROW_NUMBER возьмёт два из них произвольно; DENSE_RANK ≤ 3 вернёт все заказы с тремя наибольшими различными суммами. Выбор зависит от формулировки задачи — уточнить у интервьюера. Производительность. Окно сортирует всю таблицу по группе. Если групп много, а нужен топ-1 и есть индекс (customer_id, amount DESC), LATERAL-подзапрос с LIMIT 1 на каждого клиента может быть быстрее."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

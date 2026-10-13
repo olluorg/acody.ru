@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как представить граф в программе? — вопрос с собеседования</title>
+<meta name="description" content="Два основных способа: матрица смежности (таблица V×V) и список смежности (для каждой вершины — список соседей). Матрица: проверка ребра O(1), память…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/graph-representation/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/graph-representation/">
+<meta property="og:title" content="Как представить граф в программе? — вопрос с собеседования">
+<meta property="og:description" content="Два основных способа: матрица смежности (таблица V×V) и список смежности (для каждой вершины — список соседей). Матрица: проверка ребра O(1), память…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Как представить граф в программе?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Как представить граф в программе?"}]}</script>
+  <h1>Как представить граф в программе?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Графы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем матрица смежности отличается от списка смежности?</li><li>Какие бывают графы?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Два основных способа: <b>матрица смежности</b> (таблица V×V) и <b>список смежности</b> (для каждой вершины — список соседей).</p><ul><li>Матрица: проверка ребра O(1), память O(V²) — для плотных графов</li><li>Список: память O(V + E), перебор соседей быстрый — выбор по умолчанию для разреженных графов</li></ul><p class="extra"><span>А ещё</span> Сначала уточните вид графа: ориентированный или нет, со весами или нет, есть ли циклы</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Граф — вершины (V) и рёбра (E) между ними. Виды: <b>ориентированный</b> (у ребра есть направление: подписки, зависимости) или <b>неориентированный</b> (дружба, дороги в обе стороны); <b>взвешенный</b> (у ребра есть вес: расстояние, стоимость); <b>ациклический</b> (DAG — нет циклов: зависимости задач).</p>
+<p><b>Матрица смежности</b> — двумерный массив V×V, где <code>m[u][v]</code> — есть ли ребро (или его вес).</p>
+<ul><li>проверить ребро — O(1);</li><li>перебрать соседей вершины — O(V);</li><li>память — O(V²): для миллиона вершин нереально.</li></ul>
+<p>Подходит для небольших и плотных графов.</p>
+<p><b>Список смежности</b> — для каждой вершины список её соседей (словарь списков).</p>
+<ul><li>память — O(V + E);</li><li>перебрать соседей — O(степени вершины);</li><li>проверить конкретное ребро — O(степени), или O(1) в среднем, если соседей хранить множеством.</li></ul>
+<p>Большинство реальных графов разреженные (у пользователя сотни друзей, а не миллионы), поэтому список смежности — выбор по умолчанию.</p>
+<p>Ещё бывает <b>список рёбер</b> — просто перечень пар (u, v, вес); удобен для алгоритмов, перебирающих все рёбра (Краскал, Беллман — Форд).</p>
+<p>Сетка (лабиринт, карта) — тоже граф: клетки — вершины, соседние клетки — рёбра, хранить отдельно не нужно.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>from collections import defaultdict
+
+edges = [(&quot;A&quot;, &quot;B&quot;, 4), (&quot;A&quot;, &quot;C&quot;, 2), (&quot;C&quot;, &quot;B&quot;, 1), (&quot;B&quot;, &quot;D&quot;, 5)]
+
+graph = defaultdict(list)          # список смежности, ориентированный, взвешенный
+for u, v, w in edges:
+    graph[u].append((v, w))
+
+graph[&quot;A&quot;]   # [(&#x27;B&#x27;, 4), (&#x27;C&#x27;, 2)]</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Оба представления и их сложность по памяти и операциям.</li><li>Когда какое выбирать: плотные и разреженные графы.</li><li>Виды графов, которые нужно уточнить в задаче.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Брать матрицу для большого разреженного графа.</li><li>Не уточнить, ориентирован ли граф.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/bfs-dfs/">Чем обход в ширину (BFS) отличается от обхода в глубину (DFS)?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/dijkstra/">Как работает алгоритм Дейкстры?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как представить граф в программе?","acceptedAnswer":{"@type":"Answer","text":"Два основных способа: матрица смежности (таблица V×V) и список смежности (для каждой вершины — список соседей). Матрица: проверка ребра O(1), память O(V²) — для плотных графов Список: память O(V + E), перебор соседей быстрый — выбор по умолчанию для разреженных графов Сначала уточните вид графа: ориентированный или нет, со весами или нет, есть ли циклы Граф — вершины (V) и рёбра (E) между ними. Виды: ориентированный (у ребра есть направление: подписки, зависимости) или неориентированный (дружба, дороги в обе стороны); взвешенный (у ребра есть вес: расстояние, стоимость); ациклический (DAG — нет циклов: зависимости задач). Матрица смежности — двумерный массив V×V, где m[u][v] — есть ли ребро (или его вес). - проверить ребро — O(1); - перебрать соседей вершины — O(V); - память — O(V²): для миллиона вершин нереально. Подходит для небольших и плотных графов. Список смежности — для каждой вершины список её соседей (словарь списков). - память — O(V + E); - перебрать соседей — O(степени вершины); - проверить конкретное ребро — O(степени), или O(1) в среднем, если соседей хранить множеством. Большинство реальных графов разреженные (у пользователя сотни друзей, а не миллионы), поэтому список смежности — выбор по умолчанию. Ещё бывает список…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

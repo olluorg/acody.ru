@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему в React нельзя изменять состояние напрямую? — вопрос с собеседования</title>
+<meta name="description" content="React узнаёт об изменении, сравнивая ссылки (Object.is). Мутация (items.push(x), user.name = ...) оставляет ссылку прежней — перерисовки не будет, а…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/react-state-immutability/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/react-state-immutability/">
+<meta property="og:title" content="Почему в React нельзя изменять состояние напрямую? — вопрос с собеседования">
+<meta property="og:description" content="React узнаёт об изменении, сравнивая ссылки (Object.is). Мутация (items.push(x), user.name = ...) оставляет ссылку прежней — перерисовки не будет, а…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Почему в React нельзя изменять состояние напрямую?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Почему в React нельзя изменять состояние напрямую?"}]}</script>
+  <h1>Почему в React нельзя изменять состояние напрямую?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">React</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему компонент не перерисовался после push в массив состояния?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">React узнаёт об изменении, <b>сравнивая ссылки</b> (Object.is). Мутация (<code>items.push(x)</code>, <code>user.name = ...</code>) оставляет ссылку прежней — <b>перерисовки не будет</b>, а memo и useEffect не увидят изменений. Состояние обновляют <b>новым объектом</b>: spread, map, filter, toSorted.</p><ul><li>Добавить: setItems([...items, x]); удалить: filter; изменить: map</li><li>Вложенные объекты копируют по всему пути до изменения</li><li>Immer (встроен в Redux Toolkit) позволяет писать «мутирующий» код безопасно</li></ul><p class="extra"><span>А ещё</span> Мутация ещё и ломает предыдущие значения, которые могли сохраниться в замыканиях</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Механика.</b> <code>setState(next)</code> сравнивает <code>next</code> с текущим значением через <code>Object.is</code>. Совпали — React может пропустить рендер. Мутация меняет содержимое, но не ссылку.</p>
+<p><b>Почему это хорошо, а не ограничение:</b> сравнение ссылок — O(1), на нём построены <code>React.memo</code>, <code>useMemo</code>, зависимости эффектов. Неизменяемые данные дают историю (отмена действия), простую отладку и безопасность при параллельном рендеринге.</p>
+<p><b>Глубокие структуры</b> — копировать путь до изменённого поля или нормализовать данные (хранить сущности плоско по id).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-jsx"><code>// плохо
+items.push(newItem);
+setItems(items);              // та же ссылка — React пропустит
+
+// хорошо
+setItems(prev =&gt; [...prev, newItem]);
+setItems(prev =&gt; prev.map(i =&gt; i.id === id ? { ...i, done: true } : i));
+setUser(prev =&gt; ({ ...prev, address: { ...prev.address, city } }));</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Сравнение по ссылке.</li><li>Правильные способы обновления массивов и объектов.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/copy-objects/">Как скопировать объект в JavaScript и чем поверхностная копия отличается от глубокой?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/array-methods/">Какие методы массивов меняют исходный массив, а какие возвращают новый?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/react-state-props/">Чем state отличается от props в React?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему в React нельзя изменять состояние напрямую?","acceptedAnswer":{"@type":"Answer","text":"React узнаёт об изменении, сравнивая ссылки (Object.is). Мутация (items.push(x), user.name = ...) оставляет ссылку прежней — перерисовки не будет, а memo и useEffect не увидят изменений. Состояние обновляют новым объектом: spread, map, filter, toSorted. Добавить: setItems([...items, x]); удалить: filter; изменить: map Вложенные объекты копируют по всему пути до изменения Immer (встроен в Redux Toolkit) позволяет писать «мутирующий» код безопасно Мутация ещё и ломает предыдущие значения, которые могли сохраниться в замыканиях Механика. setState(next) сравнивает next с текущим значением через Object.is. Совпали — React может пропустить рендер. Мутация меняет содержимое, но не ссылку. Почему это хорошо, а не ограничение: сравнение ссылок — O(1), на нём построены React.memo, useMemo, зависимости эффектов. Неизменяемые данные дают историю (отмена действия), простую отладку и безопасность при параллельном рендеринге. Глубокие структуры — копировать путь до изменённого поля или нормализовать данные (хранить сущности плоско по id)."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

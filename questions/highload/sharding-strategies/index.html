@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как выбрать ключ и стратегию шардирования? — вопрос с собеседования</title>
+<meta name="description" content="Шардирование делит данные между узлами по ключу шардирования. Ключ выбирают так, чтобы частые запросы шли в один шард, а нагрузка распределялась…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/sharding-strategies/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/sharding-strategies/">
+<meta property="og:title" content="Как выбрать ключ и стратегию шардирования? — вопрос с собеседования">
+<meta property="og:description" content="Шардирование делит данные между узлами по ключу шардирования. Ключ выбирают так, чтобы частые запросы шли в один шард, а нагрузка распределялась…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Как выбрать ключ и стратегию шардирования?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Как выбрать ключ и стратегию шардирования?"}]}</script>
+  <h1>Как выбрать ключ и стратегию шардирования?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Шардирование и распределение данных</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем шардирование по диапазону отличается от шардирования по хешу?</li><li>Что делать с запросами, которые затрагивают несколько шардов?</li><li>Когда пора шардировать базу?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Шардирование делит данные между узлами по <b>ключу шардирования</b>. Ключ выбирают так, чтобы частые запросы шли в <b>один шард</b>, а нагрузка распределялась <b>равномерно</b>.</p><ul><li>По диапазону — удобны диапазонные запросы, но новые ключи бьют в один шард (время, автоинкремент)</li><li>По хешу — равномерно, но диапазонный запрос идёт во все шарды</li><li>По справочнику (directory) — гибко, но нужен сервис-каталог</li></ul><p class="extra"><span>А ещё</span> Шардировать последним: сначала индексы, кэш, реплики для чтения, вертикальное масштабирование, архивирование</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Consistent hashing и виртуальные узлы</p><script type="module" src="/widgets/consistent-hashing.js"></script><sotto-consistent-hashing theme="dark"></sotto-consistent-hashing></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Зачем.</b> Одна машина упирается в объём данных, запись или память под рабочий набор. Реплики масштабируют только чтение. Шардирование масштабирует и запись, и объём — ценой сложности.</p>
+<p><b>Стратегии:</b></p>
+<ul><li><b>по диапазону</b> ключа: A–F на шард 1, G–M на шард 2; или по датам. Плюсы — диапазонные запросы и сортировка внутри шарда, простое разделение растущего шарда пополам (так делают HBase, Spanner, CockroachDB, MongoDB с range). Минус — <b>горячий хвост</b>: монотонные ключи (время, автоинкремент) пишутся в последний шард;</li><li><b>по хешу</b> ключа: <code>hash(user_id) mod N</code> или consistent hashing. Равномерно, монотонные ключи рассеиваются. Минус — диапазонный запрос обходит все шарды (scatter-gather), смена N перемещает данные;</li><li><b>по справочнику</b> — таблица «ключ или диапазон → шард». Можно переносить отдельных крупных клиентов, но каталог становится критичным сервисом (обычно кэшируется);</li><li><b>географическое</b> — данные пользователя в его регионе (задержка, законы о локализации данных).</li></ul>
+<p><b>Как выбирать ключ</b> — от запросов, а не от данных:</p>
+<ul><li>большинство запросов должно содержать ключ и попадать в один шард: для мессенджера — <code>chat_id</code>, для магазина — <code>tenant_id</code> или <code>user_id</code>;</li><li>связанные данные — в один шард (заказы пользователя рядом с ним), чтобы транзакции и JOIN оставались локальными;</li><li>высокая кардинальность и равномерность — не <code>country</code> и не <code>status</code>;</li><li>учесть «китов»: один клиент на 30% нагрузки не поделится хеш-функцией.</li></ul>
+<p><b>Что становится сложным:</b></p>
+<ul><li>запросы без ключа — scatter-gather по всем шардам, медленно и с хвостами; решают вторичными индексами в отдельном хранилище (поисковый индекс, денормализованная проекция);</li><li>транзакции между шардами — саги, outbox, двухфазный коммит или перепроектирование, чтобы их не было;</li><li>уникальность и глобальные id — генераторы вроде Snowflake;</li><li>JOIN между шардами — денормализация, справочники копируются на все шарды;</li><li>решардинг — перенос данных без простоя.</li></ul>
+<p><b>Когда шардировать.</b> Когда исчерпаны дешёвые способы: оптимизация запросов и индексов, кэширование, реплики для чтения, вертикальный рост, вынос холодных данных в архив, партиционирование таблицы внутри одной базы. И лучше заранее заложить ключ (tenant_id во всех таблицах), чем добавлять его потом.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>Сервис заказов: 20 млн пользователей, 95% запросов — «заказы пользователя».
+Ключ — user_id, хеш, 16 шардов: заказы и позиции пользователя в одном шарде.
+«Все заказы за день» для аналитики — не из шардов, а из потока изменений в ClickHouse.
+«Заказ по номеру» — номер содержит номер шарда (или user_id), чтобы не обходить все.</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Зачем шардировать и что масштабирует шардирование в отличие от реплик.</li><li>Стратегии: диапазон, хеш, справочник — плюсы и минусы.</li><li>Критерии выбора ключа от запросов, локальность связанных данных.</li><li>Что усложняется: межшардовые запросы, транзакции, решардинг.</li><li>Шардирование как последнее средство.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Шардировать по автоинкременту или времени по диапазону — все записи в один шард.</li><li>Выбирать ключ, не посмотрев на основные запросы.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/consistent-hashing/">Как работает consistent hashing и зачем нужны виртуальные узлы?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/hot-keys/">Что делать с горячими ключами, на которые приходится непропорционально большая нагрузка?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/resharding/">Как перешардировать данные без простоя?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/skewed-sharding/">Данные шардированы по хешу от идентификатора клиента. Несколько крупных клиентов дают около 80% нагрузки, и она приходится на один шард. Что здесь поможет?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/system-design/scaling-database-reads/">Как масштабировать чтение базы данных под высокой нагрузкой?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/b-tree/">Почему индексы в базах данных устроены как B-дерево?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как выбрать ключ и стратегию шардирования?","acceptedAnswer":{"@type":"Answer","text":"Шардирование делит данные между узлами по ключу шардирования. Ключ выбирают так, чтобы частые запросы шли в один шард, а нагрузка распределялась равномерно. По диапазону — удобны диапазонные запросы, но новые ключи бьют в один шард (время, автоинкремент) По хешу — равномерно, но диапазонный запрос идёт во все шарды По справочнику (directory) — гибко, но нужен сервис-каталог Шардировать последним: сначала индексы, кэш, реплики для чтения, вертикальное масштабирование, архивирование Зачем. Одна машина упирается в объём данных, запись или память под рабочий набор. Реплики масштабируют только чтение. Шардирование масштабирует и запись, и объём — ценой сложности. Стратегии: - по диапазону ключа: A–F на шард 1, G–M на шард 2; или по датам. Плюсы — диапазонные запросы и сортировка внутри шарда, простое разделение растущего шарда пополам (так делают HBase, Spanner, CockroachDB, MongoDB с range). Минус — горячий хвост: монотонные ключи (время, автоинкремент) пишутся в последний шард; - по хешу ключа: hash(user_id) mod N или consistent hashing. Равномерно, монотонные ключи рассеиваются. Минус — диапазонный запрос обходит все шарды (scatter-gather), смена N перемещает данные; - по справочнику — таблица «ключ или диапазон → шард». Можно переносить отдельных крупных клиентов, но каталог становится критичным сервисом (обычно кэшируется); - географическое — данные пользователя…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

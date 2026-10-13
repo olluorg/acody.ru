@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что вы выберете для очереди фоновых задач, а что для шины событий между сервисами — RabbitMQ или Kafka? — вопрос с собеседования</title>
+<meta name="description" content="Очередь задач — RabbitMQ (или SQS): подтверждение каждого сообщения, повторы, DLX, приоритеты, отложенная доставка, медленная задача не блокирует…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/brokers/rabbitmq-or-kafka-choice/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/brokers/rabbitmq-or-kafka-choice/">
+<meta property="og:title" content="Что вы выберете для очереди фоновых задач, а что для шины событий между сервисами — RabbitMQ или Kafka? — вопрос с собеседования">
+<meta property="og:description" content="Очередь задач — RabbitMQ (или SQS): подтверждение каждого сообщения, повторы, DLX, приоритеты, отложенная доставка, медленная задача не блокирует…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/brokers/">Брокеры сообщений</a> <span>/</span> <span>Что вы выберете для очереди фоновых задач, а что для шины событий между сервисами — RabbitMQ или Kafka?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/questions/brokers/"},{"@type":"ListItem","position":3,"name":"Что вы выберете для очереди фоновых задач, а что для шины событий между сервисами — RabbitMQ или Kafka?"}]}</script>
+  <h1>Что вы выберете для очереди фоновых задач, а что для шины событий между сервисами — RabbitMQ или Kafka?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">RabbitMQ и SQS</span><span class="chip">Kafka</span><span class="chip">RabbitMQ</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Когда RabbitMQ лучше Kafka?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Очередь задач</b> — RabbitMQ (или SQS): подтверждение каждого сообщения, повторы, DLX, приоритеты, отложенная доставка, медленная задача не блокирует остальные. <b>Шина событий</b> — Kafka: хранение и перечитывание, много независимых потребителей, порядок по ключу, большой поток.</p><ul><li>Задачи разной длительности в Kafka блокируют партицию — head-of-line blocking</li><li>В RabbitMQ нет перечитывания истории и сложнее масштабировать огромный поток</li><li>Часто в одной системе оба: Kafka для событий, RabbitMQ или очереди для задач</li></ul><p class="extra"><span>А ещё</span> Решающий вопрос — нужна ли история и сколько независимых потребителей</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Фоновые задачи</b> (сгенерировать PDF, отправить письмо, обработать видео): каждую задачу должен взять один воркер, подтвердить после выполнения, при сбое — повторить, после N попыток — отложить в DLQ. Задачи разной длительности. RabbitMQ делает это из коробки: конкурирующие потребители на одной очереди, prefetch для справедливого распределения, DLX, TTL, приоритеты, отложенная доставка (плагин). В Kafka одна медленная задача задерживает всю партицию, а повторы требуют отдельных топиков.</p>
+<p><b>Шина событий</b> («заказ создан», «платёж прошёл»): несколько сервисов реагируют независимо, новый сервис может прочитать историю, нужен порядок событий сущности, объёмы большие. Kafka: журнал с хранением, группы потребителей, порядок по ключу, CDC и потоковая обработка. В RabbitMQ пришлось бы держать очередь на каждого подписчика, а прочитанное пропадает.</p>
+<p><b>Другие критерии:</b> эксплуатация (управляемые сервисы), экосистема, требования к задержке (RabbitMQ обычно ниже при малых объёмах), объём (Kafka — на порядки больше).</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Выбор по сценарию с обоснованием.</li><li>Почему Kafka неудобна для задач разной длительности.</li><li>Почему RabbitMQ неудобен для шины событий с историей.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Выбирать по «что быстрее», без учёта модели.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Фоновые задачи с подтверждением каждой и сложной маршрутизацией — RabbitMQ; шина событий с хранением, перечитыванием и многими потребителями — Kafka</li><li class="no"><span class="mark">✗</span>Всегда Kafka — она быстрее</li><li class="no"><span class="mark">✗</span>Всегда RabbitMQ — Kafka не гарантирует доставку</li><li class="no"><span class="mark">✗</span>Для фоновых задач Kafka, потому что в ней есть приоритеты сообщений</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое exchange в RabbitMQ?</li><li>Когда Kafka как очередь неудобна?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/brokers/rabbitmq-sqs/">RabbitMQ, SQS и классические очереди</a><p>Модель exchange/binding/queue, ack/nack и publisher confirms, prefetch, DLQ через DLX, отложенные сообщения, SQS Standard vs FIFO и visibility timeout.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/brokers/kafka-vs-rabbitmq/">Чем Kafka принципиально отличается от RabbitMQ?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/when-kafka/">Когда стоит выбирать Kafka?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/rabbitmq-exchange-routing/">Что такое exchange и routing key в RabbitMQ?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что вы выберете для очереди фоновых задач, а что для шины событий между сервисами — RabbitMQ или Kafka?","acceptedAnswer":{"@type":"Answer","text":"Очередь задач — RabbitMQ (или SQS): подтверждение каждого сообщения, повторы, DLX, приоритеты, отложенная доставка, медленная задача не блокирует остальные. Шина событий — Kafka: хранение и перечитывание, много независимых потребителей, порядок по ключу, большой поток. Задачи разной длительности в Kafka блокируют партицию — head-of-line blocking В RabbitMQ нет перечитывания истории и сложнее масштабировать огромный поток Часто в одной системе оба: Kafka для событий, RabbitMQ или очереди для задач Решающий вопрос — нужна ли история и сколько независимых потребителей Фоновые задачи (сгенерировать PDF, отправить письмо, обработать видео): каждую задачу должен взять один воркер, подтвердить после выполнения, при сбое — повторить, после N попыток — отложить в DLQ. Задачи разной длительности. RabbitMQ делает это из коробки: конкурирующие потребители на одной очереди, prefetch для справедливого распределения, DLX, TTL, приоритеты, отложенная доставка (плагин). В Kafka одна медленная задача задерживает всю партицию, а повторы требуют отдельных топиков. Шина событий («заказ создан», «платёж прошёл»): несколько сервисов реагируют независимо, новый сервис может прочитать историю, нужен порядок событий сущности, объёмы большие. Kafka: журнал с хранением, группы потребителей, порядок по ключу, CDC и потоковая обработка. В RabbitMQ пришлось бы держать очередь на каждого подписчика, а прочитанное пропадает. Другие критерии: эксплуатация (управляемые сервисы)…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

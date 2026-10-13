@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работает компьютер и сеть — карта «Backend-разработчик»</title>
+<meta name="description" content="Процессы и потоки, память, конкурентность, TCP и TLS — фундамент, на котором стоит любой сервер.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/backend/cs/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/backend/cs/">
+<meta property="og:title" content="Как работает компьютер и сеть — карта «Backend-разработчик»">
+<meta property="og:description" content="Процессы и потоки, память, конкурентность, TCP и TLS — фундамент, на котором стоит любой сервер.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/#cs">Backend-разработчик</a> <span>/</span> <span>Как работает компьютер и сеть</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://learn.getsotto.ru/roadmap/backend/#cs"},{"@type":"ListItem","position":3,"name":"Как работает компьютер и сеть"}]}</script>
+  <h1>Как работает компьютер и сеть</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span></div>
+  <p class="lead">Процессы и потоки, память, конкурентность, TCP и TLS — фундамент, на котором стоит любой сервер.</p>
+  <article class="md"><p>Бэкенд-сервис — это процесс, который держит тысячи сетевых соединений, делит память и процессор между потоками и общается с базами и другими сервисами по сети. Почти все трудные баги бэкенда — гонки, утечки, зависания, таймауты — объясняются на этом уровне.</p>
+<p>На собеседованиях этот этап проверяют вопросами «чем процесс отличается от потока», «что такое deadlock», «как устанавливается TCP-соединение», «что происходит при вводе адреса в браузере». В работе он нужен, чтобы понимать, почему сервис тормозит под нагрузкой.</p></article>
+  <section class="block"><h2>Темы этапа</h2><ul class="links"><li><a href="/roadmap/backend/os-processes/">Процессы, потоки и память</a> <span class="rm-kind k-core">Основа</span><p>Процесс и поток, стек и куча, виртуальная память, системные вызовы и файловые дескрипторы.</p></li><li><a href="/roadmap/backend/concurrency-basics/">Конкурентность</a> <span class="rm-kind k-core">Основа</span><p>Гонки данных, мьютексы и семафоры, взаимные блокировки, атомарные операции и пулы потоков.</p></li><li><a href="/roadmap/common/internet/">Как работает интернет</a> <span class="rm-kind k-core">Основа</span><p>Клиент, сервер, протоколы и путь запроса от адресной строки до ответа — основа, на которой стоит любая веб-разработка.</p></li><li><a href="/roadmap/backend/networking/">TCP, UDP и TLS</a> <span class="rm-kind k-core">Основа</span><p>Как устанавливаются соединения, как TCP гарантирует доставку и как работает HTTPS.</p></li><li><a href="/roadmap/common/dns/">DNS</a> <span class="rm-kind k-core">Основа</span><p>Система, которая превращает имя сайта в IP-адрес, — записи, кэширование, TTL и типичные проблемы.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/common/data-structures/">← Структуры данных</a><a class="next" href="/roadmap/backend/os-processes/">Процессы, потоки и память →</a></nav>
+  <p class="rm-back"><a href="/roadmap/backend/#cs">← Вся карта «Backend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Как работает компьютер и сеть","description":"Процессы и потоки, память, конкурентность, TCP и TLS — фундамент, на котором стоит любой сервер.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/backend/cs/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

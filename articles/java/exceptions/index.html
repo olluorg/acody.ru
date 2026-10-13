@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Исключения: иерархия и checked/unchecked — разбор для собеседования</title>
+<meta name="description" content="Дерево Throwable, философия checked против unchecked, раскрутка стека и стоимость, цепочки причин и практики обработки.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/exceptions/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/exceptions/">
+<meta property="og:title" content="Исключения: иерархия и checked/unchecked — разбор для собеседования">
+<meta property="og:description" content="Дерево Throwable, философия checked против unchecked, раскрутка стека и стоимость, цепочки причин и практики обработки.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Исключения: иерархия и checked/unchecked</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Исключения: иерархия и checked/unchecked"}]}</script>
+  <h1>Исключения: иерархия и checked/unchecked</h1>
+  <p class="lead">Дерево Throwable, философия checked против unchecked, раскрутка стека и стоимость, цепочки причин и практики обработки.</p>
+  <article class="md"><h2>Иерархия Throwable</h2>
+<p>Корень — Throwable (только его объект можно бросить и поймать). От него две ветви: Error и Exception. Error — серьёзные сбои окружения, из которых обычно не восстанавливаются и которые не ловят: OutOfMemoryError, StackOverflowError, NoClassDefFoundError.</p>
+<p>Exception — прикладные ситуации, которые код может обработать. Внутри неё особняком стоит RuntimeException — ветка unchecked, куда попадают ошибки программиста: NullPointerException, IllegalArgumentException, IllegalStateException, ClassCastException.</p>
+<h2>Checked против unchecked</h2>
+<p>Checked-исключения (наследники Exception, кроме RuntimeException) проверяются компилятором: их нужно либо объявить в throws, либо обработать. Unchecked (RuntimeException и Error) компилятор обрабатывать не требует.</p>
+<p>Философия: checked — для ожидаемых восстановимых ситуаций, на которые вызывающий реально может среагировать (нет файла, сетевой сбой); unchecked — для багов и нарушений контракта, которые надо чинить в коде, а не «обрабатывать».</p>
+<p>Важный нюанс зрелости: checked-исключения критикуют за многословие и за то, что они плохо дружат с лямбдами и Stream API — функциональные интерфейсы (Function, Supplier) не объявляют throws, поэтому checked из лямбды не бросить без обёртки. Поэтому многие современные библиотеки и фреймворки тяготеют к unchecked.</p>
+<h2>Что происходит при выбросе</h2>
+<p>Когда исключение брошено, JVM раскручивает стек (stack unwinding): идёт вверх по кадрам методов в поисках ближайшего подходящего catch, по пути выполняя блоки finally. Если обработчик не найден до вершины стека потока — поток завершается, и печатается stack trace.</p>
+<p>Это объясняет, почему исключения не стоит использовать для нормального потока управления: основная стоимость — заполнение stack trace (<code>fillInStackTrace</code> обходит весь стек) при создании исключения. Само бросание/ловля дёшевы, дорого именно построение трассы.</p>
+<h2>Цепочки причин и не-глотание</h2>
+<p>При перехвате на границе слоёв исключение оборачивают, сохраняя первопричину: throw <code>new ServiceException(&quot;...&quot;, e)</code>. Тогда <code>getCause()</code> и печать трассы покажут всю цепочку «Caused by: …» — это бесценно при отладке. Терять cause (бросать new без e) — распространённая ошибка.</p>
+<p>Антипаттерны обработки: пустой catch (глотание ошибки), слишком широкий catch (Exception) или catch (Throwable) (ловит и баги, и Error), а также «залогировал и пробросил» (двойные логи одной ошибки на разных слоях). Несколько типов ловят одним multi-catch: catch (IOException | SQLException e).</p>
+<pre class="lang-java"><code>try {
+    repository.save(order);
+} catch (SQLException e) {
+    throw new OrderPersistenceException(&quot;не удалось сохранить заказ&quot;, e); // сохраняем cause
+}</code></pre>
+<h2>Практики и fail-fast</h2>
+<p>Бросайте максимально конкретное исключение и проверяйте предусловия рано (fail-fast): неверный аргумент — IllegalArgumentException, недопустимое состояние объекта — IllegalStateException, null-аргумент — <code>Objects.requireNonNull(x, &quot;x&quot;)</code> (бросит NPE с понятным сообщением сразу, а не где-то глубже).</p>
+<p>Кастомные исключения заводят, когда вызывающему нужно различать ситуацию программно; в них кладут осмысленные поля (id сущности, код ошибки), а не только текст. И помните смежное правило из многопоточности: поймав InterruptedException, восстановите флаг прерывания, а не глотайте его.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Нарисуйте дерево Throwable (Error не ловим; Exception/RuntimeException), объясните философию checked/unchecked и их трение с лямбдами, опишите раскрутку стека и что дорого именно построение stack trace (значит, не для control flow). Подчеркните сохранение cause при оборачивании и fail-fast (<code>requireNonNull</code>, IllegalArgument/StateException), назовите антипаттерны (пустой/широкий catch, log-and-rethrow).</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/checked-vs-unchecked/">Чем checked-исключения отличаются от unchecked?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/catch-order/">Какой порядок catch-блоков корректен для FileNotFoundException и IOException?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/throwable-hierarchy/">Что верно про иерархию Throwable?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/return-in-finally/">Метод бросает исключение внутри try, а в блоке finally стоит return. Что получит вызывающий?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/uncaught-exception/">Что происходит, если исключение не перехвачено ни в одном методе цепочки вызовов?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/resource-management/">Управление ресурсами: try-with-resources</a><p>Беды ручного finally, автозакрытие AutoCloseable, suppressed-исключения и разница Closeable/AutoCloseable.</p></li><li><a href="/articles/java/oop/">ООП и его принципы</a><p>Инкапсуляция, наследование, полиморфизм, абстракция — зачем они нужны, как работают внутри и почему композицию предпочитают наследованию.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Исключения: иерархия и checked/unchecked","description":"Дерево Throwable, философия checked против unchecked, раскрутка стека и стоимость, цепочки причин и практики обработки.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/exceptions/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

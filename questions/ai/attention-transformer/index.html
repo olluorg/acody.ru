@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работает механизм внимания (self-attention) и архитектура трансформера? — вопрос с собеседования</title>
+<meta name="description" content="Self-attention: для каждого токена считаются три вектора — Query (что ищу), Key (что содержу), Value (что передам). Вес внимания токена i к токену j…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/attention-transformer/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/attention-transformer/">
+<meta property="og:title" content="Как работает механизм внимания (self-attention) и архитектура трансформера? — вопрос с собеседования">
+<meta property="og:description" content="Self-attention: для каждого токена считаются три вектора — Query (что ищу), Key (что содержу), Value (что передам). Вес внимания токена i к токену j…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как работает механизм внимания (self-attention) и архитектура трансформера?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как работает механизм внимания (self-attention) и архитектура трансформера?"}]}</script>
+  <h1>Как работает механизм внимания (self-attention) и архитектура трансформера?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Нейросети и трансформеры</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое Query, Key и Value?</li><li>Почему трансформеры вытеснили RNN?</li><li>Что такое multi-head attention?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Self-attention</b>: для каждого токена считаются три вектора — <b>Query</b> (что ищу), <b>Key</b> (что содержу), <b>Value</b> (что передам). Вес внимания токена i к токену j — softmax от скалярного произведения Query_i и Key_j; выход — взвешенная сумма Value. Так каждый токен «смотрит» на все остальные и собирает нужный контекст.</p><ul><li>Multi-head — несколько голов внимания параллельно, каждая ловит свои связи</li><li>Блок трансформера: внимание + полносвязный слой, с остаточными связями и нормализацией</li><li>В декодерах (GPT) маска запрещает смотреть на будущие токены</li></ul><p class="extra"><span>А ещё</span> Внимание квадратично по длине контекста — отсюда цена длинных окон</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Формула:</b> Attention(Q, K, V) = softmax(Q·Kᵀ / √d) · V. Деление на √d не даёт произведениям расти с размерностью и «насыщать» softmax.</p>
+<p><b>Почему вытеснили RNN.</b> Рекуррентные сети обрабатывали последовательность шаг за шагом: обучение не параллелится, а связь между далёкими словами проходит через десятки шагов и затухает. Внимание связывает любые две позиции напрямую, и все позиции считаются параллельно на GPU — это позволило обучать модели на триллионах токенов.</p>
+<p><b>Позиции.</b> Внимание само по себе не знает порядка, поэтому добавляют позиционную информацию; в современных LLM — RoPE (вращение векторов Q и K в зависимости от позиции).</p>
+<p><b>Три семейства:</b></p>
+<ul><li><b>энкодер</b> (BERT) — видит весь текст, хорош для классификации и эмбеддингов;</li><li><b>декодер</b> (GPT, Llama, Claude) — с причинной маской, генерирует текст;</li><li><b>энкодер-декодер</b> (T5) — перевод, суммаризация.</li></ul>
+<p><b>Цена.</b> Вычисления и память внимания растут квадратично от длины контекста. Оптимизации: FlashAttention (без материализации матрицы внимания), grouped-query attention (меньше голов для K и V), KV-кэш при генерации.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Q, K, V и формула внимания.</li><li>Почему трансформеры лучше RNN.</li><li>Энкодер, декодер, причинная маска.</li><li>Квадратичная сложность.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/ai/kv-cache-inference/">Как LLM генерирует текст и что такое KV-кэш?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/how-llm-works/">Как устроена большая языковая модель (LLM)?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/tokenization-bpe/">Как работает токенизация в LLM и что такое BPE?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/tokens-context-window/">Что такое токены и контекстное окно LLM?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работает механизм внимания (self-attention) и архитектура трансформера?","acceptedAnswer":{"@type":"Answer","text":"Self-attention: для каждого токена считаются три вектора — Query (что ищу), Key (что содержу), Value (что передам). Вес внимания токена i к токену j — softmax от скалярного произведения Query_i и Key_j; выход — взвешенная сумма Value. Так каждый токен «смотрит» на все остальные и собирает нужный контекст. Multi-head — несколько голов внимания параллельно, каждая ловит свои связи Блок трансформера: внимание + полносвязный слой, с остаточными связями и нормализацией В декодерах (GPT) маска запрещает смотреть на будущие токены Внимание квадратично по длине контекста — отсюда цена длинных окон Формула: Attention(Q, K, V) = softmax(QKᵀ / √d) V. Деление на √d не даёт произведениям расти с размерностью и «насыщать» softmax. Почему вытеснили RNN. Рекуррентные сети обрабатывали последовательность шаг за шагом: обучение не параллелится, а связь между далёкими словами проходит через десятки шагов и затухает. Внимание связывает любые две позиции напрямую, и все позиции считаются параллельно на GPU — это позволило обучать модели на триллионах токенов. Позиции. Внимание само по себе не знает порядка, поэтому добавляют позиционную информацию; в современных LLM — RoPE (вращение векторов Q и K в зависимости от позиции). Три семейства: - энкодер (BERT) — видит весь текст, хорош для классификации и эмбеддингов; - декодер (GPT, Llama, Claude) — с причинной маской, генерирует текст; - энкодер-декодер (T5) — перевод, суммаризация. Цена. Вычисления и память внимания растут квадратично от длины…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

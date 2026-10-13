@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое проблема N+1 запросов и как её решать? — вопрос с собеседования</title>
+<meta name="description" content="N+1 — один запрос за списком и ещё по запросу на связанные данные каждого элемента: 100 заказов → 101 запрос. Причина — ленивая загрузка связей в…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/n-plus-one/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/n-plus-one/">
+<meta property="og:title" content="Что такое проблема N+1 запросов и как её решать? — вопрос с собеседования">
+<meta property="og:description" content="N+1 — один запрос за списком и ещё по запросу на связанные данные каждого элемента: 100 заказов → 101 запрос. Причина — ленивая загрузка связей в…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Что такое проблема N+1 запросов и как её решать?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Что такое проблема N+1 запросов и как её решать?"}]}</script>
+  <h1>Что такое проблема N+1 запросов и как её решать?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">ORM и N+1</span><span class="chip">Hibernate / JPA</span><span class="chip">SQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему Hibernate делает сотни запросов?</li><li>Как найти проблему N+1?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>N+1</b> — один запрос за списком и ещё по запросу на связанные данные каждого элемента: 100 заказов → 101 запрос. Причина — ленивая загрузка связей в цикле.</p><ul><li>Лечение: JOIN FETCH, @EntityGraph, пакетная загрузка (batch size), DTO-проекции</li><li>Обнаружение: логи SQL, счётчик запросов в тестах, APM</li><li>Каждый запрос — сетевой обход: 100 × 1 мс = 100 мс впустую</li></ul><p class="extra"><span>А ещё</span> JOIN FETCH коллекций с пагинацией — ловушка: Hibernate пагинирует в памяти</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Механизм.</b> ORM загружает список сущностей одним запросом, а связи (<code>order.getCustomer()</code>, <code>order.getItems()</code>) помечены ленивыми и подгружаются при первом обращении. Код проходит по списку в цикле — и на каждой итерации идёт отдельный запрос. В шаблоне или сериализаторе JSON это происходит незаметно.</p>
+<p><b>Почему плохо:</b> каждый запрос — обход по сети и разбор, даже быстрый; сотни запросов на страницу дают сотни миллисекунд и нагружают базу.</p>
+<p><b>Как найти:</b></p>
+<ul><li>включить лог SQL (<code>spring.jpa.show-sql</code>, p6spy, datasource-proxy) и посмотреть на повторяющиеся запросы;</li><li>в тестах проверять число запросов (Hypersistence Utils, assertSelectCount);</li><li>APM-трассировка показывает десятки одинаковых спанов.</li></ul>
+<p><b>Как лечить:</b></p>
+<ul><li><b>JOIN FETCH</b> в JPQL — связь загружается одним запросом с JOIN;</li><li><b>@EntityGraph</b> — описать, какие связи загрузить для конкретного запроса;</li><li><b>пакетная загрузка</b> — <code>hibernate.default_batch_fetch_size = 50</code>: связи для 50 сущностей подгружаются одним запросом с <code>IN (...)</code>;</li><li><b>DTO-проекции</b> — выбрать ровно нужные поля одним запросом.</li></ul>
+<p><b>Ловушки:</b> JOIN FETCH двух коллекций — декартово произведение (MultipleBagFetchException); JOIN FETCH коллекции с <code>setMaxResults</code> — Hibernate загрузит всё и пагинирует в памяти (предупреждение HHH000104).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>// N+1: запрос за заказами + по запросу на клиента каждого заказа
+for (Order o : orderRepo.findAll()) log.info(o.getCustomer().getName());
+
+// один запрос
+@Query(&quot;select o from Order o join fetch o.customer&quot;)
+List&lt;Order&gt; findAllWithCustomer();</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механизм через ленивую загрузку в цикле.</li><li>Как обнаружить.</li><li>Несколько способов исправления.</li><li>Ловушки JOIN FETCH — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Делать все связи EAGER — N+1 остаётся, а лишние данные грузятся всегда.</li><li>Не проверять число запросов в тестах.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем @EntityGraph отличается от JOIN FETCH?</li><li>Как поймать N+1 в тестах?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/orm/">ORM, persistence context и N+1</a><p>Что делает ORM, lazy/eager и proxy, механизм N+1, способы лечения и типичные грабли.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/spring-n-plus-one/">Список из 100 заказов рендерится вместе с покупателем каждого, и в логе видно 101 SQL-запрос. Какие способы исправят проблему?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/latency-numbers/">Какие порядки задержек нужно знать разработчику?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/explain/">Что делает EXPLAIN для SQL-запроса?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое проблема N+1 запросов и как её решать?","acceptedAnswer":{"@type":"Answer","text":"N+1 — один запрос за списком и ещё по запросу на связанные данные каждого элемента: 100 заказов → 101 запрос. Причина — ленивая загрузка связей в цикле. Лечение: JOIN FETCH, @EntityGraph, пакетная загрузка (batch size), DTO-проекции Обнаружение: логи SQL, счётчик запросов в тестах, APM Каждый запрос — сетевой обход: 100 × 1 мс = 100 мс впустую JOIN FETCH коллекций с пагинацией — ловушка: Hibernate пагинирует в памяти Механизм. ORM загружает список сущностей одним запросом, а связи (order.getCustomer(), order.getItems()) помечены ленивыми и подгружаются при первом обращении. Код проходит по списку в цикле — и на каждой итерации идёт отдельный запрос. В шаблоне или сериализаторе JSON это происходит незаметно. Почему плохо: каждый запрос — обход по сети и разбор, даже быстрый; сотни запросов на страницу дают сотни миллисекунд и нагружают базу. Как найти: - включить лог SQL (spring.jpa.show-sql, p6spy, datasource-proxy) и посмотреть на повторяющиеся запросы; - в тестах проверять число запросов (Hypersistence Utils, assertSelectCount); - APM-трассировка показывает десятки одинаковых спанов. Как лечить: - JOIN FETCH в JPQL — связь загружается одним запросом с JOIN; - @EntityGraph — описать, какие связи загрузить для конкретного запроса; - пакетная загрузка — hibernate.default_batch_fetch_size = 50: связи…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

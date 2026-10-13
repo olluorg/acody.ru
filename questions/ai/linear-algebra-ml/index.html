@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какая математика нужна в машинном обучении и где она применяется? — вопрос с собеседования</title>
+<meta name="description" content="Три опоры: линейная алгебра — данные это матрицы, модель — умножение матриц, эмбеддинги — векторы, сходство — скалярное произведение; математический…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/linear-algebra-ml/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/linear-algebra-ml/">
+<meta property="og:title" content="Какая математика нужна в машинном обучении и где она применяется? — вопрос с собеседования">
+<meta property="og:description" content="Три опоры: линейная алгебра — данные это матрицы, модель — умножение матриц, эмбеддинги — векторы, сходство — скалярное произведение; математический…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Какая математика нужна в машинном обучении и где она применяется?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Какая математика нужна в машинном обучении и где она применяется?"}]}</script>
+  <h1>Какая математика нужна в машинном обучении и где она применяется?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Основы машинного обучения</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Зачем data scientist линейная алгебра?</li><li>Что такое скалярное произведение и где оно в ML?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Три опоры: <b>линейная алгебра</b> — данные это матрицы, модель — умножение матриц, эмбеддинги — векторы, сходство — скалярное произведение; <b>математический анализ</b> — градиент показывает, куда менять параметры, обучение — градиентный спуск; <b>вероятность и статистика</b> — модели оценивают вероятности, функции потерь выводятся из правдоподобия, качество проверяется статистически. Нужна <b>интуиция и умение читать формулы</b>, а не доказательства теорем.</p><ul><li>Векторы, матрицы, умножение, норма, скалярное произведение, собственные векторы (PCA)</li><li>Производная, градиент, цепное правило (обратное распространение ошибки)</li><li>Распределения, условная вероятность, Байес, матожидание и дисперсия</li></ul><p class="extra"><span>А ещё</span> На собеседованиях спрашивают на уровне «объясните, что делает градиентный спуск» и «почему логистическая регрессия выдаёт вероятность»</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Где встречается:</b></p>
+<div class="table"><table><thead><tr><th>раздел</th><th>применение</th></tr></thead><tbody><tr><td>векторы и матрицы</td><td>признаки объекта, батч данных, веса слоя</td></tr><tr><td>скалярное произведение, косинус</td><td>сходство эмбеддингов, линейная модель</td></tr><tr><td>собственные векторы, SVD</td><td>PCA, рекомендательные системы</td></tr><tr><td>производная, градиент</td><td>обучение любой модели градиентным спуском</td></tr><tr><td>цепное правило</td><td>обратное распространение в нейросетях</td></tr><tr><td>вероятность, правдоподобие</td><td>логистическая регрессия, кросс-энтропия</td></tr><tr><td>распределения</td><td>проверка гипотез, генерация данных</td></tr></tbody></table></div>
+<p><b>Как учить:</b> параллельно с практикой — реализовать линейную регрессию и градиентный спуск на NumPy без библиотек, это закрывает большую часть интуиции.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Связь разделов математики с конкретными частями ML.</li><li>Понимание градиента и скалярного произведения.</li><li>Вероятностный взгляд на модели.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/gradient-descent/">Как работает градиентный спуск и что такое learning rate?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/embeddings/">Что такое эмбеддинги?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/pca-dimensionality/">Что такое PCA и зачем снижать размерность данных?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какая математика нужна в машинном обучении и где она применяется?","acceptedAnswer":{"@type":"Answer","text":"Три опоры: линейная алгебра — данные это матрицы, модель — умножение матриц, эмбеддинги — векторы, сходство — скалярное произведение; математический анализ — градиент показывает, куда менять параметры, обучение — градиентный спуск; вероятность и статистика — модели оценивают вероятности, функции потерь выводятся из правдоподобия, качество проверяется статистически. Нужна интуиция и умение читать формулы, а не доказательства теорем. Векторы, матрицы, умножение, норма, скалярное произведение, собственные векторы (PCA) Производная, градиент, цепное правило (обратное распространение ошибки) Распределения, условная вероятность, Байес, матожидание и дисперсия На собеседованиях спрашивают на уровне «объясните, что делает градиентный спуск» и «почему логистическая регрессия выдаёт вероятность» Где встречается: | раздел | применение | | --- | --- | | векторы и матрицы | признаки объекта, батч данных, веса слоя | | скалярное произведение, косинус | сходство эмбеддингов, линейная модель | | собственные векторы, SVD | PCA, рекомендательные системы | | производная, градиент | обучение любой модели градиентным спуском | | цепное правило | обратное распространение в нейросетях | | вероятность, правдоподобие | логистическая регрессия, кросс-энтропия | | распределения | проверка гипотез, генерация данных | Как учить: параллельно с практикой — реализовать линейную регрессию и градиентный спуск на NumPy без библиотек, это закрывает большую часть интуиции."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

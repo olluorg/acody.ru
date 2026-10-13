@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retries, DLQ и идемпотентность — разбор для собеседования</title>
+<meta name="description" content="Что повторять и почему не всё, backoff/jitter, non-blocking retry, дизайн DLQ и redrive, идемпотентность как фундамент.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/brokers/dlq-retries/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/brokers/dlq-retries/">
+<meta property="og:title" content="Retries, DLQ и идемпотентность — разбор для собеседования">
+<meta property="og:description" content="Что повторять и почему не всё, backoff/jitter, non-blocking retry, дизайн DLQ и redrive, идемпотентность как фундамент.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#brokers">Брокеры сообщений</a> <span>/</span> <span>Retries, DLQ и идемпотентность</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/articles/#brokers"},{"@type":"ListItem","position":3,"name":"Retries, DLQ и идемпотентность"}]}</script>
+  <h1>Retries, DLQ и идемпотентность</h1>
+  <p class="lead">Что повторять и почему не всё, backoff/jitter, non-blocking retry, дизайн DLQ и redrive, идемпотентность как фундамент.</p>
+  <article class="md"><h2>Что повторять, а что нет</h2>
+<p>Ретраи помогают только при ВРЕМЕННЫХ (transient) ошибках: сетевой сбой, таймаут, 5xx от зависимости, временная блокировка БД. Постоянные ошибки — валидация, формат, бизнес-правило — повторами не лечатся: повторите — снова упадёт.</p>
+<p>Поэтому код различает категории ошибок и ретраит только transient. Permanent-ошибки сразу уходят в DLQ или возвращаются вызывающему. Бесконечные слепые ретраи на любую ошибку — почти всегда симптом плохого дизайна.</p>
+<h2>Backoff и jitter</h2>
+<p>Между попытками обязательны экспоненциальный backoff (1с → 2с → 4с) и случайный jitter — добавка, разводящая ретраи во времени. Без jitter тысячи клиентов синхронно повторят запрос через одну и ту же паузу и добьют уже шатающуюся зависимость (retry storm / thundering herd).</p>
+<p>У ретраев всегда есть лимит попыток. И есть тонкость в брокерах: если consumer ретраит в том же потоке (blocking retry), он удерживает offset и блокирует всю партицию — лаг растёт, остальные сообщения ждут. Поэтому для брокерных consumer'ов чаще применяют non-blocking retry.</p>
+<h2>Non-blocking retry</h2>
+<p>Идея: при ошибке не ретраить на месте, а ПЕРЕНАПРАВИТЬ сообщение в отдельный retry-топик с задержкой (<code>orders.retry-5s</code>, <code>orders.retry-30s</code>, <code>orders.retry-5m</code>). Отдельный consumer этого топика ждёт паузу и пытается снова на основном. Так основной поток партиции не блокируется одной плохой записью.</p>
+<p>В Spring Kafka это реализует <code>@RetryableTopic</code> — фреймворк сам создаёт retry-топики по уровням и DLT после исчерпания лимита. Цена — больше топиков и сложнее наблюдение, но партиция не стоит из-за одного poison-сообщения.</p>
+<h2>Дизайн DLQ</h2>
+<p>DLQ (Dead Letter Queue/Topic) хранит то, что не удалось обработать после исчерпания ретраев или из-за невосстановимой ошибки. В Kafka это отдельный топик, в RabbitMQ — очередь, связанная с DLX (Dead Letter Exchange).</p>
+<p>Хорошая DLQ-запись несёт: оригинальный payload без модификации, причину (заголовки <code>error.class</code>, <code>error.message</code>, stacktrace), originating-topic/partition/offset и correlation id для трассировки. Без этого в DLQ остаётся непригодный для разбора мусор.</p>
+<figure><img src="/articles/assets/dlq-retries.webp" alt="Обработка сообщения: при ошибке — повтор с backoff до N раз; после исчерпания попыток сообщение уходит в очередь мёртвых сообщений (DLQ), при успехе — обработано." loading="lazy"><figcaption>Сообщение повторяется с backoff до N раз; после исчерпания попыток уходит в DLQ.</figcaption></figure>
+<h2>Redrive и владелец</h2>
+<p>У DLQ ОБЯЗАТЕЛЬНО должен быть владелец (команда/сервис), процедура разбора и инструмент redrive — возврата сообщений в основной поток после исправления первопричины. Без этого DLQ превращается в свалку, в которую тихо сваливаются события, которые «как будто обработали».</p>
+<p>Минимум для прода: алерт на любое сообщение в DLQ (или на скорость поступления), runbook разбора, скрипт/команда redrive с учётом идемпотентности consumer'а. Метрика «count in DLQ» должна стремиться к нулю.</p>
+<h2>Идемпотентность как фундамент</h2>
+<p>At-least-once + ретраи + ребалансы = неминуемые дубли. Поэтому consumer ОБЯЗАН обрабатывать одно сообщение повторно с тем же эффектом, что и в первый раз — без двойного списания, двойного письма, двойной строки в БД.</p>
+<p>Практика: в сообщение кладут стабильный idempotency key (event_id), а consumer держит таблицу processed_events с unique-constraint по нему и пишет бизнес-эффект + отметку об обработке в ОДНОЙ транзакции. Альтернативы — upsert/CAS по версии агрегата, дедупликация по натуральному ключу.</p>
+<pre class="lang-sql"><code>-- атомарно: либо и эффект, и отметка, либо ничего
+begin;
+  insert into processed_events(event_id) values (?) on conflict do nothing returning event_id;
+  -- если returning пуст — событие уже было обработано, выходим
+  update accounts set balance = balance + ? where id = ?;
+commit;</code></pre>
+<h2>Как отвечать на собеседовании</h2>
+<p>Разделите transient vs permanent ошибки и подчеркните: ретраить только transient, остальное — в DLQ. Назовите обязательные backoff + jitter (против retry storm) и риск blocking retry в брокерах (блокирует партицию) → паттерн non-blocking retry через retry-топики. Опишите хорошую DLQ-запись (payload + причина + контекст), требование владельца и redrive-процедуры. Завершите тезисом: at-least-once → идемпотентность consumer'а через idempotency key и атомарную запись эффекта+отметки.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/brokers/dead-letter-queue/">Что такое dead letter queue (DLQ) и зачем она нужна?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/retryable-errors/">Какие ошибки обработки сообщения имеет смысл повторять, а какие нет?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/non-blocking-retries/">Чем неблокирующий повтор через отдельные retry-топики лучше повтора прямо в обработчике?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/dlq-design/">Что важно предусмотреть при проектировании dead letter queue?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/at-least-once-basic/">Что означает семантика доставки at-least-once?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/brokers/messaging-basics/">Очереди, pub/sub и гарантии доставки</a><p>Зачем брокер сообщений, queue против pub/sub, три семантики доставки, роль идемпотентности и компромисс порядок/масштаб.</p></li><li><a href="/articles/brokers/kafka-consumer/">Kafka Consumer и consumer group</a><p>Группа и распределение партиций, poll-цикл, heartbeat и таймауты, модели commit offset, ребаланс и роль идемпотентности.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Retries, DLQ и идемпотентность","description":"Что повторять и почему не всё, backoff/jitter, non-blocking retry, дизайн DLQ и redrive, идемпотентность как фундамент.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/brokers/dlq-retries/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

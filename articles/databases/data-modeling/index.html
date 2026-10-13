@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Моделирование данных и целостность — разбор для собеседования</title>
+<meta name="description" content="Ключи и constraints, нормальные формы простыми словами, осознанная денормализация и каскадные действия.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/databases/data-modeling/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/databases/data-modeling/">
+<meta property="og:title" content="Моделирование данных и целостность — разбор для собеседования">
+<meta property="og:description" content="Ключи и constraints, нормальные формы простыми словами, осознанная денормализация и каскадные действия.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>Моделирование данных и целостность</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"Моделирование данных и целостность"}]}</script>
+  <h1>Моделирование данных и целостность</h1>
+  <p class="lead">Ключи и constraints, нормальные формы простыми словами, осознанная денормализация и каскадные действия.</p>
+  <article class="md"><h2>Ключи и ограничения как часть модели</h2>
+<p>Хорошая модель кодирует правила данных в схеме, а не только в коде. Primary key идентифицирует строку, foreign key защищает ссылочную целостность, unique выражает бизнес-уникальность, NOT NULL и CHECK ограничивают допустимые значения.</p>
+<p>Эти ограничения — не бюрократия, а машинно-проверяемая документация инвариантов. Схему читают новые разработчики, аналитики и скрипты миграции; правило, записанное в CHECK, невозможно «не заметить», в отличие от проверки, спрятанной в одном из сервисов.</p>
+<p>Отдельный сюжет — суррогатный ключ против естественного. Суррогатный (auto id, UUID) стабилен и ничего не значит для бизнеса, поэтому его безопасно менять местами и ссылаться на него. Естественный (email, ИНН, номер паспорта) экономит соединение, но имеет свойство меняться — а меняющийся PK тянет за собой обновление всех ссылающихся строк. Практика по умолчанию: суррогатный PK плюс unique-ограничение на естественный ключ — так получаем и стабильность, и защиту бизнес-уникальности.</p>
+<pre class="lang-sql"><code>create table orders (
+  id          bigserial primary key,              -- суррогатный ключ
+  tenant_id   bigint not null references tenants(id),
+  order_no    text   not null,
+  status      text   not null,
+  total       numeric(12,2) not null,
+  created_at  timestamptz   not null default now(),
+  constraint uq_order_no unique (tenant_id, order_no),   -- бизнес-уникальность
+  constraint ck_total_non_negative check (total &gt;= 0),   -- инвариант в схеме
+  constraint ck_status check (status in (&#x27;NEW&#x27;,&#x27;PAID&#x27;,&#x27;SHIPPED&#x27;,&#x27;CANCELLED&#x27;))
+);
+
+-- колонку-источник FK индексируем сами: автоматически это не делается
+create index idx_orders_tenant on orders (tenant_id);</code></pre>
+<h2>Нормальные формы простыми словами</h2>
+<p>1NF — атомарные значения, без списков в одной ячейке. 2NF — нет зависимости части атрибутов только от части составного ключа. 3NF — неключевые атрибуты зависят только от ключа, а не друг от друга (нет транзитивных зависимостей).</p>
+<p>Практический смысл нормализации — хранить каждый факт в одном месте, чтобы не было аномалий вставки/обновления/удаления и рассинхронизации копий.</p>
+<h2>Осознанная денормализация</h2>
+<p>Денормализация — сознательное дублирование данных ради скорости чтения (меньше join, готовые агрегаты). Это компромисс: чтение дешевеет, но запись усложняется, и появляется риск рассинхронизации.</p>
+<p>Денормализуйте после измерений и с явным механизмом поддержания согласованности (триггеры, пересчёт, события), а не «на всякий случай».</p>
+<h2>Каскадные действия</h2>
+<p>ON DELETE CASCADE удобен для строк, не имеющих смысла без родителя (позиции заказа), но опасен на больших графах: одно удаление может снести многое. RESTRICT/NO ACTION заставляет приложение явно решить судьбу зависимостей. SET NULL подходит для опциональной связи.</p>
+<p>Выбор действия — часть модели, а не деталь реализации.</p>
+<h2>JSON-колонки и гибкая схема</h2>
+<p>Современные реляционные СУБД умеют хранить документ прямо в колонке (jsonb в PostgreSQL, JSON в MySQL) и индексировать его содержимое. Это снимает вечный соблазн изобрести EAV — таблицу вида (entity_id, attribute, value), которая формально универсальна, но убивает и запросы, и типизацию, и ограничения.</p>
+<p>Разумная граница проходит по предсказуемости: то, по чему фильтруют, соединяют и считают агрегаты, должно быть обычными колонками с типами и ограничениями. То, что действительно произвольно и меняется от записи к записи (атрибуты товара в маркетплейсе, сырой ответ внешнего API, настройки), уместно в jsonb.</p>
+<p>Цена гибкости честная: в JSON нет NOT NULL, FK и CHECK для внутренних полей, опечатка в имени ключа не будет замечена базой, а индексы по содержимому дороже обычных. Поэтому «сложим всё в jsonb и разберёмся потом» — это не гибкость, а отложенный технический долг.</p>
+<pre class="lang-sql"><code>create table products (
+  id         bigserial primary key,
+  sku        text not null unique,        -- предсказуемое → колонка
+  price      numeric(12,2) not null,      -- по нему фильтруют → колонка
+  attributes jsonb not null default &#x27;{}&#x27;  -- произвольное → документ
+);
+
+-- индекс по содержимому документа
+create index idx_products_attrs on products using gin (attributes);
+select * from products where attributes @&gt; &#x27;{&quot;color&quot;: &quot;red&quot;}&#x27;;</code></pre>
+<h2>Практический критерий</h2>
+<p>Если нарушение правила критично для бизнеса, не держите его только в коде — добавьте constraint в БД. Код можно обойти миграцией, багом или вторым сервисом; constraint остаётся последней линией защиты.</p>
+<p>Обратная сторона критерия: ограничение в схеме тем полезнее, чем стабильнее правило. Инварианты вроде «сумма не отрицательна» или «номер заказа уникален в рамках тенанта» живут годами. Изменчивую бизнес-логику («скидка не больше 30% по вторникам») в CHECK загонять не стоит — каждое изменение правила превратится в миграцию.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Нормальные формы объясняйте смыслом, а не заученными формулировками: цель нормализации — хранить каждый факт в ОДНОМ месте, чтобы не было аномалий вставки, обновления и удаления. Дальше уже можно назвать 1NF (атомарные значения), 2NF (нет зависимости от части составного ключа) и 3NF (неключевые атрибуты не зависят друг от друга).</p>
+<p>Ключевая фраза, которую ждут: нормализуйте по умолчанию, денормализуйте осознанно — после измерений и с явным механизмом поддержания согласованности (триггер, пересчёт, событие). Денормализация — это обмен: чтение дешевеет, запись усложняется, появляется риск рассинхронизации.</p>
+<p>Про ключи дайте готовую позицию: суррогатный PK для стабильности плюс unique на естественный ключ для бизнес-правила. Это лучше, чем абстрактно рассуждать, что «у обоих есть плюсы».</p>
+<p>Каскады подавайте как проектное решение: CASCADE для строк, не имеющих смысла без родителя (позиции заказа), RESTRICT когда удаление должно быть осознанным, SET NULL для опциональной связи. И упомяните риск CASCADE на большом графе — одно удаление способно снести многое.</p>
+<p>Завершите критерием про constraints: критичные инварианты закрепляем в схеме, потому что это последняя линия защиты, которую не обойдёт ни баг, ни второй сервис, ни ручной UPDATE в проде.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/databases/normalization/">Что такое нормализация и когда оправдана денормализация?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/normal-forms/">Что требуют первые три нормальные формы?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/on-delete-cascade-risk/">Чем опасно объявление внешнего ключа с ON DELETE CASCADE?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/surrogate-vs-natural-key/">Почему в качестве первичного ключа обычно предпочитают суррогатный ключ, а не естественный?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/foreign-key-basic/">Что обеспечивает внешний ключ (foreign key)?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/databases/joins-keys/">JOIN, ключи и ограничения</a><p>INNER/OUTER/CROSS JOIN, ловушка ON vs WHERE, первичные/внешние/уникальные ключи и ссылочная целостность.</p></li><li><a href="/articles/databases/transactions/">Транзакции, изоляция и блокировки</a><p>ACID по буквам, аномалии чтения, уровни изоляции, MVCC и оптимистичные/пессимистичные блокировки.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Моделирование данных и целостность","description":"Ключи и constraints, нормальные формы простыми словами, осознанная денормализация и каскадные действия.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/databases/data-modeling/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

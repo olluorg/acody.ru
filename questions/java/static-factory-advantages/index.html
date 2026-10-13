@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие преимущества даёт статическая фабрика по сравнению с публичным конструктором? — вопрос с собеседования</title>
+<meta name="description" content="Три плюса из Effective Java: имя (of, copyOf, ofNullable — различимы, в отличие от конструкторов с одной сигнатурой), не обязана создавать новый…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/static-factory-advantages/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/static-factory-advantages/">
+<meta property="og:title" content="Какие преимущества даёт статическая фабрика по сравнению с публичным конструктором? — вопрос с собеседования">
+<meta property="og:description" content="Три плюса из Effective Java: имя (of, copyOf, ofNullable — различимы, в отличие от конструкторов с одной сигнатурой), не обязана создавать новый…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Какие преимущества даёт статическая фабрика по сравнению с публичным конструктором?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Какие преимущества даёт статическая фабрика по сравнению с публичным конструктором?"}]}</script>
+  <h1>Какие преимущества даёт статическая фабрика по сравнению с публичным конструктором?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Паттерны проектирования</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main">Три плюса из Effective Java: <b>имя</b> (of, copyOf, ofNullable — различимы, в отличие от конструкторов с одной сигнатурой), <b>не обязана создавать новый объект</b> (кэш, синглтон), <b>может вернуть подтип</b> (EnumSet.noneOf отдаёт RegularEnumSet или JumboEnumSet).</p><ul><li>Тип результата может даже не существовать на момент написания (ServiceLoader)</li><li>Минусы: класс только со статическими фабриками нельзя наследовать; фабрики хуже видны в документации</li><li>Соглашения имён: of, from, valueOf, getInstance, newInstance, create</li></ul><p class="extra"><span>А ещё</span> List.of, Optional.of, Path.of — современные примеры</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Три классических плюса из Effective Java. Имя: of и copyOf различимы, а два конструктора с одинаковой сигнатурой невозможны. Кэширование: Integer.valueOf берёт из кэша, Boolean.valueOf возвращает константу. Подтип: EnumSet.noneOf отдаёт RegularEnumSet или JumboEnumSet в зависимости от размера, а клиент видит только EnumSet. Потокобезопасность объекта из способа создания никак не следует.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Три преимущества с примерами.</li><li>Недостатки.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Приписывать статической фабрике гарантии, которых у неё нет.</li><li>Забывать про минусы: класс без публичного конструктора нельзя наследовать, а фабричные методы хуже заметны в документации.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Несколько верных вариантов. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>У неё есть имя, поэтому можно иметь несколько способов создания с одинаковой сигнатурой</li><li class="ok"><span class="mark">✓</span>Она не обязана создавать новый объект при каждом вызове</li><li class="ok"><span class="mark">✓</span>Она может вернуть объект любого подтипа объявленного типа возврата</li><li class="no"><span class="mark">✗</span>Она гарантирует потокобезопасность создаваемого объекта</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Какие минусы у статической фабрики?</li><li>Как это связано с Flyweight?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/patterns-creational/">Порождающие паттерны</a><p>Factory Method против статической фабрики Блоха, Abstract Factory, Builder в двух версиях, Prototype и почему clone() считают ошибкой, object pool — с примерами из JDK и Spring.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/static-factory-vs-factory-method/">Чем Integer.valueOf(127) отличается от паттерна Factory Method по GoF?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/builder-immutable/">Почему паттерн Builder особенно удобен при создании неизменяемых объектов?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие преимущества даёт статическая фабрика по сравнению с публичным конструктором?","acceptedAnswer":{"@type":"Answer","text":"Три плюса из Effective Java: имя (of, copyOf, ofNullable — различимы, в отличие от конструкторов с одной сигнатурой), не обязана создавать новый объект (кэш, синглтон), может вернуть подтип (EnumSet.noneOf отдаёт RegularEnumSet или JumboEnumSet). Тип результата может даже не существовать на момент написания (ServiceLoader) Минусы: класс только со статическими фабриками нельзя наследовать; фабрики хуже видны в документации Соглашения имён: of, from, valueOf, getInstance, newInstance, create List.of, Optional.of, Path.of — современные примеры Три классических плюса из Effective Java. Имя: of и copyOf различимы, а два конструктора с одинаковой сигнатурой невозможны. Кэширование: Integer.valueOf берёт из кэша, Boolean.valueOf возвращает константу. Подтип: EnumSet.noneOf отдаёт RegularEnumSet или JumboEnumSet в зависимости от размера, а клиент видит только EnumSet. Потокобезопасность объекта из способа создания никак не следует."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

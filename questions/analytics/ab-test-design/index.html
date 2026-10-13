@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как спроектировать A/B-тест от гипотезы до решения? — вопрос с собеседования</title>
+<meta name="description" content="До запуска: гипотеза (что меняем и почему это должно сработать), главная метрика и ограничители (guardrails), единица рандомизации (пользователь…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/ab-test-design/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/ab-test-design/">
+<meta property="og:title" content="Как спроектировать A/B-тест от гипотезы до решения? — вопрос с собеседования">
+<meta property="og:description" content="До запуска: гипотеза (что меняем и почему это должно сработать), главная метрика и ограничители (guardrails), единица рандомизации (пользователь…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Как спроектировать A/B-тест от гипотезы до решения?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Как спроектировать A/B-тест от гипотезы до решения?"}]}</script>
+  <h1>Как спроектировать A/B-тест от гипотезы до решения?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">A/B-тесты</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что нужно определить до запуска A/B-теста?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">До запуска: <b>гипотеза</b> (что меняем и почему это должно сработать), <b>главная метрика</b> и <b>ограничители</b> (guardrails), <b>единица рандомизации</b> (пользователь, сессия, город), <b>размер выборки и длительность</b> по MDE, <b>критерий решения</b>. Во время — проверки здоровья (SRM, трекинг). После — анализ по заранее заданному плану и решение с учётом бизнес-контекста.</p><ul><li>Длительность — целое число недель, чтобы покрыть недельную сезонность</li><li>Одна главная метрика, чувствительная и связанная с целью бизнеса</li><li>Рандомизация по пользователю, если изменение заметно на протяжении визитов</li></ul><p class="extra"><span>А ещё</span> Записывают дизайн до старта — это защищает от подгонки выводов</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Сотни A/B-тестов: ложные срабатывания, подглядывание и мощность</p><script type="module" src="/widgets/ab-simulator.js"></script><sotto-ab-simulator theme="dark"></sotto-ab-simulator></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Шаблон дизайна:</b></p>
+<ol><li><b>Гипотеза:</b> «Если показать доставку на карточке товара, больше пользователей добавят товар в корзину, потому что снимется неопределённость».</li><li><b>Метрики:</b> главная — конверсия в добавление в корзину; вторичные — конверсия в заказ, средний чек; ограничители — выручка, скорость загрузки страницы, обращения в поддержку.</li><li><b>Единица и доля трафика:</b> пользователи, 50/50, сегмент — все страны или только Россия.</li><li><b>Размер выборки:</b> из базовой конверсии, MDE, α = 0,05 и мощности 80%.</li><li><b>Длительность:</b> не меньше недели и до набора выборки; заранее — без «остановлю, когда станет значимо».</li><li><b>Решение:</b> что делаем при положительном, нейтральном и отрицательном результате.</li></ol>
+<p><b>Во время теста</b> — проверить, что группы получились нужного размера (SRM), события отправляются в обеих группах, нет технических ошибок.</p>
+<p><b>Анализ:</b> эффект с доверительным интервалом, а не только p-value; ограничители; сегменты — как гипотезы, а не как основание для решения.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Элементы дизайна до запуска.</li><li>Главная метрика и ограничители.</li><li>Размер выборки, длительность и правило остановки.</li><li>Проверки во время теста.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/analytics/ab-sample-size/">Как рассчитать размер выборки и длительность A/B-теста?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/analytics/peeking-problem/">Почему нельзя останавливать A/B-тест, как только результат стал значимым?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/p-value-hypothesis/">Что такое p-value и как работает проверка статистических гипотез?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/multiple-testing/">Что такое проблема множественных сравнений?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/ab-testing-models/">Почему хорошая офлайн-метрика модели не гарантирует успех в продакшене и как проверить модель онлайн?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как спроектировать A/B-тест от гипотезы до решения?","acceptedAnswer":{"@type":"Answer","text":"До запуска: гипотеза (что меняем и почему это должно сработать), главная метрика и ограничители (guardrails), единица рандомизации (пользователь, сессия, город), размер выборки и длительность по MDE, критерий решения. Во время — проверки здоровья (SRM, трекинг). После — анализ по заранее заданному плану и решение с учётом бизнес-контекста. Длительность — целое число недель, чтобы покрыть недельную сезонность Одна главная метрика, чувствительная и связанная с целью бизнеса Рандомизация по пользователю, если изменение заметно на протяжении визитов Записывают дизайн до старта — это защищает от подгонки выводов Шаблон дизайна: 1. Гипотеза: «Если показать доставку на карточке товара, больше пользователей добавят товар в корзину, потому что снимется неопределённость». 2. Метрики: главная — конверсия в добавление в корзину; вторичные — конверсия в заказ, средний чек; ограничители — выручка, скорость загрузки страницы, обращения в поддержку. 3. Единица и доля трафика: пользователи, 50/50, сегмент — все страны или только Россия. 4. Размер выборки: из базовой конверсии, MDE, α = 0,05 и мощности 80%. 5. Длительность: не меньше недели и до набора выборки; заранее — без «остановлю, когда станет значимо». 6. Решение: что делаем при положительном, нейтральном и отрицательном результате. Во время теста — проверить, что группы получились нужного размера (SRM), события отправляются в обеих группах, нет технических ошибок. Анализ: эффект с доверительным интервалом, а не только p-value; ограничители; сегменты…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

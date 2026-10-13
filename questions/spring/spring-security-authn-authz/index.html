@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как в Spring Security устроены аутентификация и авторизация — какие объекты за них отвечают? — вопрос с собеседования</title>
+<meta name="description" content="Аутентификация: фильтр извлекает учётные данные → AuthenticationManager (через AuthenticationProvider, UserDetailsService, PasswordEncoder) проверяет…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/spring-security-authn-authz/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/spring-security-authn-authz/">
+<meta property="og:title" content="Как в Spring Security устроены аутентификация и авторизация — какие объекты за них отвечают? — вопрос с собеседования">
+<meta property="og:description" content="Аутентификация: фильтр извлекает учётные данные → AuthenticationManager (через AuthenticationProvider, UserDetailsService, PasswordEncoder) проверяет…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Как в Spring Security устроены аутентификация и авторизация — какие объекты за них отвечают?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Как в Spring Security устроены аутентификация и авторизация — какие объекты за них отвечают?"}]}</script>
+  <h1>Как в Spring Security устроены аутентификация и авторизация — какие объекты за них отвечают?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">HTTP, cookies и сессии</span><span class="chip">Spring Security</span><span class="chip ver">Spring Boot &gt;=3</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое AuthenticationManager и SecurityContext?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Аутентификация</b>: фильтр извлекает учётные данные → <code>AuthenticationManager</code> (через <code>AuthenticationProvider</code>, <code>UserDetailsService</code>, <code>PasswordEncoder</code>) проверяет → готовый <code>Authentication</code> кладётся в <code>SecurityContext</code>. <b>Авторизация</b>: <code>AuthorizationManager</code> сверяет права (<code>GrantedAuthority</code>) с правилами для URL или метода.</p><ul><li>SecurityContext живёт в потоке, а между запросами — в сессии или нигде (JWT)</li><li>401 — не аутентифицирован, 403 — нет прав</li><li>Правила: <code>authorizeHttpRequests</code> для URL, <code>@PreAuthorize</code> для методов</li></ul><p class="extra"><span>А ещё</span> Spring Security 6: WebSecurityConfigurerAdapter удалён, конфигурация — бином SecurityFilterChain</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Аутентификация — «кто ты»:</b></p>
+<ol><li>фильтр в цепочке (<code>UsernamePasswordAuthenticationFilter</code>, <code>BearerTokenAuthenticationFilter</code> для JWT, <code>BasicAuthenticationFilter</code>) извлекает учётные данные и создаёт неаутентифицированный <code>Authentication</code>;</li><li><code>AuthenticationManager</code> (обычно <code>ProviderManager</code>) перебирает <code>AuthenticationProvider</code>: для логина и пароля — <code>DaoAuthenticationProvider</code>, который берёт пользователя из <code>UserDetailsService</code> и сверяет пароль через <code>PasswordEncoder</code> (BCrypt, Argon2);</li><li>успех — аутентифицированный <code>Authentication</code> с principal и списком <code>GrantedAuthority</code> кладётся в <code>SecurityContext</code>. Неудача — <code>AuthenticationException</code> и ответ 401.</li></ol>
+<p><b>Хранение:</b> <code>SecurityContextHolder</code> держит контекст в ThreadLocal на время запроса. Между запросами — в HTTP-сессии (формы) или нигде: при JWT токен проверяется заново в каждом запросе.</p>
+<p><b>Авторизация — «что можно»:</b></p>
+<ul><li>для URL — <code>http.authorizeHttpRequests(a -&gt; a.requestMatchers(&quot;/admin/**&quot;).hasRole(&quot;ADMIN&quot;))</code>, правила проверяются по порядку, первое совпадение решает;</li><li>для методов — <code>@EnableMethodSecurity</code> и <code>@PreAuthorize(&quot;hasRole(&#x27;ADMIN&#x27;)&quot;)</code>;</li><li>решение принимает <code>AuthorizationManager</code>; отказ — <code>AccessDeniedException</code> и ответ 403.</li></ul>
+<p><b>Роли и права:</b> <code>hasRole(&quot;ADMIN&quot;)</code> проверяет authority <code>ROLE_ADMIN</code> (префикс добавляется автоматически), <code>hasAuthority(&quot;orders:write&quot;)</code> — точное значение.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Путь аутентификации: фильтр, AuthenticationManager, провайдер, SecurityContext.</li><li>Хранение контекста: поток, сессия, stateless.</li><li>Авторизация для URL и методов, роли и authorities.</li><li>Коды 401 и 403.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Путать hasRole и hasAuthority (префикс ROLE_).</li><li>Проверять права вручную в контроллерах вместо правил.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Фильтр извлекает учётные данные, AuthenticationManager проверяет их через AuthenticationProvider, результат кладётся в SecurityContext; авторизация сверяет GrantedAuthority с правилами через AuthorizationManager</li><li class="no"><span class="mark">✗</span>Аутентификацией и авторизацией занимается один @PreAuthorize на контроллере</li><li class="no"><span class="mark">✗</span>Spring Security хранит пароль пользователя в SecurityContext и сравнивает его в каждом контроллере</li><li class="no"><span class="mark">✗</span>Авторизация выполняется до аутентификации</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем session auth отличается от JWT?</li><li>Что такое RBAC и ABAC?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/http-security/">HTTP, cookies и сессии</a><p>Семантика HTTP-методов и кэширование, cookies и их флаги безопасности, stateful против stateless сессий, HTTPS и граница authn/authz.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/authentication-vs-authorization/">Чем аутентификация отличается от авторизации?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/spring/security-filter-chain/">Как устроена SecurityFilterChain в Spring Security?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/preauthorize/">Для чего нужна @PreAuthorize в Spring Security?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/spring-security-filters-basic/">Как Spring Security встраивается в обработку запроса?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как в Spring Security устроены аутентификация и авторизация — какие объекты за них отвечают?","acceptedAnswer":{"@type":"Answer","text":"Аутентификация: фильтр извлекает учётные данные → AuthenticationManager (через AuthenticationProvider, UserDetailsService, PasswordEncoder) проверяет → готовый Authentication кладётся в SecurityContext. Авторизация: AuthorizationManager сверяет права (GrantedAuthority) с правилами для URL или метода. SecurityContext живёт в потоке, а между запросами — в сессии или нигде (JWT) 401 — не аутентифицирован, 403 — нет прав Правила: authorizeHttpRequests для URL, @PreAuthorize для методов Spring Security 6: WebSecurityConfigurerAdapter удалён, конфигурация — бином SecurityFilterChain Аутентификация — «кто ты»: 1. фильтр в цепочке (UsernamePasswordAuthenticationFilter, BearerTokenAuthenticationFilter для JWT, BasicAuthenticationFilter) извлекает учётные данные и создаёт неаутентифицированный Authentication; 2. AuthenticationManager (обычно ProviderManager) перебирает AuthenticationProvider: для логина и пароля — DaoAuthenticationProvider, который берёт пользователя из UserDetailsService и сверяет пароль через PasswordEncoder (BCrypt, Argon2); 3. успех — аутентифицированный Authentication с principal и списком GrantedAuthority кладётся в SecurityContext. Неудача — AuthenticationException и ответ 401. Хранение: SecurityContextHolder держит контекст в ThreadLocal на время запроса. Между запросами — в HTTP-сессии (формы) или нигде: при JWT токен проверяется заново в каждом запросе. Авторизация — «что можно»: - для URL — http.authorizeHttpRequests(a ->…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как понять, сколько памяти реально свободно в Linux, и что такое OOM killer? — вопрос с собеседования</title>
+<meta name="description" content="Linux использует свободную память под кэш файлов (page cache), поэтому «free» почти всегда мал — смотреть надо на available: сколько можно выделить…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/linux-memory-oom/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/linux-memory-oom/">
+<meta property="og:title" content="Как понять, сколько памяти реально свободно в Linux, и что такое OOM killer? — вопрос с собеседования">
+<meta property="og:description" content="Linux использует свободную память под кэш файлов (page cache), поэтому «free» почти всегда мал — смотреть надо на available: сколько можно выделить…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Как понять, сколько памяти реально свободно в Linux, и что такое OOM killer?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Как понять, сколько памяти реально свободно в Linux, и что такое OOM killer?"}]}</script>
+  <h1>Как понять, сколько памяти реально свободно в Linux, и что такое OOM killer?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Linux и диагностика</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему free показывает, что памяти почти не осталось?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Linux использует свободную память под <b>кэш файлов</b> (page cache), поэтому «free» почти всегда мал — смотреть надо на <b>available</b>: сколько можно выделить, вытеснив кэш. Когда память действительно закончилась, <b>OOM killer</b> убивает процесс с наибольшей оценкой (обычно самый большой) — в логах ядра «Out of memory: Killed process».</p><ul><li>Найти: dmesg -T | grep -i kill, journalctl -k</li><li>В контейнере OOM срабатывает при превышении лимита cgroup, даже если на хосте память есть</li><li>Swap спасает от OOM ценой резкого падения производительности</li></ul><p class="extra"><span>А ещё</span> oom_score_adj позволяет защитить критичный процесс или пожертвовать неважным</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>**Вывод <code>free -h</code>:**</p>
+<ul><li><b>used</b> — занято процессами;</li><li><b>buff/cache</b> — кэш файлов и буферы: освобождается при нужде;</li><li><b>available</b> — оценка доступной памяти с учётом кэша.</li></ul>
+<p>Мониторинг по <code>free</code> вместо <code>available</code> даёт ложные алерты.</p>
+<p><b>OOM killer.</b> Ядро выбирает жертву по <code>oom_score</code> (зависит от объёма памяти процесса и <code>oom_score_adj</code>). Процесс получает SIGKILL — без корректного завершения.</p>
+<p><b>Контейнеры:</b> лимит памяти — это cgroup. Превышение → OOM внутри контейнера, в Kubernetes статус <code>OOMKilled</code>, код выхода 137. Для JVM и других рантаймов важно настроить кучу относительно лимита: память процесса больше кучи.</p>
+<p><b>Утечки и рост:</b> <code>ps aux --sort=-rss</code>, <code>smem</code>, метрики RSS процесса во времени; для JVM — дамп кучи.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Page cache и available.</li><li>Как работает OOM killer и где его следы.</li><li>OOM в контейнере и код 137.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/devops/k8s-requests-limits/">Чем requests отличаются от limits в Kubernetes и что такое OOMKilled и троттлинг CPU?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jvm-heap-in-container/">Java-приложение запускают в контейнере с лимитом памяти. Как правильно задать размер кучи?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/page-cache/">Почему повторное чтение файла быстрее первого?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как понять, сколько памяти реально свободно в Linux, и что такое OOM killer?","acceptedAnswer":{"@type":"Answer","text":"Linux использует свободную память под кэш файлов (page cache), поэтому «free» почти всегда мал — смотреть надо на available: сколько можно выделить, вытеснив кэш. Когда память действительно закончилась, OOM killer убивает процесс с наибольшей оценкой (обычно самый большой) — в логах ядра «Out of memory: Killed process». Найти: dmesg -T | grep -i kill, journalctl -k В контейнере OOM срабатывает при превышении лимита cgroup, даже если на хосте память есть Swap спасает от OOM ценой резкого падения производительности oom_score_adj позволяет защитить критичный процесс или пожертвовать неважным Вывод free -h: - used — занято процессами; - buff/cache — кэш файлов и буферы: освобождается при нужде; - available — оценка доступной памяти с учётом кэша. Мониторинг по free вместо available даёт ложные алерты. OOM killer. Ядро выбирает жертву по oom_score (зависит от объёма памяти процесса и oom_score_adj). Процесс получает SIGKILL — без корректного завершения. Контейнеры: лимит памяти — это cgroup. Превышение → OOM внутри контейнера, в Kubernetes статус OOMKilled, код выхода 137. Для JVM и других рантаймов важно настроить кучу относительно лимита: память процесса больше кучи. Утечки и рост: ps aux --sort=-rss, smem, метрики RSS процесса во времени; для JVM — дамп кучи."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

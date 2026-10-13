@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как подключить circuit breaker к вызову внешнего сервиса в Spring Boot? — вопрос с собеседования</title>
+<meta name="description" content="Resilience4j — библиотека устойчивости для Spring Boot (Hystrix давно в режиме поддержки и из Spring Cloud удалён). Аннотация @CircuitBreaker(name =…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/resilience4j-circuit-breaker/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/resilience4j-circuit-breaker/">
+<meta property="og:title" content="Как подключить circuit breaker к вызову внешнего сервиса в Spring Boot? — вопрос с собеседования">
+<meta property="og:description" content="Resilience4j — библиотека устойчивости для Spring Boot (Hystrix давно в режиме поддержки и из Spring Cloud удалён). Аннотация @CircuitBreaker(name =…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Как подключить circuit breaker к вызову внешнего сервиса в Spring Boot?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Как подключить circuit breaker к вызову внешнего сервиса в Spring Boot?"}]}</script>
+  <h1>Как подключить circuit breaker к вызову внешнего сервиса в Spring Boot?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Устойчивость и наблюдаемость</span><span class="chip">Spring Boot</span><span class="chip">Spring Cloud</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как использовать Resilience4j в Spring Boot?</li><li>Что такое circuit breaker?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Resilience4j</b> — библиотека устойчивости для Spring Boot (Hystrix давно в режиме поддержки и из Spring Cloud удалён). Аннотация <code>@CircuitBreaker(name = &quot;payments&quot;, fallbackMethod = &quot;...&quot;)</code> на методе вызова, пороги — в <code>application.yml</code>.</p><ul><li>Состояния: CLOSED → OPEN (при доле ошибок или медленных вызовов) → HALF_OPEN (пробные вызовы)</li><li>Вместе с ним: таймаут клиента, Retry, Bulkhead</li><li>Состояние и метрики — в Actuator и Micrometer</li></ul><p class="extra"><span>А ещё</span> Аннотации работают через AOP — те же ограничения прокси (self-invocation)</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Зачем:</b> внешний сервис начал отвечать ошибками или медленно. Без защиты каждый запрос ждёт таймаут, потоки заняты, сервис падает целиком. Circuit breaker после порога ошибок перестаёт вызывать зависимость на время и сразу возвращает запасной ответ.</p>
+<p><b>Подключение:</b> <code>resilience4j-spring-boot3</code> (или <code>spring-cloud-starter-circuitbreaker-resilience4j</code>) и <code>spring-boot-starter-aop</code>.</p>
+<pre class="lang-java"><code>@CircuitBreaker(name = &quot;payments&quot;, fallbackMethod = &quot;pendingPayment&quot;)
+public PaymentStatus charge(Order o) { return client.charge(o); }
+
+PaymentStatus pendingPayment(Order o, Throwable e) {
+    return PaymentStatus.PENDING;          // принять заказ, оплату проверить позже
+}</code></pre>
+<pre class="lang-yaml"><code>resilience4j.circuitbreaker.instances.payments:
+  sliding-window-size: 50
+  minimum-number-of-calls: 20
+  failure-rate-threshold: 50
+  slow-call-duration-threshold: 2s
+  slow-call-rate-threshold: 50
+  wait-duration-in-open-state: 30s
+  permitted-number-of-calls-in-half-open-state: 5</code></pre>
+<p><b>Что важно:</b></p>
+<ul><li>медленные вызовы считаются отдельным порогом — именно они чаще кладут сервис;</li><li>таймаут у HTTP-клиента обязателен — breaker его не заменяет;</li><li>порядок аспектов Retry и CircuitBreaker определяет, считаются ли повторы ошибками;</li><li>fallback должен быть осмысленным: кэш, значение по умолчанию, отложенная обработка — или честная ошибка;</li><li>состояние — в <code>/actuator/circuitbreakers</code>, плюс алерты.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Зачем circuit breaker.</li><li>Resilience4j, аннотация, fallback, настройки.</li><li>Медленные вызовы, таймауты, связка с Retry.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ставить breaker без таймаута клиента.</li><li>Называть Hystrix текущим выбором.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Подключить Resilience4j, пометить вызов @CircuitBreaker с fallbackMethod и настроить пороги в application.yml</li><li class="no"><span class="mark">✗</span>Увеличить таймаут вызова до минуты</li><li class="no"><span class="mark">✗</span>Использовать Hystrix — он входит в Spring Boot 3</li><li class="no"><span class="mark">✗</span>Повторять вызов бесконечно до успеха</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем circuit breaker отличается от retry?</li><li>Что такое bulkhead?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/resilience-observability/">Resilience: таймауты, ретраи и circuit breaker</a><p>Защита от каскадных отказов: таймауты, безопасные ретраи, состояния circuit breaker, bulkhead и rate limiter, fallback и порядок паттернов.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/circuit-breaker-states/">В каких состояниях бывает circuit breaker и как он между ними переходит?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/slow-dependency-cascade/">Внешний платёжный провайдер начал отвечать за 30 секунд вместо 200 миллисекунд. Через минуту сервис перестал отвечать вообще, включая страницы, не связанные с оплатой. Что произошло?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/retries-checklist/">Что необходимо учесть, добавляя автоматические повторы вызова внешнего сервиса?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/bulkhead-vs-rate-limiter/">Чем bulkhead отличается от rate limiter?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как подключить circuit breaker к вызову внешнего сервиса в Spring Boot?","acceptedAnswer":{"@type":"Answer","text":"Resilience4j — библиотека устойчивости для Spring Boot (Hystrix давно в режиме поддержки и из Spring Cloud удалён). Аннотация @CircuitBreaker(name = \"payments\", fallbackMethod = \"...\") на методе вызова, пороги — в application.yml. Состояния: CLOSED → OPEN (при доле ошибок или медленных вызовов) → HALF_OPEN (пробные вызовы) Вместе с ним: таймаут клиента, Retry, Bulkhead Состояние и метрики — в Actuator и Micrometer Аннотации работают через AOP — те же ограничения прокси (self-invocation) Зачем: внешний сервис начал отвечать ошибками или медленно. Без защиты каждый запрос ждёт таймаут, потоки заняты, сервис падает целиком. Circuit breaker после порога ошибок перестаёт вызывать зависимость на время и сразу возвращает запасной ответ. Подключение: resilience4j-spring-boot3 (или spring-cloud-starter-circuitbreaker-resilience4j) и spring-boot-starter-aop. Что важно: - медленные вызовы считаются отдельным порогом — именно они чаще кладут сервис; - таймаут у HTTP-клиента обязателен — breaker его не заменяет; - порядок аспектов Retry и CircuitBreaker определяет, считаются ли повторы ошибками; - fallback должен быть осмысленным: кэш, значение по умолчанию, отложенная обработка — или честная ошибка; - состояние — в /actuator/circuitbreakers, плюс алерты."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое error budget и зачем он нужен? — вопрос с собеседования</title>
+<meta name="description" content="Бюджет ошибок = 100% − SLO. При SLO 99,9% за 30 дней можно «потратить» ~43 минуты недоступности. Это инструмент решений: бюджет есть — выкатываем…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/error-budget/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/error-budget/">
+<meta property="og:title" content="Что такое error budget и зачем он нужен? — вопрос с собеседования">
+<meta property="og:description" content="Бюджет ошибок = 100% − SLO. При SLO 99,9% за 30 дней можно «потратить» ~43 минуты недоступности. Это инструмент решений: бюджет есть — выкатываем…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Что такое error budget и зачем он нужен?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Что такое error budget и зачем он нужен?"}]}</script>
+  <h1>Что такое error budget и зачем он нужен?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Наблюдаемость и SLO</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем SLI, SLO и SLA отличаются?</li><li>Что делать, когда бюджет ошибок исчерпан?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Бюджет ошибок</b> = 100% − SLO. При SLO 99,9% за 30 дней можно «потратить» ~43 минуты недоступности. Это инструмент решений: бюджет есть — выкатываем смелее, кончился — приоритет надёжности.</p><ul><li>SLI — измеряемая величина (доля успешных запросов быстрее 300 мс)</li><li>SLO — внутренняя цель; SLA — внешний договор с компенсациями, всегда слабее SLO</li><li>Каждая девятка кратно дороже предыдущей — SLO выбирают достаточным, а не максимальным</li></ul><p class="extra"><span>А ещё</span> Алерты — по скорости прожигания бюджета</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Термины:</b></p>
+<ul><li><b>SLI</b> (индикатор) — что меряем: доля успешных запросов, доля запросов быстрее порога, свежесть данных;</li><li><b>SLO</b> (цель) — какое значение SLI нужно за окно: «99,9% запросов успешны за 30 дней»;</li><li><b>SLA</b> (соглашение) — обещание клиентам с последствиями (возврат денег). Его делают слабее SLO, чтобы был запас.</li></ul>
+<p><b>Бюджет ошибок</b> — допустимая «ненадёжность»: 0,1% запросов за месяц или ~43 минуты полной недоступности. Он превращает спор «фичи против стабильности» в арифметику:</p>
+<ul><li>бюджет расходуется медленно — можно выкатывать чаще и рискованнее, проводить эксперименты;</li><li>бюджет кончился — заморозка рискованных изменений, работа над надёжностью, разбор причин.</li></ul>
+<p><b>Почему не 100%:</b> пользователь не отличит 99,99% от 100% из-за своей сети и устройств, а каждая девятка требует кратно больше вложений (резервирование, дежурства, замедление выкаток). SLO выбирают по потребности пользователей.</p>
+<p><b>Алерты</b> строят на скорости прожигания: «если так продолжится, бюджет кончится за двое суток» — это значимо, а одиночный всплеск ошибок — нет.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>SLO 99,9% за 30 дней → бюджет 0,1% ≈ 43 мин недоступности
+SLO 99,99%           → ≈ 4,3 мин
+SLO 99%              → ≈ 7,2 ч</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определения SLI, SLO, SLA и их соотношение.</li><li>Расчёт бюджета.</li><li>Бюджет как инструмент решений о выкатках.</li><li>Почему SLO не ставят максимальным.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Путать SLA и SLO.</li><li>Ставить SLO 100% или «как можно выше».</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Допустимый объём нарушений, вытекающий из SLO: пока бюджет есть — выкатываем смелее, когда исчерпан — останавливаем релизы фич</li><li class="no"><span class="mark">✗</span>Сумма денег, заложенная на компенсации клиентам при нарушении SLA</li><li class="no"><span class="mark">✗</span>Лимит на число ошибок в логах, после которого срабатывает алерт</li><li class="no"><span class="mark">✗</span>Резерв вычислительных мощностей на случай пиковой нагрузки</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое алерт по скорости прожигания бюджета?</li><li>Почему SLA всегда слабее SLO?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/observability/">Наблюдаемость: метрики, логи, трассировка и SLO</a><p>Чем наблюдаемость отличается от мониторинга, три сигнала и что каждый умеет, RED и USE, почему среднее врёт, взрыв кардинальности, SLI/SLO/error budget и алерты на симптомы.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/symptom-based-alerting/">Дежурных будят алерты «загрузка CPU выше 90%», которые в большинстве случаев ни к чему не приводят. Как правильно перестроить алертинг?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/latency-percentiles/">Почему время ответа измеряют перцентилями, а не средним?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/availability-chain/">Пользовательский сценарий последовательно вызывает пять сервисов, доступность каждого 99,9%. Какова примерная доступность сценария и что из этого следует?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое error budget и зачем он нужен?","acceptedAnswer":{"@type":"Answer","text":"Бюджет ошибок = 100% − SLO. При SLO 99,9% за 30 дней можно «потратить» ~43 минуты недоступности. Это инструмент решений: бюджет есть — выкатываем смелее, кончился — приоритет надёжности. SLI — измеряемая величина (доля успешных запросов быстрее 300 мс) SLO — внутренняя цель; SLA — внешний договор с компенсациями, всегда слабее SLO Каждая девятка кратно дороже предыдущей — SLO выбирают достаточным, а не максимальным Алерты — по скорости прожигания бюджета Термины: - SLI (индикатор) — что меряем: доля успешных запросов, доля запросов быстрее порога, свежесть данных; - SLO (цель) — какое значение SLI нужно за окно: «99,9% запросов успешны за 30 дней»; - SLA (соглашение) — обещание клиентам с последствиями (возврат денег). Его делают слабее SLO, чтобы был запас. Бюджет ошибок — допустимая «ненадёжность»: 0,1% запросов за месяц или ~43 минуты полной недоступности. Он превращает спор «фичи против стабильности» в арифметику: - бюджет расходуется медленно — можно выкатывать чаще и рискованнее, проводить эксперименты; - бюджет кончился — заморозка рискованных изменений, работа над надёжностью, разбор причин. Почему не 100%: пользователь не отличит 99,99% от 100% из-за своей сети и устройств, а каждая девятка требует кратно больше вложений (резервирование, дежурства, замедление выкаток). SLO выбирают по потребности пользователей. Алерты строят на…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

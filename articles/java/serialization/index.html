@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сериализация и форматы данных — разбор для собеседования</title>
+<meta name="description" content="Java serialization и её механика, serialVersionUID, почему её опасно использовать и какие форматы выбирают вместо неё.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/serialization/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/serialization/">
+<meta property="og:title" content="Сериализация и форматы данных — разбор для собеседования">
+<meta property="og:description" content="Java serialization и её механика, serialVersionUID, почему её опасно использовать и какие форматы выбирают вместо неё.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Сериализация и форматы данных</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Сериализация и форматы данных"}]}</script>
+  <h1>Сериализация и форматы данных</h1>
+  <p class="lead">Java serialization и её механика, serialVersionUID, почему её опасно использовать и какие форматы выбирают вместо неё.</p>
+  <article class="md"><h2>Что такое сериализация</h2>
+<p>Сериализация превращает граф объектов в байтовое представление, которое можно сохранить или передать; десериализация восстанавливает объекты обратно. Это нужно для персистентности, кэшей, передачи по сети.</p>
+<p>Встроенная Java serialization включается маркерным интерфейсом Serializable: помеченный объект (и весь достижимый от него граф) JVM умеет сохранять автоматически. Поля transient исключаются из стандартного сохранения (секреты, кэши, вычислимые значения), как и static-поля (они принадлежат классу, а не объекту). Тонкую настройку дают методы <code>writeObject</code>/<code>readObject</code>.</p>
+<h2>serialVersionUID</h2>
+<p><code>serialVersionUID</code> — идентификатор версии класса в сериализованном виде. При десериализации JVM сравнивает UID из потока с UID локального класса; при несовпадении бросает InvalidClassException.</p>
+<p>UID нужно задавать ЯВНО (private static final long <code>serialVersionUID</code>). Если не задать, компилятор вычислит его из структуры класса — и любое изменение (добавил метод, поменял модификатор) сменит UID и сломает чтение ранее сохранённых данных. Явный UID даёт контроль над совместимостью версий.</p>
+<pre class="lang-java"><code>class UserSnapshot implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private final long id;
+    private transient String temporaryToken; // не сериализуется
+}</code></pre>
+<h2>Почему Java serialization опасна</h2>
+<p>Это, пожалуй, главный практический тезис. Десериализация недоверенных данных — серьёзная брешь безопасности: при восстановлении графа выполняется код (<code>readObject</code> и конструкторы), и злоумышленник, подсунув специально собранную цепочку объектов (gadget chain), может добиться удалённого выполнения кода. Так возникали громкие RCE-уязвимости.</p>
+<p>Плюс хрупкость: формат завязан на приватную структуру класса, что превращает её в часть публичного контракта и мешает рефакторингу. Поэтому современная рекомендация (в духе Effective Java) — избегать Java serialization, не реализовывать Serializable без необходимости, а если приходится принимать сериализованные данные — фильтровать типы через ObjectInputFilter (Java 9+) и никогда не десериализовать чужой ввод.</p>
+<h2>Externalizable</h2>
+<p>Externalizable — альтернатива внутри Java: вы полностью описываете формат сами в <code>writeExternal</code>/<code>readExternal</code>, получая контроль и над содержимым, и над производительностью.</p>
+<p>Цена — ручная работа и риск рассинхронизации чтения с записью. На практике, если уж нужен полный контроль, чаще берут внешний формат, а не Externalizable.</p>
+<h2>Современные форматы</h2>
+<p>Для хранения и обмена выбирают форматы с явной схемой, а не привязку к Java-классам. JSON (Jackson/Gson) — человекочитаемый, кросс-язычный, удобный для API, но многословный и слабо типизированный. Бинарные схемные форматы Protobuf/Avro — компактные, со строгой схемой и продуманной эволюцией (добавление полей не ломает старых читателей) и кросс-язычные.</p>
+<p>Выбор по требованиям: отлаживаемость и простота → JSON; компактность, производительность и строгий контракт между сервисами → Protobuf/Avro.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Опишите механику (Serializable, граф объектов, transient/static исключаются, <code>writeObject</code>/<code>readObject</code>) и роль явного <code>serialVersionUID</code> (иначе любое изменение класса ломает чтение). Сильный акцент — на безопасности: десериализация недоверенных данных → RCE через gadget chains, поэтому Java serialization избегают, а ввод фильтруют (ObjectInputFilter). Завершите выбором форматов: JSON vs Protobuf/Avro по схеме/компактности/эволюции.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/serialversionuid/">Зачем нужен serialVersionUID?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/java-serialization-dangers/">Почему встроенную Java-сериализацию считают небезопасной и устаревшей?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/transient/">Что произойдёт с полем, помеченным transient, при сериализации и последующей десериализации?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/externalizable/">Чем Externalizable отличается от Serializable?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/serialization/">Что такое сериализация?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/io/">Потоки ввода-вывода: байты, символы, буферы</a><p>Байтовые и символьные потоки, кодировки и Charset, буферизация и системные вызовы, декоратор-паттерн и современный файловый API.</p></li><li><a href="/articles/java/immutability/">Проектирование неизменяемых классов</a><p>Зачем нужна неизменяемость, рецепт immutable-класса, защитные копии, безопасная публикация и records.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Сериализация и форматы данных","description":"Java serialization и её механика, serialVersionUID, почему её опасно использовать и какие форматы выбирают вместо неё.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/serialization/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

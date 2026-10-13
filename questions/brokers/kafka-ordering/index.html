@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какая гарантия порядка в Kafka является базовой? — вопрос с собеседования</title>
+<meta name="description" content="Kafka гарантирует порядок только внутри партиции. Чтобы события одного заказа шли по порядку, у них должен быть одинаковый ключ (order_id) — тогда…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/brokers/kafka-ordering/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/brokers/kafka-ordering/">
+<meta property="og:title" content="Какая гарантия порядка в Kafka является базовой? — вопрос с собеседования">
+<meta property="og:description" content="Kafka гарантирует порядок только внутри партиции. Чтобы события одного заказа шли по порядку, у них должен быть одинаковый ключ (order_id) — тогда…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/brokers/">Брокеры сообщений</a> <span>/</span> <span>Какая гарантия порядка в Kafka является базовой?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/questions/brokers/"},{"@type":"ListItem","position":3,"name":"Какая гарантия порядка в Kafka является базовой?"}]}</script>
+  <h1>Какая гарантия порядка в Kafka является базовой?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Kafka: topic, partition, offset</span><span class="chip">Kafka</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как сохранить порядок событий одного заказа в Kafka?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Kafka гарантирует порядок <b>только внутри партиции</b>. Чтобы события одного заказа шли по порядку, у них должен быть <b>одинаковый ключ</b> (order_id) — тогда они попадут в одну партицию.</p><ul><li>Между партициями порядка нет</li><li>Повторы продюсера могут переставить сообщения — нужна идемпотентность (<code>enable.idempotence=true</code>)</li><li>Увеличение числа партиций меняет партицию для ключа — порядок ломается на переходе</li></ul><p class="extra"><span>А ещё</span> Глобальный порядок — только одна партиция, без параллелизма</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Гарантия.</b> Сообщения в партицию дописываются по порядку, и потребитель читает их в том же порядке. Для сообщений в разных партициях порядок не определён: потребители читают их параллельно.</p>
+<p><b>Как сохранить порядок для сущности</b> — ключ сообщения: продюсер выбирает партицию по хешу ключа, и все события с ключом <code>order:42</code> идут в одну партицию.</p>
+<p><b>Что может нарушить:</b></p>
+<ul><li><b>повторы продюсера</b> — при <code>max.in.flight.requests.per.connection &gt; 1</code> и повторах без идемпотентности второй батч может записаться раньше повторённого первого. Идемпотентный продюсер (по умолчанию с Kafka 3.0) сохраняет порядок при до 5 запросов в полёте;</li><li><b>увеличение числа партиций</b> — <code>hash(key) % N</code> меняется, новые события ключа идут в другую партицию, пока старые ещё не обработаны;</li><li><b>параллельная обработка внутри потребителя</b> — если обрабатывать сообщения партиции в пуле потоков без группировки по ключу;</li><li><b>повторы через retry-топики</b> — сообщение уходит на повтор, следующее за ним обрабатывается раньше.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Порядок только в партиции.</li><li>Ключ сообщения для сохранения порядка сущности.</li><li>Что нарушает порядок.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ожидать глобального порядка в топике.</li><li>Отправлять события сущности без ключа.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Глобальный порядок всех сообщений во всех topics</li><li class="ok"><span class="mark">✓</span>Порядок сообщений внутри одной partition</li><li class="no"><span class="mark">✗</span>Порядок только между разными consumer groups</li><li class="no"><span class="mark">✗</span>Kafka не даёт никаких гарантий порядка</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как обеспечить порядок событий одного пользователя?</li><li>Почему нельзя просто добавить partitions без анализа ключей?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/brokers/kafka-core/">Kafka: topic, partition, offset</a><p>Распределённый append-only лог, партиция как единица масштаба и упорядоченности, ключ и порядок, retention и log compaction, replay.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/brokers/producer-partitioner/">Как Kafka producer выбирает партицию для сообщения?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/retries-and-ordering/">Producer настроен с retries и несколькими запросами в полёте одновременно. Чем это грозит порядку сообщений и как решается?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/add-partitions-ordering/">Что произойдёт с гарантией порядка при увеличении числа партиций в существующем топике?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какая гарантия порядка в Kafka является базовой?","acceptedAnswer":{"@type":"Answer","text":"Kafka гарантирует порядок только внутри партиции. Чтобы события одного заказа шли по порядку, у них должен быть одинаковый ключ (order_id) — тогда они попадут в одну партицию. Между партициями порядка нет Повторы продюсера могут переставить сообщения — нужна идемпотентность (enable.idempotence=true) Увеличение числа партиций меняет партицию для ключа — порядок ломается на переходе Глобальный порядок — только одна партиция, без параллелизма Гарантия. Сообщения в партицию дописываются по порядку, и потребитель читает их в том же порядке. Для сообщений в разных партициях порядок не определён: потребители читают их параллельно. Как сохранить порядок для сущности — ключ сообщения: продюсер выбирает партицию по хешу ключа, и все события с ключом order:42 идут в одну партицию. Что может нарушить: - повторы продюсера — при max.in.flight.requests.per.connection > 1 и повторах без идемпотентности второй батч может записаться раньше повторённого первого. Идемпотентный продюсер (по умолчанию с Kafka 3.0) сохраняет порядок при до 5 запросов в полёте; - увеличение числа партиций — hash(key) % N меняется, новые события ключа идут в другую партицию, пока старые ещё не обработаны; - параллельная обработка внутри потребителя — если обрабатывать сообщения партиции в пуле потоков без группировки по ключу; - повторы через retry-топики …"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

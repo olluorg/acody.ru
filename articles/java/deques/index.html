@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Очереди и стек: ArrayDeque и PriorityQueue — разбор для собеседования</title>
+<meta name="description" content="ArrayDeque как кольцевой буфер и замена Stack, PriorityQueue как бинарная куча и её неотсортированная итерация.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/deques/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/deques/">
+<meta property="og:title" content="Очереди и стек: ArrayDeque и PriorityQueue — разбор для собеседования">
+<meta property="og:description" content="ArrayDeque как кольцевой буфер и замена Stack, PriorityQueue как бинарная куча и её неотсортированная итерация.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Очереди и стек: ArrayDeque и PriorityQueue</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Очереди и стек: ArrayDeque и PriorityQueue"}]}</script>
+  <h1>Очереди и стек: ArrayDeque и PriorityQueue</h1>
+  <p class="lead">ArrayDeque как кольцевой буфер и замена Stack, PriorityQueue как бинарная куча и её неотсортированная итерация.</p>
+  <article class="md"><h2>ArrayDeque: кольцевой буфер</h2>
+<p>ArrayDeque — двусторонняя очередь на основе массива с указателями head и tail, который при достижении границ «заворачивается» (кольцевой буфер). Добавление и снятие с обоих концов — амортизированно O(1), ёмкость — степень двойки для быстрого индекса по маске.</p>
+<p>За счёт плотного массива у него отличная cache locality — он быстрее LinkedList и не создаёт мусорных узлов на каждый элемент. Null хранить нельзя: null используется как маркер пустоты.</p>
+<h2>Замена Stack и LinkedList</h2>
+<p>Как стек используют именно ArrayDeque (push/pop/peek), а не легаси-класс Stack: Stack наследует Vector и синхронизирован на каждой операции, что бессмысленно для локального стека и медленно.</p>
+<p>Как очередь FIFO (offer/poll) ArrayDeque тоже предпочтительнее LinkedList по тем же причинам — память и кэш.</p>
+<pre class="lang-java"><code>Deque&lt;Integer&gt; stack = new ArrayDeque&lt;&gt;();
+stack.push(1); stack.push(2);
+int top = stack.pop(); // 2  — современная замена java.util.Stack</code></pre>
+<h2>PriorityQueue: бинарная куча</h2>
+<p>PriorityQueue — это бинарная min-куча, хранящаяся в массиве: для узла с индексом i дети находятся в 2i+1 и 2i+2. Корень — минимальный (или экстремальный по Comparator) элемент.</p>
+<p>offer и poll — O(log n) (просеивание вверх/вниз для восстановления свойства кучи), а peek — O(1). Порядок задаётся Comparable или Comparator.</p>
+<h2>Ловушка итерации кучи</h2>
+<p>Куча упорядочена лишь частично (родитель ≤ детей), поэтому итерация по PriorityQueue НЕ даёт отсортированный порядок — гарантирован только порядок извлечения через poll. Это частая ошибка: распечатать очередь и ждать сортировки.</p>
+<p>PriorityQueue не потокобезопасна; для конкурентного варианта есть PriorityBlockingQueue.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Скажите, что для стека/очереди современный выбор — ArrayDeque (кольцевой буфер, O(1), лучше кэш, замена Stack/LinkedList), а PriorityQueue — это бинарная куча в массиве с O(log n) на вставку/снятие и важной оговоркой: итерация не отсортирована.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/stack-arraydeque/">Почему стек реализуют через ArrayDeque, а не java.util.Stack?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/priorityqueue-iteration/">В каком порядке выдаёт элементы итерация (for-each) по PriorityQueue?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/priorityqueue-complexity/">Какая алгоритмическая сложность операций PriorityQueue (бинарной кучи)?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jc-214/">Почему ArrayDeque не допускает null-элементов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/queue-vs-stack/">Чем очередь (FIFO) отличается от стека (LIFO)?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/linkedlist/">LinkedList и миф о дешёвой вставке</a><p>Двусвязные узлы, реальная стоимость операций, cache locality и почему ArrayList/ArrayDeque почти всегда лучше.</p></li><li><a href="/articles/java/collections-overview/">Collections Framework: карта и выбор структуры</a><p>Иерархия интерфейсов, сложности операций основных структур, неизменяемые коллекции и принцип выбора по паттерну доступа.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Очереди и стек: ArrayDeque и PriorityQueue","description":"ArrayDeque как кольцевой буфер и замена Stack, PriorityQueue как бинарная куча и её неотсортированная итерация.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/deques/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

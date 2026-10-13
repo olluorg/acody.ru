@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как посчитать экономику LLM-функции и доказать, что она окупается? — вопрос с собеседования</title>
+<meta name="description" content="Считать стоимость на единицу результата, а не на запрос: сколько стоит одно решённое обращение, обработанный документ, сгенерированный отчёт — с…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/ai-feature-economics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/ai-feature-economics/">
+<meta property="og:title" content="Как посчитать экономику LLM-функции и доказать, что она окупается? — вопрос с собеседования">
+<meta property="og:description" content="Считать стоимость на единицу результата, а не на запрос: сколько стоит одно решённое обращение, обработанный документ, сгенерированный отчёт — с…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как посчитать экономику LLM-функции и доказать, что она окупается?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как посчитать экономику LLM-функции и доказать, что она окупается?"}]}</script>
+  <h1>Как посчитать экономику LLM-функции и доказать, что она окупается?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">LLM в продакшене</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как оценить ROI внедрения LLM?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Считать <b>стоимость на единицу результата</b>, а не на запрос: сколько стоит одно решённое обращение, обработанный документ, сгенерированный отчёт — с учётом токенов, повторов, инфраструктуры, ручной проверки и ошибок. Сравнить с <b>текущей стоимостью</b> того же результата (время сотрудника, конверсия). Эффект доказывать <b>экспериментом</b> на бизнес-метрике, а не демонстрацией.</p><ul><li>Стоимость: токены × запросы на результат + поиск + инфраструктура + люди в контуре</li><li>Цена ошибки: сколько стоит неверный ответ и как часто он случается</li><li>Рост аудитории увеличивает затраты линейно — в отличие от обычного кода</li></ul><p class="extra"><span>А ещё</span> Пороги остановки пилота заранее: какой эффект считать неуспехом</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Пример.</b> Оператор поддержки стоит условно 800 рублей в час и решает 8 обращений — 100 рублей за обращение. Ассистент закрывает 40% обращений по 3 рубля за диалог, остальные передаёт оператору с резюме, экономя ему 20% времени. Экономия на 10 тысяч обращений: 4 000 × 97 + 6 000 × 20 = около 508 тысяч рублей минус стоимость разработки и поддержки.</p>
+<p><b>Что учесть:</b></p>
+<ul><li>доля задач, которые реально закрываются без человека, по пилоту;</li><li>стоимость ошибок: компенсации, отток, юридические риски;</li><li>затраты на оценку качества, разбор и поддержку промптов;</li><li>изменения цен провайдеров.</li></ul>
+<p><b>Доказательство:</b> A/B-тест или поэтапный запуск по сегментам с бизнес-метрикой (время решения, CSAT, конверсия), порогами успеха и остановки, определёнными до старта.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Стоимость на единицу результата и полный учёт затрат.</li><li>Сравнение с текущим процессом и цена ошибки.</li><li>Эксперимент с заранее заданными критериями.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/llm-cost-latency/">Как снизить стоимость и задержку приложения на LLM?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/ab-testing-models/">Почему хорошая офлайн-метрика модели не гарантирует успех в продакшене и как проверить модель онлайн?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/model-selection/">Как выбрать модель для LLM-продукта — большая или маленькая, своя или по API?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как посчитать экономику LLM-функции и доказать, что она окупается?","acceptedAnswer":{"@type":"Answer","text":"Считать стоимость на единицу результата, а не на запрос: сколько стоит одно решённое обращение, обработанный документ, сгенерированный отчёт — с учётом токенов, повторов, инфраструктуры, ручной проверки и ошибок. Сравнить с текущей стоимостью того же результата (время сотрудника, конверсия). Эффект доказывать экспериментом на бизнес-метрике, а не демонстрацией. Стоимость: токены × запросы на результат + поиск + инфраструктура + люди в контуре Цена ошибки: сколько стоит неверный ответ и как часто он случается Рост аудитории увеличивает затраты линейно — в отличие от обычного кода Пороги остановки пилота заранее: какой эффект считать неуспехом Пример. Оператор поддержки стоит условно 800 рублей в час и решает 8 обращений — 100 рублей за обращение. Ассистент закрывает 40% обращений по 3 рубля за диалог, остальные передаёт оператору с резюме, экономя ему 20% времени. Экономия на 10 тысяч обращений: 4 000 × 97 + 6 000 × 20 = около 508 тысяч рублей минус стоимость разработки и поддержки. Что учесть: - доля задач, которые реально закрываются без человека, по пилоту; - стоимость ошибок: компенсации, отток, юридические риски; - затраты на оценку качества, разбор и поддержку промптов; - изменения цен провайдеров. Доказательство: A/B-тест или поэтапный запуск по сегментам с бизнес-метрикой (время решения, CSAT, конверсия), порогами успеха и остановки, определёнными до старта."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

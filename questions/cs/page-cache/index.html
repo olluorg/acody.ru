@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему повторное чтение файла быстрее первого? — вопрос с собеседования</title>
+<meta name="description" content="ОС кэширует содержимое файлов в свободной памяти — page cache. Повторное чтение берётся из памяти, а запись сначала попадает в кэш и на диск уходит…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/page-cache/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/page-cache/">
+<meta property="og:title" content="Почему повторное чтение файла быстрее первого? — вопрос с собеседования">
+<meta property="og:description" content="ОС кэширует содержимое файлов в свободной памяти — page cache. Повторное чтение берётся из памяти, а запись сначала попадает в кэш и на диск уходит…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Почему повторное чтение файла быстрее первого?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Почему повторное чтение файла быстрее первого?"}]}</script>
+  <h1>Почему повторное чтение файла быстрее первого?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Операционные системы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое page cache?</li><li>Что делает fsync и зачем он нужен?</li><li>Почему после записи в файл данные могут пропасть при сбое питания?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">ОС кэширует содержимое файлов в свободной памяти — <b>page cache</b>. Повторное чтение берётся из памяти, а запись сначала попадает в кэш и на диск уходит позже.</p><ul><li>write() вернул управление — данные ещё не на диске</li><li>fsync() ждёт, пока данные физически запишутся; без него при сбое питания их можно потерять</li><li>«Свободной» памяти на сервере мало — это нормально, она занята кэшем</li></ul><p class="extra"><span>А ещё</span> Базы данных делают fsync журнала на каждый коммит, отсюда цена записи</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Диск на порядки медленнее памяти, поэтому ядро держит прочитанные страницы файлов в оперативной памяти — это <b>page cache</b>. Под него идёт вся память, не занятая процессами; когда процессам нужно больше, кэш ужимается. Поэтому в <code>free -h</code> на долго работающем сервере колонка <code>free</code> маленькая, а <code>available</code> большая — паниковать не нужно.</p>
+<p><b>Чтение.</b> Первый <code>read</code> идёт на диск и заодно заполняет кэш; ядро ещё и читает наперёд (readahead), если доступ последовательный. Повторное чтение того же файла — копирование из памяти, на порядки быстрее. Отсюда эффект «холодного» и «прогретого» сервера после перезапуска.</p>
+<p><b>Запись.</b> <code>write</code> копирует данные в кэш, помечает страницы «грязными» и сразу возвращает управление. Сбросом на диск занимается ядро в фоне — через несколько секунд или при нехватке памяти. Это быстро, но если пропадёт питание или упадёт ядро, грязные страницы потеряются, хотя программа думала, что записала.</p>
+<p><b>fsync.</b> Вызов <code>fsync(fd)</code> ждёт, пока данные и метаданные файла дойдут до устройства. Именно его делают базы данных при коммите: транзакция считается подтверждённой, только когда запись в журнале (WAL) пережила бы сбой. fsync стоит от долей миллисекунды на SSD с конденсаторами до десятков миллисекунд на HDD, поэтому базы группируют коммиты (group commit), а настройки вроде <code>synchronous_commit = off</code> в PostgreSQL или <code>acks</code>/<code>flush</code> в брокерах — сознательный обмен надёжности на скорость.</p>
+<p><b>Обход кэша.</b> Базы, которые кэшируют данные сами (InnoDB, Oracle), часто открывают файлы с <code>O_DIRECT</code>, чтобы не держать два кэша. PostgreSQL, наоборот, опирается на page cache, поэтому <code>shared_buffers</code> ставят около четверти памяти. Kafka почти полностью полагается на page cache и последовательную запись.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>$ free -h
+              total   used   free  shared  buff/cache  available
+Mem:           31Gi   6.2Gi  0.4Gi   0.1Gi       24Gi       24Gi
+
+$ time cat big.log &gt; /dev/null    # первый раз — с диска
+real 0m4.812s
+$ time cat big.log &gt; /dev/null    # второй — из page cache
+real 0m0.391s</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Page cache: кэш файлов в свободной памяти, readahead.</li><li>Запись отложенная, write не гарантирует сохранность.</li><li>fsync и его цена, связь с коммитом в базах.</li><li>«Свободной памяти мало» на сервере — норма.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что после <code>write</code> или закрытия файла данные уже на диске.</li><li>Добавлять памяти серверу из-за маленького <code>free</code>, глядя не на ту колонку.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/wal/">Что такое журнал предзаписи (WAL) и зачем он нужен?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/virtual-memory/">Что такое виртуальная память?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/latency-numbers/">Какие порядки задержек нужно знать разработчику?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему повторное чтение файла быстрее первого?","acceptedAnswer":{"@type":"Answer","text":"ОС кэширует содержимое файлов в свободной памяти — page cache. Повторное чтение берётся из памяти, а запись сначала попадает в кэш и на диск уходит позже. write() вернул управление — данные ещё не на диске fsync() ждёт, пока данные физически запишутся; без него при сбое питания их можно потерять «Свободной» памяти на сервере мало — это нормально, она занята кэшем Базы данных делают fsync журнала на каждый коммит, отсюда цена записи Диск на порядки медленнее памяти, поэтому ядро держит прочитанные страницы файлов в оперативной памяти — это page cache. Под него идёт вся память, не занятая процессами; когда процессам нужно больше, кэш ужимается. Поэтому в free -h на долго работающем сервере колонка free маленькая, а available большая — паниковать не нужно. Чтение. Первый read идёт на диск и заодно заполняет кэш; ядро ещё и читает наперёд (readahead), если доступ последовательный. Повторное чтение того же файла — копирование из памяти, на порядки быстрее. Отсюда эффект «холодного» и «прогретого» сервера после перезапуска. Запись. write копирует данные в кэш, помечает страницы «грязными» и сразу возвращает управление. Сбросом на диск занимается ядро в фоне — через несколько секунд или при нехватке памяти. Это быстро, но если пропадёт питание или упадёт ядро, грязные страницы потеряются, хотя программа думала, что…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

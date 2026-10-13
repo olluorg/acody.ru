@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как в аннотациях Python описать обобщённые типы — TypeVar, Generic, Protocol? — вопрос с собеседования</title>
+<meta name="description" content="TypeVar — параметр типа: функция first(xs: list[T]) -&gt; T сохраняет связь «что пришло, то и вернулось». Generic — обобщённый класс. С Python 3.12 …">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/typing-generics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/typing-generics/">
+<meta property="og:title" content="Как в аннотациях Python описать обобщённые типы — TypeVar, Generic, Protocol? — вопрос с собеседования">
+<meta property="og:description" content="TypeVar — параметр типа: функция first(xs: list[T]) -&gt; T сохраняет связь «что пришло, то и вернулось». Generic — обобщённый класс. С Python 3.12 …">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Как в аннотациях Python описать обобщённые типы — TypeVar, Generic, Protocol?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Как в аннотациях Python описать обобщённые типы — TypeVar, Generic, Protocol?"}]}</script>
+  <h1>Как в аннотациях Python описать обобщённые типы — TypeVar, Generic, Protocol?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Окружение и инструменты</span><span class="chip ver">Python &gt;=3.12</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое TypeVar?</li><li>Как mypy проверяет типы, если Python их игнорирует?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>TypeVar</b> — параметр типа: функция <code>first(xs: list[T]) -&gt; T</code> сохраняет связь «что пришло, то и вернулось». <b>Generic</b> — обобщённый класс. С Python 3.12 — новый синтаксис: <code>def first[T](xs: list[T]) -&gt; T</code> и <code>class Box[T]</code>. Проверяют их <b>mypy и pyright</b>, интерпретатор аннотации не проверяет.</p><ul><li>Ограничения: bound=Comparable или набор типов TypeVar("T", int, str)</li><li>Union через |, Optional[X] = X | None (3.10)</li><li>Pydantic и FastAPI читают аннотации во время выполнения — там они влияют на поведение</li></ul><p class="extra"><span>А ещё</span> Any отключает проверку; object — безопасный «что угодно»</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Без TypeVar</b> функция <code>def first(xs: list) -&gt; object</code> теряет тип: <code>first([&quot;a&quot;]).upper()</code> — ошибка проверки. С параметром типа анализатор знает, что вернётся <code>str</code>.</p>
+<p><b>Синтаксис по версиям:</b> до 3.12 — <code>T = TypeVar(&quot;T&quot;)</code> и <code>class Box(Generic[T])</code>; с 3.12 — параметры в квадратных скобках прямо в объявлении (PEP 695), <code>type Alias = ...</code> для псевдонимов.</p>
+<p><b>Вариантность:</b> <code>list[int]</code> не подтип <code>list[object]</code> (инвариантен, потому что изменяем), а <code>Sequence[int]</code> — подтип <code>Sequence[object]</code> (ковариантен, только чтение). Это та же идея, что PECS в Java.</p>
+<p><b>Практика:</b> проверка в CI (<code>mypy --strict</code> или pyright) на новом коде, постепенное включение в старом; <code>reveal_type()</code> показывает выведенный тип.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>from typing import Protocol
+
+def first[T](items: list[T]) -&gt; T:        # Python 3.12
+    return items[0]
+
+class SupportsLess(Protocol):
+    def __lt__(self, other, /) -&gt; bool: ...
+
+def max_of[T: SupportsLess](a: T, b: T) -&gt; T:
+    return b if a &lt; b else a
+
+class Repo[T]:
+    def get(self, id: int) -&gt; T | None: ...</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Зачем TypeVar и Generic.</li><li>Новый синтаксис 3.12.</li><li>Кто проверяет аннотации.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/type-hints/">Что такое аннотации типов и проверяются ли они при выполнении?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/abc-protocol/">Чем абстрактный базовый класс (ABC) отличается от Protocol?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как в аннотациях Python описать обобщённые типы — TypeVar, Generic, Protocol?","acceptedAnswer":{"@type":"Answer","text":"TypeVar — параметр типа: функция first(xs: list[T]) -> T сохраняет связь «что пришло, то и вернулось». Generic — обобщённый класс. С Python 3.12 — новый синтаксис: def first[T](xs: list[T]) -> T и class Box[T]. Проверяют их mypy и pyright, интерпретатор аннотации не проверяет. Ограничения: bound=Comparable или набор типов TypeVar(\"T\", int, str) Union через |, Optional[X] = X | None (3.10) Pydantic и FastAPI читают аннотации во время выполнения — там они влияют на поведение Any отключает проверку; object — безопасный «что угодно» Без TypeVar функция def first(xs: list) -> object теряет тип: first([\"a\"]).upper() — ошибка проверки. С параметром типа анализатор знает, что вернётся str. Синтаксис по версиям: до 3.12 — T = TypeVar(\"T\") и class Box(Generic[T]); с 3.12 — параметры в квадратных скобках прямо в объявлении (PEP 695), type Alias = ... для псевдонимов. Вариантность: list[int] не подтип list[object] (инвариантен, потому что изменяем), а Sequence[int] — подтип Sequence[object] (ковариантен, только чтение). Это та же идея, что PECS в Java. Практика: проверка в CI (mypy --strict или pyright) на новом коде, постепенное включение в старом; reveal_type() показывает выведенный тип."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

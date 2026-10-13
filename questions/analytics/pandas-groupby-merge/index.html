@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работают groupby и merge в pandas и какие у них ловушки? — вопрос с собеседования</title>
+<meta name="description" content="groupby — разбить, применить агрегат, собрать (split-apply-combine): df.groupby(&quot;city&quot;)[&quot;amount&quot;].agg([&quot;sum&quot;, &quot;mean&quot;]). merge — соединение таблиц по…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/pandas-groupby-merge/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/pandas-groupby-merge/">
+<meta property="og:title" content="Как работают groupby и merge в pandas и какие у них ловушки? — вопрос с собеседования">
+<meta property="og:description" content="groupby — разбить, применить агрегат, собрать (split-apply-combine): df.groupby(&quot;city&quot;)[&quot;amount&quot;].agg([&quot;sum&quot;, &quot;mean&quot;]). merge — соединение таблиц по…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Как работают groupby и merge в pandas и какие у них ловушки?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Как работают groupby и merge в pandas и какие у них ловушки?"}]}</script>
+  <h1>Как работают groupby и merge в pandas и какие у них ловушки?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Python и pandas</span><span class="chip">pandas</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем merge отличается от join и concat в pandas?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>groupby</b> — разбить, применить агрегат, собрать (split-apply-combine): <code>df.groupby(&quot;city&quot;)[&quot;amount&quot;].agg([&quot;sum&quot;, &quot;mean&quot;])</code>. <b>merge</b> — соединение таблиц по ключам, как SQL JOIN (<code>how=&quot;left&quot;</code>, <code>on=</code>). Ловушки: <b>размножение строк</b> при дублях ключа, <b>NaN-ключи</b> отбрасываются в groupby по умолчанию, <b>типы ключей</b> не совпадают (строка и число).</p><ul><li>merge(..., validate="many_to_one") проверяет кратность связи</li><li>indicator=True показывает, из какой таблицы пришла строка</li><li>groupby(..., dropna=False) — не терять группу с пропущенным ключом</li></ul><p class="extra"><span>А ещё</span> concat склеивает таблицы по строкам или столбцам, join — merge по индексу</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Именованные агрегаты</b> (<code>agg(revenue=(&quot;amount&quot;, &quot;sum&quot;))</code>) дают читаемые столбцы без мультииндекса.</p>
+<p><b>transform</b> возвращает результат той же длины, что исходная таблица: <code>df[&quot;share&quot;] = df[&quot;amount&quot;] / df.groupby(&quot;user_id&quot;)[&quot;amount&quot;].transform(&quot;sum&quot;)</code> — аналог оконной функции.</p>
+<p><b>Ловушки merge:</b></p>
+<ul><li>дубли ключа в правой таблице размножают строки — <code>validate</code> ловит это сразу;</li><li>ключ <code>user_id</code> как int в одной таблице и str в другой — пустой результат без ошибки;</li><li>одинаковые имена столбцов получают суффиксы <code>_x</code>, <code>_y</code>;</li><li>после left merge строки без пары имеют NaN, и целочисленные столбцы превращаются в float.</li></ul>
+<p><b>Проверка после соединения:</b> сравнить число строк до и после, посмотреть <code>indicator</code> и долю <code>left_only</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>orders.merge(users, on=&quot;user_id&quot;, how=&quot;left&quot;,
+             validate=&quot;many_to_one&quot;, indicator=True)
+
+(orders
+   .groupby([&quot;city&quot;, &quot;month&quot;], dropna=False)
+   .agg(revenue=(&quot;amount&quot;, &quot;sum&quot;),
+        buyers=(&quot;user_id&quot;, &quot;nunique&quot;),
+        median_check=(&quot;amount&quot;, &quot;median&quot;))
+   .reset_index())</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Принцип split-apply-combine, agg и transform.</li><li>Типы соединений и validate.</li><li>Проверка результата.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/join-fanout/">Почему после JOIN суммы в отчёте оказались больше, чем должны быть?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/pandas-vectorization/">Почему apply и циклы в pandas медленные и как писать быстрее?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работают groupby и merge в pandas и какие у них ловушки?","acceptedAnswer":{"@type":"Answer","text":"groupby — разбить, применить агрегат, собрать (split-apply-combine): df.groupby(\"city\")[\"amount\"].agg([\"sum\", \"mean\"]). merge — соединение таблиц по ключам, как SQL JOIN (how=\"left\", on=). Ловушки: размножение строк при дублях ключа, NaN-ключи отбрасываются в groupby по умолчанию, типы ключей не совпадают (строка и число). merge(..., validate=\"many_to_one\") проверяет кратность связи indicator=True показывает, из какой таблицы пришла строка groupby(..., dropna=False) — не терять группу с пропущенным ключом concat склеивает таблицы по строкам или столбцам, join — merge по индексу Именованные агрегаты (agg(revenue=(\"amount\", \"sum\"))) дают читаемые столбцы без мультииндекса. transform возвращает результат той же длины, что исходная таблица: df[\"share\"] = df[\"amount\"] / df.groupby(\"user_id\")[\"amount\"].transform(\"sum\") — аналог оконной функции. Ловушки merge: - дубли ключа в правой таблице размножают строки — validate ловит это сразу; - ключ user_id как int в одной таблице и str в другой — пустой результат без ошибки; - одинаковые имена столбцов получают суффиксы _x, _y; - после left merge строки без пары имеют NaN, и целочисленные столбцы превращаются в float. Проверка после соединения: сравнить число строк до и после, посмотреть indicator и долю left_only."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

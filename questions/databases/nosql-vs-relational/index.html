@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Когда NoSQL база может быть лучше реляционной? — вопрос с собеседования</title>
+<meta name="description" content="NoSQL выбирают под конкретный паттерн доступа: документы, читаемые целиком; доступ по ключу с огромной нагрузкой; запись временных рядов…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/nosql-vs-relational/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/nosql-vs-relational/">
+<meta property="og:title" content="Когда NoSQL база может быть лучше реляционной? — вопрос с собеседования">
+<meta property="og:description" content="NoSQL выбирают под конкретный паттерн доступа: документы, читаемые целиком; доступ по ключу с огромной нагрузкой; запись временных рядов…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Когда NoSQL база может быть лучше реляционной?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Когда NoSQL база может быть лучше реляционной?"}]}</script>
+  <h1>Когда NoSQL база может быть лучше реляционной?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">NoSQL</span><span class="chip">MongoDB</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Когда выбрать MongoDB вместо PostgreSQL?</li><li>Какие бывают NoSQL-базы?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">NoSQL выбирают <b>под конкретный паттерн доступа</b>: документы, читаемые целиком; доступ по ключу с огромной нагрузкой; запись временных рядов; горизонтальное масштабирование записи. Цена — меньше JOIN и транзакций, схему проектируют под запросы.</p><ul><li>Виды: документные (MongoDB), ключ-значение (Redis, DynamoDB), колоночные (Cassandra), графовые (Neo4j), поисковые (Elasticsearch)</li><li>Реляционная база — хороший выбор по умолчанию: транзакции, связи, произвольные запросы</li><li>PostgreSQL с JSONB закрывает многие «документные» сценарии</li></ul><p class="extra"><span>А ещё</span> Часто не «или», а «и»: основная база плюс специализированные хранилища</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Сильные стороны реляционной базы:</b> ACID-транзакции на много строк и таблиц, ограничения целостности, JOIN и произвольные запросы, которые оптимизатор выполнит без заранее заложенной модели доступа. Отличный выбор по умолчанию.</p>
+<p><b>Когда NoSQL выигрывает:</b></p>
+<ul><li><b>документная</b> (MongoDB) — данные естественно иерархичны и читаются целиком (профиль с настройками, карточка товара с вариантами), схема часто меняется;</li><li><b>ключ-значение</b> (Redis, DynamoDB) — доступ строго по ключу с предсказуемой задержкой на огромной нагрузке: сессии, корзины, кэш;</li><li><b>wide-column</b> (Cassandra, ScyllaDB) — огромный поток записи, данные по ключу партиции с сортировкой: сообщения, события, временные ряды;</li><li><b>графовая</b> — запросы по связям произвольной глубины (рекомендации, социальный граф);</li><li><b>поисковая</b> — полнотекстовый поиск и фасеты.</li></ul>
+<p><b>Цена:</b> обычно нет произвольных JOIN, транзакции — в пределах документа или партиции, согласованность часто итоговая, модель данных проектируют под запросы и дублируют данные под разные запросы. Ответственность за целостность переходит к приложению.</p>
+<p><b>На практике</b> — основная реляционная база и специализированные хранилища рядом (поиск, кэш, аналитика), заполняемые через CDC или события.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Виды NoSQL и их сценарии.</li><li>Сильные стороны реляционных баз.</li><li>Цена NoSQL: JOIN, транзакции, моделирование под запросы.</li><li>Комбинация хранилищ — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«NoSQL быстрее и масштабируется, значит лучше».</li><li>Выбирать MongoDB только из-за «гибкой схемы».</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое eventual consistency?</li><li>Когда MongoDB документ лучше нормализованных таблиц?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/nosql-overview/">NoSQL: семейства и когда их выбирать</a><p>Почему появился NoSQL, моделирование от access patterns, четыре семейства хранилищ, BASE против ACID и горизонтальное масштабирование.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/databases/mongodb-embed-vs-reference/">Когда в документной БД (MongoDB) выгоднее embedding (вложение), а когда referencing (ссылки)?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/cassandra-primary-key/">Из чего состоит первичный ключ в Cassandra?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/redis-vs-dynamodb/">Чем Redis принципиально отличается от DynamoDB как key-value хранилище?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/replication-models/">Какие бывают схемы репликации и чем они отличаются?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Когда NoSQL база может быть лучше реляционной?","acceptedAnswer":{"@type":"Answer","text":"NoSQL выбирают под конкретный паттерн доступа: документы, читаемые целиком; доступ по ключу с огромной нагрузкой; запись временных рядов; горизонтальное масштабирование записи. Цена — меньше JOIN и транзакций, схему проектируют под запросы. Виды: документные (MongoDB), ключ-значение (Redis, DynamoDB), колоночные (Cassandra), графовые (Neo4j), поисковые (Elasticsearch) Реляционная база — хороший выбор по умолчанию: транзакции, связи, произвольные запросы PostgreSQL с JSONB закрывает многие «документные» сценарии Часто не «или», а «и»: основная база плюс специализированные хранилища Сильные стороны реляционной базы: ACID-транзакции на много строк и таблиц, ограничения целостности, JOIN и произвольные запросы, которые оптимизатор выполнит без заранее заложенной модели доступа. Отличный выбор по умолчанию. Когда NoSQL выигрывает: - документная (MongoDB) — данные естественно иерархичны и читаются целиком (профиль с настройками, карточка товара с вариантами), схема часто меняется; - ключ-значение (Redis, DynamoDB) — доступ строго по ключу с предсказуемой задержкой на огромной нагрузке: сессии, корзины, кэш; - wide-column (Cassandra, ScyllaDB) — огромный поток записи, данные по ключу партиции с сортировкой: сообщения, события, временные ряды; - графовая — запросы по связям произвольной глубины (рекомендации, социальный граф); - поисковая — полнотекстовый поиск и фасеты. Цена: обычно нет произвольных JOIN, транзакции — в пределах документа или партиции, согласованность…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

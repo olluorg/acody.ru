@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как мониторить ошибки и производительность фронтенда в продакшене? — вопрос с собеседования</title>
+<meta name="description" content="Код выполняется на тысячах чужих устройств — без мониторинга вы узнаете об ошибках от пользователей. Нужны: сбор ошибок (Sentry и аналоги) с source…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/frontend-observability/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/frontend-observability/">
+<meta property="og:title" content="Как мониторить ошибки и производительность фронтенда в продакшене? — вопрос с собеседования">
+<meta property="og:description" content="Код выполняется на тысячах чужих устройств — без мониторинга вы узнаете об ошибках от пользователей. Нужны: сбор ошибок (Sentry и аналоги) с source…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Как мониторить ошибки и производительность фронтенда в продакшене?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Как мониторить ошибки и производительность фронтенда в продакшене?"}]}</script>
+  <h1>Как мониторить ошибки и производительность фронтенда в продакшене?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Выкатка и эксплуатация</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Зачем фронтенду Sentry?</li><li>Как узнать, что у пользователей сломалась страница?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Код выполняется на тысячах чужих устройств — без мониторинга вы узнаете об ошибках от пользователей. Нужны: <b>сбор ошибок</b> (Sentry и аналоги) с <b>source maps</b>, чтобы видеть исходный код, контекстом (браузер, маршрут, действия до ошибки) и группировкой; <b>метрики реальных пользователей</b> (Core Web Vitals, время загрузки); <b>алерты</b> на рост ошибок после выкатки; связь с версией сборки.</p><ul><li>Source maps загружают в систему мониторинга, но не раздают публично</li><li>Глобальные обработчики: window.onerror, unhandledrejection, границы ошибок React</li><li>Шум от расширений браузера и старых браузеров фильтруют</li></ul><p class="extra"><span>А ещё</span> Привязка ошибок к релизу позволяет быстро понять, какая выкатка всё сломала</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Что собирать:</b></p>
+<ul><li>необработанные исключения и отклонённые промисы;</li><li>ошибки сетевых запросов к API (коды, время);</li><li>ошибки рендеринга (границы ошибок);</li><li>хлебные крошки: клики, переходы, запросы перед ошибкой;</li><li>версия сборки, пользователь (без персональных данных), окружение.</li></ul>
+<p><b>Практика:</b></p>
+<ul><li>алерт на рост новых ошибок в первые часы после выкатки;</li><li>еженедельный разбор топа ошибок;</li><li>сэмплирование трассировки производительности, чтобы не платить за всё;</li><li>маскирование персональных данных в отчётах.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Сбор ошибок с source maps и контекстом.</li><li>Метрики реальных пользователей.</li><li>Привязка к релизам и алерты.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/core-web-vitals/">Что такое Core Web Vitals и как их улучшить?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/frontend/performance-budget/">Как держать производительность большого фронтенд-приложения под контролем?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как мониторить ошибки и производительность фронтенда в продакшене?","acceptedAnswer":{"@type":"Answer","text":"Код выполняется на тысячах чужих устройств — без мониторинга вы узнаете об ошибках от пользователей. Нужны: сбор ошибок (Sentry и аналоги) с source maps, чтобы видеть исходный код, контекстом (браузер, маршрут, действия до ошибки) и группировкой; метрики реальных пользователей (Core Web Vitals, время загрузки); алерты на рост ошибок после выкатки; связь с версией сборки. Source maps загружают в систему мониторинга, но не раздают публично Глобальные обработчики: window.onerror, unhandledrejection, границы ошибок React Шум от расширений браузера и старых браузеров фильтруют Привязка ошибок к релизу позволяет быстро понять, какая выкатка всё сломала Что собирать: - необработанные исключения и отклонённые промисы; - ошибки сетевых запросов к API (коды, время); - ошибки рендеринга (границы ошибок); - хлебные крошки: клики, переходы, запросы перед ошибкой; - версия сборки, пользователь (без персональных данных), окружение. Практика: - алерт на рост новых ошибок в первые часы после выкатки; - еженедельный разбор топа ошибок; - сэмплирование трассировки производительности, чтобы не платить за всё; - маскирование персональных данных в отчётах."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

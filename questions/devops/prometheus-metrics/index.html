@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работает Prometheus и какие типы метрик в нём есть? — вопрос с собеседования</title>
+<meta name="description" content="Prometheus сам опрашивает (pull) эндпоинты /metrics целей, найденных через service discovery, и хранит временные ряды. Типы: counter — только растёт…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/prometheus-metrics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/prometheus-metrics/">
+<meta property="og:title" content="Как работает Prometheus и какие типы метрик в нём есть? — вопрос с собеседования">
+<meta property="og:description" content="Prometheus сам опрашивает (pull) эндпоинты /metrics целей, найденных через service discovery, и хранит временные ряды. Типы: counter — только растёт…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Как работает Prometheus и какие типы метрик в нём есть?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Как работает Prometheus и какие типы метрик в нём есть?"}]}</script>
+  <h1>Как работает Prometheus и какие типы метрик в нём есть?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Мониторинг и логи</span><span class="chip">Prometheus</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем pull-модель отличается от push?</li><li>Чем counter отличается от gauge и histogram?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Prometheus <b>сам опрашивает</b> (pull) эндпоинты <code>/metrics</code> целей, найденных через service discovery, и хранит временные ряды. Типы: <b>counter</b> — только растёт (запросы, ошибки), смотрят скорость через <code>rate()</code>; <b>gauge</b> — текущее значение (память, длина очереди); <b>histogram</b> — распределение по корзинам, перцентили считаются на сервере через <code>histogram_quantile</code> и <b>агрегируются</b> между экземплярами; <b>summary</b> — перцентили на клиенте, агрегировать нельзя.</p><ul><li>Высокая кардинальность меток (user_id, URL с идентификаторами) убивает Prometheus</li><li>Pull: видно, что цель недоступна (up == 0); для коротких задач — Pushgateway</li><li>Хранение долгое и HA — Thanos, VictoriaMetrics, Mimir</li></ul><p class="extra"><span>А ещё</span> Метод RED для сервисов: Rate, Errors, Duration</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Pull против push.</b> При pull Prometheus контролирует частоту и сразу видит пропавшую цель. Push удобнее для коротких задач и сетей, куда Prometheus не дотянется; там используют Pushgateway или агент, пересылающий данные (remote write).</p>
+<p><b>Кардинальность.</b> Каждое уникальное сочетание меток — отдельный ряд. Метка <code>user_id</code> с миллионом значений даёт миллион рядов на метрику: память и диск растут, запросы тормозят. Такие данные — в логах и трейсах.</p>
+<p><b>Histogram против summary.</b> Перцентили нельзя усреднять: среднее p99 десяти подов — не p99 сервиса. Histogram хранит счётчики по корзинам, их можно сложить и посчитать перцентиль общего распределения; точность зависит от границ корзин. Нативные гистограммы Prometheus снимают проблему подбора границ.</p>
+<p><b>Экосистема:</b> exporters (node_exporter, postgres_exporter), Alertmanager для алертов, Grafana для дашбордов.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-promql"><code># запросов в секунду по сервису
+sum by (service) (rate(http_requests_total[5m]))
+
+# доля ошибок 5xx
+sum(rate(http_requests_total{status=~&quot;5..&quot;}[5m]))
+  / sum(rate(http_requests_total[5m]))
+
+# p99 задержки по всем экземплярам
+histogram_quantile(0.99,
+  sum by (le) (rate(http_request_duration_seconds_bucket[5m])))</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Pull-модель и service discovery.</li><li>Четыре типа метрик и почему histogram агрегируется.</li><li>Кардинальность меток.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/three-pillars/">Какие три сигнала составляют основу наблюдаемости?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/system-design/metrics-cardinality/">Команда добавила в метрику задержки метку с идентификатором пользователя, чтобы «удобнее расследовать инциденты». Что произойдёт?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/latency-percentiles/">Почему время ответа измеряют перцентилями, а не средним?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/alerting-slo/">Как настроить алерты, чтобы дежурные не выгорали, а реальные проблемы не пропускались?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работает Prometheus и какие типы метрик в нём есть?","acceptedAnswer":{"@type":"Answer","text":"Prometheus сам опрашивает (pull) эндпоинты /metrics целей, найденных через service discovery, и хранит временные ряды. Типы: counter — только растёт (запросы, ошибки), смотрят скорость через rate(); gauge — текущее значение (память, длина очереди); histogram — распределение по корзинам, перцентили считаются на сервере через histogram_quantile и агрегируются между экземплярами; summary — перцентили на клиенте, агрегировать нельзя. Высокая кардинальность меток (user_id, URL с идентификаторами) убивает Prometheus Pull: видно, что цель недоступна (up == 0); для коротких задач — Pushgateway Хранение долгое и HA — Thanos, VictoriaMetrics, Mimir Метод RED для сервисов: Rate, Errors, Duration Pull против push. При pull Prometheus контролирует частоту и сразу видит пропавшую цель. Push удобнее для коротких задач и сетей, куда Prometheus не дотянется; там используют Pushgateway или агент, пересылающий данные (remote write). Кардинальность. Каждое уникальное сочетание меток — отдельный ряд. Метка user_id с миллионом значений даёт миллион рядов на метрику: память и диск растут, запросы тормозят. Такие данные — в логах и трейсах. Histogram против summary. Перцентили нельзя усреднять: среднее p99 десяти подов — не p99 сервиса. Histogram хранит счётчики по корзинам, их можно сложить и посчитать перцентиль общего распределения; точность зависит от границ корзин. Нативные гистограммы Prometheus снимают проблему подбора границ. Экосистема: exporters (node_exporter, postgres_exporter), Alertmanager для алертов, Grafana для дашбордов."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

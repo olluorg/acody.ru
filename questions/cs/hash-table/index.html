@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как устроена хеш-таблица? — вопрос с собеседования</title>
+<meta name="description" content="Хеш-таблица — массив «корзин»: хеш-функция превращает ключ в номер корзины, поэтому поиск, вставка и удаление в среднем — O(1). Коллизия — разные…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/hash-table/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/hash-table/">
+<meta property="og:title" content="Как устроена хеш-таблица? — вопрос с собеседования">
+<meta property="og:description" content="Хеш-таблица — массив «корзин»: хеш-функция превращает ключ в номер корзины, поэтому поиск, вставка и удаление в среднем — O(1). Коллизия — разные…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Как устроена хеш-таблица?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Как устроена хеш-таблица?"}]}</script>
+  <h1>Как устроена хеш-таблица?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Структуры данных</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как решаются коллизии в хеш-таблице?</li><li>Что такое коэффициент загрузки?</li><li>Чем метод цепочек отличается от открытой адресации?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Хеш-таблица — массив «корзин»: <b>хеш-функция</b> превращает ключ в номер корзины, поэтому поиск, вставка и удаление в среднем — <b>O(1)</b>.</p><ul><li>Коллизия — разные ключи в одной корзине: решают цепочками или открытой адресацией</li><li>Коэффициент загрузки (элементов на корзину) растёт — таблицу увеличивают и перераспределяют ключи</li></ul><p class="extra"><span>А ещё</span> Худший случай O(n) — при плохом хеше или атаке на коллизии</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Хеш-таблица: цепочки и открытая адресация, коллизии, расширение</p><script type="module" src="/widgets/hash-table.js"></script><sotto-hash-table theme="dark"></sotto-hash-table></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Принцип.</b> Хеш-функция превращает ключ в число, а остаток от деления на размер массива даёт индекс корзины. Вместо перебора мы вычисляем, где искать, — отсюда средняя сложность O(1).</p>
+<p>Требования к хеш-функции: детерминированность (одинаковый ключ — одинаковый хеш), равномерное распределение по корзинам, быстрота. Равные ключи обязаны давать равный хеш.</p>
+<p><b>Коллизии неизбежны:</b> ключей больше, чем корзин. Два основных способа:</p>
+<ul><li><b>метод цепочек</b> — в корзине хранится список (или дерево) записей; при поиске идём по нему и сравниваем ключи. Так устроены <code>HashMap</code> в Java и <code>unordered_map</code> в C++;</li><li><b>открытая адресация</b> — все записи прямо в массиве; если ячейка занята, пробуем следующие по правилу: линейное пробирование (+1), квадратичное, двойное хеширование. Так устроен <code>dict</code> в Python. Удаление требует пометки «здесь было» (tombstone), иначе разорвётся цепочка поиска.</li></ul>
+<p><b>Коэффициент загрузки</b> — отношение числа элементов к числу корзин. Чем он больше, тем больше коллизий. При превышении порога (около 0,75 для цепочек, 2/3 у Python) таблица увеличивается, обычно вдвое, и все ключи перераспределяются — дорого, но редко, поэтому вставка амортизированно O(1).</p>
+<p><b>Худший случай</b> — все ключи в одной корзине: O(n). Бывает при плохой хеш-функции или намеренной атаке; поэтому для строк используют хеш со случайной солью, а Java превращает длинные цепочки в деревья.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>class HashTable:
+    def __init__(self, capacity=8):
+        self.buckets = [[] for _ in range(capacity)]
+        self.size = 0
+
+    def put(self, key, value):
+        bucket = self.buckets[hash(key) % len(self.buckets)]
+        for i, (k, _) in enumerate(bucket):
+            if k == key:
+                bucket[i] = (key, value)
+                return
+        bucket.append((key, value))
+        self.size += 1
+        if self.size / len(self.buckets) &gt; 0.75:
+            self._resize()
+
+    def get(self, key):
+        bucket = self.buckets[hash(key) % len(self.buckets)]
+        return next((v for k, v in bucket if k == key), None)
+
+    def _resize(self):
+        old = [pair for b in self.buckets for pair in b]
+        self.buckets = [[] for _ in range(len(self.buckets) * 2)]
+        self.size = 0
+        for k, v in old:
+            self.put(k, v)</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Хеш-функция → индекс корзины → средняя O(1).</li><li>Два способа разрешения коллизий и их отличия.</li><li>Коэффициент загрузки и расширение.</li><li>Худший случай и защита от него.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Поиск всегда O(1)» без оговорки про средний случай.</li><li>Забыть, что равные ключи должны давать одинаковый хеш.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/amortized-complexity/">Что такое амортизированная сложность?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/array-vs-linked-list/">Чем массив отличается от связного списка?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/big-o/">Что такое О-большое (Big O) и зачем оценивать сложность алгоритма?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как устроена хеш-таблица?","acceptedAnswer":{"@type":"Answer","text":"Хеш-таблица — массив «корзин»: хеш-функция превращает ключ в номер корзины, поэтому поиск, вставка и удаление в среднем — O(1). Коллизия — разные ключи в одной корзине: решают цепочками или открытой адресацией Коэффициент загрузки (элементов на корзину) растёт — таблицу увеличивают и перераспределяют ключи Худший случай O(n) — при плохом хеше или атаке на коллизии Принцип. Хеш-функция превращает ключ в число, а остаток от деления на размер массива даёт индекс корзины. Вместо перебора мы вычисляем, где искать, — отсюда средняя сложность O(1). Требования к хеш-функции: детерминированность (одинаковый ключ — одинаковый хеш), равномерное распределение по корзинам, быстрота. Равные ключи обязаны давать равный хеш. Коллизии неизбежны: ключей больше, чем корзин. Два основных способа: - метод цепочек — в корзине хранится список (или дерево) записей; при поиске идём по нему и сравниваем ключи. Так устроены HashMap в Java и unordered_map в C++; - открытая адресация — все записи прямо в массиве; если ячейка занята, пробуем следующие по правилу: линейное пробирование (+1), квадратичное, двойное хеширование. Так устроен dict в Python. Удаление требует пометки «здесь было» (tombstone), иначе разорвётся цепочка поиска. Коэффициент загрузки — отношение числа…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

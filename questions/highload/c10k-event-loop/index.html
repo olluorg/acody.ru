@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как один сервер держит сотни тысяч одновременных соединений? — вопрос с собеседования</title>
+<meta name="description" content="Модель «поток на соединение» упирается в память стеков и переключения. Решение — неблокирующие сокеты + epoll: один поток спрашивает ядро «какие из…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/c10k-event-loop/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/c10k-event-loop/">
+<meta property="og:title" content="Как один сервер держит сотни тысяч одновременных соединений? — вопрос с собеседования">
+<meta property="og:description" content="Модель «поток на соединение» упирается в память стеков и переключения. Решение — неблокирующие сокеты + epoll: один поток спрашивает ядро «какие из…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Как один сервер держит сотни тысяч одновременных соединений?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Как один сервер держит сотни тысяч одновременных соединений?"}]}</script>
+  <h1>Как один сервер держит сотни тысяч одновременных соединений?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Сеть и ввод-вывод</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое проблема C10k?</li><li>Как работает epoll?</li><li>Почему nginx держит больше соединений, чем Apache с потоком на соединение?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Модель «поток на соединение» упирается в память стеков и переключения. Решение — <b>неблокирующие сокеты + epoll</b>: один поток спрашивает ядро «какие из 100 000 сокетов готовы?» и обрабатывает только их.</p><ul><li>select/poll — O(n) на каждый вызов; epoll/kqueue — регистрация один раз, ответ — только готовые</li><li>Event loop на ядро (nginx: worker на ядро, SO_REUSEPORT), обработка короткая и неблокирующая</li><li>Бездействующее соединение стоит килобайты, а не мегабайт стека</li></ul><p class="extra"><span>А ещё</span> Дальше — io_uring (асинхронные операции без системного вызова на каждую), C10M — обход ядра (DPDK)</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Проблема C10k</b> (1999): как обслуживать 10 000 соединений одновременно. Классическая модель — процесс или поток на соединение (Apache prefork, старые Java-серверы): соединение читается блокирующим <code>read</code>, пока данных нет, поток спит. Простой код, но:</p>
+<ul><li>каждый поток — стек (мегабайт виртуальной памяти, реально десятки килобайт и больше), структуры ядра;</li><li>десятки тысяч потоков — постоянные переключения контекста и вымытые кэши;</li><li>большинство соединений простаивают (keep-alive, вебсокеты, долгий опрос), а ресурсы на них держатся.</li></ul>
+<p><b>Неблокирующий ввод-вывод и мультиплексирование.</b> Сокеты переводятся в неблокирующий режим: <code>read</code> без данных сразу возвращает <code>EAGAIN</code>. Один поток спрашивает ядро, какие сокеты готовы:</p>
+<ul><li><code>select</code> и <code>poll</code> — каждый раз передают весь список и ядро проверяет все: O(n) на вызов, при 100 000 соединений — дорого;</li><li><b>epoll</b> (Linux), <b>kqueue</b> (BSD, macOS), IOCP (Windows) — сокеты регистрируются один раз (<code>epoll_ctl</code>), а <code>epoll_wait</code> возвращает только готовые. Стоимость пропорциональна числу событий, а не соединений.</li></ul>
+<p><b>Event loop:</b> цикл <code>epoll_wait</code> → для каждого готового сокета вызвать обработчик → обработчик читает, сколько есть, продвигает состояние соединения (разбор запроса — это конечный автомат) и, если надо ждать, регистрирует интерес и возвращает управление. Так работают nginx, HAProxy, Redis, Node.js (libuv), Netty, asyncio, Go-рантайм внутри.</p>
+<p><b>Масштабирование на ядра:</b> event loop на каждое ядро; соединения распределяются через <code>SO_REUSEPORT</code> (ядро раскидывает новые соединения по слушающим сокетам) или передачей от акцептора.</p>
+<p><b>Что нельзя делать в цикле:</b> блокирующие вызовы (синхронный драйвер базы, чтение файла, DNS-резолв в старых libc) и долгие вычисления — они останавливают все соединения потока. Их выносят в пул потоков.</p>
+<p><b>Что ещё ограничивает:</b> лимит файловых дескрипторов (<code>ulimit -n</code>), память буферов сокетов (<code>tcp_rmem</code>/<code>tcp_wmem</code>), очередь accept (<code>somaxconn</code>), эфемерные порты у клиента, conntrack в NAT/фаерволе.</p>
+<p><b>Дальше:</b> <b>io_uring</b> — кольцевые очереди запросов и завершений между приложением и ядром: операции (включая файловые) ставятся пачкой без системного вызова на каждую. <b>C10M</b> — миллионы соединений с обходом сетевого стека ядра (DPDK, XDP) — для балансировщиков и специальных систем.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import selectors, socket
+sel = selectors.DefaultSelector()          # epoll в Linux
+srv = socket.socket(); srv.bind((&quot;&quot;, 8080)); srv.listen(4096); srv.setblocking(False)
+sel.register(srv, selectors.EVENT_READ)
+
+while True:
+    for key, _ in sel.select():            # только готовые сокеты
+        if key.fileobj is srv:
+            conn, _ = srv.accept(); conn.setblocking(False)
+            sel.register(conn, selectors.EVENT_READ)
+        else:
+            data = key.fileobj.recv(4096)
+            if data: key.fileobj.send(b&quot;HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok&quot;)
+            else: sel.unregister(key.fileobj); key.fileobj.close()</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Почему поток на соединение не масштабируется: память и переключения.</li><li>Неблокирующие сокеты и мультиплексирование, разница select/poll и epoll.</li><li>Устройство event loop и запрет блокирующих операций в нём.</li><li>Системные лимиты и io_uring — для senior.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что epoll делает обработку параллельной — один цикл всё ещё один поток.</li><li>Делать синхронный запрос в базу внутри обработчика event loop.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/connection-pooling/">Зачем нужен пул соединений к базе и как выбрать его размер?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/zero-copy/">Что такое zero-copy и почему Kafka так быстро отдаёт данные?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/async-vs-threads/">Чем асинхронность отличается от многопоточности?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/context-switch/">Что такое переключение контекста и почему оно дорогое?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/file-descriptors/">Что такое файловый дескриптор?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/syscalls/">Что такое системный вызов и чем режим ядра отличается от пользовательского?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как один сервер держит сотни тысяч одновременных соединений?","acceptedAnswer":{"@type":"Answer","text":"Модель «поток на соединение» упирается в память стеков и переключения. Решение — неблокирующие сокеты + epoll: один поток спрашивает ядро «какие из 100 000 сокетов готовы?» и обрабатывает только их. select/poll — O(n) на каждый вызов; epoll/kqueue — регистрация один раз, ответ — только готовые Event loop на ядро (nginx: worker на ядро, SO_REUSEPORT), обработка короткая и неблокирующая Бездействующее соединение стоит килобайты, а не мегабайт стека Дальше — io_uring (асинхронные операции без системного вызова на каждую), C10M — обход ядра (DPDK) Проблема C10k (1999): как обслуживать 10 000 соединений одновременно. Классическая модель — процесс или поток на соединение (Apache prefork, старые Java-серверы): соединение читается блокирующим read, пока данных нет, поток спит. Простой код, но: - каждый поток — стек (мегабайт виртуальной памяти, реально десятки килобайт и больше), структуры ядра; - десятки тысяч потоков — постоянные переключения контекста и вымытые кэши; - большинство соединений простаивают (keep-alive, вебсокеты, долгий опрос), а ресурсы на них держатся. Неблокирующий ввод-вывод и мультиплексирование. Сокеты переводятся в неблокирующий режим: read без данных сразу возвращает EAGAIN. Один поток спрашивает ядро, какие сокеты готовы: - select и poll — каждый раз передают весь список и ядро проверяет все: O(n) на вызов, при 100 000 соединений — дорого; - epoll (Linux), kqueue (BSD, macOS), IOCP (Windows) — сокеты…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

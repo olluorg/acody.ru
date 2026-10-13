@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Optional: явное отсутствие значения — разбор для собеседования</title>
+<meta name="description" content="Зачем Optional, orElse против orElseGet, композиция map/flatMap/filter и антипаттерны использования.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/optional/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/optional/">
+<meta property="og:title" content="Optional: явное отсутствие значения — разбор для собеседования">
+<meta property="og:description" content="Зачем Optional, orElse против orElseGet, композиция map/flatMap/filter и антипаттерны использования.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Optional: явное отсутствие значения</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Optional: явное отсутствие значения"}]}</script>
+  <h1>Optional: явное отсутствие значения</h1>
+  <p class="lead">Зачем Optional, orElse против orElseGet, композиция map/flatMap/filter и антипаттерны использования.</p>
+  <article class="md"><h2>Зачем Optional</h2>
+<p><code>Optional&lt;T&gt;</code> — контейнер, который либо содержит значение, либо пуст. Его смысл — сделать «значения может не быть» ЯВНЫМ в типе возвращаемого значения, чтобы вызывающий не забыл про этот случай, как это происходит с молчаливым null.</p>
+<p>Главное применение — тип результата методов, которые могут не найти значение (<code>findById</code>, <code>findFirst</code>). Это не универсальная замена null везде.</p>
+<h2>Создание и распаковка</h2>
+<p>Создают через <code>Optional.of(x)</code> (x не null, иначе NPE), <code>Optional.ofNullable(maybeNull)</code> и <code>Optional.empty()</code>. Достают значение безопасно: <code>orElse(default)</code>, <code>orElseGet(supplier)</code>, <code>orElseThrow()</code>, <code>ifPresent(consumer)</code>, <code>ifPresentOrElse</code>.</p>
+<p>Ключевая ловушка — <code>orElse</code> против <code>orElseGet</code>: аргумент <code>orElse(expr)</code> вычисляется ВСЕГДА, даже если Optional не пуст; <code>orElseGet</code>(() -&gt; expr) вызывает поставщик ТОЛЬКО когда значения нет. Если дефолт дорогой или с побочным эффектом (запрос в БД, new) — это разница между лишней работой и ленивым вычислением.</p>
+<pre class="lang-java"><code>// orElse всегда выполнит expensiveDefault(), даже если value присутствует:
+String a = opt.orElse(expensiveDefault());
+// orElseGet выполнит лишь при пустом opt:
+String b = opt.orElseGet(() -&gt; expensiveDefault());</code></pre>
+<h2>Композиция</h2>
+<p>Optional поддерживает map (преобразовать значение, если есть), <code>flatMap</code> (когда функция сама возвращает Optional — разворачивает <code>Optional&lt;Optional&lt;&gt;&gt;</code>), filter (оставить, если подходит). Это позволяет строить цепочки без ручных проверок на null.</p>
+<p>Например: <code>findUser(id).map(User::address).map(Address::city).orElse(&quot;unknown&quot;)</code> — безопасный путь сквозь возможные пропуски.</p>
+<h2>Антипаттерны</h2>
+<p><code>opt.get()</code> без проверки — почти всегда ошибка (бросит NoSuchElementException); вместо <code>isPresent()</code>+<code>get()</code> используют map/<code>orElse</code>/<code>ifPresent</code>. Optional как ПОЛЕ класса или ПАРАМЕТР метода — антипаттерн (он не Serializable, добавляет обёртку и аллокацию; для полей берут обычный nullable + контроль доступа, для параметров — перегрузку или nullable).</p>
+<p>Не возвращайте <code>Optional&lt;Collection&gt;</code> — верните пустую коллекцию (пустота уже выражает «ничего нет»). И не оборачивайте в Optional то, что не бывает пустым.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Объясните цель Optional (явное отсутствие в типе результата, против тихого null), разберите <code>orElse</code> vs <code>orElseGet</code> (<code>orElse</code> вычисляет всегда — ленивость важна для дорогих дефолтов), покажите композицию map/<code>flatMap</code>/filter и назовите антипаттерны (get без проверки, Optional как поле/параметр, <code>Optional&lt;Collection&gt;</code>).</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/optional/">Для чего предназначен Optional?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/optional-usage/">Как правильно использовать Optional?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/orelse-vs-orelseget/">Чем orElse отличается от orElseGet?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/optional-antipatterns/">Какие способы применения Optional считаются антипаттернами?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/streams/">Stream API: устройство и ленивый конвейер</a><p>Что такое стрим, источники, промежуточные против терминальных, ленивость и short-circuiting, stateful-операции, параллельность и примитивные стримы.</p></li><li><a href="/articles/java/lambdas/">Лямбды и функциональные интерфейсы</a><p>SAM-интерфейсы, лямбда против анонимного класса, замыкания и effectively final, ссылки на методы и стандартные интерфейсы.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Optional: явное отсутствие значения","description":"Зачем Optional, orElse против orElseGet, композиция map/flatMap/filter и антипаттерны использования.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/optional/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

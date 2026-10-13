@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зачем нужно виртуальное окружение и как управлять зависимостями? — вопрос с собеседования</title>
+<meta name="description" content="Виртуальное окружение — отдельная копия Python со своими пакетами для каждого проекта. Проекты не конфликтуют версиями библиотек, системный Python не…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/venv-pip/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/venv-pip/">
+<meta property="og:title" content="Зачем нужно виртуальное окружение и как управлять зависимостями? — вопрос с собеседования">
+<meta property="og:description" content="Виртуальное окружение — отдельная копия Python со своими пакетами для каждого проекта. Проекты не конфликтуют версиями библиотек, системный Python не…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Зачем нужно виртуальное окружение и как управлять зависимостями?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Зачем нужно виртуальное окружение и как управлять зависимостями?"}]}</script>
+  <h1>Зачем нужно виртуальное окружение и как управлять зависимостями?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Окружение и инструменты</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое venv?</li><li>Как зафиксировать версии библиотек проекта?</li><li>Чем pip отличается от poetry и uv?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Виртуальное окружение — <b>отдельная копия Python со своими пакетами</b> для каждого проекта.</p><ul><li>Проекты не конфликтуют версиями библиотек, системный Python не засоряется</li><li><code>python -m venv .venv</code>, активация, <code>pip install -r requirements.txt</code></li></ul><p class="extra"><span>А ещё</span> Версии фиксируют lock-файлом: <code>pip freeze</code>, poetry.lock, uv.lock</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Без окружения все пакеты ставятся в один общий Python. Если проекту A нужна Django 4, а проекту B — Django 5, они начинают мешать друг другу. Кроме того, <code>pip install</code> в системный Python может сломать системные утилиты.</p>
+<p><code>venv</code> создаёт папку с собственным интерпретатором и каталогом пакетов:</p>
+<ul><li><code>python -m venv .venv</code> — создать;</li><li><code>source .venv/bin/activate</code> (Linux, macOS) или <code>.venv\Scripts\activate</code> (Windows) — активировать;</li><li>после этого <code>pip install</code> ставит пакеты только в это окружение.</li></ul>
+<p>Папку окружения в git не кладут — её всегда можно пересоздать.</p>
+<p><b>Зависимости.</b> Минимальный вариант — <code>requirements.txt</code>: список пакетов с версиями, полученный через <code>pip freeze &gt; requirements.txt</code>. Он фиксирует и прямые, и транзитивные зависимости, но не разделяет их.</p>
+<p>Современные инструменты разделяют «что нужно проекту» (<code>pyproject.toml</code>) и «точные версии всего дерева» (lock-файл):</p>
+<ul><li><b>poetry</b> — управление зависимостями, lock-файл, сборка пакетов;</li><li><b>uv</b> — очень быстрый установщик и менеджер проектов и окружений.</li></ul>
+<p>Lock-файл гарантирует, что у коллеги, в CI и на сервере стоят одни и те же версии.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-bash"><code>python -m venv .venv
+source .venv/bin/activate
+pip install requests==2.32.3
+pip freeze &gt; requirements.txt
+
+# на другой машине
+python -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -r requirements.txt
+
+# то же через uv
+uv init &amp;&amp; uv add requests &amp;&amp; uv sync</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Зачем окружение: изоляция версий и защита системного Python.</li><li>Команды создания, активации, установки.</li><li>Фиксация версий и смысл lock-файла.</li><li>Знание хотя бы одного современного инструмента — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Класть <code>.venv</code> в репозиторий.</li><li>Ставить зависимости через <code>sudo pip install</code> в системный Python.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/name-main/">Зачем нужна конструкция if __name__ == &quot;__main__&quot;?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/type-hints/">Что такое аннотации типов и проверяются ли они при выполнении?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Зачем нужно виртуальное окружение и как управлять зависимостями?","acceptedAnswer":{"@type":"Answer","text":"Виртуальное окружение — отдельная копия Python со своими пакетами для каждого проекта. Проекты не конфликтуют версиями библиотек, системный Python не засоряется python -m venv .venv, активация, pip install -r requirements.txt Версии фиксируют lock-файлом: pip freeze, poetry.lock, uv.lock Без окружения все пакеты ставятся в один общий Python. Если проекту A нужна Django 4, а проекту B — Django 5, они начинают мешать друг другу. Кроме того, pip install в системный Python может сломать системные утилиты. venv создаёт папку с собственным интерпретатором и каталогом пакетов: - python -m venv .venv — создать; - source .venv/bin/activate (Linux, macOS) или .venv\\Scripts\\activate (Windows) — активировать; - после этого pip install ставит пакеты только в это окружение. Папку окружения в git не кладут — её всегда можно пересоздать. Зависимости. Минимальный вариант — requirements.txt: список пакетов с версиями, полученный через pip freeze > requirements.txt. Он фиксирует и прямые, и транзитивные зависимости, но не разделяет их. Современные инструменты разделяют «что нужно проекту» (pyproject.toml) и «точные версии всего дерева» (lock-файл): - poetry — управление зависимостями…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

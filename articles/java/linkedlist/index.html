@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LinkedList и миф о дешёвой вставке — разбор для собеседования</title>
+<meta name="description" content="Двусвязные узлы, реальная стоимость операций, cache locality и почему ArrayList/ArrayDeque почти всегда лучше.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/linkedlist/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/linkedlist/">
+<meta property="og:title" content="LinkedList и миф о дешёвой вставке — разбор для собеседования">
+<meta property="og:description" content="Двусвязные узлы, реальная стоимость операций, cache locality и почему ArrayList/ArrayDeque почти всегда лучше.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>LinkedList и миф о дешёвой вставке</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"LinkedList и миф о дешёвой вставке"}]}</script>
+  <h1>LinkedList и миф о дешёвой вставке</h1>
+  <p class="lead">Двусвязные узлы, реальная стоимость операций, cache locality и почему ArrayList/ArrayDeque почти всегда лучше.</p>
+  <article class="md"><h2>Устройство</h2>
+<p>LinkedList — двусвязный список: каждый элемент завёрнут в узел Node с ссылками prev и next и ссылкой на значение. Список хранит ссылки на первый и последний узлы.</p>
+<p>Реализует и List, и Deque, поэтому добавление/снятие с обоих концов — честное O(1) по ссылкам на голову/хвост.</p>
+<h2>Реальная стоимость операций</h2>
+<p>Доступ по индексу <code>get(i)</code> — O(n): нужно пройти по ссылкам от ближайшего конца. Поиск contains — O(n). Вставка/удаление O(1) только если у вас уже есть ссылка на узел (например, через ListIterator).</p>
+<p>Ключевой нюанс: «вставка в середину O(1)» почти всегда вводит в заблуждение, потому что сначала надо до этой середины дойти за O(n). Чистая O(1) достижима лишь при итераторной вставке.</p>
+<pre class="lang-java"><code>List&lt;String&gt; list = new LinkedList&lt;&gt;(...);
+
+// O(n) на каждый вызов: список каждый раз идёт от ближайшего конца
+for (int i = 0; i &lt; list.size(); i++) sum += list.get(i).length();  // итого O(n^2)
+
+// честная O(1) вставка — только когда позиция уже в руках у итератора
+ListIterator&lt;String&gt; it = list.listIterator();
+while (it.hasNext()) {
+    if (it.next().isBlank()) it.set(&quot;—&quot;);   // без повторного поиска позиции
+}</code></pre>
+<h2>Цена памяти и кэша</h2>
+<p>Каждый элемент требует отдельный объект-узел с двумя ссылками и заголовком объекта — это в разы больше памяти, чем плотный массив ArrayList. Узлы разбросаны по куче, поэтому обход — это pointer chasing с постоянными промахами кэша.</p>
+<p>Из-за этого на практике LinkedList часто медленнее ArrayList даже там, где «по асимптотике» должен выигрывать: константа и поведение кэша решают.</p>
+<h2>Когда выбирать</h2>
+<p>Почти никогда как List общего назначения — по умолчанию берут ArrayList. Если нужна очередь/дек, современный выбор — ArrayDeque (плотный массив, лучше кэш), а не LinkedList.</p>
+<p>Реальные ниши LinkedList узки: интенсивные вставки/удаления строго через итератор по ходу обхода, или когда нужны одновременно List и Deque в одном объекте.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Сильный ход — развенчать миф: назвать O(n) на доступ и на достижение позиции вставки, объяснить оверхед узлов и промахи кэша, и сделать вывод, что ArrayList/ArrayDeque почти всегда предпочтительнее. Это отличает понимание от заученного «LinkedList хорош для вставок».</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/arraylist-vs-linkedlist/">Чем ArrayList отличается от LinkedList и что брать по умолчанию?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/jc-154/">Почему утверждение «вставка в середину LinkedList работает за O(1)» вводит в заблуждение?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jc-155/">Почему ArrayList обычно обходит LinkedList даже там, где асимптотика формально в пользу связного списка?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jc-156/">Нужна очередь FIFO внутри одного потока. Что выбрать по умолчанию?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/linkedlist-get-by-index/">Сколько стоит получение элемента по индексу в LinkedList?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/arraylist/">ArrayList: динамический массив изнутри</a><p>Бэкенд-массив, рост в 1.5×, амортизированная O(1), стоимость вставки/удаления и когда массив лучше.</p></li><li><a href="/articles/java/deques/">Очереди и стек: ArrayDeque и PriorityQueue</a><p>ArrayDeque как кольцевой буфер и замена Stack, PriorityQueue как бинарная куча и её неотсортированная итерация.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"LinkedList и миф о дешёвой вставке","description":"Двусвязные узлы, реальная стоимость операций, cache locality и почему ArrayList/ArrayDeque почти всегда лучше.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/linkedlist/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

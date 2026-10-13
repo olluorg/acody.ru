@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем изменяемые типы отличаются от неизменяемых? — вопрос с собеседования</title>
+<meta name="description" content="Изменяемый объект меняется на месте, неизменяемый — только заменяется новым. Неизменяемые: int, float, str, tuple, frozenset, bytes, bool, None…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/mutable-immutable/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/mutable-immutable/">
+<meta property="og:title" content="Чем изменяемые типы отличаются от неизменяемых? — вопрос с собеседования">
+<meta property="og:description" content="Изменяемый объект меняется на месте, неизменяемый — только заменяется новым. Неизменяемые: int, float, str, tuple, frozenset, bytes, bool, None…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Чем изменяемые типы отличаются от неизменяемых?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Чем изменяемые типы отличаются от неизменяемых?"}]}</script>
+  <h1>Чем изменяемые типы отличаются от неизменяемых?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Типы данных</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Какие типы в Python изменяемые, а какие нет?</li><li>Что такое mutable и immutable объекты?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Изменяемый объект меняется <b>на месте</b>, неизменяемый — только заменяется новым.</p><ul><li>Неизменяемые: int, float, str, tuple, frozenset, bytes, bool, None</li><li>Изменяемые: list, dict, set, bytearray, обычные объекты классов</li></ul><p class="extra"><span>А ещё</span> Скажите про хешируемость: ключом словаря может быть только неизменяемое</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>В Python переменная — это имя, привязанное к объекту. Разница в том, что можно сделать с самим объектом.</p>
+<p>У <b>изменяемого</b> объекта (list, dict, set) можно поменять содержимое, и все имена, которые на него ссылаются, увидят изменение: <code>a = [1]; b = a; b.append(2)</code> — теперь и <code>a == [1, 2]</code>.</p>
+<p><b>Неизменяемый</b> объект (int, str, tuple) поменять нельзя. Операция, которая выглядит как изменение, создаёт новый объект и перепривязывает имя: после <code>s = &quot;ab&quot;; s += &quot;c&quot;</code> имя <code>s</code> указывает на другую строку, а старая не изменилась. Это видно по <code>id()</code> до и после.</p>
+<p>Следствия, о которых обычно спрашивают:</p>
+<ul><li><b>Хешируемость.</b> Ключи <code>dict</code> и элементы <code>set</code> должны быть хешируемыми, а хеш не должен меняться за время жизни объекта. Поэтому список ключом быть не может, а кортеж из неизменяемых элементов — может.</li><li><b>Кортеж со списком внутри.</b> Сам кортеж неизменяем (нельзя заменить элемент), но список внутри можно менять — и такой кортеж уже не хешируется.</li><li><b>Передача в функцию.</b> Функция получает ссылку на тот же объект: изменяемый аргумент она может поменять «снаружи», неизменяемый — нет.</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>a = [1, 2]
+b = a
+b.append(3)
+print(a)          # [1, 2, 3] — один и тот же список
+
+s = &quot;py&quot;
+t = s
+t += &quot;thon&quot;
+print(s, t)       # py python — у t теперь новая строка
+
+hash((1, 2))      # работает
+hash((1, [2]))    # TypeError: unhashable type: &#x27;list&#x27;</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Разница сформулирована через объект, а не через переменную: имя перепривязывается, объект меняется или нет.</li><li>Названы типы с обеих сторон, включая tuple, str, frozenset.</li><li>Связь с хешируемостью и ключами словаря.</li><li>Понимание, что кортеж со списком внутри «частично изменяем» и не хешируется.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Строку можно изменить через <code>+=</code>» — нет, создаётся новая строка.</li><li>«Кортеж полностью неизменяем» без оговорки про изменяемые элементы внутри.</li><li>Путать изменяемость объекта с возможностью переприсвоить переменную.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/dict-how-it-works/">Как устроен словарь в Python?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/copy-deepcopy/">Чем поверхностная копия отличается от глубокой?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/mutable-default-arg/">Почему нельзя использовать изменяемый объект как значение аргумента по умолчанию?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/list-vs-tuple/">Чем список отличается от кортежа?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/is-vs-eq/">Чем отличается is от ==?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем изменяемые типы отличаются от неизменяемых?","acceptedAnswer":{"@type":"Answer","text":"Изменяемый объект меняется на месте, неизменяемый — только заменяется новым. Неизменяемые: int, float, str, tuple, frozenset, bytes, bool, None Изменяемые: list, dict, set, bytearray, обычные объекты классов Скажите про хешируемость: ключом словаря может быть только неизменяемое В Python переменная — это имя, привязанное к объекту. Разница в том, что можно сделать с самим объектом. У изменяемого объекта (list, dict, set) можно поменять содержимое, и все имена, которые на него ссылаются, увидят изменение: a = [1]; b = a; b.append(2) — теперь и a == [1, 2]. Неизменяемый объект (int, str, tuple) поменять нельзя. Операция, которая выглядит как изменение, создаёт новый объект и перепривязывает имя: после s = \"ab\"; s += \"c\" имя s указывает на другую строку, а старая не изменилась. Это видно по id() до и после. Следствия, о которых обычно спрашивают: - Хешируемость. Ключи dict и элементы set должны быть хешируемыми, а хеш не должен меняться за время жизни объекта. Поэтому список ключом быть не может, а кортеж из неизменяемых элементов — может. - Кортеж со списком внутри. Сам кортеж неизменяем (нельзя заменить элемент), но список внутри можно менять — и такой кортеж…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

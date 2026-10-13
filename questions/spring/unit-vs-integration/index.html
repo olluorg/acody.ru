@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем unit-тест отличается от интеграционного? — вопрос с собеседования</title>
+<meta name="description" content="Unit-тест проверяет изолированную логику без внешних зависимостей (моки), быстро. Интеграционный — что компоненты правильно связаны между собой и с…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/unit-vs-integration/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/unit-vs-integration/">
+<meta property="og:title" content="Чем unit-тест отличается от интеграционного? — вопрос с собеседования">
+<meta property="og:description" content="Unit-тест проверяет изолированную логику без внешних зависимостей (моки), быстро. Интеграционный — что компоненты правильно связаны между собой и с…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Чем unit-тест отличается от интеграционного?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Чем unit-тест отличается от интеграционного?"}]}</script>
+  <h1>Чем unit-тест отличается от интеграционного?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Тестирование Spring Boot</span><span class="chip">Spring</span><span class="chip">Testcontainers</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем unit-тест отличается от интеграционного?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Unit-тест</b> проверяет изолированную логику без внешних зависимостей (моки), быстро. <b>Интеграционный</b> — что компоненты правильно связаны между собой и с реальными системами: база, брокер, HTTP.</p><ul><li>Unit — миллисекунды, тысячи штук</li><li>Интеграционный в Spring — контекст, Testcontainers</li><li>Оба нужны: unit не поймает ошибку в SQL или маппинге</li></ul><p class="extra"><span>А ещё</span> Сквозные — через всю систему, их мало</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Разница в цене и в том, что именно проверяется. Unit-тест выполняется за миллисекунды и не требует контекста Spring, поэтому таких тестов делают много — они закрывают бизнес-правила. Интеграционный поднимает контекст или контейнер с базой, работает секунды и отвечает на вопросы, которые unit-тест закрыть не может: правильно ли отображается сущность, работает ли миграция, тот ли запрос порождает репозиторий. Отсюда форма пирамиды: широкое основание быстрых тестов, меньше интеграционных, единицы сквозных.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Различие объёма и зависимостей.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Поднимать контекст приложения для проверки чистой бизнес-логики.</li><li>Строить набор из одних сквозных тестов.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Unit проверяет небольшую единицу логики изолированно и быстро; интеграционный проверяет связку компонентов, включая базу, брокер или контекст приложения</li><li class="no"><span class="mark">✗</span>Unit-тесты пишет разработчик, интеграционные — тестировщик</li><li class="no"><span class="mark">✗</span>Unit-тест проверяет один класс, интеграционный — один метод</li><li class="no"><span class="mark">✗</span>Разница только в используемой библиотеке утверждений</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое slice-тест и когда он уместен?</li><li>Почему тесты на встроенной базе могут вводить в заблуждение?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/testcontainers-contracts/">Тестирование Spring Boot</a><p>Пирамида тестов, unit без Spring, slice-тесты, @SpringBootTest и @MockBean, MockMvc/WebTestClient, Testcontainers и контрактные тесты.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/test-pyramid/">Что верно про пирамиду тестов в Spring-приложении?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/webmvctest-vs-springboottest/">Что делает slice-тест вроде @WebMvcTest по сравнению с @SpringBootTest?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем unit-тест отличается от интеграционного?","acceptedAnswer":{"@type":"Answer","text":"Unit-тест проверяет изолированную логику без внешних зависимостей (моки), быстро. Интеграционный — что компоненты правильно связаны между собой и с реальными системами: база, брокер, HTTP. Unit — миллисекунды, тысячи штук Интеграционный в Spring — контекст, Testcontainers Оба нужны: unit не поймает ошибку в SQL или маппинге Сквозные — через всю систему, их мало Разница в цене и в том, что именно проверяется. Unit-тест выполняется за миллисекунды и не требует контекста Spring, поэтому таких тестов делают много — они закрывают бизнес-правила. Интеграционный поднимает контекст или контейнер с базой, работает секунды и отвечает на вопросы, которые unit-тест закрыть не может: правильно ли отображается сущность, работает ли миграция, тот ли запрос порождает репозиторий. Отсюда форма пирамиды: широкое основание быстрых тестов, меньше интеграционных, единицы сквозных."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое вызов инструментов (tool calling) и агенты? — вопрос с собеседования</title>
+<meta name="description" content="Модель получает описания инструментов (имя, параметры по схеме) и вместо текста может вернуть запрос на вызов; вызывает их код приложения и отдаёт…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/tool-calling-agents/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/tool-calling-agents/">
+<meta property="og:title" content="Что такое вызов инструментов (tool calling) и агенты? — вопрос с собеседования">
+<meta property="og:description" content="Модель получает описания инструментов (имя, параметры по схеме) и вместо текста может вернуть запрос на вызов; вызывает их код приложения и отдаёт…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Что такое вызов инструментов (tool calling) и агенты?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Что такое вызов инструментов (tool calling) и агенты?"}]}</script>
+  <h1>Что такое вызов инструментов (tool calling) и агенты?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Инструменты и агенты</span><span class="chip">API языковых моделей</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как LLM вызывает функции?</li><li>Чем агент отличается от обычного чат-бота?</li><li>Как дать модели доступ к API или базе данных?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Модель получает <b>описания инструментов</b> (имя, параметры по схеме) и вместо текста может вернуть <b>запрос на вызов</b>; вызывает их <b>код приложения</b> и отдаёт результат обратно модели.</p><ul><li>Агент — цикл: модель решает, какой инструмент вызвать, видит результат, решает дальше, пока задача не решена</li><li>Нужны лимиты шагов, логирование, проверка аргументов и подтверждение опасных действий</li></ul><p class="extra"><span>А ещё</span> Сама модель ничего не выполняет — все права и риски на стороне вашего кода</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Как работает tool calling:</b></p>
+<ol><li>Приложение передаёт модели запрос пользователя и список инструментов с JSON-схемами параметров: <code>get_order_status(order_id)</code>, <code>search_docs(query)</code>.</li><li>Модель решает, нужен ли инструмент, и возвращает его имя и аргументы.</li><li>Приложение проверяет аргументы, выполняет функцию и добавляет результат в диалог.</li><li>Модель формирует ответ или запрашивает следующий инструмент.</li></ol>
+<p><b>Агент</b> — когда этот цикл продолжается несколько шагов и модель сама планирует: найти документ → вытащить данные → посчитать → записать результат.</p>
+<p><b>Что важно в продакшене:</b></p>
+<ul><li><b>лимиты</b> — число шагов, время, бюджет токенов, иначе агент может зациклиться;</li><li><b>минимальные права</b> — инструмент делает только необходимое, с правами текущего пользователя;</li><li><b>проверка аргументов</b> и подтверждение человеком для необратимых действий (оплата, удаление, отправка писем);</li><li><b>логирование</b> каждого шага для отладки;</li><li><b>понятные описания инструментов</b> — модель выбирает их по описанию.</li></ul>
+<p>Чем меньше инструментов и шагов, тем надёжнее. Часто фиксированный конвейер (сначала поиск, потом ответ) лучше полностью свободного агента.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механика: описание, запрос вызова, выполнение кодом, результат обратно.</li><li>Определение агента как цикла.</li><li>Риски и меры: лимиты, права, подтверждения, логи.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что модель сама выполняет код или запросы.</li><li>Давать агенту широкие права без подтверждения действий.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/ai/prompt-injection/">Что такое prompt injection и как от неё защищаться?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/structured-output/">Как получить от LLM ответ в строгом формате, например JSON?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое вызов инструментов (tool calling) и агенты?","acceptedAnswer":{"@type":"Answer","text":"Модель получает описания инструментов (имя, параметры по схеме) и вместо текста может вернуть запрос на вызов; вызывает их код приложения и отдаёт результат обратно модели. Агент — цикл: модель решает, какой инструмент вызвать, видит результат, решает дальше, пока задача не решена Нужны лимиты шагов, логирование, проверка аргументов и подтверждение опасных действий Сама модель ничего не выполняет — все права и риски на стороне вашего кода Как работает tool calling: 1. Приложение передаёт модели запрос пользователя и список инструментов с JSON-схемами параметров: get_order_status(order_id), search_docs(query). 2. Модель решает, нужен ли инструмент, и возвращает его имя и аргументы. 3. Приложение проверяет аргументы, выполняет функцию и добавляет результат в диалог. 4. Модель формирует ответ или запрашивает следующий инструмент. Агент — когда этот цикл продолжается несколько шагов и модель сама планирует: найти документ → вытащить данные → посчитать → записать результат. Что важно в продакшене: - лимиты — число шагов, время, бюджет токенов, иначе агент может зациклиться; - минимальные права — инструмент делает только необходимое, с правами текущего пользователя; - проверка аргументов и подтверждение человеком для необратимых действий (оплата, удаление, отправка писем); - логирование каждого шага для отладки; - понятные…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

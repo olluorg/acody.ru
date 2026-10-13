@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ООП и его принципы — разбор для собеседования</title>
+<meta name="description" content="Инкапсуляция, наследование, полиморфизм, абстракция — зачем они нужны, как работают внутри и почему композицию предпочитают наследованию.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/oop/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/oop/">
+<meta property="og:title" content="ООП и его принципы — разбор для собеседования">
+<meta property="og:description" content="Инкапсуляция, наследование, полиморфизм, абстракция — зачем они нужны, как работают внутри и почему композицию предпочитают наследованию.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>ООП и его принципы</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"ООП и его принципы"}]}</script>
+  <h1>ООП и его принципы</h1>
+  <p class="lead">Инкапсуляция, наследование, полиморфизм, абстракция — зачем они нужны, как работают внутри и почему композицию предпочитают наследованию.</p>
+  <article class="md"><h2>Зачем нужно ООП</h2>
+<p>Объектно-ориентированное программирование — способ моделировать систему через объекты. Каждый объект объединяет состояние (данные) и поведение (методы, которые с этим состоянием работают).</p>
+<p>В процедурном стиле данные и функции живут порознь: по мере роста кода всё труднее уследить, кто и как меняет данные. ООП собирает данные и операции над ними в один тип с чёткой границей — снаружи виден только контракт, а не внутренности.</p>
+<p>Главная цель — управлять сложностью: прятать детали за понятным интерфейсом и собирать большое из небольших заменяемых частей. Четыре принципа ниже — это инструменты для этой цели, а не пункты для заучивания.</p>
+<h2>Инкапсуляция: класс охраняет свои инварианты</h2>
+<p>Инкапсуляция — сокрытие внутреннего состояния за публичными методами так, чтобы класс сам отвечал за свою корректность. Внешний код не трогает поля напрямую, а просит объект выполнить операцию.</p>
+<p>Суть не в том, чтобы «сделать поля private и приклеить геттеры/сеттеры». Суть — в инвариантах: правилах, которые всегда должны быть истинны (баланс не отрицателен, список отсортирован). Методы — это место, где правила проверяются.</p>
+<p>Поэтому бездумные сеттеры на каждое поле ломают инкапсуляцию не хуже public-полей: они снова позволяют менять состояние в обход проверок. Хорошая инкапсуляция выставляет наружу осмысленные операции (deposit), а не присваивания (<code>setBalance</code>).</p>
+<pre class="lang-java"><code>class Account {
+    private long balance; // состояние под защитой
+
+    public void deposit(long amount) {
+        if (amount &lt;= 0) throw new IllegalArgumentException(&quot;amount must be positive&quot;);
+        balance += amount; // инвариант «balance &gt;= 0» под контролем
+    }
+
+    public long balance() { return balance; } // только чтение, без сеттера
+}</code></pre>
+<h2>Абстракция: что показать, а что спрятать</h2>
+<p>Абстракция — выделение существенного: какие операции тип предоставляет наружу, без подробностей, как они устроены внутри. В Java её выражают интерфейсы и абстрактные классы — это контракт, на который опираются клиенты.</p>
+<p>Частая путаница: абстракция отвечает на вопрос «что делает тип» (контракт), а инкапсуляция — «как он защищает своё состояние» (сокрытие). Они дополняют друг друга, но это не одно и то же.</p>
+<p>Чем уже публичный контракт, тем свободнее менять реализацию, не ломая тех, кто им пользуется. Хорошая абстракция показывает минимум.</p>
+<h2>Наследование: расширение через «is-a»</h2>
+<p>Наследование (extends) задаёт отношение «является»: подтип — это разновидность базового типа. Он получает поля и методы родителя, а часть поведения переопределяет через <code>@Override</code>; к версии родителя обращаются через super.</p>
+<p>Наследование переиспользует код, но его цена — жёсткая связь. Проблема «хрупкого базового класса» (fragile base class): изменение базового класса может незаметно сломать наследников, потому что они зависят от его внутреннего поведения, а не только от контракта.</p>
+<p>Поэтому наследоваться стоит, лишь когда отношение действительно «is-a» и контракт базового типа стабилен.</p>
+<h2>Полиморфизм: один интерфейс — много реализаций</h2>
+<p>Полиморфизм позволяет работать с разными реализациями через общий тип, а конкретный метод выбирается во время выполнения по фактическому классу объекта. Это динамическая диспетчеризация (late binding).</p>
+<p>Не путайте два механизма: переопределение (overriding) — это и есть рантайм-полиморфизм; перегрузка (overloading) — выбор метода по типам аргументов на этапе компиляции и к полиморфизму подтипов отношения не имеет.</p>
+<p>Полиморфизм — двигатель расширяемости: добавляя новую реализацию интерфейса, вы не трогаете код, который с ним работает. Это и есть принцип open/closed — открыт для расширения, закрыт для изменения.</p>
+<pre class="lang-java"><code>interface Shape { double area(); }
+
+class Circle implements Shape {
+    private final double r;
+    Circle(double r) { this.r = r; }
+    public double area() { return Math.PI * r * r; }
+}
+
+class Square implements Shape {
+    private final double a;
+    Square(double a) { this.a = a; }
+    public double area() { return a * a; }
+}
+
+// area() выбирает реализацию по фактическому типу объекта:
+double total = 0;
+for (Shape s : shapes) total += s.area();</code></pre>
+<h2>Композиция вместо наследования</h2>
+<p>Композиция — отношение «имеет» (has-a): объект делегирует работу другим объектам, которые держит внутри, вместо того чтобы наследоваться от них.</p>
+<p>Композиция гибче: зависимость можно подменить (в том числе в рантайме и в тестах), нет хрупкой связи с базовым классом и нет риска унаследовать лишнее. Отсюда правило «composition over inheritance».</p>
+<p>Классический пример: Stack не должен наследовать ArrayList (иначе наружу протекут add/remove по индексу, ломающие LIFO). Лучше держать список внутри и выставить только push/pop.</p>
+<pre class="lang-java"><code>// плохо: class Stack&lt;T&gt; extends ArrayList&lt;T&gt; — наследуем лишнее API
+class Stack&lt;T&gt; {
+    private final List&lt;T&gt; items = new ArrayList&lt;&gt;(); // has-a
+    public void push(T x) { items.add(x); }
+    public T pop() { return items.remove(items.size() - 1); }
+}</code></pre>
+<h2>Частые заблуждения</h2>
+<p>Считать, что private-поля с геттерами/сеттерами — это и есть инкапсуляция. Инкапсуляция про инварианты, а не про шаблонные аксессоры.</p>
+<p>Сводить полиморфизм к перегрузке методов вместо переопределения.</p>
+<p>Путать абстракцию (контракт типа) и инкапсуляцию (сокрытие состояния).</p>
+<p>Наследоваться ради переиспользования кода там, где отношения «is-a» на самом деле нет.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Назовите четыре принципа и дайте по одному короткому примеру: инкапсуляция (поле под проверяющим методом), наследование (extends + <code>@Override</code>), полиморфизм (вызов переопределённого метода по ссылке базового типа), абстракция (интерфейс как контракт).</p>
+<p>Сильный ответ добавляет связку: инкапсуляция бережёт инварианты, абстракция задаёт контракт, полиморфизм даёт расширяемость (open/closed), а наследование стоит предпочитать композиции. Это показывает, что принципы для вас — инструменты, а не заученный список.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/oop-principles/">Какие четыре принципа ООП?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/stack-extends-vector/">Почему java.util.Stack, унаследованный от Vector, считают ошибкой дизайна?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/encapsulation-getters-setters/">Класс сделал все поля private и добавил к каждому геттер и сеттер. Достигнута ли инкапсуляция?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/polymorphism-rules/">Что верно про полиморфизм в Java?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/solid/">SOLID: пять принципов дизайна</a><p>SRP, OCP, LSP, ISP, DIP — что каждая буква значит на самом деле, как выглядит нарушение в Java-коде, чем DIP отличается от DI и IoC.</p></li><li><a href="/articles/java/design-principles/">DRY, KISS, YAGNI и качество связей</a><p>Дублирование знания против дублирования текста, цена преждевременной абстракции, связность и связанность, закон Деметры, каталог code smells и когда рефакторить.</p></li><li><a href="/articles/java/equality/">Равенство: ==, equals и hashCode</a><p>Идентичность против логического равенства, контракт equals и hashCode, проблема equals с наследованием и корректная реализация.</p></li><li><a href="/articles/java/collections-overview/">Collections Framework: карта и выбор структуры</a><p>Иерархия интерфейсов, сложности операций основных структур, неизменяемые коллекции и принцип выбора по паттерну доступа.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"ООП и его принципы","description":"Инкапсуляция, наследование, полиморфизм, абстракция — зачем они нужны, как работают внутри и почему композицию предпочитают наследованию.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/oop/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

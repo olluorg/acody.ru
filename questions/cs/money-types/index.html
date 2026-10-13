@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как хранить денежные суммы в коде и в базе? — вопрос с собеседования</title>
+<meta name="description" content="Деньги — в целых минимальных единицах (копейках) или в десятичном типе: BigDecimal, Decimal, NUMERIC в базе. Не в double. double не представляет 0.10…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/money-types/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/money-types/">
+<meta property="og:title" content="Как хранить денежные суммы в коде и в базе? — вопрос с собеседования">
+<meta property="og:description" content="Деньги — в целых минимальных единицах (копейках) или в десятичном типе: BigDecimal, Decimal, NUMERIC в базе. Не в double. double не представляет 0.10…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Как хранить денежные суммы в коде и в базе?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Как хранить денежные суммы в коде и в базе?"}]}</script>
+  <h1>Как хранить денежные суммы в коде и в базе?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Числа в компьютере</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему нельзя хранить деньги в double?</li><li>Чем BigDecimal лучше double для денег?</li><li>Как делить сумму на части без потери копейки?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Деньги — в <b>целых минимальных единицах</b> (копейках) или в <b>десятичном типе</b>: BigDecimal, Decimal, NUMERIC в базе. Не в double.</p><ul><li>double не представляет 0.10 точно — ошибки копятся при суммах</li><li>Явно задавать масштаб и режим округления (HALF_EVEN, HALF_UP)</li><li>Хранить валюту рядом с суммой</li></ul><p class="extra"><span>А ещё</span> Деление на части — с распределением остатка, чтобы сошлись копейки</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Двоичная плавающая точка не может точно записать 0.10 или 0.01, поэтому сумма тысячи платежей по 0.10 рубля в double — не ровно 100. Для отчётов и сверок с банком такая погрешность неприемлема. Варианты:</p>
+<ul><li><b>целые минимальные единицы</b> — хранить копейки в <code>long</code>/<code>BIGINT</code>. Быстро, просто, точно. Нужно знать число знаков после запятой у валюты: у рубля и доллара 2, у иены 0, у бахрейнского динара 3;</li><li><b>десятичный тип</b> — <code>BigDecimal</code> в Java, <code>Decimal</code> в Python, <code>NUMERIC(19, 4)</code> в PostgreSQL. Число хранится как целое и десятичный масштаб, поэтому 0.10 представимо точно. Медленнее целых, но удобнее для процентов, курсов и налогов.</li></ul>
+<p><b>Округление.</b> Любое деление и умножение на процент даёт лишние знаки. Режим округления выбирают явно и по правилам предметной области: <code>HALF_UP</code> — школьное, <code>HALF_EVEN</code> — банковское (к чётному, не смещает сумму при большом числе операций). В Java <code>new BigDecimal(0.1)</code> берёт неточное значение double — создавать надо из строки или через <code>BigDecimal.valueOf</code>. И сравнивать через <code>compareTo</code>: <code>equals</code> учитывает масштаб, и 1.0 не равно 1.00.</p>
+<p><b>Распределение.</b> 100 рублей на троих — 33.33 × 3 = 99.99. Потерянную копейку отдают кому-то явно: считают доли, а остаток раскладывают по одной копейке первым участникам. Так делают при разбивке платежа на части и пропорциональном списании скидки по позициям чека.</p>
+<p><b>Валюта.</b> Сумма без валюты — источник ошибок. Хранят пару (сумма, код ISO 4217) или используют тип вроде <code>javax.money</code>/Joda-Money.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>from decimal import Decimal, ROUND_HALF_EVEN
+
+def split(total_kop: int, parts: int) -&gt; list[int]:
+    base, rest = divmod(total_kop, parts)
+    return [base + (1 if i &lt; rest else 0) for i in range(parts)]
+
+split(10000, 3)            # [3334, 3333, 3333] — в сумме ровно 10000
+Decimal(&quot;2.675&quot;).quantize(Decimal(&quot;0.01&quot;), ROUND_HALF_EVEN)  # 2.68
+round(2.675, 2)            # 2.67 — double хранит 2.67499999…</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Почему не double — двоичное представление.</li><li>Два рабочих варианта: копейки в целом или десятичный тип.</li><li>Явный режим округления и создание BigDecimal из строки.</li><li>Распределение остатка и хранение валюты — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li><code>new BigDecimal(0.1)</code> и сравнение через <code>equals</code>.</li><li>Считать, что <code>float</code> с округлением при выводе «достаточно».</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/floating-point/">Почему 0.1 + 0.2 не равно 0.3?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как хранить денежные суммы в коде и в базе?","acceptedAnswer":{"@type":"Answer","text":"Деньги — в целых минимальных единицах (копейках) или в десятичном типе: BigDecimal, Decimal, NUMERIC в базе. Не в double. double не представляет 0.10 точно — ошибки копятся при суммах Явно задавать масштаб и режим округления (HALF_EVEN, HALF_UP) Хранить валюту рядом с суммой Деление на части — с распределением остатка, чтобы сошлись копейки Двоичная плавающая точка не может точно записать 0.10 или 0.01, поэтому сумма тысячи платежей по 0.10 рубля в double — не ровно 100. Для отчётов и сверок с банком такая погрешность неприемлема. Варианты: - целые минимальные единицы — хранить копейки в long/BIGINT. Быстро, просто, точно. Нужно знать число знаков после запятой у валюты: у рубля и доллара 2, у иены 0, у бахрейнского динара 3; - десятичный тип — BigDecimal в Java, Decimal в Python, NUMERIC(19, 4) в PostgreSQL. Число хранится как целое и десятичный масштаб, поэтому 0.10 представимо точно. Медленнее целых, но удобнее для процентов, курсов и налогов. Округление. Любое деление и умножение на процент даёт лишние знаки. Режим округления выбирают явно и по правилам предметной области: HALF_UP — школьное, HALF_EVEN — банковское (к чётному, не смещает сумму при большом числе операций). В Java new BigDecimal(0.1) берёт неточное…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

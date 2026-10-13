@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем fail-fast итератор отличается от weakly consistent? — вопрос с собеседования</title>
+<meta name="description" content="Fail-fast итератор (ArrayList, HashMap) замечает структурное изменение коллекции не через него и бросает ConcurrentModificationException — по…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/fail-fast-vs-weakly-consistent/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/fail-fast-vs-weakly-consistent/">
+<meta property="og:title" content="Чем fail-fast итератор отличается от weakly consistent? — вопрос с собеседования">
+<meta property="og:description" content="Fail-fast итератор (ArrayList, HashMap) замечает структурное изменение коллекции не через него и бросает ConcurrentModificationException — по…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Чем fail-fast итератор отличается от weakly consistent?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Чем fail-fast итератор отличается от weakly consistent?"}]}</script>
+  <h1>Чем fail-fast итератор отличается от weakly consistent?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Коллекции</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему итератор ConcurrentHashMap не бросает ConcurrentModificationException?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Fail-fast</b> итератор (ArrayList, HashMap) замечает структурное изменение коллекции не через него и бросает <b>ConcurrentModificationException</b> — по возможности, без гарантии. <b>Weakly consistent</b> (ConcurrentHashMap, ConcurrentLinkedQueue) не падает, обходит каждый элемент не больше раза и может увидеть часть параллельных изменений.</p><ul><li>Fail-fast основан на счётчике modCount — это отладочный механизм, не синхронизация</li><li>CopyOnWriteArrayList — snapshot-итератор: видит копию на момент создания</li><li>CME возникает и в одном потоке — удаление в for-each</li></ul><p class="extra"><span>А ещё</span> Полагаться на CME для логики программы нельзя</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Fail-fast.</b> Коллекция ведёт счётчик структурных изменений <code>modCount</code> (добавление, удаление; замена значения — нет). Итератор при создании запоминает его и сверяет в каждом <code>next()</code>. Не совпало — CME. Цель — быстро сообщить об ошибке вместо странного поведения. Гарантии нет: в многопоточном коде без синхронизации изменение может быть не замечено.</p>
+<p><b>Weakly consistent</b> — итераторы коллекций <code>java.util.concurrent</code>:</p>
+<ul><li>не бросают CME;</li><li>каждый элемент, присутствовавший при создании итератора и не удалённый, будет возвращён ровно один раз;</li><li>изменения после создания итератора могут быть видны или нет.</li></ul>
+<p>Подходят для обхода разделяемых структур под нагрузкой (мониторинг, сбор статистики), но не дают консистентного снимка.</p>
+<p><b>Snapshot</b> — <code>CopyOnWriteArrayList</code>: итератор работает с копией массива на момент создания, изменения не видны, <code>remove</code> через итератор не поддерживается.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механика fail-fast и modCount.</li><li>Гарантии weakly consistent.</li><li>Snapshot-итераторы.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать fail-fast механизмом потокобезопасности.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>weakly consistent всегда бросает ConcurrentModificationException</li><li class="no"><span class="mark">✗</span>fail-fast потокобезопасен</li><li class="no"><span class="mark">✗</span>Они идентичны</li><li class="ok"><span class="mark">✓</span>fail-fast бросает CME при структурном изменении во время обхода; weakly consistent (concurrent-коллекции) не бросает и переживает изменения</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как безопасно удалить элемент при обходе?</li><li>Что делает CopyOnWriteArrayList?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/concurrent-collections/">Конкурентные коллекции</a><p>ConcurrentHashMap без сегментов (CAS + блокировка бакета), запрет null, CopyOnWriteArrayList и BlockingQueue.</p></li><li><a href="/articles/java/iterators/">Итераторы: fail-fast и ConcurrentModificationException</a><p>Iterator и ListIterator, механизм modCount, причины CME даже в одном потоке и безопасное удаление.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/jc-163/">В цикле for-each по списку вызывается list.remove(element). Что произойдёт?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jc-164/">Какие способы удалить элементы по условию во время обхода коллекции корректны?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/concurrenthashmap-internals/">Как устроен ConcurrentHashMap в Java 8+ и почему он эффективнее synchronized Map?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем fail-fast итератор отличается от weakly consistent?","acceptedAnswer":{"@type":"Answer","text":"Fail-fast итератор (ArrayList, HashMap) замечает структурное изменение коллекции не через него и бросает ConcurrentModificationException — по возможности, без гарантии. Weakly consistent (ConcurrentHashMap, ConcurrentLinkedQueue) не падает, обходит каждый элемент не больше раза и может увидеть часть параллельных изменений. Fail-fast основан на счётчике modCount — это отладочный механизм, не синхронизация CopyOnWriteArrayList — snapshot-итератор: видит копию на момент создания CME возникает и в одном потоке — удаление в for-each Полагаться на CME для логики программы нельзя Fail-fast. Коллекция ведёт счётчик структурных изменений modCount (добавление, удаление; замена значения — нет). Итератор при создании запоминает его и сверяет в каждом next(). Не совпало — CME. Цель — быстро сообщить об ошибке вместо странного поведения. Гарантии нет: в многопоточном коде без синхронизации изменение может быть не замечено. Weakly consistent — итераторы коллекций java.util.concurrent: - не бросают CME; - каждый элемент, присутствовавший при создании итератора и не удалённый, будет возвращён ровно один раз; - изменения после создания итератора могут быть видны или нет. Подходят для обхода разделяемых структур под нагрузкой (мониторинг, сбор статистики), но не дают консистентного снимка. Snapshot — CopyOnWriteArrayList: итератор работает с копией массива на момент создания, изменения не видны, remove через итератор не поддерживается."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

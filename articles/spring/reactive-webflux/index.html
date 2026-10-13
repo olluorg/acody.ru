@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reactive и Spring WebFlux — разбор для собеседования</title>
+<meta name="description" content="Неблокирующая модель и event loop, Reactive Streams и Reactor (Mono/Flux), backpressure, реактивный стек целиком, выбор MVC/WebFlux и цена сложности.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/spring/reactive-webflux/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/spring/reactive-webflux/">
+<meta property="og:title" content="Reactive и Spring WebFlux — разбор для собеседования">
+<meta property="og:description" content="Неблокирующая модель и event loop, Reactive Streams и Reactor (Mono/Flux), backpressure, реактивный стек целиком, выбор MVC/WebFlux и цена сложности.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#spring">Spring</a> <span>/</span> <span>Reactive и Spring WebFlux</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/articles/#spring"},{"@type":"ListItem","position":3,"name":"Reactive и Spring WebFlux"}]}</script>
+  <h1>Reactive и Spring WebFlux</h1>
+  <p class="lead">Неблокирующая модель и event loop, Reactive Streams и Reactor (Mono/Flux), backpressure, реактивный стек целиком, выбор MVC/WebFlux и цена сложности.</p>
+  <article class="md"><h2>Зачем неблокирующая модель</h2>
+<p>В модели thread-per-request (MVC на Tomcat) поток держится всё время запроса, включая блокирующие ожидания IO, поэтому число одновременных запросов ограничено размером пула (см. урок про сервлеты).</p>
+<p>Реактивная модель строится на event loop: небольшое число потоков (примерно по числу ядер) обслуживает тысячи соединений. Поток не блокируется на IO — он инициирует операцию и переключается на другую работу, а продолжение выполняется по готовности. Цель — высокая конкуренция на IO при малом числе потоков и памяти.</p>
+<h2>Reactive Streams и Reactor</h2>
+<p>В основе — стандарт Reactive Streams (Publisher, Subscriber, Subscription, Processor) с асинхронным обменом и backpressure. В Spring его реализует Project Reactor, дающий два типа Publisher: Mono (0..1 значение) и Flux (0..N значений).</p>
+<p>Ключевое свойство — ленивость: пока на поток не подписались (subscribe), не происходит НИЧЕГО. В WebFlux подписывается сам фреймворк, когда отдаёт ответ; вызывать subscribe/block в коде контроллера обычно не нужно и вредно.</p>
+<h2>Операторы и пайплайн</h2>
+<p>Поток обрабатывают декларативно операторами: map (преобразовать), <code>flatMap</code> (вложенная асинхронная операция, возвращающая свой Mono/Flux), filter, zip (объединить), <code>onErrorResume</code> (обработка ошибок). Они лишь СТРОЯТ конвейер — он выполнится при подписке.</p>
+<p>Мышление здесь иное, чем в императивном коде: вы описываете трансформации потока, а не последовательность шагов.</p>
+<pre class="lang-java"><code>Mono&lt;UserDto&gt; result = userClient.getUser(id) // неблокирующий вызов
+    .map(UserDto::from)
+    .onErrorResume(NotFoundException.class, e -&gt; Mono.empty());</code></pre>
+<h2>Backpressure</h2>
+<p>Главное отличие от «просто async» — backpressure: subscriber через <code>request(n)</code> сообщает, сколько элементов готов принять, и быстрый продюсер не зальёт его данными сверх возможностей. Это встроенный механизм защиты от перегрузки.</p>
+<p>Когда данные всё же прибывают быстрее, чем обрабатываются, применяют стратегии: буферизация (с лимитом), drop (отбрасывать новые), latest (хранить только последнее). Без управления backpressure быстрый источник вызвал бы OOM или деградацию.</p>
+<h2>Реактивный стек целиком</h2>
+<p>WebFlux по умолчанию работает на Netty (event loop), а не на Tomcat. Для неблокирующих зависимостей есть WebClient (неблокирующий HTTP-клиент, замена RestTemplate) и R2DBC (реактивный доступ к БД вместо блокирующего JDBC).</p>
+<p>Критическое правило: вся цепочка должна быть неблокирующей. Один блокирующий вызов в request path — JDBC, <code>Thread.sleep</code>, .block() — занимает поток event loop, и поскольку этих потоков единицы, пропускная способность обрушивается. Неизбежно блокирующую работу выносят на отдельный планировщик (<code>Schedulers.boundedElastic</code>).</p>
+<h2>MVC, WebFlux и виртуальные потоки</h2>
+<p>MVC проще, привычнее и отлаживаемее; thread-per-request отлично подходит большинству CRUD-сервисов с JPA/JDBC. WebFlux оправдан при измеримой проблеме IO-concurrency, когда ВСЯ цепочка умеет non-blocking, а также для стриминга (Server-Sent Events, потоковые ответы) и явного backpressure.</p>
+<p>Важный современный сдвиг: виртуальные потоки (Java 21) дают блокирующему MVC-коду масштаб реактивного без его сложности. Поэтому ради ОДНОГО ЛИШЬ масштаба на блокирующем IO WebFlux теперь берут реже — его уникальная ниша смещается к стримингу и backpressure, а не к «просто много соединений».</p>
+<h2>Цена сложности</h2>
+<p>Реактивный код труднее: stacktrace-ы малоинформативны (нужны <code>onErrorContinue</code>/checkpoint/reactor-tools), привычный ThreadLocal не работает (контекст пробрасывают через Reactor Context / Micrometer context propagation), и очень легко случайно заблокировать поток, не заметив этого.</p>
+<p>Поэтому WebFlux — осознанный выбор под задачу, а не дефолт «чтобы было быстро». Команда должна уметь мыслить декларативными потоками и отлаживать их.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Не сводитесь к «WebFlux быстрее». Объясните event loop (мало потоков на много соединений) против thread-per-request, Reactive Streams/Reactor (Mono/Flux, ленивость до subscribe), backpressure (<code>request(n)</code> против перегрузки) и требование сквозной неблокирующести (JDBC/.block убивают event loop → <code>boundedElastic</code>). Дайте формулу выбора: MVC по умолчанию; WebFlux — при доказанной IO-concurrency и end-to-end non-blocking или ради стриминга/backpressure; и что виртуальные потоки забрали у WebFlux аргумент «просто масштаб».</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/spring/reactive-backpressure/">Что такое reactive programming и backpressure?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/mvc-vs-webflux/">Чем Spring MVC отличается от Spring WebFlux?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/jdbc-in-webflux/">В реактивной цепочке WebFlux внутри map() выполняется синхронный JDBC-запрос. Чем это опасно?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/mono-without-subscribe/">Метод создаёт Mono с вызовом внешнего сервиса, но не возвращает его и ни на что не подписывается. Что произойдёт?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/non-blocking-basic/">Чем неблокирующая модель обработки отличается от модели «поток на запрос»?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/spring/servlet-runtime/">Сервлеты, фильтры и встроенный контейнер</a><p>Сервлет и встроенный Tomcat, модель thread-per-request, потокобезопасность контроллеров, Filter против Interceptor и forward/redirect.</p></li><li><a href="/articles/spring/web/">Spring MVC: DispatcherServlet и обработка запроса</a><p>Конвейер обработки запроса, @Controller против @RestController, маппинги, извлечение данных и контроль ответа.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Reactive и Spring WebFlux","description":"Неблокирующая модель и event loop, Reactive Streams и Reactor (Mono/Flux), backpressure, реактивный стек целиком, выбор MVC/WebFlux и цена сложности.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/spring/reactive-webflux/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

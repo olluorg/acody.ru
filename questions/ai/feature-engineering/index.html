@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как вы строите признаки для модели? — вопрос с собеседования</title>
+<meta name="description" content="Признаки часто важнее выбора модели. Источники: знание предметной области (доля возвратов клиента, время с последней покупки), агрегаты по истории…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/feature-engineering/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/feature-engineering/">
+<meta property="og:title" content="Как вы строите признаки для модели? — вопрос с собеседования">
+<meta property="og:description" content="Признаки часто важнее выбора модели. Источники: знание предметной области (доля возвратов клиента, время с последней покупки), агрегаты по истории…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как вы строите признаки для модели?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как вы строите признаки для модели?"}]}</script>
+  <h1>Как вы строите признаки для модели?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Основы машинного обучения</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое feature engineering?</li><li>Как кодировать категориальные признаки с большим числом значений?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Признаки часто важнее выбора модели. Источники: <b>знание предметной области</b> (доля возвратов клиента, время с последней покупки), <b>агрегаты</b> по истории (среднее, число событий за окна), <b>время</b> (день недели, праздники, сезонность), <b>взаимодействия</b> и отношения признаков, <b>текст и категории</b> (частоты, target encoding, эмбеддинги). Главное правило — признак должен быть <b>доступен на момент предсказания</b>, иначе утечка.</p><ul><li>Агрегаты считаются только по данным до момента предсказания</li><li>Target encoding — с регуляризацией и внутри фолдов кросс-валидации</li><li>Бустинги сами ловят нелинейности, линейным моделям нужны преобразования</li></ul><p class="extra"><span>А ещё</span> Признаки проверяют на валидации, а не на интуиции: много признаков — шум и переобучение</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Типы признаков:</b></p>
+<div class="table"><table><thead><tr><th>тип</th><th>приёмы</th></tr></thead><tbody><tr><td>числовые</td><td>логарифм для хвостов, биннинг, отношения</td></tr><tr><td>категориальные</td><td>one-hot, частоты, target encoding, CatBoost нативно</td></tr><tr><td>время</td><td>компоненты даты, давность, циклическое кодирование</td></tr><tr><td>история</td><td>агрегаты за окна 7, 30, 90 дней, тренды</td></tr><tr><td>текст</td><td>длина, ключевые слова, TF-IDF, эмбеддинги</td></tr><tr><td>геоданные</td><td>расстояния, плотность объектов рядом</td></tr></tbody></table></div>
+<p><b>Утечки:</b> агрегат посчитан с учётом будущего; признак отражает решение, принятое после события; target encoding на всей выборке.</p>
+<p><b>Отбор:</b> важность признаков, SHAP, удаление и проверка на валидации, стабильность во времени.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Признаки из предметной области и истории.</li><li>Доступность на момент предсказания.</li><li>Проверка на валидации и отбор.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/feature-scaling-encoding/">Зачем масштабировать признаки и как кодировать категориальные признаки?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/data-leakage/">Что такое утечка данных (data leakage) в машинном обучении?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/eda/">Как вы проводите разведочный анализ данных (EDA)?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/feature-importance/">Как объяснить предсказание модели — важность признаков и SHAP?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как вы строите признаки для модели?","acceptedAnswer":{"@type":"Answer","text":"Признаки часто важнее выбора модели. Источники: знание предметной области (доля возвратов клиента, время с последней покупки), агрегаты по истории (среднее, число событий за окна), время (день недели, праздники, сезонность), взаимодействия и отношения признаков, текст и категории (частоты, target encoding, эмбеддинги). Главное правило — признак должен быть доступен на момент предсказания, иначе утечка. Агрегаты считаются только по данным до момента предсказания Target encoding — с регуляризацией и внутри фолдов кросс-валидации Бустинги сами ловят нелинейности, линейным моделям нужны преобразования Признаки проверяют на валидации, а не на интуиции: много признаков — шум и переобучение Типы признаков: | тип | приёмы | | --- | --- | | числовые | логарифм для хвостов, биннинг, отношения | | категориальные | one-hot, частоты, target encoding, CatBoost нативно | | время | компоненты даты, давность, циклическое кодирование | | история | агрегаты за окна 7, 30, 90 дней, тренды | | текст | длина, ключевые слова, TF-IDF, эмбеддинги | | геоданные | расстояния, плотность объектов рядом | Утечки: агрегат посчитан с учётом будущего; признак отражает решение, принятое после события; target encoding на всей выборке. Отбор: важность признаков, SHAP, удаление и проверка на валидации, стабильность во времени."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

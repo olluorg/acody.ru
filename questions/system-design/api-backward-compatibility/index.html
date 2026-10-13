@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие изменения REST API обратно совместимы для существующих клиентов? — вопрос с собеседования</title>
+<meta name="description" content="Добавлять можно (новое необязательное поле в ответе, новый эндпоинт, новый необязательный параметр); удалять, переименовывать, менять тип и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/api-backward-compatibility/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/api-backward-compatibility/">
+<meta property="og:title" content="Какие изменения REST API обратно совместимы для существующих клиентов? — вопрос с собеседования">
+<meta property="og:description" content="Добавлять можно (новое необязательное поле в ответе, новый эндпоинт, новый необязательный параметр); удалять, переименовывать, менять тип и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Какие изменения REST API обратно совместимы для существующих клиентов?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Какие изменения REST API обратно совместимы для существующих клиентов?"}]}</script>
+  <h1>Какие изменения REST API обратно совместимы для существующих клиентов?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Проектирование API</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что можно менять в API, не ломая клиентов?</li><li>Что такое expand–contract?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Добавлять</b> можно (новое необязательное поле в ответе, новый эндпоинт, новый необязательный параметр); <b>удалять, переименовывать, менять тип и ужесточать</b> — нельзя.</p><ul><li>Совместимость держится на «толерантном читателе»: клиент игнорирует незнакомые поля</li><li>Опасные мелочи: новое значение enum, смена формата даты, необязательное поле стало обязательным</li><li>Ломающее изменение — через expand–contract: добавить новое, перевести клиентов, удалить старое</li></ul><p class="extra"><span>А ещё</span> Для неизбежных изменений — новая версия API и срок поддержки старой</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Совместимые изменения (для существующих клиентов):</b></p>
+<ul><li>новое поле в ответе;</li><li>новый необязательный параметр запроса со значением по умолчанию, как раньше;</li><li>новый эндпоинт или метод;</li><li>ослабление требований к входу (принимать больше форматов).</li></ul>
+<p><b>Несовместимые:</b></p>
+<ul><li>удаление или переименование поля;</li><li>изменение типа (<code>&quot;price&quot;: &quot;100&quot;</code> → <code>100</code>), формата даты, единиц измерения;</li><li>необязательное поле становится обязательным во входе;</li><li>изменение смысла существующего значения или поведения по умолчанию;</li><li><b>новое значение перечисления</b> в ответе — ломает клиентов со строгим <code>switch</code> без ветки по умолчанию; об этом договариваются заранее.</li></ul>
+<p><b>Толерантный читатель</b> — правило для клиентов: игнорировать незнакомые поля, не зависеть от порядка, обрабатывать неизвестные значения enum. Без него даже добавление поля ломает строгие десериализаторы (<code>FAIL_ON_UNKNOWN_PROPERTIES</code> в Jackson).</p>
+<p><b>Expand–contract</b> для ломающих изменений:</p>
+<ol><li><b>расширить</b> — добавить новое поле или эндпоинт рядом со старым, заполнять оба;</li><li><b>перевести</b> потребителей на новое, отслеживая использование старого;</li><li><b>сократить</b> — удалить старое, когда им никто не пользуется.</li></ol>
+<p>Тот же приём — для схем баз данных и событий в брокере.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Правило «добавлять можно, удалять и ужесточать нельзя» с примерами.</li><li>Неочевидные ломающие изменения: enum, формат, обязательность.</li><li>Толерантный читатель на стороне клиента.</li><li>Expand–contract для неизбежных изменений.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать переименование поля безобидным.</li><li>Не учитывать клиентов со строгой десериализацией.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Несколько верных вариантов. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Добавить необязательное поле в ответ</li><li class="ok"><span class="mark">✓</span>Добавить необязательный параметр запроса</li><li class="ok"><span class="mark">✓</span>Добавить новый эндпоинт</li><li class="no"><span class="mark">✗</span>Сделать ранее необязательное поле запроса обязательным</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как автоматически проверять совместимость в CI?</li><li>Что такое expand–contract и где он ещё применяется?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/api-design/">Проектирование API: REST, gRPC и события</a><p>Выбор стиля взаимодействия, семантика и идемпотентность HTTP, формат ошибок, курсорная пагинация против offset, версионирование и обратная совместимость, контрактное тестирование.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/api-contract-safety/">Как гарантировать, что изменение вашего API не сломает потребителей, которых вы не контролируете?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/rolling-update-compatibility/">Во время rolling update в проде одновременно работают старая и новая версии сервиса. Какое требование из этого следует?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/rename-column-zero-downtime/">Нужно переименовать колонку name в full_name без простоя при rolling-выкатке. Какая последовательность верна?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие изменения REST API обратно совместимы для существующих клиентов?","acceptedAnswer":{"@type":"Answer","text":"Добавлять можно (новое необязательное поле в ответе, новый эндпоинт, новый необязательный параметр); удалять, переименовывать, менять тип и ужесточать — нельзя. Совместимость держится на «толерантном читателе»: клиент игнорирует незнакомые поля Опасные мелочи: новое значение enum, смена формата даты, необязательное поле стало обязательным Ломающее изменение — через expand–contract: добавить новое, перевести клиентов, удалить старое Для неизбежных изменений — новая версия API и срок поддержки старой Совместимые изменения (для существующих клиентов): - новое поле в ответе; - новый необязательный параметр запроса со значением по умолчанию, как раньше; - новый эндпоинт или метод; - ослабление требований к входу (принимать больше форматов). Несовместимые: - удаление или переименование поля; - изменение типа (\"price\": \"100\" → 100), формата даты, единиц измерения; - необязательное поле становится обязательным во входе; - изменение смысла существующего значения или поведения по умолчанию; - новое значение перечисления в ответе — ломает клиентов со строгим switch без ветки по умолчанию; об этом договариваются заранее. Толерантный читатель — правило для клиентов: игнорировать незнакомые поля, не зависеть от порядка, обрабатывать неизвестные значения enum. Без него даже добавление поля ломает строгие десериализаторы (FAIL_ON_UNKNOWN_PROPERTIES в Jackson). Expand–contract для ломающих…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

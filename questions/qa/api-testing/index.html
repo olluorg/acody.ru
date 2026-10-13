@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как тестировать REST API? — вопрос с собеседования</title>
+<meta name="description" content="API тестируют без интерфейса: отправляем запросы (Postman, curl) и проверяем статус, тело ответа, схему данных, побочные эффекты и обработку ошибок…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/qa/api-testing/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/qa/api-testing/">
+<meta property="og:title" content="Как тестировать REST API? — вопрос с собеседования">
+<meta property="og:description" content="API тестируют без интерфейса: отправляем запросы (Postman, curl) и проверяем статус, тело ответа, схему данных, побочные эффекты и обработку ошибок…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/qa/">Тестирование (QA)</a> <span>/</span> <span>Как тестировать REST API?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Тестирование (QA)","item":"https://learn.getsotto.ru/questions/qa/"},{"@type":"ListItem","position":3,"name":"Как тестировать REST API?"}]}</script>
+  <h1>Как тестировать REST API?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Тестирование API</span><span class="chip">Postman</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что проверять при тестировании API?</li><li>Как вы работаете с Postman?</li><li>Что такое REST?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">API тестируют <b>без интерфейса</b>: отправляем запросы (Postman, curl) и проверяем <b>статус, тело ответа, схему данных, побочные эффекты</b> и обработку ошибок.</p><ul><li>Позитивные: корректные данные → верный ответ и изменения в системе</li><li>Негативные: неверные типы, пустые и лишние поля, без авторизации, чужой ресурс</li></ul><p class="extra"><span>А ещё</span> Тестирование API находит ошибки раньше UI и не зависит от вёрстки</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>REST</b> — стиль построения API: ресурсы с адресами (<code>/users/15</code>), действия — HTTP-методами, данные — обычно в JSON, сервер не хранит состояние между запросами.</p>
+<p>Что проверять:</p>
+<ul><li><b>статус ответа</b> — 200/201 при успехе, нужный 4xx при ошибке, никогда 500 на неверных данных;</li><li><b>тело ответа</b> — значения полей, типы данных, формат дат, соответствие документации (часто Swagger/OpenAPI);</li><li><b>схему</b> — обязательные поля на месте, лишних чувствительных полей нет (например, хеша пароля);</li><li><b>побочные эффекты</b> — данные действительно создались или изменились: повторный GET, проверка в базе;</li><li><b>негативные сценарии</b> — пустое тело, неверные типы (строка вместо числа), слишком длинные значения, лишние поля, отсутствующие обязательные;</li><li><b>авторизацию</b> — запрос без токена (401), с чужим токеном к чужому ресурсу (403 или 404), с истёкшим токеном;</li><li><b>граничные значения и пагинацию</b>, идемпотентность повторных запросов, время ответа.</li></ul>
+<p><b>Postman</b> — инструмент для ручного тестирования API: коллекции запросов, переменные окружения (стенд, токен), проверки в Tests, запуск коллекции целиком.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><p><code>POST /api/users</code> с телом <code>{&quot;email&quot;: &quot;a@b.ru&quot;, &quot;age&quot;: 25}</code> → 201 и <code>id</code> в ответе; затем <code>GET /api/users/{id}</code> возвращает те же данные. Негативные: <code>age: &quot;двадцать&quot;</code> → 400/422 с понятной ошибкой; тот же email второй раз → 409; без токена → 401.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Что такое REST и как устроен запрос.</li><li>Список проверок: статус, тело, схема, побочные эффекты, негативные, авторизация.</li><li>Опыт с Postman или другим инструментом.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Проверять только статус 200.</li><li>Не проверять доступ к чужим данным.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/qa/auth-authorization/">Чем аутентификация отличается от авторизации?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/qa/http-status-codes/">Какие коды ответа HTTP вы знаете?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/qa/http-methods/">Какие HTTP-методы вы знаете? Чем GET отличается от POST?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/qa/devtools/">Как вы используете DevTools при тестировании?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как тестировать REST API?","acceptedAnswer":{"@type":"Answer","text":"API тестируют без интерфейса: отправляем запросы (Postman, curl) и проверяем статус, тело ответа, схему данных, побочные эффекты и обработку ошибок. Позитивные: корректные данные → верный ответ и изменения в системе Негативные: неверные типы, пустые и лишние поля, без авторизации, чужой ресурс Тестирование API находит ошибки раньше UI и не зависит от вёрстки REST — стиль построения API: ресурсы с адресами (/users/15), действия — HTTP-методами, данные — обычно в JSON, сервер не хранит состояние между запросами. Что проверять: - статус ответа — 200/201 при успехе, нужный 4xx при ошибке, никогда 500 на неверных данных; - тело ответа — значения полей, типы данных, формат дат, соответствие документации (часто Swagger/OpenAPI); - схему — обязательные поля на месте, лишних чувствительных полей нет (например, хеша пароля); - побочные эффекты — данные действительно создались или изменились: повторный GET, проверка в базе; - негативные сценарии — пустое тело, неверные типы (строка вместо числа), слишком длинные значения, лишние поля, отсутствующие обязательные; - авторизацию — запрос без токена (401), с чужим токеном к чужому ресурсу (403 или 404), с истёкшим токеном; - граничные значения и пагинацию, идемпотентность повторных запросов, время ответа…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

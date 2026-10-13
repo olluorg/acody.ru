@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работает алгоритм Дейкстры? — вопрос с собеседования</title>
+<meta name="description" content="Дейкстра находит кратчайшие пути от одной вершины во взвешенном графе с неотрицательными весами: каждый раз берёт ближайшую ещё не обработанную…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/dijkstra/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/dijkstra/">
+<meta property="og:title" content="Как работает алгоритм Дейкстры? — вопрос с собеседования">
+<meta property="og:description" content="Дейкстра находит кратчайшие пути от одной вершины во взвешенном графе с неотрицательными весами: каждый раз берёт ближайшую ещё не обработанную…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Как работает алгоритм Дейкстры?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Как работает алгоритм Дейкстры?"}]}</script>
+  <h1>Как работает алгоритм Дейкстры?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Графы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как найти кратчайший путь во взвешенном графе?</li><li>Почему Дейкстра не работает с отрицательными весами?</li><li>Какая сложность у алгоритма Дейкстры?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Дейкстра находит <b>кратчайшие пути от одной вершины</b> во взвешенном графе с <b>неотрицательными весами</b>: каждый раз берёт ближайшую ещё не обработанную вершину и <b>ослабляет</b> рёбра из неё.</p><ul><li>Ближайшую вершину достают из очереди с приоритетом (кучи): O((V + E) log V)</li><li>Когда вершину достали из очереди, расстояние до неё окончательное</li></ul><p class="extra"><span>А ещё</span> Отрицательные веса ломают это свойство — нужен Беллман — Форд</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Поиск пути на сетке: BFS, DFS, Дейкстра, A*, жадный</p><script type="module" src="/widgets/pathfinding.js"></script><sotto-pathfinding theme="dark"></sotto-pathfinding></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Идея.</b> Храним текущие оценки расстояний <code>dist</code>: у старта 0, у остальных бесконечность. Повторяем:</p>
+<ol><li>достать из очереди с приоритетом вершину <code>v</code> с наименьшим <code>dist</code>;</li><li>для каждого ребра <code>v → u</code> с весом <code>w</code>: если <code>dist[v] + w &lt; dist[u]</code>, обновить <code>dist[u]</code> и положить <code>u</code> в очередь (это называется <b>ослаблением</b> ребра);</li><li>запоминать родителя, чтобы восстановить путь.</li></ol>
+<p><b>Почему это верно.</b> Все веса неотрицательны, поэтому вершина, у которой сейчас наименьшая оценка, не может получить ещё меньшую через другие вершины — любой обходной путь только длиннее. Значит, в момент извлечения её расстояние окончательное. Это «жадный» шаг.</p>
+<p><b>Отрицательные веса</b> ломают рассуждение: обходной путь через отрицательное ребро может оказаться короче уже «окончательного». Для них используют алгоритм Беллмана — Форда (O(V·E)), он же находит отрицательные циклы.</p>
+<p><b>Сложность</b> с двоичной кучей — O((V + E) log V). Для невзвешенного графа Дейкстра вырождается в BFS. Если нужен путь до одной конкретной цели, можно остановиться, когда цель извлечена из очереди, а ещё лучше — использовать A* с эвристикой.</p>
+<p>Применения: маршрутизация в сетях (OSPF), навигация, стоимость перемещения в играх.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import heapq
+
+def dijkstra(graph, start):
+    dist = {start: 0}
+    heap = [(0, start)]
+    while heap:
+        d, v = heapq.heappop(heap)
+        if d &gt; dist.get(v, float(&quot;inf&quot;)):
+            continue                      # устаревшая запись в куче
+        for u, w in graph[v]:
+            nd = d + w
+            if nd &lt; dist.get(u, float(&quot;inf&quot;)):
+                dist[u] = nd
+                heapq.heappush(heap, (nd, u))
+    return dist</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Жадный выбор ближайшей вершины и ослабление рёбер.</li><li>Роль очереди с приоритетом и сложность.</li><li>Почему нельзя отрицательные веса и что вместо.</li><li>Связь с BFS и A* — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Применять к графу с отрицательными весами.</li><li>Забыть пропускать устаревшие записи в куче.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/a-star/">Что такое алгоритм A* и чем он лучше Дейкстры?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/bfs-dfs/">Чем обход в ширину (BFS) отличается от обхода в глубину (DFS)?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/heap-priority-queue/">Что такое двоичная куча и очередь с приоритетом?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работает алгоритм Дейкстры?","acceptedAnswer":{"@type":"Answer","text":"Дейкстра находит кратчайшие пути от одной вершины во взвешенном графе с неотрицательными весами: каждый раз берёт ближайшую ещё не обработанную вершину и ослабляет рёбра из неё. Ближайшую вершину достают из очереди с приоритетом (кучи): O((V + E) log V) Когда вершину достали из очереди, расстояние до неё окончательное Отрицательные веса ломают это свойство — нужен Беллман — Форд Идея. Храним текущие оценки расстояний dist: у старта 0, у остальных бесконечность. Повторяем: 1. достать из очереди с приоритетом вершину v с наименьшим dist; 2. для каждого ребра v → u с весом w: если dist[v] + w < dist[u], обновить dist[u] и положить u в очередь (это называется ослаблением ребра); 3. запоминать родителя, чтобы восстановить путь. Почему это верно. Все веса неотрицательны, поэтому вершина, у которой сейчас наименьшая оценка, не может получить ещё меньшую через другие вершины — любой обходной путь только длиннее. Значит, в момент извлечения её расстояние окончательное. Это «жадный» шаг. Отрицательные веса ломают рассуждение: обходной путь через отрицательное ребро может оказаться короче уже «окончательного». Для них используют алгоритм Беллмана — Форда (O(VE)), он же находит отрицательные циклы. Сложность с двоичной кучей — O((V + E) log V). Для невзвешенного графа…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

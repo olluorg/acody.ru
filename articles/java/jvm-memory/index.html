@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Память JVM и устройство объекта — разбор для собеседования</title>
+<meta name="description" content="Runtime data areas, стек против кучи, заголовок объекта и выравнивание, compressed oops и metaspace.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/jvm-memory/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/jvm-memory/">
+<meta property="og:title" content="Память JVM и устройство объекта — разбор для собеседования">
+<meta property="og:description" content="Runtime data areas, стек против кучи, заголовок объекта и выравнивание, compressed oops и metaspace.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Память JVM и устройство объекта</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Память JVM и устройство объекта"}]}</script>
+  <h1>Память JVM и устройство объекта</h1>
+  <p class="lead">Runtime data areas, стек против кучи, заголовок объекта и выравнивание, compressed oops и metaspace.</p>
+  <article class="md"><h2>Runtime data areas</h2>
+<p>JVM делит память на области. Heap — общая для всех потоков, там живут все объекты и массивы. У каждого потока свои: JVM stack (кадры методов), program counter и, для нативных вызовов, native stack. Metaspace (вне кучи) хранит метаданные классов, code cache — скомпилированный JIT-код.</p>
+<p>Heap собирается сборщиком мусора; стек освобождается автоматически при возврате из метода (LIFO). Переполнение стека — StackOverflowError (обычно глубокая рекурсия), нехватка кучи — OutOfMemoryError.</p>
+<figure><img src="/articles/assets/jvm-memory.webp" alt="Области памяти JVM: куча, метапространство, стеки потоков, счётчик команд; справа — устройство объекта: заголовок, указатель на класс, поля." loading="lazy"><figcaption>Области памяти времени выполнения JVM и устройство одного объекта в куче.</figcaption></figure>
+<h2>Стек против кучи</h2>
+<p>В кадре стека лежат примитивные локальные переменные и ссылки; сами объекты — всегда в куче. Поэтому Account a = <code>new Account()</code> кладёт ссылку в стек, а объект — в кучу.</p>
+<p>JIT может через escape analysis доказать, что объект не «убегает» из метода, и применить scalar replacement — разложить его на локальные переменные и не аллоцировать в куче вовсе. Это, а не «маленькие объекты на стеке», и есть реальная оптимизация аллокаций.</p>
+<pre class="lang-java"><code>void m() {
+    int x = 5;                 // примитив в кадре стека
+    Account a = new Account(); // ссылка в стеке, объект в куче
+}</code></pre>
+<h2>Устройство объекта в памяти</h2>
+<p>Объект в куче состоит из заголовка и полей. Заголовок — это mark word (хеш-код по требованию, биты блокировки/состояния GC, возраст для tenuring) и klass pointer (ссылка на метаданные класса в metaspace). У массивов в заголовке ещё длина.</p>
+<p>Поля выравниваются, а весь объект дополняется до кратности 8 байт (padding) для эффективного доступа. Поэтому пустой объект занимает не ноль, а обычно 16 байт — это объясняет, почему миллионы крошечных объектов дороги по памяти.</p>
+<h2>Compressed oops</h2>
+<p>На 64-битной JVM ссылки (oops) по умолчанию сжимаются до 32 бит, пока куча меньше ~32 ГБ. Это вдвое уменьшает размер ссылок и заметно экономит память и нагрузку на кэш.</p>
+<p>Практическое следствие: куча чуть выше 32 ГБ может вмещать меньше полезных данных, чем 31 ГБ, потому что отключаются compressed oops — частый сюрприз при тюнинге.</p>
+<h2>Metaspace</h2>
+<p>Метаданные классов с Java 8 живут в metaspace — нативной памяти вне кучи, которая растёт автоматически (в отличие от старого PermGen фиксированного размера). Это убрало классический «OutOfMemoryError: PermGen space».</p>
+<p>Но утечки классов всё ещё возможны: например, постоянная перезагрузка классов через новые загрузчики (динамическая генерация, частый redeploy) раздувает metaspace — его ограничивают -XX:MaxMetaspaceSize.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Назовите области (heap общий, стеки/PC по потоку, metaspace вне кучи), объясните «примитивы и ссылки в кадре, объекты в куче» и упомяните escape analysis вместо мифа «объекты на стеке». Бонус-уровень — заголовок объекта (mark word + klass pointer), padding до 8 байт и compressed oops с порогом ~32 ГБ.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/jvm-memory-areas/">Из каких основных областей состоит память JVM и что где хранится?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/stack-vs-heap-jvm/">Что верно про стек и кучу в JVM?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/compressed-oops-32gb/">Почему увеличение кучи с 30 ГБ до 33 ГБ может уменьшить объём фактически доступной памяти?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/heap-vs-stack/">Где размещаются объекты, создаваемые оператором new?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/classloading/">Загрузка классов и class loaders</a><p>Жизненный цикл класса (loading/linking/initialization), иерархия загрузчиков с делегированием, триггеры инициализации и изоляция.</p></li><li><a href="/articles/java/gc-generations/">GC: поколения и продвижение объектов</a><p>Гипотеза о поколениях, Eden и Survivor, minor GC через копирование, tenuring и преждевременное продвижение.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Память JVM и устройство объекта","description":"Runtime data areas, стек против кучи, заголовок объекта и выравнивание, compressed oops и metaspace.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/jvm-memory/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

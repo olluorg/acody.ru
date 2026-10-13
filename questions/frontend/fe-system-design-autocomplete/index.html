@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Спроектируйте компонент поиска с автодополнением. — вопрос с собеседования</title>
+<meta name="description" content="Уточнить требования (источник данных, объём, задержка, мобильные, офлайн), затем: debounce ввода (~150–300 мс), отмена устаревших запросов…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/fe-system-design-autocomplete/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/fe-system-design-autocomplete/">
+<meta property="og:title" content="Спроектируйте компонент поиска с автодополнением. — вопрос с собеседования">
+<meta property="og:description" content="Уточнить требования (источник данных, объём, задержка, мобильные, офлайн), затем: debounce ввода (~150–300 мс), отмена устаревших запросов…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Спроектируйте компонент поиска с автодополнением.</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Спроектируйте компонент поиска с автодополнением."}]}</script>
+  <h1>Спроектируйте компонент поиска с автодополнением.</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Архитектура фронтенда</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Frontend system design — поиск с подсказками</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Уточнить <b>требования</b> (источник данных, объём, задержка, мобильные, офлайн), затем: <b>debounce</b> ввода (~150–300 мс), <b>отмена</b> устаревших запросов (AbortController) и защита от гонок ответов, <b>кэш</b> результатов по запросу, <b>минимальная длина</b> запроса, <b>клавиатурная навигация</b> и <b>ARIA</b> (combobox, listbox, aria-activedescendant), подсветка совпадений, состояния загрузки, пустого результата и ошибки. Для больших списков — виртуализация.</p><ul><li>API: пагинация, лимит, ограничение частоты; кэширующий CDN для популярных запросов</li><li>Локальный поиск по небольшому словарю — без сети, через Web Worker при большом объёме</li><li>Метрики: время до подсказки, доля выбранных подсказок</li></ul><p class="extra"><span>А ещё</span> Интервьюер ждёт обсуждения компромиссов: debounce против мгновенного отклика, кэш против свежести</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Компоненты:</b></p>
+<ul><li>поле ввода (контролируемое), список подсказок, состояние выделения;</li><li>слой данных: debounce, кэш (LRU на сотни запросов), отмена, повторы;</li><li>отрисовка: выделение совпадений без <code>innerHTML</code>, виртуализация.</li></ul>
+<p><b>Доступность:</b></p>
+<ul><li><code>role=&quot;combobox&quot;</code>, <code>aria-expanded</code>, <code>aria-controls</code>;</li><li>список <code>role=&quot;listbox&quot;</code>, элементы <code>role=&quot;option&quot;</code>;</li><li>стрелки, Enter, Escape; объявление числа результатов через <code>aria-live</code>.</li></ul>
+<p><b>Крайние случаи:</b> быстрый ввод и удаление, ответы не по порядку, медленная сеть, офлайн, длинные строки, мобильная клавиатура, IME для ввода иероглифов.</p>
+<p><b>Производительность:</b> без перерисовки всего списка на каждый символ, дешёвые обработчики ввода (INP).</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Требования до решения.</li><li>Debounce, отмена, кэш и гонки.</li><li>Доступность и крайние случаи.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/debounce-throttle/">Чем debounce отличается от throttle?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/promises/">Что такое Promise и чем отличаются Promise.all, allSettled, race и any?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/core-web-vitals/">Что такое Core Web Vitals и как их улучшить?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Спроектируйте компонент поиска с автодополнением.","acceptedAnswer":{"@type":"Answer","text":"Уточнить требования (источник данных, объём, задержка, мобильные, офлайн), затем: debounce ввода (~150–300 мс), отмена устаревших запросов (AbortController) и защита от гонок ответов, кэш результатов по запросу, минимальная длина запроса, клавиатурная навигация и ARIA (combobox, listbox, aria-activedescendant), подсветка совпадений, состояния загрузки, пустого результата и ошибки. Для больших списков — виртуализация. API: пагинация, лимит, ограничение частоты; кэширующий CDN для популярных запросов Локальный поиск по небольшому словарю — без сети, через Web Worker при большом объёме Метрики: время до подсказки, доля выбранных подсказок Интервьюер ждёт обсуждения компромиссов: debounce против мгновенного отклика, кэш против свежести Компоненты: - поле ввода (контролируемое), список подсказок, состояние выделения; - слой данных: debounce, кэш (LRU на сотни запросов), отмена, повторы; - отрисовка: выделение совпадений без innerHTML, виртуализация. Доступность: - role=\"combobox\", aria-expanded, aria-controls; - список role=\"listbox\", элементы role=\"option\"; - стрелки, Enter, Escape; объявление числа результатов через aria-live. Крайние случаи: быстрый ввод и удаление, ответы не по порядку, медленная сеть, офлайн, длинные строки, мобильная клавиатура, IME для ввода иероглифов. Производительность: без перерисовки всего списка на каждый символ, дешёвые обработчики ввода (INP)."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

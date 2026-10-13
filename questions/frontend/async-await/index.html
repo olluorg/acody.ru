@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работают async и await и как правильно обрабатывать в них ошибки? — вопрос с собеседования</title>
+<meta name="description" content="async-функция всегда возвращает Promise; await приостанавливает её до завершения промиса, не блокируя поток (продолжение — микрозадача). Ошибки ловят…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/async-await/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/async-await/">
+<meta property="og:title" content="Как работают async и await и как правильно обрабатывать в них ошибки? — вопрос с собеседования">
+<meta property="og:description" content="async-функция всегда возвращает Promise; await приостанавливает её до завершения промиса, не блокируя поток (продолжение — микрозадача). Ошибки ловят…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Как работают async и await и как правильно обрабатывать в них ошибки?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Как работают async и await и как правильно обрабатывать в них ошибки?"}]}</script>
+  <h1>Как работают async и await и как правильно обрабатывать в них ошибки?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Асинхронность и event loop</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как выполнить несколько запросов параллельно с await?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>async</b>-функция всегда возвращает Promise; <b>await</b> приостанавливает её до завершения промиса, не блокируя поток (продолжение — микрозадача). Ошибки ловят обычным <b>try/catch</b>. Независимые запросы запускают <b>одновременно</b>: сначала создать промисы, потом await <code>Promise.all</code>.</p><ul><li>await в цикле for — последовательно; для параллельности — map + Promise.all</li><li>forEach с async-колбэком не ждёт завершения</li><li>Забытый await — функция идёт дальше, а ошибка уходит в unhandledrejection</li></ul><p class="extra"><span>А ещё</span> Top-level await доступен в ES-модулях</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Event loop: стек, микро- и макрозадачи</p><script type="module" src="/widgets/event-loop.js"></script><sotto-event-loop theme="dark"></sotto-event-loop></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Что делает await.</b> Если значение — промис, функция приостанавливается, а продолжение ставится в очередь микрозадач после его завершения. Поток при этом свободен для других задач.</p>
+<p><b>fetch не бросает на HTTP-ошибки</b> — 404 и 500 приходят как успешный ответ, проверять <code>res.ok</code>. Бросает только при сетевой ошибке и отмене.</p>
+<p><b>Циклы:</b> <code>for...of</code> с await — последовательная обработка (иногда нужна, чтобы не перегрузить сервер); <code>forEach(async ...)</code> — запускает всё и не ждёт; для ограниченного параллелизма — пачки или библиотека <code>p-limit</code>.</p>
+<p><b>Отмена:</b> <code>AbortController</code> и <code>signal</code> в fetch; при размонтировании компонента отменять незавершённые запросы.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-js"><code>// медленно: запросы по очереди
+const user = await fetchUser(id);
+const orders = await fetchOrders(id);
+
+// быстро: одновременно
+const [user2, orders2] = await Promise.all([fetchUser(id), fetchOrders(id)]);
+
+async function load() {
+  try {
+    const res = await fetch(&quot;/api/data&quot;);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (e) {
+    showError(e);
+  }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Связь async/await с промисами.</li><li>try/catch и проверка res.ok.</li><li>Последовательные и параллельные запросы.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/promises/">Что такое Promise и чем отличаются Promise.all, allSettled, race и any?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/event-loop/">Как работает event loop в JavaScript — макрозадачи и микрозадачи?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/async-await/">Как работают async и await?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работают async и await и как правильно обрабатывать в них ошибки?","acceptedAnswer":{"@type":"Answer","text":"async-функция всегда возвращает Promise; await приостанавливает её до завершения промиса, не блокируя поток (продолжение — микрозадача). Ошибки ловят обычным try/catch. Независимые запросы запускают одновременно: сначала создать промисы, потом await Promise.all. await в цикле for — последовательно; для параллельности — map + Promise.all forEach с async-колбэком не ждёт завершения Забытый await — функция идёт дальше, а ошибка уходит в unhandledrejection Top-level await доступен в ES-модулях Что делает await. Если значение — промис, функция приостанавливается, а продолжение ставится в очередь микрозадач после его завершения. Поток при этом свободен для других задач. fetch не бросает на HTTP-ошибки — 404 и 500 приходят как успешный ответ, проверять res.ok. Бросает только при сетевой ошибке и отмене. Циклы: for...of с await — последовательная обработка (иногда нужна, чтобы не перегрузить сервер); forEach(async ...) — запускает всё и не ждёт; для ограниченного параллелизма — пачки или библиотека p-limit. Отмена: AbortController и signal в fetch; при размонтировании компонента отменять незавершённые запросы."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

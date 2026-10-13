@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GC: тюнинг и мониторинг — разбор для собеседования</title>
+<meta name="description" content="Ключевые флаги, unified GC-логи, метрики (паузы, throughput, allocation/promotion rate) и диагностика частых проблем.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/gc-tuning/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/gc-tuning/">
+<meta property="og:title" content="GC: тюнинг и мониторинг — разбор для собеседования">
+<meta property="og:description" content="Ключевые флаги, unified GC-логи, метрики (паузы, throughput, allocation/promotion rate) и диагностика частых проблем.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>GC: тюнинг и мониторинг</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"GC: тюнинг и мониторинг"}]}</script>
+  <h1>GC: тюнинг и мониторинг</h1>
+  <p class="lead">Ключевые флаги, unified GC-логи, метрики (паузы, throughput, allocation/promotion rate) и диагностика частых проблем.</p>
+  <article class="md"><h2>Сначала измерить</h2>
+<p>Тюнинг GC начинается не с подбора флагов, а с фактов: какие паузы (средние и хвостовые p99), какой throughput, как часто и почему происходят сборки, растёт ли потребление со временем. Менять флаги вслепую обычно делает хуже.</p>
+<p>Главное правило: сначала цель (например, p99 паузы &lt; 50 мс при заданном RPS), потом измерение, потом изменение одного параметра и повторный замер.</p>
+<h2>Ключевые флаги</h2>
+<p>Базовое: -Xms/-Xmx (начальный/максимальный размер кучи; часто их делают равными, чтобы избежать дорогих изменений размера). Выбор сборщика: -XX:+UseG1GC (обычно дефолт), -XX:+UseZGC для сверхнизких пауз. Для G1 цель пауз задаётся -XX:MaxGCPauseMillis.</p>
+<p>Размеры поколений и Survivor (-XX:NewRatio, -XX:SurvivorRatio, -XX:MaxTenuringThreshold) трогают точечно и только по данным — чаще достаточно дать сборщику цель пауз и адекватную кучу.</p>
+<h2>GC-логи и метрики</h2>
+<p>С Java 9 включён unified logging: -Xlog:gc* пишет причины сборок, паузы, размеры поколений до/после. Это первичный источник правды о поведении GC.</p>
+<p>Ключевые метрики: длительность и частота пауз, throughput (доля времени вне GC), allocation rate (сколько МБ/с создаётся — высокий разгоняет minor GC), promotion rate (сколько уезжает в old — высокий ведёт к full GC). Их снимают из логов или через JFR/JMX.</p>
+<pre class="lang-java"><code># Логи в файл с ротацией — то, что включают на проде по умолчанию
+java -Xlog:gc*,safepoint:file=gc.log:time,uptime,level:filecount=5,filesize=20M \
+     -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/app \
+     -Xms4g -Xmx4g -jar app.jar
+
+# Строка о полной сборке читается так:
+[42.117s][info][gc] GC(37) Pause Full (G1 Compaction Pause) 3894M-&gt;3702M(4096M) 812.443ms
+#                                                            ^^^^^     ^^^^^
+# после Full освободилось всего 192M при куче 4G — живой набор почти равен куче:
+# это утечка или недостаточная куча, флагами сборщика такое не лечится.</code></pre>
+<h2>Типичные проблемы</h2>
+<p>Частые full GC: обычно утечка, premature promotion (мал Survivor) или просто мала куча — смотрят, растёт ли old после каждого цикла. Высокий allocation rate: чрезмерное создание временных объектов — лечится не флагами, а кодом (переиспользование, примитивы, потоки данных).</p>
+<p>Длинные паузы при большой куче: повод перейти на ZGC. OutOfMemoryError: снять heap dump (-XX:+HeapDumpOnOutOfMemoryError) и искать доминаторы.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Покажите дисциплину «цель → измерение → один параметр → замер», назовите базовые флаги (-Xms/-Xmx, выбор сборщика, цель пауз для G1), источники данных (unified -Xlog:gc, JFR) и ключевые метрики (паузы, throughput, allocation/promotion rate). Свяжите частые full GC с утечкой/premature promotion, а не с «надо больше памяти».</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/gc-tuning-start/">С чего правильно начинать настройку сборщика мусора?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/frequent-full-gc/">В приложении участились длинные паузы full GC, при этом старое поколение почти всегда заполнено. О чём это говорит?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/allocation-promotion-rate/">Что показывают метрики allocation rate и promotion rate?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jvm-heap-in-container/">Java-приложение запускают в контейнере с лимитом памяти. Как правильно задать размер кучи?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/gc-latency-diagnosis/">В проде выросли задержки, подозрение на GC. Опиши порядок диагностики — от сбора данных до вывода.</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/gc-algorithms/">GC: алгоритмы и сборщики</a><p>Mark-sweep-compact и копирование, stop-the-world и safepoints, конкурентная маркировка, G1 и ZGC и выбор по throughput/latency.</p></li><li><a href="/articles/java/gc-references/">GC: корни, достижимость и типы ссылок</a><p>GC roots и reachability, strong/soft/weak/phantom-ссылки, Cleaner вместо finalize и утечки через сильные ссылки.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"GC: тюнинг и мониторинг","description":"Ключевые флаги, unified GC-логи, метрики (паузы, throughput, allocation/promotion rate) и диагностика частых проблем.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/gc-tuning/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

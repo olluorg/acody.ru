@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое CSRF и как он связан с CORS? — вопрос с собеседования</title>
+<meta name="description" content="CSRF — чужой сайт заставляет браузер жертвы отправить запрос на ваш сайт; браузер сам приложит cookie, и запрос выполнится от имени пользователя…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/csrf-cors/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/csrf-cors/">
+<meta property="og:title" content="Что такое CSRF и как он связан с CORS? — вопрос с собеседования">
+<meta property="og:description" content="CSRF — чужой сайт заставляет браузер жертвы отправить запрос на ваш сайт; браузер сам приложит cookie, и запрос выполнится от имени пользователя…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Что такое CSRF и как он связан с CORS?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Что такое CSRF и как он связан с CORS?"}]}</script>
+  <h1>Что такое CSRF и как он связан с CORS?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Безопасность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое межсайтовая подделка запроса?</li><li>Зачем нужен CSRF-токен?</li><li>Что делает CORS и от чего он не защищает?</li><li>Что такое SameSite у cookie?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>CSRF</b> — чужой сайт заставляет браузер жертвы отправить запрос на ваш сайт; браузер сам приложит cookie, и запрос выполнится от имени пользователя. <b>CORS</b> — правила, когда скрипт с одного домена может <b>читать</b> ответы другого.</p><ul><li>Защита от CSRF: cookie SameSite, CSRF-токен, проверка Origin, не менять состояние через GET</li><li>CORS не защищает от CSRF: простой POST с формы уходит и без CORS — запрещено лишь прочитать ответ</li><li>CORS ослабляет политику одного источника, а не усиливает</li></ul><p class="extra"><span>А ещё</span> С токеном в заголовке Authorization (не в cookie) классического CSRF нет</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Политика одного источника</b> (same-origin policy): скрипт со страницы <code>evil.example</code> не может читать ответы с <code>bank.ru</code>. Источник — схема + домен + порт.</p>
+<p><b>CSRF.</b> Но <em>отправлять</em> запросы на другой источник браузер разрешает: формы, картинки, ссылки. И при отправке он прикладывает cookie этого сайта. Если пользователь вошёл в банк, страница злоумышленника с автоматически отправляемой формой <code>POST bank.ru/transfer</code> выполнит перевод: сервер видит валидную сессионную cookie. Злоумышленник ответа не видит, но ему и не нужно — действие выполнено.</p>
+<p><b>Защита от CSRF:</b></p>
+<ul><li><b>SameSite у cookie</b> — <code>Lax</code> (по умолчанию в современных браузерах): cookie не отправляется в межсайтовых POST и фоновых запросах, только при переходе по ссылке; <code>Strict</code> — никогда в межсайтовых. Основная защита сегодня;</li><li><b>CSRF-токен</b> — случайное значение в форме или заголовке, которое сервер сверяет с сессией. Чужой сайт не знает токена и прочитать его не может (той самой политикой одного источника). Spring Security, Django делают это из коробки;</li><li>**проверка заголовков <code>Origin</code>/<code>Referer</code>** на изменяющих запросах;</li><li><b>GET не меняет состояние</b> — иначе хватит картинки <code>&lt;img src=&quot;.../delete&quot;&gt;</code>;</li><li>для API с токеном в заголовке <code>Authorization</code> CSRF не работает: браузер такой заголовок сам не подставит.</li></ul>
+<p><b>CORS</b> (Cross-Origin Resource Sharing) — механизм, которым сервер <em>разрешает</em> скриптам с других источников читать свои ответы. Браузер добавляет <code>Origin</code>, сервер отвечает <code>Access-Control-Allow-Origin</code>. Для «непростых» запросов (PUT, DELETE, JSON-тело, свои заголовки) браузер сначала шлёт <b>preflight</b> — <code>OPTIONS</code> с вопросом «можно?».</p>
+<p>Важно: CORS — это ослабление ограничений, а не защита сервера. Он не останавливает отправку простых запросов (а значит, CSRF), и не мешает curl или серверу злоумышленника — это проверка только в браузере. Опасная конфигурация — отражать любой <code>Origin</code> вместе с <code>Access-Control-Allow-Credentials: true</code>: тогда любой сайт сможет читать данные пользователя.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-http"><code># preflight перед PUT с JSON
+OPTIONS /api/profile HTTP/1.1
+Origin: https://app.shop.ru
+Access-Control-Request-Method: PUT
+Access-Control-Request-Headers: content-type
+
+HTTP/1.1 204 No Content
+Access-Control-Allow-Origin: https://app.shop.ru
+Access-Control-Allow-Methods: GET, PUT
+Access-Control-Allow-Credentials: true
+Vary: Origin
+
+Set-Cookie: session=…; HttpOnly; Secure; SameSite=Lax</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механика CSRF: браузер сам прикладывает cookie.</li><li>Защиты: SameSite, токен, проверка Origin, безопасный GET.</li><li>Что делает CORS, preflight, и почему он не защищает от CSRF.</li><li>Опасность Allow-Origin со звёздочкой или отражением при credentials.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Включим CORS, и CSRF не страшен».</li><li>Разрешать <code>Access-Control-Allow-Origin: *</code> для API с cookie-сессией (браузер такое не пропустит с credentials — и начинают отражать любой Origin).</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/xss/">Что такое XSS и как от неё защищаться?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/system-design/secure-public-api/">Какие меры безопасности вы заложите при проектировании публичного REST API с личным кабинетом пользователя?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое CSRF и как он связан с CORS?","acceptedAnswer":{"@type":"Answer","text":"CSRF — чужой сайт заставляет браузер жертвы отправить запрос на ваш сайт; браузер сам приложит cookie, и запрос выполнится от имени пользователя. CORS — правила, когда скрипт с одного домена может читать ответы другого. Защита от CSRF: cookie SameSite, CSRF-токен, проверка Origin, не менять состояние через GET CORS не защищает от CSRF: простой POST с формы уходит и без CORS — запрещено лишь прочитать ответ CORS ослабляет политику одного источника, а не усиливает С токеном в заголовке Authorization (не в cookie) классического CSRF нет Политика одного источника (same-origin policy): скрипт со страницы evil.example не может читать ответы с bank.ru. Источник — схема + домен + порт. CSRF. Но отправлять запросы на другой источник браузер разрешает: формы, картинки, ссылки. И при отправке он прикладывает cookie этого сайта. Если пользователь вошёл в банк, страница злоумышленника с автоматически отправляемой формой POST bank.ru/transfer выполнит перевод: сервер видит валидную сессионную cookie. Злоумышленник ответа не видит, но ему и не нужно — действие выполнено. Защита от CSRF: - SameSite у cookie — Lax (по умолчанию в современных браузерах): cookie не отправляется в межсайтовых POST и фоновых запросах, только при переходе по ссылке; Strict — никогда в межсайтовых. Основная защита сегодня; - CSRF-токен — случайное значение в форме или заголовке, которое сервер сверяет с сессией. Чужой сайт не знает токена и прочитать его…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

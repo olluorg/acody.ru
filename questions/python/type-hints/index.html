@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое аннотации типов и проверяются ли они при выполнении? — вопрос с собеседования</title>
+<meta name="description" content="Аннотации — подсказки о типах для людей и инструментов; интерпретатор их не проверяет. Проверяют статические анализаторы: mypy, pyright; IDE берут их…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/type-hints/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/type-hints/">
+<meta property="og:title" content="Что такое аннотации типов и проверяются ли они при выполнении? — вопрос с собеседования">
+<meta property="og:description" content="Аннотации — подсказки о типах для людей и инструментов; интерпретатор их не проверяет. Проверяют статические анализаторы: mypy, pyright; IDE берут их…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Что такое аннотации типов и проверяются ли они при выполнении?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Что такое аннотации типов и проверяются ли они при выполнении?"}]}</script>
+  <h1>Что такое аннотации типов и проверяются ли они при выполнении?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Окружение и инструменты</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Зачем нужны type hints в Python?</li><li>Что такое mypy?</li><li>Как указать, что значение может быть None?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Аннотации — <b>подсказки о типах для людей и инструментов</b>; интерпретатор их <b>не проверяет</b>.</p><ul><li>Проверяют статические анализаторы: mypy, pyright; IDE берут их для автодополнения</li><li>Современная запись: <code>list[int]</code> (3.9+), <code>int | None</code> (3.10+)</li></ul><p class="extra"><span>А ещё</span> Проверка во время выполнения — только явно: pydantic, свой isinstance</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Аннотации пишутся у параметров, возвращаемого значения и переменных: <code>def greet(name: str) -&gt; str</code>. Python сохраняет их в <code>__annotations__</code>, но передать в функцию число вместо строки он не помешает — ошибка проявится только там, где код реально не сможет работать с числом.</p>
+<p>Зачем они нужны:</p>
+<ul><li><b>статическая проверка</b> — mypy или pyright находят ошибки типов до запуска, в том числе в CI;</li><li><b>IDE</b> — точное автодополнение и навигация;</li><li><b>документация</b> — сигнатура говорит, что функция принимает и возвращает;</li><li><b>библиотеки читают их во время выполнения</b>: dataclasses, pydantic, FastAPI проверяют и преобразуют данные по аннотациям.</li></ul>
+<p>Основные конструкции:</p>
+<ul><li>коллекции: <code>list[str]</code>, <code>dict[str, int]</code>, <code>tuple[int, ...]</code>;</li><li>значение или None: <code>str | None</code> (раньше <code>Optional[str]</code>);</li><li>несколько типов: <code>int | str</code>;</li><li>вызываемые объекты: <code>Callable[[int], str]</code>;</li><li><code>Any</code> — отключить проверку для значения;</li><li><code>Protocol</code> — утиная типизация: «любой объект с методом read».</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>from dataclasses import dataclass
+
+def find_user(user_id: int) -&gt; &quot;User | None&quot;:
+    ...
+
+@dataclass
+class User:
+    id: int
+    name: str
+    tags: list[str]
+
+def total(prices: dict[str, float]) -&gt; float:
+    return sum(prices.values())
+
+total({&quot;кофе&quot;: 250.0})      # mypy: ок
+total([&quot;кофе&quot;])             # mypy: ошибка ещё до запуска; Python упадёт только на .values()</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Аннотации не проверяются интерпретатором.</li><li>Кто их использует: анализаторы, IDE, библиотеки.</li><li>Базовый синтаксис коллекций и <code>X | None</code>.</li><li>Знание mypy или pyright.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Если указать тип, Python не даст передать другой».</li><li>Злоупотреблять <code>Any</code> — проверка теряет смысл.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/venv-pip/">Зачем нужно виртуальное окружение и как управлять зависимостями?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/class-self-init/">Что такое self и __init__ в классе?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое аннотации типов и проверяются ли они при выполнении?","acceptedAnswer":{"@type":"Answer","text":"Аннотации — подсказки о типах для людей и инструментов; интерпретатор их не проверяет. Проверяют статические анализаторы: mypy, pyright; IDE берут их для автодополнения Современная запись: list[int] (3.9+), int | None (3.10+) Проверка во время выполнения — только явно: pydantic, свой isinstance Аннотации пишутся у параметров, возвращаемого значения и переменных: def greet(name: str) -> str. Python сохраняет их в __annotations__, но передать в функцию число вместо строки он не помешает — ошибка проявится только там, где код реально не сможет работать с числом. Зачем они нужны: - статическая проверка — mypy или pyright находят ошибки типов до запуска, в том числе в CI; - IDE — точное автодополнение и навигация; - документация — сигнатура говорит, что функция принимает и возвращает; - библиотеки читают их во время выполнения: dataclasses, pydantic, FastAPI проверяют и преобразуют данные по аннотациям. Основные конструкции: - коллекции: list[str], dict[str, int], tuple[int, ...]; - значение или None: str | None (раньше Optional[str]); - несколько типов: int | str; - вызываемые объекты: Callable[[int], str]; - Any — отключить проверку для значения; - Protocol — утиная типизация…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

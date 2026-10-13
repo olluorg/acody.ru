@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое теорема Байеса и ошибка пренебрежения базовой частотой? — вопрос с собеседования</title>
+<meta name="description" content="Теорема Байеса пересчитывает вероятность гипотезы после наблюдения: P(H|D) = P(D|H)P(H) / P(D). Классическая ловушка — забыть базовую частоту P(H)…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/bayes-base-rate/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/bayes-base-rate/">
+<meta property="og:title" content="Что такое теорема Байеса и ошибка пренебрежения базовой частотой? — вопрос с собеседования">
+<meta property="og:description" content="Теорема Байеса пересчитывает вероятность гипотезы после наблюдения: P(H|D) = P(D|H)P(H) / P(D). Классическая ловушка — забыть базовую частоту P(H)…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Что такое теорема Байеса и ошибка пренебрежения базовой частотой?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Что такое теорема Байеса и ошибка пренебрежения базовой частотой?"}]}</script>
+  <h1>Что такое теорема Байеса и ошибка пренебрежения базовой частотой?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Статистика</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Тест точен на 99%, а результат положительный — какова вероятность болезни?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Теорема Байеса пересчитывает вероятность гипотезы после наблюдения: P(H|D) = P(D|H)·P(H) / P(D). Классическая ловушка — забыть <b>базовую частоту</b> P(H): при редком событии даже очень точный тест даёт <b>больше ложных срабатываний, чем верных</b>.</p><ul><li>Пример: болезнь у 1 из 1000, тест с чувствительностью 99% и 1% ложноположительных → при положительном результате вероятность болезни около 9%</li><li>В антифроде, модерации и медицине это объясняет низкую precision</li><li>Байесовские A/B-тесты отвечают на «вероятность, что B лучше A», но требуют априорного распределения</li></ul><p class="extra"><span>А ещё</span> Связь с ML: precision зависит от доли положительного класса, а recall — нет</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Расчёт примера на 100 000 человек:</b></p>
+<ul><li>больных — 100; тест найдёт 99 (чувствительность 99%);</li><li>здоровых — 99 900; ложных срабатываний 1% — 999;</li><li>положительных результатов всего 1 098, больных среди них 99 — около 9%.</li></ul>
+<p>Интуиция «тест точен на 99% → 99%» игнорирует, что здоровых в тысячу раз больше.</p>
+<p><b>Где встречается аналитику:</b></p>
+<ul><li>модель мошенничества с 99% accuracy на редком классе;</li><li>алерты мониторинга: при редких реальных инцидентах большая часть тревог — ложные;</li><li>интерпретация результатов тестов и опросов.</li></ul>
+<p><b>Байесовский подход к экспериментам:</b> вместо p-value — распределение возможного эффекта и вероятность, что вариант лучше. Удобно бизнесу, но зависит от выбора априорного распределения и не отменяет проблему раннего подглядывания полностью.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Формула и смысл.</li><li>Расчёт примера с базовой частотой.</li><li>Где это встречается в продукте.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/roc-pr-auc/">Что такое ROC-AUC и PR-AUC и когда какую метрику использовать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/analytics/p-value-hypothesis/">Что такое p-value и как работает проверка статистических гипотез?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое теорема Байеса и ошибка пренебрежения базовой частотой?","acceptedAnswer":{"@type":"Answer","text":"Теорема Байеса пересчитывает вероятность гипотезы после наблюдения: P(H|D) = P(D|H)P(H) / P(D). Классическая ловушка — забыть базовую частоту P(H): при редком событии даже очень точный тест даёт больше ложных срабатываний, чем верных. Пример: болезнь у 1 из 1000, тест с чувствительностью 99% и 1% ложноположительных → при положительном результате вероятность болезни около 9% В антифроде, модерации и медицине это объясняет низкую precision Байесовские A/B-тесты отвечают на «вероятность, что B лучше A», но требуют априорного распределения Связь с ML: precision зависит от доли положительного класса, а recall — нет Расчёт примера на 100 000 человек: - больных — 100; тест найдёт 99 (чувствительность 99%); - здоровых — 99 900; ложных срабатываний 1% — 999; - положительных результатов всего 1 098, больных среди них 99 — около 9%. Интуиция «тест точен на 99% → 99%» игнорирует, что здоровых в тысячу раз больше. Где встречается аналитику: - модель мошенничества с 99% accuracy на редком классе; - алерты мониторинга: при редких реальных инцидентах большая часть тревог — ложные; - интерпретация результатов тестов и опросов. Байесовский подход к экспериментам: вместо p-value — распределение возможного эффекта и вероятность, что вариант лучше. Удобно бизнесу, но зависит от выбора априорного распределения и не отменяет проблему раннего подглядывания полностью."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

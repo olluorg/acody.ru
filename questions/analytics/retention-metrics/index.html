@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие бывают виды retention и как их интерпретировать? — вопрос с собеседования</title>
+<meta name="description" content="N-day (classic) retention — доля пользователей когорты, активных ровно в день N (или неделю N). Rolling (unbounded) — доля активных в день N или…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/retention-metrics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/retention-metrics/">
+<meta property="og:title" content="Какие бывают виды retention и как их интерпретировать? — вопрос с собеседования">
+<meta property="og:description" content="N-day (classic) retention — доля пользователей когорты, активных ровно в день N (или неделю N). Rolling (unbounded) — доля активных в день N или…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Какие бывают виды retention и как их интерпретировать?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Какие бывают виды retention и как их интерпретировать?"}]}</script>
+  <h1>Какие бывают виды retention и как их интерпретировать?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Продуктовые метрики</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем N-day retention отличается от rolling retention?</li><li>Что такое churn rate?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>N-day (classic) retention</b> — доля пользователей когорты, активных <b>ровно в день N</b> (или неделю N). <b>Rolling (unbounded)</b> — доля активных <b>в день N или позже</b> — всегда выше классического. <b>Churn rate</b> — доля ушедших за период (в подписках — не продливших). Кривая retention должна <b>выходить на плато</b>: плато — признак, что продукт кому-то нужен.</p><ul><li>Retention считают по когортам, а не по всем пользователям сразу</li><li>Day 1, Day 7, Day 30 — стандартные точки для приложений</li><li>Для подписок — retention по платёжным периодам и отток (churn)</li></ul><p class="extra"><span>А ещё</span> Улучшение ранних дней (онбординг) обычно поднимает всю кривую</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Классический против rolling:</b></p>
+<ul><li>classic D7 — был активен на 7-й день после установки;</li><li>rolling D7 — был активен на 7-й день или в любой день позже.</li></ul>
+<p>Rolling удобен для редкого использования, но растёт задним числом: пользователь, вернувшийся через месяц, «повышает» прошлые значения.</p>
+<p><b>Кривая retention.</b> Падает быстро в первые дни, затем замедляется. Если кривая уходит к нулю — продукт не нашёл постоянной аудитории; плато на 15–20% — есть ядро пользователей.</p>
+<p><b>Churn в подписках:</b> месячный отток 5% означает потерю примерно 46% клиентов за год (1 − 0,95¹²) — поэтому даже небольшое снижение оттока заметно влияет на LTV.</p>
+<p><b>Сравнение когорт</b> показывает, улучшился ли продукт: новые когорты удерживаются лучше старых — хорошие изменения работают.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Различие видов retention.</li><li>Плато кривой и его смысл.</li><li>Отток и связь с LTV.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/retention-cohorts-sql/">Как посчитать когортный retention на SQL?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/analytics/dau-mau-stickiness/">Что такое DAU, MAU и stickiness и как ими пользоваться?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/ltv-cac/">Что такое LTV, CAC и юнит-экономика?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие бывают виды retention и как их интерпретировать?","acceptedAnswer":{"@type":"Answer","text":"N-day (classic) retention — доля пользователей когорты, активных ровно в день N (или неделю N). Rolling (unbounded) — доля активных в день N или позже — всегда выше классического. Churn rate — доля ушедших за период (в подписках — не продливших). Кривая retention должна выходить на плато: плато — признак, что продукт кому-то нужен. Retention считают по когортам, а не по всем пользователям сразу Day 1, Day 7, Day 30 — стандартные точки для приложений Для подписок — retention по платёжным периодам и отток (churn) Улучшение ранних дней (онбординг) обычно поднимает всю кривую Классический против rolling: - classic D7 — был активен на 7-й день после установки; - rolling D7 — был активен на 7-й день или в любой день позже. Rolling удобен для редкого использования, но растёт задним числом: пользователь, вернувшийся через месяц, «повышает» прошлые значения. Кривая retention. Падает быстро в первые дни, затем замедляется. Если кривая уходит к нулю — продукт не нашёл постоянной аудитории; плато на 15–20% — есть ядро пользователей. Churn в подписках: месячный отток 5% означает потерю примерно 46% клиентов за год (1 − 0,95¹²) — поэтому даже небольшое снижение оттока заметно влияет на LTV. Сравнение когорт показывает, улучшился ли продукт: новые когорты удерживаются лучше старых — хорошие изменения работают."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

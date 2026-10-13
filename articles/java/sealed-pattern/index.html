@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sealed-типы и pattern matching — разбор для собеседования</title>
+<meta name="description" content="Закрытые иерархии через sealed, pattern matching в instanceof и switch, деконструкция записей и проверка исчерпываемости.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/sealed-pattern/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/sealed-pattern/">
+<meta property="og:title" content="Sealed-типы и pattern matching — разбор для собеседования">
+<meta property="og:description" content="Закрытые иерархии через sealed, pattern matching в instanceof и switch, деконструкция записей и проверка исчерпываемости.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Sealed-типы и pattern matching</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Sealed-типы и pattern matching"}]}</script>
+  <h1>Sealed-типы и pattern matching</h1>
+  <p class="lead">Закрытые иерархии через sealed, pattern matching в instanceof и switch, деконструкция записей и проверка исчерпываемости.</p>
+  <article class="md"><h2>Sealed-типы</h2>
+<p>sealed class/interface (Java 17) ограничивает список наследников через permits: только перечисленные типы могут расширять/реализовывать его. Каждый разрешённый подтип обязан быть final, sealed или non-sealed (явно «открыт снова»).</p>
+<p>Зачем: закрытая иерархия домена (алгебраический тип) — компилятор ЗНАЕТ полный набор вариантов. Это даёт исчерпывающие проверки и точную модель: PaymentResult — это ровно {Ok, Failed}, и третьего не дано.</p>
+<pre class="lang-java"><code>sealed interface PaymentResult permits PaymentOk, PaymentFailed {}
+record PaymentOk(String id) implements PaymentResult {}
+record PaymentFailed(String reason) implements PaymentResult {}</code></pre>
+<h2>Pattern matching в instanceof</h2>
+<p>Pattern matching for instanceof убирает ручной cast: if (o instanceof String s) сразу связывает переменную s нужного типа, если проверка прошла.</p>
+<p>Работает flow scoping: переменная-паттерн видна только там, где компилятор доказал её тип (например, в then-ветке, или после раннего return в else). Это и короче, и безопаснее, чем instanceof + явный cast.</p>
+<pre class="lang-java"><code>if (obj instanceof String s &amp;&amp; !s.isBlank()) {
+    use(s); // s уже String, без приведения
+}</code></pre>
+<h2>switch с паттернами и исчерпываемость</h2>
+<p>switch умеет ветвиться по типу: case PaymentOk ok -&gt; …, case PaymentFailed f -&gt; …. Для sealed-типа компилятор проверяет ИСЧЕРПЫВАЕМОСТЬ: если покрыты все разрешённые варианты, default не нужен. И наоборот — добавите новый подтип в sealed-иерархию, и компилятор заставит обработать его во всех таких switch (ошибка компиляции вместо тихого пропуска).</p>
+<p>Условия уточняют guarded-паттерны: case Integer i when i &gt; 0. Это превращает switch в полноценный разбор вариантов, как match в функциональных языках.</p>
+<pre class="lang-java"><code>String describe(PaymentResult r) {
+    return switch (r) {                 // default не нужен — sealed исчерпан
+        case PaymentOk ok -&gt; &quot;ok: &quot; + ok.id();
+        case PaymentFailed f -&gt; &quot;fail: &quot; + f.reason();
+    };
+}</code></pre>
+<h2>Деконструкция записей</h2>
+<p>Record patterns (Java 21) распаковывают запись прямо в паттерне: case <code>Point(int x, int y)</code> -&gt; … достаёт компоненты в переменные. Деконструкция вкладывается: case Line(<code>Point(var x1, var y1)</code>, <code>Point(var x2, var y2)</code>).</p>
+<p>Связка sealed + record + switch с деконструкцией — это и есть алгебраические типы данных в Java: компактный, типобезопасный и исчерпывающий разбор формы данных.</p>
+<h2>null в switch</h2>
+<p>Историческая ловушка: обычный switch бросал NullPointerException на null. В switch с паттернами это лечится явной веткой case null (иначе поведение прежнее).</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Объясните sealed как закрытую иерархию (компилятор знает все варианты → исчерпываемость), pattern matching в instanceof (без cast, flow scoping) и switch по типам с проверкой полноты для sealed, и покажите деконструкцию record как вершину — алгебраические типы. Подчеркните выгоду: добавление варианта ловится компилятором во всех switch.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/sealed-classes/">Что делает модификатор sealed у класса или интерфейса?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/sealed-pattern-matching/">Какое главное преимущество даёт sealed-иерархия при использовании switch с pattern matching?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/sealed-subclass-requirements/">Что обязан сделать наследник sealed-класса?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/instanceof-pattern/">Что даёт pattern matching в instanceof по сравнению с классической проверкой?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/records/">Records: компактные носители данных</a><p>Что генерирует record, канонический и компактный конструкторы, ограничения и когда применять.</p></li><li><a href="/articles/java/oop/">ООП и его принципы</a><p>Инкапсуляция, наследование, полиморфизм, абстракция — зачем они нужны, как работают внутри и почему композицию предпочитают наследованию.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Sealed-типы и pattern matching","description":"Закрытые иерархии через sealed, pattern matching в instanceof и switch, деконструкция записей и проверка исчерпываемости.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/sealed-pattern/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

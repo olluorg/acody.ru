@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое starter в Spring Boot? — вопрос с собеседования</title>
+<meta name="description" content="Стартер — зависимость-набор: подтягивает согласованные по версиям библиотеки для задачи, а автоконфигурация их подхватывает. spring-boot-starter-web…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/spring-boot-starter/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/spring-boot-starter/">
+<meta property="og:title" content="Что такое starter в Spring Boot? — вопрос с собеседования">
+<meta property="og:description" content="Стартер — зависимость-набор: подтягивает согласованные по версиям библиотеки для задачи, а автоконфигурация их подхватывает. spring-boot-starter-web…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Что такое starter в Spring Boot?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Что такое starter в Spring Boot?"}]}</script>
+  <h1>Что такое starter в Spring Boot?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Spring Boot и Actuator</span><span class="chip">Spring Boot</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Зачем нужны spring-boot-starter зависимости?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Стартер</b> — зависимость-набор: подтягивает согласованные по версиям библиотеки для задачи, а автоконфигурация их подхватывает. <code>spring-boot-starter-web</code> — Spring MVC, Jackson, встроенный Tomcat.</p><ul><li>Версии согласованы через spring-boot-dependencies (BOM) — свои версии писать не нужно</li><li>Стартер сам кода почти не содержит: польза — в зависимостях и автоконфигурации</li><li>Примеры: -data-jpa, -security, -actuator, -test, -validation</li></ul><p class="extra"><span>А ещё</span> Свой стартер: модуль автоконфигурации + модуль-стартер с зависимостями</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Проблема без стартеров:</b> для веб-приложения нужно подобрать версии Spring MVC, Jackson, сервлет-контейнера, валидатора — совместимые между собой. Ошибка в версии проявляется странными исключениями в рантайме.</p>
+<p><b>Стартер</b> — артефакт без своего кода, который тянет нужный набор библиотек. Версии берутся из BOM <code>spring-boot-dependencies</code>, который подключает parent <code>spring-boot-starter-parent</code> или плагин Gradle. Обновил версию Spring Boot — обновились все библиотеки согласованно.</p>
+<p><b>Автоконфигурация</b> реагирует на появившиеся классы: добавили <code>spring-boot-starter-data-jpa</code> — на classpath появились Hibernate и HikariCP, и Boot создаёт DataSource, EntityManagerFactory и менеджер транзакций.</p>
+<p><b>Частые стартеры:</b> <code>-web</code> (MVC и Tomcat), <code>-webflux</code> (реактивный стек и Netty), <code>-data-jpa</code>, <code>-jdbc</code>, <code>-security</code>, <code>-validation</code>, <code>-actuator</code>, <code>-cache</code>, <code>-test</code> (JUnit 5, Mockito, AssertJ, Spring Test).</p>
+<p><b>Свой стартер</b> для общих библиотек компании: модуль с классами <code>@AutoConfiguration</code> и файлом <code>AutoConfiguration.imports</code>, плюс модуль <code>xxx-spring-boot-starter</code>, который зависит от него и нужных библиотек.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Стартер как набор согласованных зависимостей.</li><li>Роль BOM и автоконфигурации.</li><li>Примеры и как устроен свой стартер.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Указывать вручную версии библиотек, которыми управляет Spring Boot.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Класс с методом main</li><li class="ok"><span class="mark">✓</span>Набор согласованных зависимостей, подключаемых одним пакетом</li><li class="no"><span class="mark">✗</span>Аннотация запуска приложения</li><li class="no"><span class="mark">✗</span>Профиль окружения</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как starter связан с автоконфигурацией?</li><li>Можно ли сделать свой starter?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/boot/">Spring Boot: автоконфигурация и starters</a><p>@SpringBootApplication и starters, механизм автоконфигурации по условиям, переопределение через @ConditionalOnMissingBean, внешняя конфигурация и её приоритеты.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/boot-autoconfiguration/">Как работает автоконфигурация Spring Boot?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/springbootapplication/">Что делает аннотация @SpringBootApplication?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое starter в Spring Boot?","acceptedAnswer":{"@type":"Answer","text":"Стартер — зависимость-набор: подтягивает согласованные по версиям библиотеки для задачи, а автоконфигурация их подхватывает. spring-boot-starter-web — Spring MVC, Jackson, встроенный Tomcat. Версии согласованы через spring-boot-dependencies (BOM) — свои версии писать не нужно Стартер сам кода почти не содержит: польза — в зависимостях и автоконфигурации Примеры: -data-jpa, -security, -actuator, -test, -validation Свой стартер: модуль автоконфигурации + модуль-стартер с зависимостями Проблема без стартеров: для веб-приложения нужно подобрать версии Spring MVC, Jackson, сервлет-контейнера, валидатора — совместимые между собой. Ошибка в версии проявляется странными исключениями в рантайме. Стартер — артефакт без своего кода, который тянет нужный набор библиотек. Версии берутся из BOM spring-boot-dependencies, который подключает parent spring-boot-starter-parent или плагин Gradle. Обновил версию Spring Boot — обновились все библиотеки согласованно. Автоконфигурация реагирует на появившиеся классы: добавили spring-boot-starter-data-jpa — на classpath появились Hibernate и HikariCP, и Boot создаёт DataSource, EntityManagerFactory и менеджер транзакций. Частые стартеры: -web (MVC и Tomcat), -webflux (реактивный стек и Netty), -data-jpa, -jdbc, -security, -validation, -actuator, -cache, -test (JUnit 5, Mockito, AssertJ, Spring Test). Свой стартер для общих библиотек…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

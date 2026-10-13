@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Saga, CDC и event-driven consistency — разбор для собеседования</title>
+<meta name="description" content="Почему 2PC не подходит, сага и компенсации, хореография vs оркестрация, CDC и outbox-relay, eventual consistency и границы.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/brokers/saga-cdc/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/brokers/saga-cdc/">
+<meta property="og:title" content="Saga, CDC и event-driven consistency — разбор для собеседования">
+<meta property="og:description" content="Почему 2PC не подходит, сага и компенсации, хореография vs оркестрация, CDC и outbox-relay, eventual consistency и границы.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#brokers">Брокеры сообщений</a> <span>/</span> <span>Saga, CDC и event-driven consistency</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/articles/#brokers"},{"@type":"ListItem","position":3,"name":"Saga, CDC и event-driven consistency"}]}</script>
+  <h1>Saga, CDC и event-driven consistency</h1>
+  <p class="lead">Почему 2PC не подходит, сага и компенсации, хореография vs оркестрация, CDC и outbox-relay, eventual consistency и границы.</p>
+  <article class="md"><h2>Почему не 2PC</h2>
+<p>Один бизнес-процесс часто пересекает границы нескольких сервисов и БД (оформить заказ = списать деньги + зарезервировать склад + создать доставку). Соблазн — обернуть всё в одну распределённую транзакцию через 2PC; но 2PC хрупок: блокирует ресурсы у всех участников до коммита, плохо переживает сбои координатора и сильно бьёт по доступности.</p>
+<p>В микросервисах от 2PC отказываются. Вместо него процесс собирают из ЛОКАЛЬНЫХ транзакций каждого сервиса, соединённых асинхронными сообщениями. Это и есть сага.</p>
+<h2>Сага и компенсации</h2>
+<p>Сага — последовательность локальных транзакций. Каждый шаг успешно коммитится в своём сервисе, после чего публикует событие, на которое реагирует следующий шаг. Если какой-то шаг провалился, запускаются КОМПЕНСИРУЮЩИЕ действия для уже совершённых.</p>
+<p>Ключевая идея: компенсация — не «технический rollback», а БИЗНЕС-обратное действие. Списали деньги → возврат на счёт; забронировали склад → освободили резерв; отправили письмо «вы оформили заказ» → отправляют «извините, заказ отменён». Не всё бывает компенсируемым (отправленный физический товар — компенсация это return); компенсации тоже должны быть идемпотентными.</p>
+<figure><img src="/articles/assets/saga.webp" alt="Сага как цепочка локальных транзакций T1→T2→T3; при сбое на шаге запускаются компенсирующие транзакции C3←C2←C1 в обратном порядке." loading="lazy"><figcaption>Сага: цепочка локальных транзакций; при сбое выполняются компенсации в обратном порядке.</figcaption></figure>
+<h2>Хореография</h2>
+<p>Хореография строится только на событиях: сервис A в своей транзакции публикует OrderCreated, сервис B видит его и публикует PaymentAuthorized, сервис C видит то и публикует ShipmentRequested. Никакого центрального управляющего — каждый знает только своих соседей по событиям.</p>
+<p>Плюсы: низкая связность, легко добавлять новых подписчиков. Минусы: общий процесс размазан по сервисам — сложно ответить «на каком этапе сейчас заказ» и тяжелее отлаживать. Подходит для простых цепочек.</p>
+<h2>Оркестрация</h2>
+<p>Оркестрация ставит центральный координатор (saga manager / process manager), который явно держит state machine процесса и шлёт команды участникам: «спишите деньги», «зарезервируйте склад», «оформите доставку». Те отвечают результатами; при отказе оркестратор сам запускает компенсации в обратном порядке.</p>
+<p>Плюсы: процесс виден целиком, его легко наблюдать и тестировать; явные таймауты и ретраи на каждом шаге. Минусы: координатор становится критичным компонентом, и появляется логика «оркестратора», которой надо управлять. Выбор: простые цепочки → хореография; длинные процессы с откатами и таймаутами → оркестрация.</p>
+<h2>CDC: как устроен</h2>
+<p>Change Data Capture не polling таблицы и не триггеры — это ИНКРЕМЕНТАЛЬНОЕ чтение журнала БД (WAL у PostgreSQL, binlog у MySQL): каждое изменение строки оттуда вычитывается и публикуется как событие. Это дёшево для БД и не теряет изменений.</p>
+<p>Самая распространённая реализация — Debezium как Kafka Connect source. Применения: репликация данных в поисковые/аналитические системы, синхронизация кэшей, миграции между БД, и — главный паттерн — outbox relay.</p>
+<h2>CDC vs доменные события</h2>
+<p>Прямой CDC выдаёт «row changed» — техническое событие на уровне строки. Доменное событие («OrderPaid») — другая абстракция: с бизнес-смыслом, версионируемое, иногда агрегирующее несколько строк.</p>
+<p>Поэтому сырой CDC опасно выпускать наружу как контракт — он привязывает потребителей к ПРИВАТНОЙ схеме сервиса. Два правильных пути: либо трансформировать CDC в доменные события (Kafka Streams / Single Message Transforms в Connect), либо использовать transactional outbox — сервис сам кладёт уже ДОМЕННОЕ событие в outbox-таблицу в одной транзакции с бизнес-данными, а CDC/relay просто публикует строки outbox.</p>
+<h2>Eventual consistency и границы</h2>
+<p>В event-driven системе явно проектируют ГДЕ строгая транзакция (внутри одного сервиса и его БД), а где eventual consistency (между сервисами). Нельзя имитировать ACID между сервисами через каскад событий — будут гонки, частичные состояния и неконсистентные снимки.</p>
+<p>Это влияет и на UI/API: пользовательский сценарий должен учитывать промежуточные состояния — payment_pending, shipment_requested, compensation_started — а не вид «всё атомарно». Граница «строгий vs eventual» — это бизнес-решение, и она должна быть явной в дизайне домена, а не «случиться» из-за плохой архитектуры.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Объясните, почему в микросервисах отказались от 2PC, и опишите сагу как цепочку локальных транзакций + компенсаций; подчеркните, что компенсация — это БИЗНЕС-обратное действие, а не технический rollback (и сама обязана быть идемпотентной). Сравните хореографию (события, низкая связность, сложно наблюдать) и оркестрацию (координатор + state machine, явный процесс) с критерием выбора. Опишите CDC как чтение WAL/binlog (Debezium), его отличие от доменных событий и почему сырой CDC не стоит выпускать наружу → используют transactional outbox. Завершите тезисом о явной границе строгого/eventual consistency в UI и домене.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/brokers/saga-pattern/">Что такое saga pattern в микросервисах?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/cdc/">Что такое Change Data Capture (CDC) и где оно полезно?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/saga-choreography-vs-orchestration/">Чем хореография саги отличается от оркестрации и когда что выбирают?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/saga-compensation/">Почему компенсацию в саге называют бизнес-действием, а не откатом транзакции?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/saga-basic/">Что такое сага в контексте микросервисов?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/brokers/message-design/">Проектирование событий и команд</a><p>Event vs command, обязательные поля envelope, idempotency key, schema evolution, thick vs thin payload и transactional outbox.</p></li><li><a href="/articles/brokers/kafka-operations/">Kafka в эксплуатации</a><p>Consumer lag и его причины, ребаланс и безопасный commit, poison-сообщения, ZooKeeper → KRaft, schema evolution, изменения partitions и ключевые метрики.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Saga, CDC и event-driven consistency","description":"Почему 2PC не подходит, сага и компенсации, хореография vs оркестрация, CDC и outbox-relay, eventual consistency и границы.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/brokers/saga-cdc/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

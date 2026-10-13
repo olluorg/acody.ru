@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что означает запись List&lt;?&gt; в сигнатуре метода? — вопрос с собеседования</title>
+<meta name="description" content="List&lt;?&gt; — список неизвестного типа: читать можно как Object, добавлять нельзя ничего, кроме null. List&lt;String&gt; нельзя передать туда, где ждут…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/unbounded-wildcard/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/unbounded-wildcard/">
+<meta property="og:title" content="Что означает запись List&lt;?&gt; в сигнатуре метода? — вопрос с собеседования">
+<meta property="og:description" content="List&lt;?&gt; — список неизвестного типа: читать можно как Object, добавлять нельзя ничего, кроме null. List&lt;String&gt; нельзя передать туда, где ждут…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что означает запись List&lt;?&gt; в сигнатуре метода?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что означает запись List<?> в сигнатуре метода?"}]}</script>
+  <h1>Что означает запись List&lt;?&gt; в сигнатуре метода?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Дженерики</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем List&lt;?&gt; отличается от List&lt;Object&gt;?</li><li>Что такое wildcard в дженериках?</li><li>Что такое правило PECS?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><code>List&lt;?&gt;</code> — список <b>неизвестного типа</b>: читать можно как Object, <b>добавлять нельзя</b> ничего, кроме null.</p><ul><li><code>List&lt;String&gt;</code> нельзя передать туда, где ждут <code>List&lt;Object&gt;</code>, а туда, где <code>List&lt;?&gt;</code>, — можно</li><li><code>? extends T</code> — читать как T (производитель), <code>? super T</code> — писать T (потребитель): PECS</li></ul><p class="extra"><span>А ещё</span> Подходит для методов, которым достаточно читать или узнать размер</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Дженерики в Java инвариантны: <code>List&lt;String&gt;</code> не является подтипом <code>List&lt;Object&gt;</code>. Иначе можно было бы через <code>List&lt;Object&gt;</code> положить число в список строк.</p>
+<p><code>List&lt;?&gt;</code> означает «список чего-то одного, но неизвестно чего». Отсюда правила:</p>
+<ul><li><b>читать</b> можно — элемент гарантированно <code>Object</code>;</li><li><b>добавлять</b> нельзя — за ссылкой может стоять список строк, и положить туда что-либо (кроме <code>null</code>) было бы ошибкой;</li><li>передать можно любой <code>List&lt;...&gt;</code>.</li></ul>
+<p>Ограниченные wildcards уточняют:</p>
+<ul><li><code>List&lt;? extends Number&gt;</code> — список чисел какого-то подтипа: читать как <code>Number</code> можно, добавлять нельзя;</li><li><code>List&lt;? super Integer&gt;</code> — список, куда можно положить <code>Integer</code>: писать можно, читать — только как <code>Object</code>.</li></ul>
+<p>Правило <b>PECS</b> — Producer Extends, Consumer Super: если коллекция отдаёт значения методу — <code>extends</code>, если принимает — <code>super</code>. Пример из JDK: <code>Collections.copy(List&lt;? super T&gt; dest, List&lt;? extends T&gt; src)</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>static void printAll(List&lt;?&gt; list) {
+    for (Object o : list) System.out.println(o);
+    // list.add(&quot;x&quot;);   // ошибка компиляции
+}
+
+static double sum(List&lt;? extends Number&gt; nums) {
+    return nums.stream().mapToDouble(Number::doubleValue).sum();
+}
+
+printAll(List.of(&quot;a&quot;, &quot;b&quot;));
+sum(List.of(1, 2.5));</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Значение: неизвестный тип элементов, чтение как Object, запрет добавления.</li><li>Отличие от List&lt;Object&gt; и инвариантность дженериков.</li><li>extends и super, правило PECS — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Отождествлять эту запись со списком объектов.</li><li>Пытаться добавить элемент в такой список.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Список с неизвестным типом элементов: читать из него можно как Object, а добавлять нельзя ничего, кроме null</li><li class="no"><span class="mark">✗</span>Список, который может содержать элементы разных типов одновременно</li><li class="no"><span class="mark">✗</span>То же самое, что List&lt;Object&gt;</li><li class="no"><span class="mark">✗</span>Список, для которого отключены проверки типов</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем отличаются формы с extends и с super?</li><li>Что утверждает правило PECS?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/wildcards/">Wildcards и правило PECS</a><p>Инвариантность дженериков против ковариантных массивов, ? extends/super, и когда что выбирать по PECS.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/pecs-copy-signature/">Метод должен перекладывать элементы из источника в приёмник. Какая сигнатура правильна по правилу PECS?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/extends-wildcard/">Что можно делать со списком, объявленным как List&lt;? extends Number&gt;?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/generics-invariance/">Почему List&lt;String&gt; нельзя присвоить переменной типа List&lt;Object&gt;?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/generics-wildcards/">Что такое generics в Java и зачем нужен wildcard ? extends / ? super?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что означает запись List<?> в сигнатуре метода?","acceptedAnswer":{"@type":"Answer","text":"List<?> — список неизвестного типа: читать можно как Object, добавлять нельзя ничего, кроме null. List<String> нельзя передать туда, где ждут List<Object>, а туда, где List<?>, — можно ? extends T — читать как T (производитель), ? super T — писать T (потребитель): PECS Подходит для методов, которым достаточно читать или узнать размер Дженерики в Java инвариантны: List<String> не является подтипом List<Object>. Иначе можно было бы через List<Object> положить число в список строк. List<?> означает «список чего-то одного, но неизвестно чего». Отсюда правила: - читать можно — элемент гарантированно Object; - добавлять нельзя — за ссылкой может стоять список строк, и положить туда что-либо (кроме null) было бы ошибкой; - передать можно любой List<...>. Ограниченные wildcards уточняют: - List<? extends Number> — список чисел какого-то подтипа: читать как Number можно, добавлять нельзя; - List<? super Integer> — список, куда можно положить Integer: писать можно, читать — только как Object. Правило PECS — Producer Extends, Consumer Super: если коллекция отдаёт значения методу — extends, если принимает — super. Пример из JDK: Collections.copy(List<? super T> dest, List<? extends T> src)."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

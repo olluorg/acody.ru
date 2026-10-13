@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое буфер (Buffer) в терминах NIO? — вопрос с собеседования</title>
+<meta name="description" content="Buffer — область памяти фиксированного размера, через которую данные читаются из канала и пишутся в него. У буфера есть position, limit и capacity…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/nio-buffer/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/nio-buffer/">
+<meta property="og:title" content="Что такое буфер (Buffer) в терминах NIO? — вопрос с собеседования">
+<meta property="og:description" content="Buffer — область памяти фиксированного размера, через которую данные читаются из канала и пишутся в него. У буфера есть position, limit и capacity…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что такое буфер (Buffer) в терминах NIO?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что такое буфер (Buffer) в терминах NIO?"}]}</script>
+  <h1>Что такое буфер (Buffer) в терминах NIO?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Ввод-вывод и NIO</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем NIO отличается от обычного ввода-вывода?</li><li>Зачем у буфера метод flip()?</li><li>Что такое Channel и Selector?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Buffer — <b>область памяти фиксированного размера</b>, через которую данные читаются из <b>канала</b> и пишутся в него.</p><ul><li>У буфера есть position, limit и capacity; между записью и чтением — <code>flip()</code></li><li>Забытый flip — самая частая ошибка: читается пустота</li></ul><p class="extra"><span>А ещё</span> NIO даёт каналы, буферы и Selector — один поток обслуживает много соединений</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Классический ввод-вывод (<code>java.io</code>) — потоки, которые передают данные по одному байту или массиву. NIO (<code>java.nio</code>) работает иначе: данные проходят через <b>буфер</b>, которым управляет приложение, а источником или приёмником служит <b>канал</b> (<code>FileChannel</code>, <code>SocketChannel</code>).</p>
+<p>У буфера три показателя:</p>
+<ul><li><code>capacity</code> — размер;</li><li><code>position</code> — где сейчас читаем или пишем;</li><li><code>limit</code> — граница доступных данных.</li></ul>
+<p>Канал записывает данные в буфер, двигая <code>position</code>. Чтобы прочитать записанное, вызывают <code>flip()</code>: <code>limit</code> становится текущей позицией, а <code>position</code> — нулём. После чтения — <code>clear()</code> или <code>compact()</code>, чтобы снова писать. Забытый <code>flip()</code> — самая частая ошибка: читать оказывается нечего.</p>
+<p>Возможности NIO:</p>
+<ul><li><b>неблокирующие каналы и Selector</b> — один поток следит за многими сокетами и обрабатывает те, что готовы. На этом построены Netty и другие сетевые серверы;</li><li><b>прямые буферы</b> (<code>allocateDirect</code>) — память вне кучи, меньше копирований при работе с ОС;</li><li>отображение файла в память (<code>MappedByteBuffer</code>).</li></ul>
+<p>Для повседневной работы с файлами удобнее <code>java.nio.file.Files</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>try (FileChannel ch = FileChannel.open(Path.of(&quot;data.bin&quot;))) {
+    ByteBuffer buf = ByteBuffer.allocate(4096);
+    while (ch.read(buf) != -1) {
+        buf.flip();                 // переключить на чтение
+        while (buf.hasRemaining()) process(buf.get());
+        buf.clear();                // снова на запись
+    }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Буфер как посредник между приложением и каналом.</li><li>position, limit, capacity и flip.</li><li>Что даёт NIO: Selector, неблокирующий ввод-вывод — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Забыть переключить буфер между записью и чтением.</li><li>Считать, что очистка буфера стирает его содержимое.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Область памяти фиксированного размера, через которую данные читаются из канала и записываются в него</li><li class="no"><span class="mark">✗</span>Очередь задач ввода-вывода, ожидающих выполнения</li><li class="no"><span class="mark">✗</span>Файл на диске, куда сохраняются промежуточные данные</li><li class="no"><span class="mark">✗</span>Отдельный поток, обслуживающий операции чтения</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что означают позиция, лимит и ёмкость буфера?</li><li>Чем канал отличается от классического потока?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/nio/">NIO: каналы, буферы и неблокирующий ввод-вывод</a><p>io против nio, Channel и ByteBuffer с его flip/clear, Selector и event loop, влияние виртуальных потоков и NIO.2.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/direct-buffers/">Зачем нужны direct-буферы (ByteBuffer.allocateDirect) и в чём их минусы?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/io-vs-nio/">Чем IO отличается от NIO?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/virtual-threads-vs-selector/">Как виртуальные потоки изменили типичный выбор между блокирующим IO и неблокирующей моделью на Selector?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/bytebuffer-flip/">Что означают позиция, лимит и ёмкость у ByteBuffer, и что делает flip()?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое буфер (Buffer) в терминах NIO?","acceptedAnswer":{"@type":"Answer","text":"Buffer — область памяти фиксированного размера, через которую данные читаются из канала и пишутся в него. У буфера есть position, limit и capacity; между записью и чтением — flip() Забытый flip — самая частая ошибка: читается пустота NIO даёт каналы, буферы и Selector — один поток обслуживает много соединений Классический ввод-вывод (java.io) — потоки, которые передают данные по одному байту или массиву. NIO (java.nio) работает иначе: данные проходят через буфер, которым управляет приложение, а источником или приёмником служит канал (FileChannel, SocketChannel). У буфера три показателя: - capacity — размер; - position — где сейчас читаем или пишем; - limit — граница доступных данных. Канал записывает данные в буфер, двигая position. Чтобы прочитать записанное, вызывают flip(): limit становится текущей позицией, а position — нулём. После чтения — clear() или compact(), чтобы снова писать. Забытый flip() — самая частая ошибка: читать оказывается нечего. Возможности NIO: - неблокирующие каналы и Selector — один поток следит за многими сокетами и обрабатывает те, что готовы. На этом построены Netty и другие сетевые серверы; - прямые буферы (allocateDirect) — память вне кучи, меньше копирований…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

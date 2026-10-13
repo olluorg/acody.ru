@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие преимущества у constructor injection по сравнению с field injection? Выберите все верные. — вопрос с собеседования</title>
+<meta name="description" content="Внедрение через конструктор даёт final-поля, полностью готовый объект сразу после создания, явные зависимости и тесты без Spring — достаточно вызвать…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/constructor-injection/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/constructor-injection/">
+<meta property="og:title" content="Какие преимущества у constructor injection по сравнению с field injection? Выберите все верные. — вопрос с собеседования">
+<meta property="og:description" content="Внедрение через конструктор даёт final-поля, полностью готовый объект сразу после создания, явные зависимости и тесты без Spring — достаточно вызвать…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Какие преимущества у constructor injection по сравнению с field injection? Выберите все верные.</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Какие преимущества у constructor injection по сравнению с field injection? Выберите все верные."}]}</script>
+  <h1>Какие преимущества у constructor injection по сравнению с field injection? Выберите все верные.</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">IoC и внедрение зависимостей</span><span class="chip">Spring</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему не стоит использовать @Autowired на полях?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Внедрение через конструктор даёт <b>final-поля</b>, <b>полностью готовый объект</b> сразу после создания, <b>явные зависимости</b> и <b>тесты без Spring</b> — достаточно вызвать конструктор.</p><ul><li>С одним конструктором @Autowired не нужен (Spring 4.3+)</li><li>Много параметров конструктора — сигнал, что класс делает слишком много</li><li>Циклические зависимости обнаруживаются при старте, а не прячутся</li></ul><p class="extra"><span>А ещё</span> Lombok @RequiredArgsConstructor сокращает код</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Внедрение в поле</b> (<code>@Autowired private Repo repo;</code>) работает через рефлексию после создания объекта. Проблемы:</p>
+<ul><li>поле не может быть <code>final</code> — объект изменяем;</li><li>объект можно создать через <code>new</code> в некорректном состоянии (поля null);</li><li>в тесте нельзя просто передать заглушку — нужен Spring или рефлексия;</li><li>зависимости скрыты: десять <code>@Autowired</code>-полей выглядят безобидно.</li></ul>
+<p><b>Внедрение через конструктор:</b></p>
+<ul><li>поля <code>final</code> — неизменяемость и безопасная публикация;</li><li>объект готов сразу после конструктора;</li><li>в unit-тесте — <code>new OrderService(mockRepo)</code>;</li><li>длинный список параметров наглядно показывает, что у класса слишком много обязанностей;</li><li>циклическая зависимость падает при старте контекста (BeanCurrentlyInCreationException), а не маскируется.</li></ul>
+<p>С одним конструктором аннотация <code>@Autowired</code> не нужна с Spring 4.3.</p>
+<p><b>Сеттер-внедрение</b> — для действительно необязательных зависимостей.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Неизменяемость и готовность объекта.</li><li>Тестирование без контейнера.</li><li>Явность зависимостей и обнаружение циклов.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ставить @Autowired на конструктор, когда он единственный, и считать это обязательным.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Несколько верных вариантов. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Позволяет объявлять зависимости как final</li><li class="ok"><span class="mark">✓</span>Гарантирует полностью инициализированный объект сразу после создания</li><li class="ok"><span class="mark">✓</span>Упрощает unit-тесты: зависимости передаются без Spring-контекста</li><li class="no"><span class="mark">✗</span>Позволяет внедрять зависимости в приватные поля без конструктора через рефлексию</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как тестировать бин без поднятия контекста?</li><li>Что делать с циклическими зависимостями?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/ioc/">IoC и Dependency Injection</a><p>Принцип инверсии управления, DI как его форма, три способа внедрения и почему конструктор, разрешение циклических зависимостей.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/constructor-vs-field-injection/">Почему внедрение через конструктор предпочтительнее внедрения в поле?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/ioc-vs-di/">Как соотносятся IoC и DI в Spring?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/spring/autowired-basic/">Что делает аннотация @Autowired?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие преимущества у constructor injection по сравнению с field injection? Выберите все верные.","acceptedAnswer":{"@type":"Answer","text":"Внедрение через конструктор даёт final-поля, полностью готовый объект сразу после создания, явные зависимости и тесты без Spring — достаточно вызвать конструктор. С одним конструктором @Autowired не нужен (Spring 4.3+) Много параметров конструктора — сигнал, что класс делает слишком много Циклические зависимости обнаруживаются при старте, а не прячутся Lombok @RequiredArgsConstructor сокращает код Внедрение в поле (@Autowired private Repo repo;) работает через рефлексию после создания объекта. Проблемы: - поле не может быть final — объект изменяем; - объект можно создать через new в некорректном состоянии (поля null); - в тесте нельзя просто передать заглушку — нужен Spring или рефлексия; - зависимости скрыты: десять @Autowired-полей выглядят безобидно. Внедрение через конструктор: - поля final — неизменяемость и безопасная публикация; - объект готов сразу после конструктора; - в unit-тесте — new OrderService(mockRepo); - длинный список параметров наглядно показывает, что у класса слишком много обязанностей; - циклическая зависимость падает при старте контекста (BeanCurrentlyInCreationException), а не маскируется. С одним конструктором аннотация @Autowired не нужна с Spring 4.3. Сеттер-внедрение — для действительно необязательных зависимостей."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

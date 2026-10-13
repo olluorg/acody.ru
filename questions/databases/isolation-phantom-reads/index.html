@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какой уровень изоляции транзакций по стандарту SQL гарантированно предотвращает phantom reads? — вопрос с собеседования</title>
+<meta name="description" content="По стандарту SQL фантомы гарантированно исключает только SERIALIZABLE. На практике PostgreSQL не показывает фантомов уже на REPEATABLE READ благодаря…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/isolation-phantom-reads/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/isolation-phantom-reads/">
+<meta property="og:title" content="Какой уровень изоляции транзакций по стандарту SQL гарантированно предотвращает phantom reads? — вопрос с собеседования">
+<meta property="og:description" content="По стандарту SQL фантомы гарантированно исключает только SERIALIZABLE. На практике PostgreSQL не показывает фантомов уже на REPEATABLE READ благодаря…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Какой уровень изоляции транзакций по стандарту SQL гарантированно предотвращает phantom reads?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Какой уровень изоляции транзакций по стандарту SQL гарантированно предотвращает phantom reads?"}]}</script>
+  <h1>Какой уровень изоляции транзакций по стандарту SQL гарантированно предотвращает phantom reads?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Транзакции и изоляция</span><span class="chip">SQL</span><span class="chip">PostgreSQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Какие уровни изоляции есть в SQL?</li><li>Что такое фантомное чтение?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">По стандарту SQL фантомы гарантированно исключает только <b>SERIALIZABLE</b>. На практике PostgreSQL не показывает фантомов уже на REPEATABLE READ благодаря снимку.</p><ul><li>READ UNCOMMITTED — возможно всё, включая грязное чтение</li><li>READ COMMITTED — нет грязного чтения</li><li>REPEATABLE READ — нет неповторяемого чтения; фантомы по стандарту возможны</li></ul><p class="extra"><span>А ещё</span> Стандарт описывает минимальные гарантии — реализации часто дают больше</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Уровни изоляции: версии строк, снимки и аномалии</p><script type="module" src="/widgets/isolation.js"></script><sotto-isolation theme="dark"></sotto-isolation></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Фантом</b> — повторный запрос с тем же условием возвращает другой набор строк, потому что другая транзакция вставила или удалила подходящие строки.</p>
+<p><b>Стандарт SQL</b> определяет уровни через запрещённые аномалии:</p>
+<div class="table"><table><thead><tr><th>Уровень</th><th>Грязное чтение</th><th>Неповторяемое</th><th>Фантом</th></tr></thead><tbody><tr><td>READ UNCOMMITTED</td><td>возможно</td><td>возможно</td><td>возможно</td></tr><tr><td>READ COMMITTED</td><td>нет</td><td>возможно</td><td>возможно</td></tr><tr><td>REPEATABLE READ</td><td>нет</td><td>нет</td><td>возможно</td></tr><tr><td>SERIALIZABLE</td><td>нет</td><td>нет</td><td>нет</td></tr></tbody></table></div>
+<p><b>Реализации:</b></p>
+<ul><li><b>PostgreSQL</b> на REPEATABLE READ работает со снимком на всю транзакцию — фантомов не видно, но возможна асимметрия записи (write skew); READ UNCOMMITTED ведёт себя как READ COMMITTED; SERIALIZABLE — SSI с откатом конфликтующих транзакций;</li><li><b>MySQL InnoDB</b> по умолчанию REPEATABLE READ: обычный SELECT читает снимок, а блокирующие чтения (<code>FOR UPDATE</code>) ставят gap-блокировки, чтобы не появлялись фантомы;</li><li><b>Oracle</b> не имеет REPEATABLE READ; SERIALIZABLE там — изоляция снимка.</li></ul>
+<p>Поэтому на собеседовании хороший ответ — «по стандарту SERIALIZABLE, но в конкретной базе нужно смотреть реализацию».</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-sql"><code>-- T1                                   -- T2
+BEGIN ISOLATION LEVEL READ COMMITTED;
+SELECT count(*) FROM orders WHERE status = &#x27;new&#x27;;  -- 5
+                                        INSERT INTO orders(status) VALUES (&#x27;new&#x27;); COMMIT;
+SELECT count(*) FROM orders WHERE status = &#x27;new&#x27;;  -- 6 — фантом</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определение фантома.</li><li>Уровни стандарта и что каждый запрещает.</li><li>Ответ: SERIALIZABLE по стандарту.</li><li>Различия реализаций — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Путать фантом с неповторяемым чтением.</li><li>Считать, что все базы реализуют уровни одинаково.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>READ UNCOMMITTED</li><li class="no"><span class="mark">✗</span>READ COMMITTED</li><li class="no"><span class="mark">✗</span>REPEATABLE READ</li><li class="ok"><span class="mark">✓</span>SERIALIZABLE</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем phantom read отличается от non-repeatable read?</li><li>Как InnoDB предотвращает phantom?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/transactions/">Транзакции, изоляция и блокировки</a><p>ACID по буквам, аномалии чтения, уровни изоляции, MVCC и оптимистичные/пессимистичные блокировки.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/isolation-anomalies/">Какие аномалии бывают при параллельных транзакциях и от чего защищает каждый уровень изоляции?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/read-anomalies/">Чем dirty read, non-repeatable read и phantom read отличаются друг от друга?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/mvcc/">Что такое MVCC и как он позволяет читать без блокировок?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какой уровень изоляции транзакций по стандарту SQL гарантированно предотвращает phantom reads?","acceptedAnswer":{"@type":"Answer","text":"По стандарту SQL фантомы гарантированно исключает только SERIALIZABLE. На практике PostgreSQL не показывает фантомов уже на REPEATABLE READ благодаря снимку. READ UNCOMMITTED — возможно всё, включая грязное чтение READ COMMITTED — нет грязного чтения REPEATABLE READ — нет неповторяемого чтения; фантомы по стандарту возможны Стандарт описывает минимальные гарантии — реализации часто дают больше Фантом — повторный запрос с тем же условием возвращает другой набор строк, потому что другая транзакция вставила или удалила подходящие строки. Стандарт SQL определяет уровни через запрещённые аномалии: | Уровень | Грязное чтение | Неповторяемое | Фантом | | --- | --- | --- | --- | | READ UNCOMMITTED | возможно | возможно | возможно | | READ COMMITTED | нет | возможно | возможно | | REPEATABLE READ | нет | нет | возможно | | SERIALIZABLE | нет | нет | нет | Реализации: - PostgreSQL на REPEATABLE READ работает со снимком на всю транзакцию — фантомов не видно, но возможна асимметрия записи (write skew); READ UNCOMMITTED ведёт себя как READ COMMITTED; SERIALIZABLE — SSI с откатом конфликтующих транзакций; - MySQL InnoDB по умолчанию REPEATABLE READ: обычный SELECT читает снимок, а блокирующие чтения (FOR UPDATE) ставят gap-блокировки, чтобы не появлялись фантомы; - Oracle не имеет…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Каскад, специфичность и блочная модель — карта «Frontend-разработчик»</title>
+<meta name="description" content="Почему применился именно этот стиль и как считается размер элемента.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/frontend/css-cascade/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/frontend/css-cascade/">
+<meta property="og:title" content="Каскад, специфичность и блочная модель — карта «Frontend-разработчик»">
+<meta property="og:description" content="Почему применился именно этот стиль и как считается размер элемента.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/frontend/#css">Frontend-разработчик</a> <span>/</span> <a href="/roadmap/frontend/css/">CSS</a> <span>/</span> <span>Каскад, специфичность и блочная модель</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Frontend-разработчик","item":"https://learn.getsotto.ru/roadmap/frontend/#css"},{"@type":"ListItem","position":3,"name":"CSS","item":"https://learn.getsotto.ru/roadmap/frontend/css/"},{"@type":"ListItem","position":4,"name":"Каскад, специфичность и блочная модель"}]}</script>
+  <h1>Каскад, специфичность и блочная модель</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Почему применился именно этот стиль и как считается размер элемента.</p>
+  <article class="md"><p>Когда к элементу подходит несколько правил, побеждает:</p>
+<ol><li><code>!important</code> (лучше не использовать);</li><li>затем более высокий <b>слой</b> (<code>@layer</code>);</li><li>затем большая <b>специфичность</b>: id (1-0-0) &gt; класс, атрибут, псевдокласс (0-1-0) &gt; тег (0-0-1);</li><li>при равенстве — правило, объявленное <b>позже</b>.</li></ol>
+<p>Инлайн-стиль сильнее любых селекторов. Часть свойств (цвет, шрифт) <b>наследуется</b> от родителя, часть (отступы, рамки) — нет.</p>
+<h3>Блочная модель</h3>
+<p>Размер элемента складывается из content, padding, border; margin — снаружи. При <code>box-sizing: content-box</code> (по умолчанию) <code>width</code> — только содержимое, и рамка с отступами увеличивают элемент. Почти все проекты ставят глобально:</p>
+<pre class="lang-css"><code>*, *::before, *::after { box-sizing: border-box; }</code></pre>
+<h3>Что ещё важно</h3>
+<ul><li>Схлопывание вертикальных margin у соседних блоков.</li><li>Единицы: <code>px</code>, <code>rem</code> (от шрифта корня), <code>em</code>, <code>%</code>, <code>vw</code>/<code>vh</code>, <code>dvh</code>.</li><li>Переменные: <code>--accent: #7c5cff; color: var(--accent);</code>.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 6 ч</small></h3><ul><li>Объясняет, почему применился конкретный стиль — специфичность, порядок, наследование</li><li>Считает размер элемента в content-box и border-box</li><li>Использует rem, переменные CSS и не прибегает к !important</li></ul><p class="rm-practice"><b>Практика.</b> Разобрать 10 задач на специфичность (какое правило победит и почему) и привести стили учебного проекта к box-sizing border-box без регрессий.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/frontend/css-specificity/">Как работают каскад и специфичность в CSS?</a> <span class="lvl lvl-junior">Junior</span><p>При конфликте правил побеждает: !important → более высокая специфичность → более позднее правило. Специфичность считается тройкой (id, классы/атрибуты/псевдоклассы…</p></li><li><a href="/questions/frontend/box-model/">Что такое блочная модель CSS и чем content-box отличается от border-box?</a> <span class="lvl lvl-junior">Junior</span><p>Каждый элемент — прямоугольник из content, padding, border, margin. При content-box (по умолчанию) width задаёт только содержимое, а padding и border добавляются сверху. При…</p></li></ul></section><section class="block"><h2>Документация</h2><ul class="links"><li><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade/Cascade" rel="noopener" target="_blank">MDN: Каскад ↗</a></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/frontend/css/">← CSS</a><a class="next" href="/roadmap/frontend/css-layout/">Раскладка — Flexbox, Grid, позиционирование →</a></nav>
+  <p class="rm-back"><a href="/roadmap/frontend/#css">← Вся карта «Frontend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Каскад, специфичность и блочная модель","description":"Почему применился именно этот стиль и как считается размер элемента.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/frontend/css-cascade/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Качество RAG — карта «ИИ-инженер»</title>
+<meta name="description" content="Почему RAG отвечает плохо и как это найти — поиск, контекст, генерация, оценка.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/ai-engineer/rag-quality/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/ai-engineer/rag-quality/">
+<meta property="og:title" content="Качество RAG — карта «ИИ-инженер»">
+<meta property="og:description" content="Почему RAG отвечает плохо и как это найти — поиск, контекст, генерация, оценка.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/ai-engineer/#rag">ИИ-инженер</a> <span>/</span> <a href="/roadmap/ai-engineer/rag/">RAG</a> <span>/</span> <span>Качество RAG</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"ИИ-инженер","item":"https://learn.getsotto.ru/roadmap/ai-engineer/#rag"},{"@type":"ListItem","position":3,"name":"RAG","item":"https://learn.getsotto.ru/roadmap/ai-engineer/rag/"},{"@type":"ListItem","position":4,"name":"Качество RAG"}]}</script>
+  <h1>Качество RAG</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-middle">с Middle</span></div>
+  <p class="lead">Почему RAG отвечает плохо и как это найти — поиск, контекст, генерация, оценка.</p>
+  <article class="md"><p>Ошибку RAG ищут по этапам, а не «подкручивая промпт».</p>
+<div class="table"><table><thead><tr><th>симптом</th><th>где искать</th></tr></thead><tbody><tr><td>нужный документ не нашёлся</td><td>разбиение, модель эмбеддингов, гибридный поиск, переформулирование</td></tr><tr><td>нашёлся, но не в топе</td><td>реранкер, число кандидатов</td></tr><tr><td>был в контексте, но ответ неверный</td><td>промпт, порядок фрагментов, слишком много шума</td></tr><tr><td>модель выдумала</td><td>инструкция отвечать только по документам, проверка ссылок</td></tr></tbody></table></div>
+<h3>Что важно знать</h3>
+<ul><li>Сначала <b>набор вопросов с правильными документами и ответами</b> — иначе улучшения не измерить.</li><li>Метрики поиска (recall@k) и метрики ответа (верность контексту, полнота, корректность) считают отдельно.</li><li>Если ответа в данных нет, модель должна это признать — это тоже проверяют.</li><li>Продвинутые схемы: агентный RAG (модель сама решает, что искать), графовый RAG для связей между сущностями — после того как базовый пайплайн отлажен.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Middle <small>≈ 12 ч</small></h3><ul><li>Собирает набор вопросов с правильными документами и ответами и измеряет поиск и ответ отдельно</li><li>Находит этап, на котором RAG ошибается, по трассам неудачных ответов</li><li>Добивается, чтобы ассистент признавал отсутствие ответа в данных</li></ul><p class="rm-practice"><b>Практика.</b> Взять базовый RAG, собрать набор из 100 вопросов, разложить ошибки по этапам и улучшить итоговое качество ответов не менее чем на 15%.</p></div><div class="rm-grade"><h3>Senior <small>≈ 8 ч</small></h3><ul><li>Проектирует RAG с правами доступа и аудитом показанных документов</li><li>Решает, когда нужны агентный или графовый RAG, и измеряет их выгоду</li></ul><p class="rm-practice"><b>Практика.</b> Спроектировать и защитить RAG по документам компании с правами доступа, синхронизацией прав и планом оценки качества.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/ai/rag-quality/">Как улучшить качество RAG, если он отвечает плохо?</a> <span class="lvl lvl-middle">Middle</span><p>Сначала понять, где ломается: не нашли нужное (поиск) или нашли, но ответили плохо (генерация) — и чинить соответствующий этап.</p></li><li><a href="/questions/ai/hallucinations/">Что такое галлюцинации LLM и как с ними бороться?</a> <span class="lvl lvl-junior">Junior</span><p>Галлюцинация — правдоподобный, но неверный ответ: модель генерирует вероятный текст, а не сверяется с фактами.</p></li><li><a href="/questions/ai/llm-evaluation/">Как оценивать качество ответов LLM?</a> <span class="lvl lvl-middle">Middle</span><p>Собрать набор тестовых примеров с ожидаемым результатом, выбрать метрики под задачу и прогонять его при каждом изменении промпта, модели или поиска.</p></li><li><a href="/questions/ai/rag-access-control/">Как сделать RAG по документам компании с учётом прав доступа?</a> <span class="lvl lvl-senior">Senior</span><p>Права проверяются при поиске, а не моделью: каждый фрагмент хранит метаданные доступа (документ, группы, уровень конфиденциальности), поисковый запрос всегда содержит фильтр по…</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/ai-engineer/rag-indexing/">← Подготовка данных и разбиение на фрагменты</a><a class="next" href="/roadmap/ai-engineer/long-context/">Длинный контекст против RAG →</a></nav>
+  <p class="rm-back"><a href="/roadmap/ai-engineer/#rag">← Вся карта «ИИ-инженер»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Качество RAG","description":"Почему RAG отвечает плохо и как это найти — поиск, контекст, генерация, оценка.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/ai-engineer/rag-quality/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

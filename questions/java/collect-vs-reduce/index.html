@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем collect отличается от reduce при сборке стрима? — вопрос с собеседования</title>
+<meta name="description" content="reduce — неизменяемая свёртка: из двух значений получается новое (сумма, максимум). collect — изменяемая свёртка: элементы накапливаются в один…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/collect-vs-reduce/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/collect-vs-reduce/">
+<meta property="og:title" content="Чем collect отличается от reduce при сборке стрима? — вопрос с собеседования">
+<meta property="og:description" content="reduce — неизменяемая свёртка: из двух значений получается новое (сумма, максимум). collect — изменяемая свёртка: элементы накапливаются в один…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Чем collect отличается от reduce при сборке стрима?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Чем collect отличается от reduce при сборке стрима?"}]}</script>
+  <h1>Чем collect отличается от reduce при сборке стрима?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Лямбды и Stream API</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем collect отличается от reduce и какие ловушки есть у Collectors.toMap и groupingBy?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>reduce</b> — неизменяемая свёртка: из двух значений получается новое (сумма, максимум). <b>collect</b> — изменяемая свёртка: элементы накапливаются в один контейнер (список, карта, StringBuilder) через Collector. Коллекции и строки собирают только collect — reduce создавал бы новый объект на каждом шаге.</p><ul><li>Ловушки toMap: дубликат ключа — IllegalStateException, null-значение — NPE</li><li>groupingBy по умолчанию HashMap и List; downstream-коллектор меняет агрегат</li><li>Для parallel: reduce требует ассоциативной функции и нейтрального элемента</li></ul><p class="extra"><span>А ещё</span> Простые агрегаты: sum, count, max у примитивных стримов</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>reduce:</b></p>
+<pre class="lang-java"><code>int total = orders.stream().map(Order::sum).reduce(0, Integer::sum);</code></pre>
+<p><code>identity</code> — нейтральный элемент, функция — ассоциативная. Подходит для значений. Собирать так строку или список — на каждом шаге новый объект, сложность квадратичная.</p>
+<p><b>collect:</b></p>
+<pre class="lang-java"><code>Map&lt;Dept, List&lt;Emp&gt;&gt; byDept = emps.stream()
+    .collect(Collectors.groupingBy(Emp::dept));
+String csv = names.stream().collect(Collectors.joining(&quot;,&quot;));</code></pre>
+<p>Collector описывает поставщика контейнера, функцию добавления элемента и функцию слияния контейнеров (для parallel).</p>
+<p><b>Ловушки Collectors:</b></p>
+<ul><li><code>toMap</code> без функции слияния падает на <b>дубликате ключа</b> (IllegalStateException: Duplicate key);</li><li><code>toMap</code> падает на <b>null-значении</b> (NPE) — внутри используется <code>HashMap.merge</code>;</li><li><code>groupingBy</code> кладёт в HashMap — порядок групп не определён; нужен порядок — <code>groupingBy(f, TreeMap::new, toList())</code>;</li><li><code>toList()</code> у Stream (Java 16) неизменяемый, <code>Collectors.toList()</code> — изменяемый ArrayList без гарантии.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Неизменяемая и изменяемая свёртка.</li><li>Почему коллекции собирают collect.</li><li>Ловушки toMap и groupingBy.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Собирать список через reduce с пересозданием контейнера.</li><li>Думать, что reduce умеет mutable-накопление.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>reduce — неизменяемая свёртка (identity + ассоциативная функция), хороша для значений; collect — изменяемая свёртка в один мутируемый контейнер, для построения коллекций</li><li class="no"><span class="mark">✗</span>Они идентичны; collect — устаревший псевдоним reduce</li><li class="no"><span class="mark">✗</span>collect работает только последовательно, reduce — только параллельно</li><li class="no"><span class="mark">✗</span>reduce собирает в коллекцию, collect — в одно значение</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое identity в reduce?</li><li>Зачем коллектору ассоциативность для параллели?</li><li>Что означают характеристики коллектора UNORDERED и CONCURRENT?</li><li>Когда параллельный стрим действительно даёт выигрыш?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/collectors/">Collectors и свёртка</a><p>reduce против collect, базовые коллекторы и ловушка toMap, группировка и downstream-коллекторы, характеристики и параллельность.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/tomap-duplicate-key/">Что произойдёт в Collectors.toMap, если два элемента дают одинаковый ключ, а merge-функция не передана?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/tomap-null-value/">Функция значения в Collectors.toMap вернула null для одного из элементов. Что произойдёт?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/groupingby-counting/">Как одним коллектором получить «количество элементов в каждой группе»?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/stream-collect/">Что делает терминальная операция collect?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем collect отличается от reduce при сборке стрима?","acceptedAnswer":{"@type":"Answer","text":"reduce — неизменяемая свёртка: из двух значений получается новое (сумма, максимум). collect — изменяемая свёртка: элементы накапливаются в один контейнер (список, карта, StringBuilder) через Collector. Коллекции и строки собирают только collect — reduce создавал бы новый объект на каждом шаге. Ловушки toMap: дубликат ключа — IllegalStateException, null-значение — NPE groupingBy по умолчанию HashMap и List; downstream-коллектор меняет агрегат Для parallel: reduce требует ассоциативной функции и нейтрального элемента Простые агрегаты: sum, count, max у примитивных стримов reduce: identity — нейтральный элемент, функция — ассоциативная. Подходит для значений. Собирать так строку или список — на каждом шаге новый объект, сложность квадратичная. collect: Collector описывает поставщика контейнера, функцию добавления элемента и функцию слияния контейнеров (для parallel). Ловушки Collectors: - toMap без функции слияния падает на дубликате ключа (IllegalStateException: Duplicate key); - toMap падает на null-значении (NPE) — внутри используется HashMap.merge; - groupingBy кладёт в HashMap — порядок групп не определён; нужен порядок — groupingBy(f, TreeMap::new, toList()); - toList() у Stream (Java 16) неизменяемый, Collectors.toList() — изменяемый ArrayList без гарантии."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

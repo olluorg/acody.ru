@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое dead letter queue (DLQ) и зачем она нужна? — вопрос с собеседования</title>
+<meta name="description" content="DLQ — отдельная очередь или топик, куда уходит сообщение после N неудачных попыток, чтобы не блокировать поток и не потеряться. Ядовитое сообщение…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/brokers/dead-letter-queue/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/brokers/dead-letter-queue/">
+<meta property="og:title" content="Что такое dead letter queue (DLQ) и зачем она нужна? — вопрос с собеседования">
+<meta property="og:description" content="DLQ — отдельная очередь или топик, куда уходит сообщение после N неудачных попыток, чтобы не блокировать поток и не потеряться. Ядовитое сообщение…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/brokers/">Брокеры сообщений</a> <span>/</span> <span>Что такое dead letter queue (DLQ) и зачем она нужна?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/questions/brokers/"},{"@type":"ListItem","position":3,"name":"Что такое dead letter queue (DLQ) и зачем она нужна?"}]}</script>
+  <h1>Что такое dead letter queue (DLQ) и зачем она нужна?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Ретраи, DLQ и идемпотентность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что делать с сообщением, которое не удаётся обработать?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>DLQ</b> — отдельная очередь или топик, куда уходит сообщение после N неудачных попыток, чтобы не блокировать поток и не потеряться.</p><ul><li>Ядовитое сообщение без DLQ бесконечно повторяется и стопорит партицию</li><li>В DLQ — с причиной, стеком, числом попыток, исходным топиком и offset</li><li>У DLQ есть владелец и алерт; разбор и переигрывание после исправления</li></ul><p class="extra"><span>А ещё</span> В RabbitMQ — DLX, в SQS — redrive policy, в Kafka — отдельный топик (Spring: DeadLetterPublishingRecoverer)</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Объясни: при повторяющихся ошибках сообщение после ограниченных ретраев (экспоненциальный backoff + jitter) перенаправляется в DLQ; это спасает от poison-message, который иначе застрял бы в цикле ретраев. Различи blocking retry (повтор на месте — держит партицию и тормозит соседние сообщения) и non-blocking retry (через retry-топики). В DLQ-запись кладут payload + причину сбоя + число попыток + исходный топик/offset, иначе разобрать её нельзя. Затем DLQ мониторят, алертят на её рост и делают redrive после фикса.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Зачем DLQ: не блокировать поток и не терять.</li><li>Когда сообщение туда попадает.</li><li>Что хранить и как разбирать.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Складывать в DLQ без мониторинга — сообщения просто теряются из виду.</li><li>Бесконечно ретраить poison-message.</li><li>Ретраить без backoff/jitter — получить retry storm.</li><li>Класть в DLQ только payload без причины сбоя и offset — разобрать потом невозможно.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем blocking retry отличается от non-blocking (retry-топики)?</li><li>Что класть в метаданные DLQ-сообщения?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/brokers/dlq-retries/">Retries, DLQ и идемпотентность</a><p>Что повторять и почему не всё, backoff/jitter, non-blocking retry, дизайн DLQ и redrive, идемпотентность как фундамент.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/brokers/retryable-errors/">Какие ошибки обработки сообщения имеет смысл повторять, а какие нет?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/non-blocking-retries/">Чем неблокирующий повтор через отдельные retry-топики лучше повтора прямо в обработчике?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/dlq-design/">Что важно предусмотреть при проектировании dead letter queue?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/reliable-processing/">Как сделать обработку запросов надёжной при сбоях и повторах?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое dead letter queue (DLQ) и зачем она нужна?","acceptedAnswer":{"@type":"Answer","text":"DLQ — отдельная очередь или топик, куда уходит сообщение после N неудачных попыток, чтобы не блокировать поток и не потеряться. Ядовитое сообщение без DLQ бесконечно повторяется и стопорит партицию В DLQ — с причиной, стеком, числом попыток, исходным топиком и offset У DLQ есть владелец и алерт; разбор и переигрывание после исправления В RabbitMQ — DLX, в SQS — redrive policy, в Kafka — отдельный топик (Spring: DeadLetterPublishingRecoverer) Объясни: при повторяющихся ошибках сообщение после ограниченных ретраев (экспоненциальный backoff + jitter) перенаправляется в DLQ; это спасает от poison-message, который иначе застрял бы в цикле ретраев. Различи blocking retry (повтор на месте — держит партицию и тормозит соседние сообщения) и non-blocking retry (через retry-топики). В DLQ-запись кладут payload + причину сбоя + число попыток + исходный топик/offset, иначе разобрать её нельзя. Затем DLQ мониторят, алертят на её рост и делают redrive после фикса."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

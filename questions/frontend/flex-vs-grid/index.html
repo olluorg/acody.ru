@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем Flexbox отличается от Grid и когда что использовать? — вопрос с собеседования</title>
+<meta name="description" content="Flexbox — одномерная раскладка: элементы в строку или столбец, распределение места и выравнивание вдоль оси; размеры идут от содержимого. Grid …">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/flex-vs-grid/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/flex-vs-grid/">
+<meta property="og:title" content="Чем Flexbox отличается от Grid и когда что использовать? — вопрос с собеседования">
+<meta property="og:description" content="Flexbox — одномерная раскладка: элементы в строку или столбец, распределение места и выравнивание вдоль оси; размеры идут от содержимого. Grid …">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Чем Flexbox отличается от Grid и когда что использовать?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Чем Flexbox отличается от Grid и когда что использовать?"}]}</script>
+  <h1>Чем Flexbox отличается от Grid и когда что использовать?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Вёрстка и CSS</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как отцентрировать элемент в CSS?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Flexbox</b> — <b>одномерная</b> раскладка: элементы в строку или столбец, распределение места и выравнивание вдоль оси; размеры идут от содержимого. <b>Grid</b> — <b>двумерная</b>: строки и столбцы одновременно, раскладка задаётся контейнером. Flex — панели, меню, ряды кнопок; Grid — каркас страницы, карточки в сетке, формы.</p><ul><li>Центрирование: display: flex (или grid); place-items: center / justify-content + align-items</li><li>gap работает и во flex, и в grid</li><li>flex: 1 — элемент забирает свободное место</li></ul><p class="extra"><span>А ещё</span> Их сочетают: grid для каркаса, flex внутри ячеек</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Flexbox:</b> главная ось (<code>flex-direction</code>), <code>justify-content</code> — вдоль неё, <code>align-items</code> — поперёк. <code>flex: grow shrink basis</code> управляет распределением свободного места; <code>flex-wrap</code> переносит элементы, но каждая строка раскладывается независимо — столбцы не выравниваются.</p>
+<p><b>Grid:</b> <code>grid-template-columns/rows</code>, единица <code>fr</code> (доля свободного места), <code>minmax</code>, <code>repeat(auto-fill, ...)</code> — адаптивная сетка без медиазапросов; именованные области <code>grid-template-areas</code>; элементы можно размещать в любые ячейки.</p>
+<p><b>Правило выбора:</b> важен поток содержимого в одном направлении — flex; важно выравнивание по строкам и столбцам сразу — grid.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-css"><code>.center { display: grid; place-items: center; }
+
+.toolbar { display: flex; gap: 8px; align-items: center; }
+.toolbar .spacer { flex: 1; }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Одномерность и двумерность.</li><li>Типичные применения.</li><li>Способы центрирования.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/box-model/">Что такое блочная модель CSS и чем content-box отличается от border-box?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/responsive/">Как сделать адаптивную вёрстку?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем Flexbox отличается от Grid и когда что использовать?","acceptedAnswer":{"@type":"Answer","text":"Flexbox — одномерная раскладка: элементы в строку или столбец, распределение места и выравнивание вдоль оси; размеры идут от содержимого. Grid — двумерная: строки и столбцы одновременно, раскладка задаётся контейнером. Flex — панели, меню, ряды кнопок; Grid — каркас страницы, карточки в сетке, формы. Центрирование: display: flex (или grid); place-items: center / justify-content + align-items gap работает и во flex, и в grid flex: 1 — элемент забирает свободное место Их сочетают: grid для каркаса, flex внутри ячеек Flexbox: главная ось (flex-direction), justify-content — вдоль неё, align-items — поперёк. flex: grow shrink basis управляет распределением свободного места; flex-wrap переносит элементы, но каждая строка раскладывается независимо — столбцы не выравниваются. Grid: grid-template-columns/rows, единица fr (доля свободного места), minmax, repeat(auto-fill, ...) — адаптивная сетка без медиазапросов; именованные области grid-template-areas; элементы можно размещать в любые ячейки. Правило выбора: важен поток содержимого в одном направлении — flex; важно выравнивание по строкам и столбцам сразу — grid."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

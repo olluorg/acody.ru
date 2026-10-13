@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Обучение, валидация и метрики — карта «ИИ-инженер»</title>
+<meta name="description" content="Задачи ML, разбиение данных, переобучение, утечки и метрики качества.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/ai-engineer/ml-concepts/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/ai-engineer/ml-concepts/">
+<meta property="og:title" content="Обучение, валидация и метрики — карта «ИИ-инженер»">
+<meta property="og:description" content="Задачи ML, разбиение данных, переобучение, утечки и метрики качества.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/ai-engineer/#ml-basics">ИИ-инженер</a> <span>/</span> <a href="/roadmap/ai-engineer/ml-basics/">Основы машинного обучения</a> <span>/</span> <span>Обучение, валидация и метрики</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"ИИ-инженер","item":"https://learn.getsotto.ru/roadmap/ai-engineer/#ml-basics"},{"@type":"ListItem","position":3,"name":"Основы машинного обучения","item":"https://learn.getsotto.ru/roadmap/ai-engineer/ml-basics/"},{"@type":"ListItem","position":4,"name":"Обучение, валидация и метрики"}]}</script>
+  <h1>Обучение, валидация и метрики</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Задачи ML, разбиение данных, переобучение, утечки и метрики качества.</p>
+  <article class="md"><p>Модель учится на примерах и должна хорошо работать на <b>новых</b> данных. Всё остальное следует из этого.</p>
+<div class="widget-in"><script type="module" src="/widgets/roc-threshold.js"></script><sotto-roc-threshold theme="dark"></sotto-roc-threshold></div>
+<h3>Что важно знать</h3>
+<ul><li><b>Задачи</b>: классификация, регрессия, кластеризация, ранжирование, генерация.</li><li><b>Выборки</b>: обучающая — учиться, валидационная — подбирать настройки, тестовая — один раз оценить итог.</li><li><b>Переобучение</b>: модель запомнила обучающие примеры и плохо работает на новых.</li><li><b>Утечка данных</b>: в признаках оказалась информация из будущего или из ответа — блестящие метрики на тесте и провал в работе.</li><li><b>Метрики классификации</b>: точность обманчива при дисбалансе классов; precision, recall, F1, ROC-AUC и PR-AUC.</li><li>Те же идеи работают для LLM: набор для оценки не должен попадать в примеры промпта, а улучшение «на трёх вопросах» — не улучшение.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 12 ч</small></h3><ul><li>Объясняет обучение с учителем и без, классификацию и регрессию на примерах</li><li>Объясняет, зачем делить данные на обучающую, валидационную и тестовую выборки</li><li>Считает precision, recall и F1 по матрице ошибок и объясняет, когда точность обманчива</li></ul><p class="rm-practice"><b>Практика.</b> Обучить логистическую регрессию на открытом датасете отзывов, посчитать метрики и разобрать 20 ошибок вручную.</p></div><div class="rm-grade"><h3>Middle <small>≈ 6 ч</small></h3><ul><li>Находит утечку данных в постановке эксперимента</li><li>Выбирает метрику под цену ошибок задачи и порог классификатора</li></ul><p class="rm-practice"><b>Практика.</b> Сравнить классификацию обращений LLM без обучения и простой моделью на эмбеддингах по F1 и стоимости на 500 размеченных примерах.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/ai/ml-task-types/">Какие бывают задачи машинного обучения — обучение с учителем, без учителя, с подкреплением?</a> <span class="lvl lvl-junior">Junior</span><p>С учителем — есть правильные ответы (метки): классификация (предсказать класс — спам/не спам) и регрессия (предсказать число — цену). Без учителя — меток нет, ищем структуру…</p></li><li><a href="/questions/ai/train-val-test/">Зачем делить данные на обучающую, валидационную и тестовую выборки?</a> <span class="lvl lvl-junior">Junior</span><p>Обучающая — на ней модель учится, валидационная — подбираем параметры и сравниваем модели, тестовая — один раз в конце для честной оценки.</p></li><li><a href="/questions/ai/overfitting/">Что такое переобучение модели и как с ним бороться?</a> <span class="lvl lvl-junior">Junior</span><p>Переобучение — модель запомнила обучающие данные вместе с шумом и плохо работает на новых; недообучение — модель слишком простая и плоха даже на обучающих.</p></li><li><a href="/questions/ai/data-leakage/">Что такое утечка данных (data leakage) в машинном обучении?</a> <span class="lvl lvl-middle">Middle</span><p>Утечка — в обучении используется информация, недоступная в момент реального прогноза. Метрики на валидации получаются завышенными, а в продакшене модель проваливается. Виды…</p></li><li><a href="/questions/ai/classification-metrics/">Какие метрики качества классификации вы знаете?</a> <span class="lvl lvl-junior">Junior</span><p>Precision — доля верных среди предсказанных положительных, recall — доля найденных среди всех настоящих положительных; F1 — их гармоническое среднее.</p></li><li><a href="/questions/ai/roc-pr-auc/">Что такое ROC-AUC и PR-AUC и когда какую метрику использовать?</a> <span class="lvl lvl-middle">Middle</span><p>ROC-кривая — зависимость доли найденных положительных (TPR) от доли ложных тревог (FPR) при всех порогах; ROC-AUC — площадь под ней, вероятность того, что случайный положительный…</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/ai-engineer/ml-basics/">← Основы машинного обучения</a><a class="next" href="/roadmap/ai-engineer/neural-networks/">Нейросети и обучение →</a></nav>
+  <p class="rm-back"><a href="/roadmap/ai-engineer/#ml-basics">← Вся карта «ИИ-инженер»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Обучение, валидация и метрики","description":"Задачи ML, разбиение данных, переобучение, утечки и метрики качества.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/ai-engineer/ml-concepts/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

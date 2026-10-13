@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие четыре принципа ООП? — вопрос с собеседования</title>
+<meta name="description" content="Четыре принципа: инкапсуляция, наследование, полиморфизм, абстракция — к каждому короткий пример. Инкапсуляция — скрыть состояние за методами…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/oop-principles/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/oop-principles/">
+<meta property="og:title" content="Какие четыре принципа ООП? — вопрос с собеседования">
+<meta property="og:description" content="Четыре принципа: инкапсуляция, наследование, полиморфизм, абстракция — к каждому короткий пример. Инкапсуляция — скрыть состояние за методами…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Какие четыре принципа ООП?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Какие четыре принципа ООП?"}]}</script>
+  <h1>Какие четыре принципа ООП?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">ООП</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Назовите принципы ООП</li><li>Что такое инкапсуляция, наследование и полиморфизм?</li><li>Какие основные принципы объектно-ориентированного программирования?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Четыре принципа: <b>инкапсуляция</b>, <b>наследование</b>, <b>полиморфизм</b>, <b>абстракция</b> — к каждому короткий пример.</p><ul><li>Инкапсуляция — скрыть состояние за методами, которые берегут инварианты</li><li>Полиморфизм — переопределённый метод вызывается по ссылке базового типа</li></ul><p class="extra"><span>А ещё</span> Скажите, что инкапсуляция — это не просто private-поля с геттерами</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>ООП строит программу из объектов, у которых есть состояние и поведение. На собеседовании ждут не только список, но и пример к каждому принципу.</p>
+<ul><li><b>Инкапсуляция</b> — объект скрывает внутреннее состояние и даёт менять его только через методы, которые сохраняют правила (инварианты). Счёт не даёт уйти в минус: поле <code>balance</code> приватное, а <code>withdraw()</code> проверяет сумму. Геттер и сеттер на каждое поле инкапсуляцию не дают.</li><li><b>Наследование</b> — класс получает поля и методы родителя (<code>extends</code>) и может их расширять. Используют для отношения «является»; для переиспользования кода чаще лучше композиция.</li><li><b>Полиморфизм</b> — один интерфейс, разные реализации: <code>Shape s = new Circle(); s.area()</code> вызовет метод <code>Circle</code>. Выбор метода происходит во время выполнения по реальному типу объекта (переопределение, overriding). Перегрузка (overloading) — другое: выбор при компиляции по типам аргументов.</li><li><b>Абстракция</b> — выделяем существенное и прячем детали: интерфейс <code>PaymentGateway</code> описывает, что умеет платёжная система, не раскрывая как.</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>interface Shape { double area(); }                 // абстракция
+record Circle(double r) implements Shape {
+    public double area() { return Math.PI * r * r; }
+}
+record Square(double side) implements Shape {
+    public double area() { return side * side; }
+}
+
+List&lt;Shape&gt; shapes = List.of(new Circle(1), new Square(2));
+shapes.forEach(s -&gt; System.out.println(s.area())); // полиморфизм</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Названы все четыре принципа.</li><li>К каждому — короткий пример из кода.</li><li>Инкапсуляция объяснена через инварианты, а не через private-поля.</li><li>Полиморфизм — через переопределение и вызов по ссылке базового типа.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Путать абстракцию и инкапсуляцию.</li><li>Сводить полиморфизм только к перегрузке (overloading) вместо переопределения (overriding).</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Наследование, многопоточность, абстракция, рефлексия</li><li class="ok"><span class="mark">✓</span>Инкапсуляция, наследование, полиморфизм, абстракция</li><li class="no"><span class="mark">✗</span>Инкапсуляция, рекурсия, полиморфизм, сериализация</li><li class="no"><span class="mark">✗</span>Полиморфизм, иммутабельность, инкапсуляция, дженерики</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем абстрактный класс отличается от интерфейса?</li><li>Почему composition часто предпочтительнее inheritance?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/oop/">ООП и его принципы</a><p>Инкапсуляция, наследование, полиморфизм, абстракция — зачем они нужны, как работают внутри и почему композицию предпочитают наследованию.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/stack-extends-vector/">Почему java.util.Stack, унаследованный от Vector, считают ошибкой дизайна?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/encapsulation-getters-setters/">Класс сделал все поля private и добавил к каждому геттер и сеттер. Достигнута ли инкапсуляция?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/polymorphism-rules/">Что верно про полиморфизм в Java?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие четыре принципа ООП?","acceptedAnswer":{"@type":"Answer","text":"Четыре принципа: инкапсуляция, наследование, полиморфизм, абстракция — к каждому короткий пример. Инкапсуляция — скрыть состояние за методами, которые берегут инварианты Полиморфизм — переопределённый метод вызывается по ссылке базового типа Скажите, что инкапсуляция — это не просто private-поля с геттерами ООП строит программу из объектов, у которых есть состояние и поведение. На собеседовании ждут не только список, но и пример к каждому принципу. - Инкапсуляция — объект скрывает внутреннее состояние и даёт менять его только через методы, которые сохраняют правила (инварианты). Счёт не даёт уйти в минус: поле balance приватное, а withdraw() проверяет сумму. Геттер и сеттер на каждое поле инкапсуляцию не дают. - Наследование — класс получает поля и методы родителя (extends) и может их расширять. Используют для отношения «является»; для переиспользования кода чаще лучше композиция. - Полиморфизм — один интерфейс, разные реализации: Shape s = new Circle(); s.area() вызовет метод Circle. Выбор метода происходит во время выполнения по реальному типу объекта (переопределение, overriding). Перегрузка (overloading) — другое: выбор при компиляции по типам аргументов. - Абстракция — выделяем…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

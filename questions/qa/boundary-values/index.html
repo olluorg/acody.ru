@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое анализ граничных значений? — вопрос с собеседования</title>
+<meta name="description" content="Ошибки чаще всего на границах классов, поэтому проверяем саму границу и значения рядом с ней. Для диапазона 1–100: 0, 1, 2 и 99, 100, 101 (или…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/qa/boundary-values/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/qa/boundary-values/">
+<meta property="og:title" content="Что такое анализ граничных значений? — вопрос с собеседования">
+<meta property="og:description" content="Ошибки чаще всего на границах классов, поэтому проверяем саму границу и значения рядом с ней. Для диапазона 1–100: 0, 1, 2 и 99, 100, 101 (или…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/qa/">Тестирование (QA)</a> <span>/</span> <span>Что такое анализ граничных значений?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Тестирование (QA)","item":"https://learn.getsotto.ru/questions/qa/"},{"@type":"ListItem","position":3,"name":"Что такое анализ граничных значений?"}]}</script>
+  <h1>Что такое анализ граничных значений?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Тест-дизайн</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Какие значения проверять на границах диапазона?</li><li>Как протестировать поле с диапазоном от 1 до 100?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Ошибки чаще всего на <b>границах классов</b>, поэтому проверяем <b>саму границу и значения рядом</b> с ней.</p><ul><li>Для диапазона 1–100: 0, 1, 2 и 99, 100, 101 (или минимум 0, 1, 100, 101)</li><li>Типичная ошибка разработчика — <code>&lt;</code> вместо <code>&lt;=</code></li></ul><p class="extra"><span>А ещё</span> Границы бывают у длины строки, дат, размера файла, количества товаров</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Разработчики чаще ошибаются в условиях сравнения: <code>&lt;</code> вместо <code>&lt;=</code>, ошибка на единицу, неверная граница при переходе между классами. Поэтому после разбиения на классы эквивалентности проверяют их края.</p>
+<p>Как выбирать значения:</p>
+<ul><li><b>двухзначный подход</b> — граница и ближайшее значение за ней: для диапазона 1–100 это 0, 1, 100, 101;</li><li><b>трёхзначный</b> — граница и по соседу с каждой стороны: 0, 1, 2, 99, 100, 101.</li></ul>
+<p>Для нецелых значений шаг берут по точности: для цены с копейками — 99.99, 100.00, 100.01.</p>
+<p>Где искать границы, кроме чисел:</p>
+<ul><li>длина строки: пароль 8–64 символа → 7, 8, 64, 65;</li><li>даты: возраст 18 лет — день рождения сегодня, вчера и завтра;</li><li>размер файла: до 10 МБ → 10 МБ ровно и чуть больше;</li><li>количество: в корзине максимум 99 товаров.</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><p>Требование: «Пароль — от 8 до 20 символов». Проверки: 7 символов (ошибка), 8 (принят), 9 (принят), 19 (принят), 20 (принят), 21 (ошибка). Плюс некорректные классы: пустой пароль, пароль из пробелов.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Почему ошибки сосредоточены на границах.</li><li>Правильный набор значений для конкретного диапазона.</li><li>Границы не только у чисел: длина, даты, размеры.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Проверить только саму границу без значений за ней.</li><li>Выбирать значения из середины диапазона.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/qa/decision-table/">Что такое таблица принятия решений?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/qa/equivalence-partitioning/">Что такое классы эквивалентности?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/qa/positive-negative-testing/">Чем позитивное тестирование отличается от негативного?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое анализ граничных значений?","acceptedAnswer":{"@type":"Answer","text":"Ошибки чаще всего на границах классов, поэтому проверяем саму границу и значения рядом с ней. Для диапазона 1–100: 0, 1, 2 и 99, 100, 101 (или минимум 0, 1, 100, 101) Типичная ошибка разработчика — < вместо <= Границы бывают у длины строки, дат, размера файла, количества товаров Разработчики чаще ошибаются в условиях сравнения: < вместо <=, ошибка на единицу, неверная граница при переходе между классами. Поэтому после разбиения на классы эквивалентности проверяют их края. Как выбирать значения: - двухзначный подход — граница и ближайшее значение за ней: для диапазона 1–100 это 0, 1, 100, 101; - трёхзначный — граница и по соседу с каждой стороны: 0, 1, 2, 99, 100, 101. Для нецелых значений шаг берут по точности: для цены с копейками — 99.99, 100.00, 100.01. Где искать границы, кроме чисел: - длина строки: пароль 8–64 символа → 7, 8, 64, 65; - даты: возраст 18 лет — день рождения сегодня, вчера и завтра; - размер файла: до 10 МБ → 10 МБ ровно и чуть больше; - количество: в корзине максимум 99 товаров."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

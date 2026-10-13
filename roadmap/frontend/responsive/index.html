@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Адаптивная вёрстка — карта «Frontend-разработчик»</title>
+<meta name="description" content="Один интерфейс для телефона, планшета и монитора — viewport, медиа- и контейнерные запросы, гибкие единицы.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/frontend/responsive/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/frontend/responsive/">
+<meta property="og:title" content="Адаптивная вёрстка — карта «Frontend-разработчик»">
+<meta property="og:description" content="Один интерфейс для телефона, планшета и монитора — viewport, медиа- и контейнерные запросы, гибкие единицы.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/frontend/#css">Frontend-разработчик</a> <span>/</span> <a href="/roadmap/frontend/css/">CSS</a> <span>/</span> <span>Адаптивная вёрстка</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Frontend-разработчик","item":"https://learn.getsotto.ru/roadmap/frontend/#css"},{"@type":"ListItem","position":3,"name":"CSS","item":"https://learn.getsotto.ru/roadmap/frontend/css/"},{"@type":"ListItem","position":4,"name":"Адаптивная вёрстка"}]}</script>
+  <h1>Адаптивная вёрстка</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Один интерфейс для телефона, планшета и монитора — viewport, медиа- и контейнерные запросы, гибкие единицы.</p>
+  <article class="md"><pre class="lang-html"><code>&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;</code></pre>
+<p>Без этого тега телефон рисует страницу шириной 980 px и уменьшает её.</p>
+<h3>Подходы</h3>
+<ul><li><b>Mobile first</b>: базовые стили для узкого экрана, расширения — через <code>@media (min-width: …)</code>.</li><li><b>Гибкая раскладка</b>: Grid с <code>minmax</code> и <code>auto-fill</code>, Flexbox с переносом — часто без единого медиазапроса.</li><li><b>Гибкая типографика</b>: <code>font-size: clamp(1rem, 0.9rem + 0.5vw, 1.25rem)</code>.</li><li><b>Контейнерные запросы</b> (<code>@container</code>) — компонент подстраивается под ширину своего контейнера, а не окна; удобно для переиспользуемых компонентов.</li><li><b>Картинки</b>: <code>max-width: 100%</code>, <code>srcset</code> и <code>sizes</code>, <code>&lt;picture&gt;</code> для разных форматов.</li><li>Сенсорные цели не меньше 44×44 px, учёт <code>hover: none</code> на телефонах.</li><li><code>100vh</code> на мобильных прыгает из-за панели браузера — <code>100dvh</code>.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 6 ч</small></h3><ul><li>Верстает mobile first с медиазапросами и гибкими сетками</li><li>Делает адаптивные картинки через srcset и sizes</li></ul><p class="rm-practice"><b>Практика.</b> Сделать адаптивную версию страницы каталога для экранов 360, 768 и 1440 пикселей.</p></div><div class="rm-grade"><h3>Middle <small>≈ 4 ч</small></h3><ul><li>Использует контейнерные запросы для переиспользуемых компонентов</li><li>Учитывает сенсорный ввод, безопасные зоны и динамическую высоту окна на мобильных</li></ul><p class="rm-practice"><b>Практика.</b> Переделать карточку товара на контейнерные запросы так, чтобы она работала и в сетке, и в боковой панели.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/frontend/responsive/">Как сделать адаптивную вёрстку?</a> <span class="lvl lvl-junior">Junior</span><p>Гибкая раскладка (flex, grid с fr и minmax), относительные единицы (rem, %, vw, clamp), медиазапросы по ширине и адаптивные изображения (srcset, sizes). Mobile-first — базовые…</p></li></ul></section><section class="block"><h2>Документация</h2><ul class="links"><li><a href="https://web.dev/learn/design" rel="noopener" target="_blank">web.dev: Responsive design ↗</a></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/frontend/css-layout/">← Раскладка — Flexbox, Grid, позиционирование</a><a class="next" href="/roadmap/frontend/css-architecture/">Организация стилей — БЭМ, CSS Modules, Tailwind →</a></nav>
+  <p class="rm-back"><a href="/roadmap/frontend/#css">← Вся карта «Frontend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Адаптивная вёрстка","description":"Один интерфейс для телефона, планшета и монитора — viewport, медиа- и контейнерные запросы, гибкие единицы.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/frontend/responsive/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

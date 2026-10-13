@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как выбираешь структуру данных под задачу? Проведи рассуждение на примере: нужно хранить сессии пользователей с быстрым поиском по id и обходом в порядке добавления. — вопрос с собеседования</title>
+<meta name="description" content="Метод: какие операции горячие и как часто → сложность каждой у кандидатов → память и конкурентность. Поиск по id + обход в порядке добавления →…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/choose-data-structure/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/choose-data-structure/">
+<meta property="og:title" content="Как выбираешь структуру данных под задачу? Проведи рассуждение на примере: нужно хранить сессии пользователей с быстрым поиском по id и обходом в порядке добавления. — вопрос с собеседования">
+<meta property="og:description" content="Метод: какие операции горячие и как часто → сложность каждой у кандидатов → память и конкурентность. Поиск по id + обход в порядке добавления →…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Как выбираешь структуру данных под задачу? Проведи рассуждение на примере: нужно хранить сессии пользователей с быстрым поиском по id и обходом в порядке добавления.</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Как выбираешь структуру данных под задачу? Проведи рассуждение на примере: нужно хранить сессии пользователей с быстрым поиском по id и обходом в порядке добавления."}]}</script>
+  <h1>Как выбираешь структуру данных под задачу? Проведи рассуждение на примере: нужно хранить сессии пользователей с быстрым поиском по id и обходом в порядке добавления.</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Коллекции</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как выбрать коллекцию под задачу на собеседовании?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Метод: <b>какие операции горячие и как часто</b> → сложность каждой у кандидатов → память и конкурентность. Поиск по id + обход в порядке добавления → <b>LinkedHashMap</b>; при доступе из многих потоков — <b>ConcurrentHashMap</b> плюс отдельная очередь порядка или синхронизация.</p><ul><li>Сначала уточнить: размер, частота чтения и записи, нужен ли порядок, многопоточность</li><li>HashMap — поиск, но без порядка; ArrayList — порядок, но поиск O(n)</li><li>Сессии с истечением — Caffeine с expireAfterAccess</li></ul><p class="extra"><span>А ещё</span> Ответ «зависит» без рассуждения не засчитают</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Алгоритм рассуждения:</b></p>
+<ol><li>Какие операции: поиск по ключу, вставка, удаление, обход, диапазоны, минимум, порядок.</li><li>Какие из них горячие и сколько элементов.</li><li>Сложность операций у кандидатов.</li><li>Память, конкурентный доступ, требования к порядку.</li></ol>
+<p><b>Пример — сессии пользователей:</b> горячие операции — <code>get</code> по id и периодический обход в порядке создания (для истечения или отображения).</p>
+<ul><li><code>HashMap</code> — <code>get</code> O(1), но порядок обхода не определён;</li><li><code>ArrayList</code> — порядок есть, но поиск O(n);</li><li><code>TreeMap</code> по id — порядок по id, а не по времени;</li><li>**<code>LinkedHashMap</code>** — <code>get</code> O(1) и обход в порядке вставки.</li></ul>
+<p><b>Многопоточность:</b> сессии читают и пишут параллельно. Готового «ConcurrentLinkedHashMap» в JDK нет: <code>ConcurrentHashMap</code> для поиска плюс отдельная структура для порядка, или синхронизация, или кэш-библиотека. Для сессий с истечением на практике — <b>Caffeine</b> (<code>expireAfterAccess</code>, ограничение размера), а при нескольких экземплярах сервиса — Redis.</p>
+<p>Хороший ответ показывает сам ход рассуждения и вопросы, а не заученную таблицу.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Рассуждение от операций к сложности.</li><li>Сравнение кандидатов.</li><li>Учёт многопоточности и практическое решение.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Называть структуру без обоснования.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что изменится, если понадобится выбирать сессии в диапазоне времени?</li><li>Когда массив лучше любой коллекции?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/collections-overview/">Collections Framework: карта и выбор структуры</a><p>Иерархия интерфейсов, сложности операций основных структур, неизменяемые коллекции и принцип выбора по паттерну доступа.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/ordered-fast-lookup/">Нужна структура с быстрым поиском по ключу, которая при обходе отдаёт элементы в порядке их добавления. Что выбрать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/linkedhashmap-order/">Какое свойство LinkedHashMap отличает его от HashMap?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/concurrenthashmap-internals/">Как устроен ConcurrentHashMap в Java 8+ и почему он эффективнее synchronized Map?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как выбираешь структуру данных под задачу? Проведи рассуждение на примере: нужно хранить сессии пользователей с быстрым поиском по id и обходом в порядке добавления.","acceptedAnswer":{"@type":"Answer","text":"Метод: какие операции горячие и как часто → сложность каждой у кандидатов → память и конкурентность. Поиск по id + обход в порядке добавления → LinkedHashMap; при доступе из многих потоков — ConcurrentHashMap плюс отдельная очередь порядка или синхронизация. Сначала уточнить: размер, частота чтения и записи, нужен ли порядок, многопоточность HashMap — поиск, но без порядка; ArrayList — порядок, но поиск O(n) Сессии с истечением — Caffeine с expireAfterAccess Ответ «зависит» без рассуждения не засчитают Алгоритм рассуждения: 1. Какие операции: поиск по ключу, вставка, удаление, обход, диапазоны, минимум, порядок. 2. Какие из них горячие и сколько элементов. 3. Сложность операций у кандидатов. 4. Память, конкурентный доступ, требования к порядку. Пример — сессии пользователей: горячие операции — get по id и периодический обход в порядке создания (для истечения или отображения). - HashMap — get O(1), но порядок обхода не определён; - ArrayList — порядок есть, но поиск O(n); - TreeMap по id — порядок по id, а не по времени; - LinkedHashMap — get O(1) и обход в порядке вставки. Многопоточность: сессии читают и пишут параллельно. Готового «ConcurrentLinkedHashMap» в JDK нет: ConcurrentHashMap для поиска плюс отдельная структура для порядка, или синхронизация, или кэш-библиотека. Для сессий с истечением на практике — Caffeine (expireAfterAccess, ограничение размера), а при нескольких…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

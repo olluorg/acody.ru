@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Расскажите о проекте, которым вы гордитесь — вопрос с собеседования</title>
+<meta name="description" content="Расскажите по STAR: ситуация → задача → что сделали лично вы → результат с цифрой. Начните с сути проекта одной фразой: что делает и для кого Главное…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/hr/project-story/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/hr/project-story/">
+<meta property="og:title" content="Расскажите о проекте, которым вы гордитесь — вопрос с собеседования">
+<meta property="og:description" content="Расскажите по STAR: ситуация → задача → что сделали лично вы → результат с цифрой. Начните с сути проекта одной фразой: что делает и для кого Главное…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/hr/">HR-вопросы</a> <span>/</span> <span>Расскажите о проекте, которым вы гордитесь</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"HR-вопросы","item":"https://learn.getsotto.ru/questions/hr/"},{"@type":"ListItem","position":3,"name":"Расскажите о проекте, которым вы гордитесь"}]}</script>
+  <h1>Расскажите о проекте, которым вы гордитесь</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Истории из опыта</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Расскажите о самом сложном проекте</li><li>Расскажите о своём дипломном проекте</li><li>Какая задача была для вас самой сложной?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Расскажите по <b>STAR</b>: ситуация → задача → <b>что сделали лично вы</b> → результат с цифрой.</p><ul><li>Начните с сути проекта одной фразой: что делает и для кого</li><li>Главное — ваши решения: что выбрали, почему, какую проблему решили</li></ul><p class="extra"><span>А ещё</span> Будьте готовы к уточнениям по коду: почему такая база, как устроена авторизация</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Этот вопрос заменяет опыт работы у тех, у кого его мало, — особенно у выпускников курсов. По ответу понимают, как вы думаете, и что вы сделали своими руками.</p>
+<p>Схема <b>STAR</b>:</p>
+<ul><li><b>Situation</b> — контекст: что за проект, для кого, какие ограничения;</li><li><b>Task</b> — ваша задача или главная сложность;</li><li><b>Action</b> — что вы сделали: решения, технологии, почему именно так. Это самая важная часть, говорите «я», а не «мы»;</li><li><b>Result</b> — результат, по возможности с цифрой: время ответа, число пользователей, покрытие тестами, сколько времени сэкономили.</li></ul>
+<p>Выберите проект, где была настоящая сложность и вы её решили: медленный запрос, гонка данных, интеграция со сторонним API, деплой.</p>
+<p>Подготовьтесь к вопросам вглубь: почему такая архитектура, что бы сделали иначе сейчас, как тестировали. Признать «сейчас я бы сделал по-другому» — это плюс: показывает рост.</p>
+<p>Если проект учебный, не выдавайте его за коммерческий, но расскажите, что сделали сверх задания.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><p>«Дипломным проектом был сервис бронирования переговорок для небольших офисов (S). Главная сложность — не дать двум людям забронировать одну комнату на одно время (T). Сначала я проверял пересечения в коде, но при одновременных запросах появлялись двойные брони. Я перенёс проверку в базу: добавил ограничение исключения в PostgreSQL по диапазону времени и написал тест, который запускает сто параллельных запросов (A). После этого двойных бронирований не стало ни разу, а проверка занимает меньше 5 мс (R). Сейчас я бы сразу начинал с ограничений в базе, а не в коде».</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Понятная структура рассказа.</li><li>Личный вклад и обоснованные решения.</li><li>Конкретный результат.</li><li>Рефлексия: что бы сделали иначе.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Говорить «мы» и не выделять свою роль.</li><li>Перечислять технологии вместо решений.</li><li>Не уметь ответить на уточнения по собственному коду.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/hr/failure/">Расскажите о своей ошибке или неудаче</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/hr/conflict/">Расскажите о конфликте в команде и как вы его решили</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/hr/no-experience/">У вас нет коммерческого опыта — почему мы должны вас рассматривать?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/hr/tell-about-yourself/">Расскажите о себе</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Расскажите о проекте, которым вы гордитесь","acceptedAnswer":{"@type":"Answer","text":"Расскажите по STAR: ситуация → задача → что сделали лично вы → результат с цифрой. Начните с сути проекта одной фразой: что делает и для кого Главное — ваши решения: что выбрали, почему, какую проблему решили Будьте готовы к уточнениям по коду: почему такая база, как устроена авторизация Этот вопрос заменяет опыт работы у тех, у кого его мало, — особенно у выпускников курсов. По ответу понимают, как вы думаете, и что вы сделали своими руками. Схема STAR: - Situation — контекст: что за проект, для кого, какие ограничения; - Task — ваша задача или главная сложность; - Action — что вы сделали: решения, технологии, почему именно так. Это самая важная часть, говорите «я», а не «мы»; - Result — результат, по возможности с цифрой: время ответа, число пользователей, покрытие тестами, сколько времени сэкономили. Выберите проект, где была настоящая сложность и вы её решили: медленный запрос, гонка данных, интеграция со сторонним API, деплой. Подготовьтесь к вопросам вглубь: почему такая архитектура, что бы сделали иначе сейчас, как тестировали. Признать «сейчас я бы сделал по-другому» — это плюс: показывает рост. Если проект учебный, не выдавайте его за коммерческий, но…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

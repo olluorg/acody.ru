@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Полнотекстовый поиск (Elasticsearch) — разбор для собеседования</title>
+<meta name="description" content="Почему LIKE не поиск, инвертированный индекс, анализаторы, релевантность BM25, query vs filter context и поиск как read model.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/databases/fulltext-search/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/databases/fulltext-search/">
+<meta property="og:title" content="Полнотекстовый поиск (Elasticsearch) — разбор для собеседования">
+<meta property="og:description" content="Почему LIKE не поиск, инвертированный индекс, анализаторы, релевантность BM25, query vs filter context и поиск как read model.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>Полнотекстовый поиск (Elasticsearch)</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"Полнотекстовый поиск (Elasticsearch)"}]}</script>
+  <h1>Полнотекстовый поиск (Elasticsearch)</h1>
+  <p class="lead">Почему LIKE не поиск, инвертированный индекс, анализаторы, релевантность BM25, query vs filter context и поиск как read model.</p>
+  <article class="md"><h2>Почему не LIKE</h2>
+<p>LIKE '%слово%' в SQL — это не поиск: ведущий wildcard не использует индекс (полный скан), нет учёта морфологии, опечаток, синонимов и релевантности — все результаты «равны».</p>
+<p>Полнотекстовый поиск решает другую задачу: найти документы, релевантные запросу на естественном языке, и отранжировать их по степени соответствия. Под это заточены поисковые движки вроде Elasticsearch (поверх Lucene).</p>
+<h2>Инвертированный индекс</h2>
+<p>Сердце поиска — инвертированный индекс: отображение «термин → список документов, где он встречается» (с позициями и частотами). Это зеркало обычного индекса «документ → его слова».</p>
+<p>Благодаря ему запрос «найдите документы со словом kafka» сводится к мгновенному взгляду в список по термину, а не к перебору документов — поэтому поиск по миллионам документов быстр.</p>
+<h2>Анализаторы: как текст становится терминами</h2>
+<p>Перед попаданием в индекс текст проходит analyzer: токенизацию (разбиение на слова), приведение к нижнему регистру, удаление стоп-слов и стемминг/лемматизацию (running → run, бежал → бежать).</p>
+<p>Тот же анализатор применяется к запросу — иначе термины не совпадут. Для русского и других языков нужен подходящий языковой анализатор; дефолтный плохо работает с морфологией. Неправильный mapping/analyzer — частая причина «поиск ничего не находит».</p>
+<h2>Релевантность</h2>
+<p>Результаты ранжируются по score. Классическая идея TF-IDF: термин важнее, если часто встречается в документе (TF) и редок в коллекции (IDF). Современный дефолт — BM25, улучшенная версия с насыщением частоты и учётом длины документа.</p>
+<p>Поэтому поиск возвращает не просто «совпало/нет», а упорядоченный по релевантности список — этого LIKE не умеет в принципе.</p>
+<h2>Query против filter context</h2>
+<p>Запросы делятся на query context (влияет на релевантность: match по тексту со скорингом) и filter context (да/нет, без скоринга: статус, дата, категория). Фильтры кэшируются и быстрее, поэтому точные ограничения стоит класть в filter, а текстовый поиск — в query.</p>
+<p>Составные запросы собирают через bool (must/should/filter/must_not), комбинируя релевантность и жёсткие условия.</p>
+<pre class="lang-json"><code>{ &quot;query&quot;: { &quot;bool&quot;: {
+  &quot;must&quot;:   [ { &quot;match&quot;: { &quot;title&quot;: &quot;kafka offset&quot; } } ],  // скоринг
+  &quot;filter&quot;: [ { &quot;term&quot;:  { &quot;status&quot;: &quot;published&quot; } } ]      // да/нет, кэшируется
+}}}</code></pre>
+<h2>Поиск как read model</h2>
+<p>Elasticsearch обычно не источник истины, а read model: данные приходят из основной БД через индексацию (outbox/CDC/батч), поэтому индекс отстаёт — это eventual consistency, и UI должен это учитывать.</p>
+<p>Под капотом индекс разбит на шарды и реплики (распределение и отказоустойчивость). Делать ES единственным хранилищем критичных транзакционных данных — рискованно: его сила в поиске и аналитике, а не в строгих гарантиях записи.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Сильный ответ: объясните инвертированный индекс и роль анализаторов (один и тот же для текста и запроса), упомяните BM25 для релевантности, различите query/filter context и подчеркните, что поиск — это производная read model поверх источника истины с задержкой индексации.</p>
+<p>Начните с того, почему задача вообще другая: LIKE '%слово%' отвечает «совпало или нет» и при этом не может использовать индекс из-за ведущего wildcard, а поиск должен найти релевантное и ОТРАНЖИРОВАТЬ. Ранжирование — то, чего у LIKE нет в принципе, и с него стоит начинать ответ.</p>
+<p>Инвертированный индекс объясняйте одной фразой с переворотом: обычный индекс ведёт от документа к его словам, инвертированный — от термина к списку документов. Поэтому запрос сводится к чтению готового списка, а не к перебору документов.</p>
+<p>Анализаторы — место, где кандидат показывает практику. Скажите, что текст проходит токенизацию, приведение к нижнему регистру, удаление стоп-слов и стемминг, и что ТОТ ЖЕ анализатор обязан применяться к запросу, иначе термины не совпадут. Добавьте, что для русского нужен языковой анализатор, а неправильный mapping — самая частая причина жалобы «поиск ничего не находит».</p>
+<p>Релевантность: назовите идею TF-IDF (термин важен, если част в документе и редок в коллекции) и уточните, что современный дефолт — BM25 с насыщением частоты и поправкой на длину документа.</p>
+<p>Разница query и filter context — короткий, но выигрышный пункт: текстовый поиск идёт в query и влияет на score, точные ограничения (статус, дата, категория) — в filter, где скоринга нет, а результат кэшируется и работает быстрее.</p>
+<p>Завершите архитектурным тезисом: Elasticsearch — не источник истины, а read model, наполняемая из основной БД через outbox/CDC/батч. Отсюда неизбежное отставание индекса (eventual consistency), которое должен учитывать UI, и вывод: держать в ES единственную копию критичных транзакционных данных рискованно.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/databases/elasticsearch-use/">Для чего Elasticsearch обычно используют в backend-системах?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/inverted-index/">Как устроен инвертированный индекс и почему он быстрее LIKE &#x27;%слово%&#x27;?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/analyzer-mismatch/">Документы проиндексированы, но поиск по очевидно присутствующему слову ничего не находит. Какая причина наиболее вероятна?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/search-in-architecture/">Что верно про использование поисковой системы в архитектуре backend-сервиса?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/why-not-like-search/">Почему полнотекстовый поиск не делают запросом LIKE &#x27;%слово%&#x27;?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/databases/nosql-overview/">NoSQL: семейства и когда их выбирать</a><p>Почему появился NoSQL, моделирование от access patterns, четыре семейства хранилищ, BASE против ACID и горизонтальное масштабирование.</p></li><li><a href="/articles/databases/document-db/">Документоориентированные БД (MongoDB)</a><p>Модель документа, embedding против referencing, индексы, aggregation pipeline, атомарность документа и шардирование.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Полнотекстовый поиск (Elasticsearch)","description":"Почему LIKE не поиск, инвертированный индекс, анализаторы, релевантность BM25, query vs filter context и поиск как read model.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/databases/fulltext-search/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие объекты удаляет сборщик мусора? — вопрос с собеседования</title>
+<meta name="description" content="Удаляются недостижимые от корней объекты: сборщик обходит граф ссылок от GC roots, всё, до чего не дошёл, — мусор. Корни: локальные переменные…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/gc-reachability/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/gc-reachability/">
+<meta property="og:title" content="Какие объекты удаляет сборщик мусора? — вопрос с собеседования">
+<meta property="og:description" content="Удаляются недостижимые от корней объекты: сборщик обходит граф ссылок от GC roots, всё, до чего не дошёл, — мусор. Корни: локальные переменные…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Какие объекты удаляет сборщик мусора?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Какие объекты удаляет сборщик мусора?"}]}</script>
+  <h1>Какие объекты удаляет сборщик мусора?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">JVM и сборка мусора</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как сборщик мусора определяет, что объект не нужен?</li><li>Что такое GC roots?</li><li>Бывают ли утечки памяти в Java?</li><li>Какие объекты освобождает сборщик мусора?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Удаляются <b>недостижимые от корней</b> объекты: сборщик обходит граф ссылок от GC roots, всё, до чего не дошёл, — мусор.</p><ul><li>Корни: локальные переменные активных потоков, статические поля, JNI-ссылки</li><li>Циклические ссылки утечек не создают — недостижимый цикл будет собран</li></ul><p class="extra"><span>А ещё</span> Утечка в Java — объект не нужен, но ещё достижим: растущий кэш, неотписанный слушатель, ThreadLocal в пуле</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">GC: Eden, Survivor и продвижение</p><script type="module" src="/widgets/gc-generations.js"></script><sotto-gc-generations theme="dark"></sotto-gc-generations></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Java не считает ссылки на объекты, как это делают некоторые другие языки. Сборщик мусора определяет живые объекты по достижимости: начинает с набора <b>корней</b> (GC roots) и обходит граф ссылок. Корни — это локальные переменные и параметры в стеках живых потоков, статические поля загруженных классов, ссылки из нативного кода. Всё, до чего обход дошёл, — живое; остальное можно освободить.</p>
+<p>Следствия:</p>
+<ul><li><b>циклические ссылки не мешают сборке</b> — если группа объектов ссылается друг на друга, но до неё нельзя дойти от корней, она будет собрана;</li><li><b>время жизни объекта и момент сборки не связаны</b> — объект может стать мусором сразу, а собран будет позже, когда сборщику понадобится место.</li></ul>
+<p>Отсюда природа утечек памяти в Java: объект логически больше не нужен, но остаётся достижимым. Частые причины:</p>
+<ul><li>статическая коллекция или кэш, которые только растут;</li><li>слушатели и подписки, от которых не отписались;</li><li><code>ThreadLocal</code>, не очищенный в пуле потоков;</li><li>незакрытые ресурсы.</li></ul>
+<p>Искать утечки помогает дамп кучи (heap dump) и анализ, кто удерживает объекты.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Критерий — достижимость от корней, а не подсчёт ссылок.</li><li>Что такое GC roots.</li><li>Почему циклы не проблема.</li><li>Природа утечек в Java с примерами.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что в Java используется подсчёт ссылок.</li><li>Полагать, что присваивание null всегда освобождает память.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Те, до которых больше нельзя добраться по ссылкам от корней — живых потоков, статических полей и подобных точек входа</li><li class="no"><span class="mark">✗</span>Те, которые не использовались дольше заданного времени</li><li class="no"><span class="mark">✗</span>Те, у которых счётчик ссылок стал равен нулю</li><li class="no"><span class="mark">✗</span>Те, которые программист явно пометил для удаления</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что относится к корням достижимости?</li><li>Почему циклические ссылки не мешают сборщику?</li><li>Что такое GC roots?</li><li>Чем мягкая ссылка отличается от слабой?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/gc-generations/">GC: поколения и продвижение объектов</a><p>Гипотеза о поколениях, Eden и Survivor, minor GC через копирование, tenuring и преждевременное продвижение.</p></li><li><a href="/articles/java/gc-references/">GC: корни, достижимость и типы ссылок</a><p>GC roots и reachability, strong/soft/weak/phantom-ссылки, Cleaner вместо finalize и утечки через сильные ссылки.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/frequent-full-gc/">В приложении участились длинные паузы full GC, при этом старое поколение почти всегда заполнено. О чём это говорит?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/generational-hypothesis/">На какой гипотезе построено разделение кучи на поколения?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/two-survivor-spaces/">Зачем в молодом поколении две области Survivor, а не одна?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие объекты удаляет сборщик мусора?","acceptedAnswer":{"@type":"Answer","text":"Удаляются недостижимые от корней объекты: сборщик обходит граф ссылок от GC roots, всё, до чего не дошёл, — мусор. Корни: локальные переменные активных потоков, статические поля, JNI-ссылки Циклические ссылки утечек не создают — недостижимый цикл будет собран Утечка в Java — объект не нужен, но ещё достижим: растущий кэш, неотписанный слушатель, ThreadLocal в пуле Java не считает ссылки на объекты, как это делают некоторые другие языки. Сборщик мусора определяет живые объекты по достижимости: начинает с набора корней (GC roots) и обходит граф ссылок. Корни — это локальные переменные и параметры в стеках живых потоков, статические поля загруженных классов, ссылки из нативного кода. Всё, до чего обход дошёл, — живое; остальное можно освободить. Следствия: - циклические ссылки не мешают сборке — если группа объектов ссылается друг на друга, но до неё нельзя дойти от корней, она будет собрана; - время жизни объекта и момент сборки не связаны — объект может стать мусором сразу, а собран будет позже, когда сборщику понадобится место. Отсюда природа утечек памяти в Java: объект логически больше не нужен, но остаётся достижимым. Частые причины: - статическая коллекция или кэш, которые только растут; - слушатели и подписки, от которых не отписались; -…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

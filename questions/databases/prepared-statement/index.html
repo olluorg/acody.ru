@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем PreparedStatement безопаснее обычного Statement? — вопрос с собеседования</title>
+<meta name="description" content="PreparedStatement передаёт текст запроса и значения раздельно: значение никогда не разбирается как SQL — инъекция невозможна. Statement склеивает…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/prepared-statement/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/prepared-statement/">
+<meta property="og:title" content="Чем PreparedStatement безопаснее обычного Statement? — вопрос с собеседования">
+<meta property="og:description" content="PreparedStatement передаёт текст запроса и значения раздельно: значение никогда не разбирается как SQL — инъекция невозможна. Statement склеивает…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Чем PreparedStatement безопаснее обычного Statement?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Чем PreparedStatement безопаснее обычного Statement?"}]}</script>
+  <h1>Чем PreparedStatement безопаснее обычного Statement?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">JDBC</span><span class="chip">SQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как защититься от SQL-инъекций в Java?</li><li>Чем PreparedStatement быстрее Statement?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>PreparedStatement</b> передаёт текст запроса и значения <b>раздельно</b>: значение никогда не разбирается как SQL — инъекция невозможна. Statement склеивает строку и выполняет как есть.</p><ul><li>Плейсхолдеры <code>?</code> и <code>setString</code>, <code>setLong</code></li><li>Повторное выполнение может использовать подготовленный план</li><li>Батчи: <code>addBatch</code> и <code>executeBatch</code></li></ul><p class="extra"><span>А ещё</span> Имена таблиц и колонок параметром не передать — только белый список</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Statement</b> выполняет SQL-строку, собранную приложением. Если в неё попадает ввод пользователя (<code>&quot;... WHERE login = &#x27;&quot; + login + &quot;&#x27;&quot;</code>), ввод <code>&#x27; OR &#x27;1&#x27;=&#x27;1</code> меняет смысл запроса — SQL-инъекция.</p>
+<p><b>PreparedStatement</b> содержит запрос с плейсхолдерами <code>?</code>, а значения передаются отдельно через <code>setString</code>, <code>setLong</code> и т. д. Драйвер и база обрабатывают их как данные, а не как часть SQL, сколько бы кавычек там ни было.</p>
+<p><b>Дополнительные плюсы:</b></p>
+<ul><li><b>производительность</b> — база может разобрать и спланировать запрос один раз и выполнять многократно (серверные prepared statements; в PostgreSQL драйвер переходит на них после нескольких выполнений — <code>prepareThreshold</code>);</li><li><b>типы</b> — даты, числа, двоичные данные передаются корректно без ручного форматирования;</li><li><b>пакетная обработка</b> — <code>addBatch</code>/<code>executeBatch</code> для массовых вставок.</li></ul>
+<p><b>Ограничения:</b> параметром нельзя передать имя таблицы, колонки, направление сортировки — для них белый список допустимых значений. Список для <code>IN (...)</code> — нужное число плейсхолдеров или <code>= ANY(?)</code> с массивом в PostgreSQL.</p>
+<p>В JPA и Spring Data параметры именованные (<code>:id</code>), но под капотом — тот же PreparedStatement; инъекции возвращаются при конкатенации строк в JPQL или нативных запросах.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>try (PreparedStatement ps = conn.prepareStatement(
+        &quot;SELECT id, total FROM orders WHERE customer_id = ? AND status = ?&quot;)) {
+    ps.setLong(1, customerId);
+    ps.setString(2, status);
+    try (ResultSet rs = ps.executeQuery()) { /* ... */ }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Раздельная передача запроса и данных как защита от инъекций.</li><li>Пример уязвимой конкатенации.</li><li>Дополнительные плюсы: план, типы, батчи.</li><li>Что нельзя передать параметром.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Конкатенировать строку и передавать её в prepareStatement.</li><li>Вручную экранировать кавычки вместо параметров.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Параметры передаются отдельно от текста запроса, что защищает от SQL-инъекций</li><li class="no"><span class="mark">✗</span>Он шифрует текст SQL-запроса</li><li class="no"><span class="mark">✗</span>Он автоматически создаёт индексы под запрос</li><li class="no"><span class="mark">✗</span>Он запрещает любые запросы с условием WHERE</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как закрывать JDBC resources?</li><li>Что такое connection pool?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/jdbc/">JDBC и безопасные запросы</a><p>Connection/Statement/ResultSet, PreparedStatement против инъекций, ручные транзакции, ресурсы и пул соединений.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/sql-injection/">Что такое SQL-инъекция и как от неё защититься?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/databases/jdbc-manual-transaction/">Как в JDBC выполнить несколько операций в одной транзакции вручную?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/jdbc-bulk-insert/">Нужно вставить 100 000 строк через JDBC. Что даст наибольший эффект?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем PreparedStatement безопаснее обычного Statement?","acceptedAnswer":{"@type":"Answer","text":"PreparedStatement передаёт текст запроса и значения раздельно: значение никогда не разбирается как SQL — инъекция невозможна. Statement склеивает строку и выполняет как есть. Плейсхолдеры ? и setString, setLong Повторное выполнение может использовать подготовленный план Батчи: addBatch и executeBatch Имена таблиц и колонок параметром не передать — только белый список Statement выполняет SQL-строку, собранную приложением. Если в неё попадает ввод пользователя (\"... WHERE login = '\" + login + \"'\"), ввод ' OR '1'='1 меняет смысл запроса — SQL-инъекция. PreparedStatement содержит запрос с плейсхолдерами ?, а значения передаются отдельно через setString, setLong и т. д. Драйвер и база обрабатывают их как данные, а не как часть SQL, сколько бы кавычек там ни было. Дополнительные плюсы: - производительность — база может разобрать и спланировать запрос один раз и выполнять многократно (серверные prepared statements; в PostgreSQL драйвер переходит на них после нескольких выполнений — prepareThreshold); - типы — даты, числа, двоичные данные передаются корректно без ручного форматирования; - пакетная обработка — addBatch/executeBatch для массовых вставок. Ограничения: параметром нельзя передать имя таблицы, колонки, направление сортировки — для них белый…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

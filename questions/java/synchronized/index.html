@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что обеспечивает ключевое слово synchronized? — вопрос с собеседования</title>
+<meta name="description" content="synchronized даёт взаимное исключение (один поток в блоке по данному монитору) и видимость изменений для следующего вошедшего. Блокировка привязана к…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/synchronized/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/synchronized/">
+<meta property="og:title" content="Что обеспечивает ключевое слово synchronized? — вопрос с собеседования">
+<meta property="og:description" content="synchronized даёт взаимное исключение (один поток в блоке по данному монитору) и видимость изменений для следующего вошедшего. Блокировка привязана к…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что обеспечивает ключевое слово synchronized?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что обеспечивает ключевое слово synchronized?"}]}</script>
+  <h1>Что обеспечивает ключевое слово synchronized?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Многопоточность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое монитор в Java?</li><li>Чем synchronized метод отличается от synchronized блока?</li><li>Зачем нужна синхронизация потоков?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">synchronized даёт <b>взаимное исключение</b> (один поток в блоке по данному монитору) и <b>видимость</b> изменений для следующего вошедшего.</p><ul><li>Блокировка привязана к объекту-монитору: метод экземпляра — this, static — класс</li><li>Разные мониторы друг другу не мешают</li></ul><p class="extra"><span>А ещё</span> Монитор реентерабелен: поток может войти повторно; освобождается автоматически при любом выходе</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>У каждого объекта в Java есть монитор. <code>synchronized</code> захватывает его: пока один поток внутри блока, другие, пытающиеся войти по тому же монитору, ждут.</p>
+<p>Две гарантии, обе важны:</p>
+<ol><li><b>Взаимное исключение</b> — составная операция (прочитать, изменить, записать) выполняется целиком без вмешательства других потоков.</li><li><b>Видимость</b> — изменения, сделанные внутри блока, видны следующему потоку, который захватит тот же монитор. Без синхронизации поток может вообще не увидеть чужие изменения из-за кэшей и переупорядочивания.</li></ol>
+<p>На каком объекте блокировка:</p>
+<ul><li><code>synchronized</code> метод экземпляра — на <code>this</code>;</li><li><code>static synchronized</code> — на объекте класса;</li><li>блок <code>synchronized (lock) { ... }</code> — на указанном объекте; так можно сузить критическую секцию и использовать приватный объект-замок.</li></ul>
+<p>Типичная ошибка — защищать одни данные разными мониторами: два потока синхронизированы, но по разным объектам, и гонка остаётся.</p>
+<p>Монитор реентерабелен и освобождается автоматически при любом выходе из блока, включая исключение. Дополнительно у монитора есть <code>wait/notify</code> для ожидания условий.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>class Counter {
+    private final Object lock = new Object();
+    private int value;
+
+    void increment() {
+        synchronized (lock) { value++; }  // атомарно и видимо
+    }
+    int get() {
+        synchronized (lock) { return value; }
+    }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Обе гарантии: взаимное исключение и видимость.</li><li>На каком объекте захватывается монитор в разных формах.</li><li>Ошибка с разными мониторами.</li><li>Реентерабельность и автоматическое освобождение — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Помнить только про взаимное исключение и забывать про видимость.</li><li>Синхронизироваться на разных объектах и считать код защищённым.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Взаимное исключение: в блок по одному монитору одновременно входит только один поток, и изменения становятся видимы следующему вошедшему</li><li class="no"><span class="mark">✗</span>Ускорение выполнения блока за счёт приоритета потока</li><li class="no"><span class="mark">✗</span>Гарантию, что блок выполнится без исключений</li><li class="no"><span class="mark">✗</span>Выполнение блока в отдельном потоке</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что произойдёт при вызове одного синхронизированного метода из другого?</li><li>На каких объектах не стоит синхронизироваться?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/synchronized/">synchronized, мониторы и wait/notify</a><p>Взаимное исключение и видимость через монитор, reentrancy, guarded blocks с wait/notify и причины deadlock.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/synchronized-lock-object/">На каких объектах не следует синхронизироваться?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/wait-in-while-loop/">Почему вызов wait() принято помещать в цикл while, а не в if?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/thread-safe-counter/">Реализуй потокобезопасный счётчик Counter с методами increment() и get().</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/volatile-vs-synchronized/">Чем volatile отличается от synchronized?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что обеспечивает ключевое слово synchronized?","acceptedAnswer":{"@type":"Answer","text":"synchronized даёт взаимное исключение (один поток в блоке по данному монитору) и видимость изменений для следующего вошедшего. Блокировка привязана к объекту-монитору: метод экземпляра — this, static — класс Разные мониторы друг другу не мешают Монитор реентерабелен: поток может войти повторно; освобождается автоматически при любом выходе У каждого объекта в Java есть монитор. synchronized захватывает его: пока один поток внутри блока, другие, пытающиеся войти по тому же монитору, ждут. Две гарантии, обе важны: 1. Взаимное исключение — составная операция (прочитать, изменить, записать) выполняется целиком без вмешательства других потоков. 2. Видимость — изменения, сделанные внутри блока, видны следующему потоку, который захватит тот же монитор. Без синхронизации поток может вообще не увидеть чужие изменения из-за кэшей и переупорядочивания. На каком объекте блокировка: - synchronized метод экземпляра — на this; - static synchronized — на объекте класса; - блок synchronized (lock) { ... } — на указанном объекте; так можно сузить критическую секцию и использовать приватный объект-замок. Типичная ошибка — защищать одни данные разными мониторами: два потока синхронизированы, но по разным объектам, и гонка остаётся. Монитор…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

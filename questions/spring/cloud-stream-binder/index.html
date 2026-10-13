@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое binder в Spring Cloud Stream? — вопрос с собеседования</title>
+<meta name="description" content="Binder — адаптер Spring Cloud Stream к конкретному брокеру (Kafka, RabbitMQ, Pulsar, облачные очереди). Код работает с функциями и «привязками»…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/cloud-stream-binder/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/cloud-stream-binder/">
+<meta property="og:title" content="Что такое binder в Spring Cloud Stream? — вопрос с собеседования">
+<meta property="og:description" content="Binder — адаптер Spring Cloud Stream к конкретному брокеру (Kafka, RabbitMQ, Pulsar, облачные очереди). Код работает с функциями и «привязками»…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Что такое binder в Spring Cloud Stream?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Что такое binder в Spring Cloud Stream?"}]}</script>
+  <h1>Что такое binder в Spring Cloud Stream?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Spring Cloud Stream</span><span class="chip">Spring Cloud</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как Spring Cloud Stream подключается к Kafka или RabbitMQ?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Binder</b> — адаптер Spring Cloud Stream к конкретному брокеру (Kafka, RabbitMQ, Pulsar, облачные очереди). Код работает с функциями и «привязками» (bindings), а binder связывает их с топиками или exchange по конфигурации.</p><ul><li>Смена брокера — смена зависимости binder'а и настроек</li><li>Bindings: <code>handle-in-0</code> → destination (топик), group (группа потребителей)</li><li>Специфичные настройки брокера — в <code>spring.cloud.stream.kafka.*</code> или <code>.rabbit.*</code></li></ul><p class="extra"><span>А ещё</span> Абстракция не прячет различия гарантий и модели брокеров</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Модель Spring Cloud Stream:</b> приложение объявляет функции (<code>Supplier</code>, <code>Function</code>, <code>Consumer</code>), фреймворк создаёт для них <b>привязки</b> — входные <code>имя-in-0</code> и выходные <code>имя-out-0</code>. Конфигурация связывает привязки с местом назначения:</p>
+<pre class="lang-yaml"><code>spring.cloud.stream.bindings:
+  handleOrder-in-0:
+    destination: orders
+    group: billing
+  handleOrder-out-0:
+    destination: invoices</code></pre>
+<p><b>Binder</b> — реализация для конкретного брокера: <code>spring-cloud-stream-binder-kafka</code>, <code>-rabbit</code>, Kafka Streams binder, Pulsar, облачные. Он создаёт потребителей и продюсеров, топики или очереди, конвертирует сообщения.</p>
+<p><b>Плюсы:</b> единый стиль кода для разных брокеров, меньше шаблонного кода, конвертация, повторы и DLQ настройками.</p>
+<p><b>Ограничения:</b> гарантии, порядок, повторы и модель групп у Kafka и RabbitMQ разные; тонкая настройка всё равно специфична для брокера. «Смена брокера одной строкой» на практике редко бывает бесплатной.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Роль binder'а.</li><li>Привязки и их конфигурация.</li><li>Плюсы и ограничения абстракции.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ожидать одинакового поведения на разных брокерах.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Класс для сериализации JSON</li><li class="no"><span class="mark">✗</span>Пул потоков для consumer</li><li class="ok"><span class="mark">✓</span>Абстракция над брокером: один и тот же код работает поверх Kafka или RabbitMQ через общую модель</li><li class="no"><span class="mark">✗</span>Хранилище offset-ов</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое destination?</li><li>Чем binder отличается от KafkaTemplate?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/cloud-stream/">Spring Cloud Stream</a><p>Binder abstraction, functional model, bindings, consumer groups, partitioning и trade-offs поверх Kafka/RabbitMQ.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/cloud-stream-functional/">Какая функциональная модель используется в современном Spring Cloud Stream?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/when-not-cloud-stream/">Когда Spring Cloud Stream хуже прямого Spring Kafka или Spring AMQP?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/cloud-stream-consumer-group/">Что произойдёт, если у двух экземпляров сервиса в Spring Cloud Stream не задать одинаковую consumer group для входящего binding?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое binder в Spring Cloud Stream?","acceptedAnswer":{"@type":"Answer","text":"Binder — адаптер Spring Cloud Stream к конкретному брокеру (Kafka, RabbitMQ, Pulsar, облачные очереди). Код работает с функциями и «привязками» (bindings), а binder связывает их с топиками или exchange по конфигурации. Смена брокера — смена зависимости binder'а и настроек Bindings: handle-in-0 → destination (топик), group (группа потребителей) Специфичные настройки брокера — в spring.cloud.stream.kafka. или .rabbit. Абстракция не прячет различия гарантий и модели брокеров Модель Spring Cloud Stream: приложение объявляет функции (Supplier, Function, Consumer), фреймворк создаёт для них привязки — входные имя-in-0 и выходные имя-out-0. Конфигурация связывает привязки с местом назначения: Binder — реализация для конкретного брокера: spring-cloud-stream-binder-kafka, -rabbit, Kafka Streams binder, Pulsar, облачные. Он создаёт потребителей и продюсеров, топики или очереди, конвертирует сообщения. Плюсы: единый стиль кода для разных брокеров, меньше шаблонного кода, конвертация, повторы и DLQ настройками. Ограничения: гарантии, порядок, повторы и модель групп у Kafka и RabbitMQ разные; тонкая настройка всё равно специфична для брокера. «Смена брокера одной строкой» на практике редко бывает бесплатной."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

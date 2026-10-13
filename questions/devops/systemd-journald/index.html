@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как управлять сервисом через systemd и смотреть его логи? — вопрос с собеседования</title>
+<meta name="description" content="systemd — система инициализации и менеджер сервисов. Сервис описывают unit-файлом (/etc/systemd/system/app.service): команда запуска, пользователь…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/systemd-journald/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/systemd-journald/">
+<meta property="og:title" content="Как управлять сервисом через systemd и смотреть его логи? — вопрос с собеседования">
+<meta property="og:description" content="systemd — система инициализации и менеджер сервисов. Сервис описывают unit-файлом (/etc/systemd/system/app.service): команда запуска, пользователь…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Как управлять сервисом через systemd и смотреть его логи?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Как управлять сервисом через systemd и смотреть его логи?"}]}</script>
+  <h1>Как управлять сервисом через systemd и смотреть его логи?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Linux и диагностика</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как сделать, чтобы сервис перезапускался после падения?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">systemd — система инициализации и менеджер сервисов. Сервис описывают <b>unit-файлом</b> (<code>/etc/systemd/system/app.service</code>): команда запуска, пользователь, перезапуск (<code>Restart=on-failure</code>), зависимости, лимиты. Управление: <code>systemctl start|stop|restart|status|enable</code>. Логи: <code>journalctl -u app -f</code>.</p><ul><li>enable — запуск при загрузке, start — сейчас</li><li>После изменения unit-файла — systemctl daemon-reload</li><li>journalctl --since "1 hour ago", -p err — фильтры по времени и уровню</li></ul><p class="extra"><span>А ещё</span> В контейнерных средах эту роль играет оркестратор, а systemd остаётся на хостах</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Ключевые параметры:</b></p>
+<ul><li><code>User</code> — не запускать сервисы от root;</li><li><code>Restart=on-failure</code>, <code>RestartSec</code> — автоматический перезапуск;</li><li><code>LimitNOFILE</code> — лимит открытых файлов (частая причина «Too many open files» под нагрузкой);</li><li><code>TimeoutStopSec</code> — сколько ждать после SIGTERM до SIGKILL;</li><li><code>After</code>/<code>Requires</code> — порядок и зависимости.</li></ul>
+<p><b>Диагностика:</b> <code>systemctl status app</code> (последние строки лога и код выхода), <code>journalctl -u app -n 200</code>, <code>systemctl list-units --failed</code>.</p>
+<p><b>Таймеры systemd</b> — альтернатива cron с логированием и зависимостями.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-ini"><code>[Unit]
+Description=Orders API
+After=network-online.target
+
+[Service]
+User=orders
+ExecStart=/opt/orders/bin/server
+Restart=on-failure
+RestartSec=5
+Environment=APP_ENV=prod
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Unit-файл и основные параметры.</li><li>Команды управления и логи.</li><li>Перезапуск и лимиты.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/signals-shutdown/">Чем SIGTERM отличается от SIGKILL и как правильно завершать сервис?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/logging-pipeline/">Как организовать сбор логов из множества сервисов?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как управлять сервисом через systemd и смотреть его логи?","acceptedAnswer":{"@type":"Answer","text":"systemd — система инициализации и менеджер сервисов. Сервис описывают unit-файлом (/etc/systemd/system/app.service): команда запуска, пользователь, перезапуск (Restart=on-failure), зависимости, лимиты. Управление: systemctl start|stop|restart|status|enable. Логи: journalctl -u app -f. enable — запуск при загрузке, start — сейчас После изменения unit-файла — systemctl daemon-reload journalctl --since \"1 hour ago\", -p err — фильтры по времени и уровню В контейнерных средах эту роль играет оркестратор, а systemd остаётся на хостах Ключевые параметры: - User — не запускать сервисы от root; - Restart=on-failure, RestartSec — автоматический перезапуск; - LimitNOFILE — лимит открытых файлов (частая причина «Too many open files» под нагрузкой); - TimeoutStopSec — сколько ждать после SIGTERM до SIGKILL; - After/Requires — порядок и зависимости. Диагностика: systemctl status app (последние строки лога и код выхода), journalctl -u app -n 200, systemctl list-units --failed. Таймеры systemd — альтернатива cron с логированием и зависимостями."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

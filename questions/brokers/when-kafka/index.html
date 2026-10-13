@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Когда стоит выбирать Kafka? — вопрос с собеседования</title>
+<meta name="description" content="Kafka — когда нужны журнал событий с хранением и перечитыванием, большая пропускная способность, много независимых потребителей одного потока и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/brokers/when-kafka/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/brokers/when-kafka/">
+<meta property="og:title" content="Когда стоит выбирать Kafka? — вопрос с собеседования">
+<meta property="og:description" content="Kafka — когда нужны журнал событий с хранением и перечитыванием, большая пропускная способность, много независимых потребителей одного потока и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/brokers/">Брокеры сообщений</a> <span>/</span> <span>Когда стоит выбирать Kafka?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/questions/brokers/"},{"@type":"ListItem","position":3,"name":"Когда стоит выбирать Kafka?"}]}</script>
+  <h1>Когда стоит выбирать Kafka?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Kafka: topic, partition, offset</span><span class="chip">Kafka</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Для каких задач подходит Kafka?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Kafka — когда нужны <b>журнал событий с хранением и перечитыванием</b>, <b>большая пропускная способность</b>, <b>много независимых потребителей</b> одного потока и <b>порядок по ключу</b>.</p><ul><li>Событийная интеграция микросервисов, CDC, поток в аналитику и хранилище</li><li>Сбор логов, метрик, кликов; потоковая обработка (Kafka Streams, Flink)</li><li>Event sourcing и восстановление состояния перечитыванием</li></ul><p class="extra"><span>А ещё</span> Не лучший выбор для сложной маршрутизации, приоритетов и отложенных задач — там RabbitMQ или очереди</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Сильные стороны Kafka:</b></p>
+<ul><li><b>хранение и replay</b> — события хранятся дни или бессрочно (compaction); новый потребитель может прочитать историю, упавший — перечитать после исправления бага;</li><li><b>пропускная способность</b> — сотни тысяч и миллионы сообщений в секунду благодаря последовательной записи, page cache, пакетам и партициям;</li><li><b>много потребителей</b> — каждая группа читает независимо и не мешает остальным;</li><li><b>порядок по ключу</b> — все события сущности в одной партиции;</li><li><b>экосистема</b> — Connect, Streams, Schema Registry, CDC через Debezium.</li></ul>
+<p><b>Типичные сценарии:</b> шина событий между сервисами, CDC из базы в поиск и хранилище, сбор телеметрии и логов, потоковая аналитика, журнал для event sourcing.</p>
+<p><b>Где хуже:</b> очередь задач с подтверждением каждой и разной длительностью обработки (блокировка партиции медленным сообщением); сложная маршрутизация по правилам; приоритеты; отложенная доставка; маленькие объёмы, где Kafka — избыточная эксплуатационная нагрузка.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Ключевые свойства: журнал, пропускная способность, независимые потребители.</li><li>Сценарии применения.</li><li>Где Kafka не лучший выбор.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Выбирать Kafka для простой очереди фоновых задач на сотню сообщений в минуту.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Когда нужна классическая очередь команд с TTL, delayed processing и DLX-маршрутизацией</li><li class="ok"><span class="mark">✓</span>Когда нужен распределённый лог событий с высокой пропускной способностью, retention для replay и независимыми consumer-группами</li><li class="no"><span class="mark">✗</span>Когда требуется реляционная СУБД с ACID-транзакциями</li><li class="no"><span class="mark">✗</span>Когда нужен HTTP-балансировщик для микросервисов</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем Kafka отличается от RabbitMQ?</li><li>Что такое retention?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/brokers/kafka-core/">Kafka: topic, partition, offset</a><p>Распределённый append-only лог, партиция как единица масштаба и упорядоченности, ключ и порядок, retention и log compaction, replay.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/brokers/kafka-vs-rabbitmq/">Чем Kafka принципиально отличается от RabbitMQ?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/rabbitmq-or-kafka-choice/">Что вы выберете для очереди фоновых задач, а что для шины событий между сервисами — RabbitMQ или Kafka?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/cdc/">Что такое Change Data Capture (CDC) и где оно полезно?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Когда стоит выбирать Kafka?","acceptedAnswer":{"@type":"Answer","text":"Kafka — когда нужны журнал событий с хранением и перечитыванием, большая пропускная способность, много независимых потребителей одного потока и порядок по ключу. Событийная интеграция микросервисов, CDC, поток в аналитику и хранилище Сбор логов, метрик, кликов; потоковая обработка (Kafka Streams, Flink) Event sourcing и восстановление состояния перечитыванием Не лучший выбор для сложной маршрутизации, приоритетов и отложенных задач — там RabbitMQ или очереди Сильные стороны Kafka: - хранение и replay — события хранятся дни или бессрочно (compaction); новый потребитель может прочитать историю, упавший — перечитать после исправления бага; - пропускная способность — сотни тысяч и миллионы сообщений в секунду благодаря последовательной записи, page cache, пакетам и партициям; - много потребителей — каждая группа читает независимо и не мешает остальным; - порядок по ключу — все события сущности в одной партиции; - экосистема — Connect, Streams, Schema Registry, CDC через Debezium. Типичные сценарии: шина событий между сервисами, CDC из базы в поиск и хранилище, сбор телеметрии и логов, потоковая аналитика, журнал для event sourcing. Где хуже: очередь задач с подтверждением каждой и разной длительностью обработки (блокировка партиции медленным сообщением); сложная маршрутизация по правилам; приоритеты; отложенная доставка; маленькие объёмы, где…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

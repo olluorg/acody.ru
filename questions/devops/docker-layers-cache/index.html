@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как устроены слои Docker-образа и почему образ — неизменяемый артефакт? — вопрос с собеседования</title>
+<meta name="description" content="Образ — стопка слоёв только для чтения, каждый — изменения файловой системы от одной инструкции. Контейнер добавляет сверху тонкий слой для записи…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/docker-layers-cache/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/docker-layers-cache/">
+<meta property="og:title" content="Как устроены слои Docker-образа и почему образ — неизменяемый артефакт? — вопрос с собеседования">
+<meta property="og:description" content="Образ — стопка слоёв только для чтения, каждый — изменения файловой системы от одной инструкции. Контейнер добавляет сверху тонкий слой для записи…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Как устроены слои Docker-образа и почему образ — неизменяемый артефакт?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Как устроены слои Docker-образа и почему образ — неизменяемый артефакт?"}]}</script>
+  <h1>Как устроены слои Docker-образа и почему образ — неизменяемый артефакт?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Docker и контейнеры</span><span class="chip">Docker</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем образ отличается от контейнера?</li><li>Почему удаление файла в следующем слое не уменьшает образ?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Образ — стопка <b>слоёв только для чтения</b>, каждый — изменения файловой системы от одной инструкции. Контейнер добавляет сверху <b>тонкий слой для записи</b>. Слои общие между образами и кэшируются. Удаление файла в следующем слое лишь <b>скрывает</b> его — в образе он остаётся, поэтому секрет, попавший в слой, утёк навсегда.</p><ul><li>Образ идентифицируется digest (хеш содержимого) — одинаковый digest значит тот же образ</li><li>Изменения внутри работающего контейнера теряются при пересоздании — данные хранят в томах</li><li>Один образ продвигают по окружениям: dev → staging → prod</li></ul><p class="extra"><span>А ещё</span> Тег (latest, v1.2) — подвижный указатель, digest — неизменный</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Union filesystem</b> (overlayfs) складывает слои: верхний перекрывает нижние. Чтение ищет файл сверху вниз; запись в контейнере копирует файл в верхний слой (copy-on-write).</p>
+<p><b>Следствия:</b></p>
+<ul><li>размер образа — сумма слоёв; временные файлы удалять в той же инструкции, где создали;</li><li>десять сервисов на одном базовом образе хранят базовые слои один раз;</li><li>контейнер — эфемерный: логи пишут в stdout, данные — в тома или во внешние хранилища.</li></ul>
+<p><b>Неизменяемый артефакт.</b> Собрали образ один раз в CI, проверили тестами — и именно этот digest выкатывают на staging и prod. Пересборка «для прода» даёт другой образ (другие версии пакетов) и обесценивает тесты. Конфигурация окружения передаётся переменными и конфигами, а не вшивается в образ.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Слои, только чтение и слой записи контейнера.</li><li>Почему удаление в следующем слое не помогает.</li><li>Неизменяемый образ и digest.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/devops/dockerfile-best-practices/">Как написать хороший Dockerfile?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/ci-cd-pipeline/">Из каких этапов состоит CI/CD-пайплайн и чем continuous delivery отличается от continuous deployment?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как устроены слои Docker-образа и почему образ — неизменяемый артефакт?","acceptedAnswer":{"@type":"Answer","text":"Образ — стопка слоёв только для чтения, каждый — изменения файловой системы от одной инструкции. Контейнер добавляет сверху тонкий слой для записи. Слои общие между образами и кэшируются. Удаление файла в следующем слое лишь скрывает его — в образе он остаётся, поэтому секрет, попавший в слой, утёк навсегда. Образ идентифицируется digest (хеш содержимого) — одинаковый digest значит тот же образ Изменения внутри работающего контейнера теряются при пересоздании — данные хранят в томах Один образ продвигают по окружениям: dev → staging → prod Тег (latest, v1.2) — подвижный указатель, digest — неизменный Union filesystem (overlayfs) складывает слои: верхний перекрывает нижние. Чтение ищет файл сверху вниз; запись в контейнере копирует файл в верхний слой (copy-on-write). Следствия: - размер образа — сумма слоёв; временные файлы удалять в той же инструкции, где создали; - десять сервисов на одном базовом образе хранят базовые слои один раз; - контейнер — эфемерный: логи пишут в stdout, данные — в тома или во внешние хранилища. Неизменяемый артефакт. Собрали образ один раз в CI, проверили тестами — и именно этот digest выкатывают на staging и prod. Пересборка «для прода» даёт другой образ (другие версии пакетов) и обесценивает тесты. Конфигурация окружения передаётся переменными и конфигами, а не вшивается в образ."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

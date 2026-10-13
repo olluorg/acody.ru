@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>synchronized, мониторы и wait/notify — разбор для собеседования</title>
+<meta name="description" content="Взаимное исключение и видимость через монитор, reentrancy, guarded blocks с wait/notify и причины deadlock.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/synchronized/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/synchronized/">
+<meta property="og:title" content="synchronized, мониторы и wait/notify — разбор для собеседования">
+<meta property="og:description" content="Взаимное исключение и видимость через монитор, reentrancy, guarded blocks с wait/notify и причины deadlock.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>synchronized, мониторы и wait/notify</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"synchronized, мониторы и wait/notify"}]}</script>
+  <h1>synchronized, мониторы и wait/notify</h1>
+  <p class="lead">Взаимное исключение и видимость через монитор, reentrancy, guarded blocks с wait/notify и причины deadlock.</p>
+  <article class="md"><h2>Что даёт synchronized</h2>
+<p>synchronized решает сразу две задачи: взаимное исключение (в критической секции по данному монитору одновременно лишь один поток) и видимость (выход из монитора happens-before следующего входа, поэтому изменения видны другому потоку).</p>
+<p>Монитор есть у каждого объекта. synchronized-метод берёт монитор this (или класса для static), а <code>synchronized(obj)</code>-блок — монитор obj. Видимость без взаимного исключения не работает: оба свойства даёт именно правильная синхронизация.</p>
+<h2>Reentrancy</h2>
+<p>Встроенные мониторы реентерабельны: поток, уже держащий монитор, может войти в другой synchronized-блок по тому же монитору без самоблокировки (счётчик удержаний увеличивается). Это позволяет synchronized-методу вызывать другой synchronized-метод того же объекта.</p>
+<p>Без реентерабельности любой такой вложенный вызов был бы deadlock-ом самого с собой.</p>
+<h2>Guarded blocks: wait/notify</h2>
+<p>wait/notify/<code>notifyAll</code> координируют потоки по условию и вызываются только при удерживаемом мониторе. <code>wait()</code> отпускает монитор и засыпает, пока другой поток не вызовет notify по тому же монитору.</p>
+<p>Два железных правила: проверять условие в цикле while (а не if) из-за ложных пробуждений (spurious wakeups) и общих notify, и предпочитать <code>notifyAll</code>, когда на мониторе ждут разные условия, иначе можно разбудить «не тот» поток и потерять сигнал.</p>
+<pre class="lang-java"><code>synchronized (lock) {
+    while (!ready) {        // while, не if — защита от spurious wakeup
+        lock.wait();
+    }
+    consume();
+}</code></pre>
+<h2>Что выбирать монитором</h2>
+<p>Нельзя синхронизироваться по общим/кэшируемым объектам: строковые литералы (интернируются), Integer в диапазоне кэша, Boolean — их разделяет весь JVM, и чужой код случайно заблокирует ту же ссылку. Синхронизация по this в публичном классе тоже рискованна: внешний код может взять ваш монитор.</p>
+<p>Хорошая практика — приватный финальный объект-замок: private final Object lock = <code>new Object()</code>;.</p>
+<h2>Deadlock, livelock, starvation</h2>
+<p>Deadlock — циклическое ожидание: поток A держит замок 1 и ждёт 2, поток B держит 2 и ждёт 1. Livelock — потоки активно реагируют друг на друга и не двигаются вперёд. Starvation — поток вечно не получает ресурс из-за приоритетов/нечестности.</p>
+<p>Профилактика deadlock: единый глобальный порядок захвата замков, короткие критические секции, никакого внешнего IO/вызовов чужого кода под замком, и <code>tryLock</code> с таймаутом (явные Lock) вместо бесконечного ожидания.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Скажите, что synchronized даёт и взаимное исключение, и видимость (happens-before через монитор), объясните реентерабельность, разберите wait/notify с правилом while-цикла и <code>notifyAll</code>, и назовите причины deadlock с профилактикой (единый порядок захвата). Бонус — почему нельзя лочиться по String/Integer/this.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/volatile-vs-synchronized/">Чем volatile отличается от synchronized?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/thread-safe-counter/">Реализуй потокобезопасный счётчик Counter с методами increment() и get().</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/wait-in-while-loop/">Почему вызов wait() принято помещать в цикл while, а не в if?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/synchronized-lock-object/">На каких объектах не следует синхронизироваться?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/synchronized/">Что обеспечивает ключевое слово synchronized?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/threads/">Потоки: создание, состояния и отмена</a><p>Thread и Runnable, стоимость платформенных потоков, состояния жизненного цикла, кооперативное прерывание и daemon-потоки.</p></li><li><a href="/articles/java/locks/">Явные блокировки: ReentrantLock, RW и Condition</a><p>Когда synchronized мало, ReentrantLock с tryLock/fairness, ReadWriteLock и StampedLock, Condition вместо wait/notify.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"synchronized, мониторы и wait/notify","description":"Взаимное исключение и видимость через монитор, reentrancy, guarded blocks с wait/notify и причины deadlock.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/synchronized/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

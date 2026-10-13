@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Пользователь публикует комментарий и должен сразу видеть его в ленте, а остальным допустима задержка в несколько секунд. Какие гарантии согласованности вы заложите и как это реализуете? — вопрос с собеседования</title>
+<meta name="description" content="Требование несимметрично: автору — чтение своих записей, остальным — согласованность в конечном счёте. Линеаризуемость на всех чтениях ленты не нужна…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/read-your-writes-feed/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/read-your-writes-feed/">
+<meta property="og:title" content="Пользователь публикует комментарий и должен сразу видеть его в ленте, а остальным допустима задержка в несколько секунд. Какие гарантии согласованности вы заложите и как это реализуете? — вопрос с собеседования">
+<meta property="og:description" content="Требование несимметрично: автору — чтение своих записей, остальным — согласованность в конечном счёте. Линеаризуемость на всех чтениях ленты не нужна…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Пользователь публикует комментарий и должен сразу видеть его в ленте, а остальным допустима задержка в несколько секунд. Какие гарантии согласованности вы заложите и как это реализуете?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Пользователь публикует комментарий и должен сразу видеть его в ленте, а остальным допустима задержка в несколько секунд. Какие гарантии согласованности вы заложите и как это реализуете?"}]}</script>
+  <h1>Пользователь публикует комментарий и должен сразу видеть его в ленте, а остальным допустима задержка в несколько секунд. Какие гарантии согласованности вы заложите и как это реализуете?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">CAP и согласованность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как показать пользователю его комментарий сразу?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Требование несимметрично: автору — <b>чтение своих записей</b>, остальным — <b>согласованность в конечном счёте</b>. Линеаризуемость на всех чтениях ленты не нужна и дорога.</p><ul><li>Чтения автора — на лидера в течение окна после записи</li><li>Или ожидание версии: реплика отвечает, догнав позицию записи</li><li>Или показать комментарий из ответа на запись, не перечитывая</li></ul><p class="extra"><span>А ещё</span> Для мультирегиональной аудитории — особенно важно не ходить к лидеру на каждое чтение</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Сначала стоит явно сказать, что требование продукта здесь несимметрично: автору нужна гарантия чтения собственных записей, всем прочим достаточно согласованности в конечном счёте. Это важно, потому что линеаризуемость на всех чтениях ленты стоила бы обращения к лидеру или кворуму на каждый запрос, а при мультирегиональной аудитории — межконтинентального обмена на каждое открытие страницы. Реализаций несколько. Простейшая — в течение нескольких секунд после записи направлять чтения этого пользователя на лидера, что стоит небольшого роста нагрузки на него. Более точная — возвращать клиенту версию или позицию журнала после записи и передавать её в последующих запросах, чтобы реплика при необходимости дождалась этой позиции. Дополнительно полезно монотонное чтение — привязка сессии к одной реплике, чтобы лента не «прыгала» назад при обновлении страницы. В интерфейсе комментарий показывают оптимистично сразу после подтверждения записи. В эксплуатации обязателен контроль репликационного лага во времени, а при его росте — временное переключение чтений на лидера.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Разделение гарантий для автора и остальных.</li><li>Способы реализации read-your-writes.</li><li>Почему не линеаризуемость для всех.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Предлагать строгую согласованность там, где достаточно сессионной гарантии.</li><li>Забыть про монотонное чтение и получить исчезающий при обновлении страницы комментарий.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как изменится решение, если пользователи распределены по нескольким регионам?</li><li>Что произойдёт при росте репликационного лага и как это заметить?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/cap/">CAP и согласованность</a><p>Точная формулировка CAP и типичные искажения, неизбежность разделения и выбор C/A по операции, спектр согласованности и сессионные гарантии, кворумы N/R/W и их пределы, PACELC и разрешение конфликтов.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/replication-lag/">Пользователь сохранил изменения, обновил страницу — а изменений нет. Что происходит и как это исправить?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/consistency-spectrum/">Какие промежуточные гарантии находятся между строгой и итоговой согласованностью?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/read-model-lag/">После перехода на отдельное хранилище для чтения пользователи жалуются: сохранённое изменение не сразу видно в списке. Как правильно к этому отнестись?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Пользователь публикует комментарий и должен сразу видеть его в ленте, а остальным допустима задержка в несколько секунд. Какие гарантии согласованности вы заложите и как это реализуете?","acceptedAnswer":{"@type":"Answer","text":"Требование несимметрично: автору — чтение своих записей, остальным — согласованность в конечном счёте. Линеаризуемость на всех чтениях ленты не нужна и дорога. Чтения автора — на лидера в течение окна после записи Или ожидание версии: реплика отвечает, догнав позицию записи Или показать комментарий из ответа на запись, не перечитывая Для мультирегиональной аудитории — особенно важно не ходить к лидеру на каждое чтение Сначала стоит явно сказать, что требование продукта здесь несимметрично: автору нужна гарантия чтения собственных записей, всем прочим достаточно согласованности в конечном счёте. Это важно, потому что линеаризуемость на всех чтениях ленты стоила бы обращения к лидеру или кворуму на каждый запрос, а при мультирегиональной аудитории — межконтинентального обмена на каждое открытие страницы. Реализаций несколько. Простейшая — в течение нескольких секунд после записи направлять чтения этого пользователя на лидера, что стоит небольшого роста нагрузки на него. Более точная — возвращать клиенту версию или позицию журнала после записи и передавать её в последующих запросах, чтобы реплика при необходимости дождалась этой позиции. Дополнительно полезно монотонное чтение — привязка сессии к одной реплике, чтобы лента не «прыгала» назад при обновлении страницы. В интерфейсе комментарий показывают…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем оптимистическая блокировка отличается от пессимистической и когда какую выбрать? — вопрос с собеседования</title>
+<meta name="description" content="Пессимистическая — сначала блокируем строку (SELECT ... FOR UPDATE), потом меняем; остальные ждут. Оптимистическая — не блокируем, а при записи…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/optimistic-locking/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/optimistic-locking/">
+<meta property="og:title" content="Чем оптимистическая блокировка отличается от пессимистической и когда какую выбрать? — вопрос с собеседования">
+<meta property="og:description" content="Пессимистическая — сначала блокируем строку (SELECT ... FOR UPDATE), потом меняем; остальные ждут. Оптимистическая — не блокируем, а при записи…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Чем оптимистическая блокировка отличается от пессимистической и когда какую выбрать?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Чем оптимистическая блокировка отличается от пессимистической и когда какую выбрать?"}]}</script>
+  <h1>Чем оптимистическая блокировка отличается от пессимистической и когда какую выбрать?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Хранение данных</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как работает @Version в JPA?</li><li>Что такое SELECT FOR UPDATE?</li><li>Как не допустить, чтобы два пользователя затёрли правки друг друга?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Пессимистическая</b> — сначала блокируем строку (<code>SELECT ... FOR UPDATE</code>), потом меняем; остальные ждут. <b>Оптимистическая</b> — не блокируем, а при записи проверяем версию: <code>UPDATE ... WHERE version = ?</code>; 0 строк — кто-то успел раньше, повторяем или сообщаем.</p><ul><li>Пессимистическая — при частых конфликтах и коротких транзакциях</li><li>Оптимистическая — при редких конфликтах и долгом «думании» между чтением и записью (форма редактирования)</li><li>Оптимистическая работает и между HTTP-запросами (ETag, If-Match), пессимистическая — только внутри транзакции</li></ul><p class="extra"><span>А ещё</span> Это тот же CAS, только в базе</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Уровни изоляции: версии строк, снимки и аномалии</p><script type="module" src="/widgets/isolation.js"></script><sotto-isolation theme="dark"></sotto-isolation></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Пессимистическая блокировка</b> исходит из того, что конфликт вероятен:</p>
+<pre class="lang-sql"><code>BEGIN;
+SELECT * FROM seats WHERE id = 42 FOR UPDATE;   -- другие FOR UPDATE ждут
+UPDATE seats SET booked_by = 7 WHERE id = 42;
+COMMIT;</code></pre>
+<p>Плюсы: просто, конфликт разрешается ожиданием, а не ошибкой. Минусы: блокировки держатся до конца транзакции — долгая транзакция тормозит остальных; возможны дедлоки при захвате нескольких строк в разном порядке; нельзя держать блокировку, пока пользователь смотрит на форму. Варианты: <code>NOWAIT</code> (сразу ошибка), <code>SKIP LOCKED</code> (взять следующую свободную — очереди задач в таблице).</p>
+<p><b>Оптимистическая блокировка</b> считает конфликт редким. У строки есть колонка <code>version</code> (или <code>updated_at</code>):</p>
+<ol><li>читаем строку вместе с версией;</li><li>меняем данные в приложении — сколько угодно долго;</li><li>записываем с проверкой: <code>UPDATE ... SET ..., version = version + 1 WHERE id = ? AND version = ?</code>;</li><li>обновлена 0 строк — кто-то изменил раньше: перечитать и повторить или показать пользователю конфликт.</li></ol>
+<p>В JPA/Hibernate это поле с <code>@Version</code> и исключение <code>OptimisticLockException</code>. В HTTP — <code>ETag</code> в ответе и <code>If-Match</code> в запросе на изменение: сервер вернёт <code>412 Precondition Failed</code>, если ресурс изменился.</p>
+<p><b>Как выбирать:</b></p>
+<ul><li>конфликты редки, чтений много — оптимистическая: нет ожиданий и дедлоков;</li><li>конфликты часты (горячая строка — остаток товара на распродаже) — оптимистическая будет постоянно откатываться; лучше пессимистическая или атомарный <code>UPDATE stock SET qty = qty - 1 WHERE id = ? AND qty &gt; 0</code>;</li><li>между запросами пользователя (редактирование документа, корзина) — только оптимистическая;</li><li>распределённые системы: условная запись в DynamoDB, <code>WATCH</code> в Redis, версия ключа в etcd — та же оптимистическая идея.</li></ul>
+<p>Часто лучший вариант — вообще не читать перед записью: атомарное изменение одним запросом не требует ни той, ни другой блокировки.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-sql"><code>-- оптимистическая: два администратора правят одну карточку товара
+SELECT id, title, price, version FROM products WHERE id = 5;   -- version = 12
+UPDATE products SET price = 990, version = 13
+ WHERE id = 5 AND version = 12;     -- 1 строка — успех; 0 строк — конфликт</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механика обеих: FOR UPDATE и проверка версии.</li><li>Критерий выбора: частота конфликтов и длина «окна».</li><li>Оптимистическая между HTTP-запросами (ETag/If-Match, @Version).</li><li>Атомарный UPDATE как альтернатива для счётчиков — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Думать, что оптимистическая блокировка что-то блокирует в базе.</li><li>Держать FOR UPDATE, пока ждём ответа внешнего сервиса или пользователя.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/atomic-cas/">Что такое атомарные операции и CAS?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/isolation-anomalies/">Какие аномалии бывают при параллельных транзакциях и от чего защищает каждый уровень изоляции?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/optimistic-vs-pessimistic/">Чем отличается оптимистичная блокировка от пессимистичной?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем оптимистическая блокировка отличается от пессимистической и когда какую выбрать?","acceptedAnswer":{"@type":"Answer","text":"Пессимистическая — сначала блокируем строку (SELECT ... FOR UPDATE), потом меняем; остальные ждут. Оптимистическая — не блокируем, а при записи проверяем версию: UPDATE ... WHERE version = ?; 0 строк — кто-то успел раньше, повторяем или сообщаем. Пессимистическая — при частых конфликтах и коротких транзакциях Оптимистическая — при редких конфликтах и долгом «думании» между чтением и записью (форма редактирования) Оптимистическая работает и между HTTP-запросами (ETag, If-Match), пессимистическая — только внутри транзакции Это тот же CAS, только в базе Пессимистическая блокировка исходит из того, что конфликт вероятен: Плюсы: просто, конфликт разрешается ожиданием, а не ошибкой. Минусы: блокировки держатся до конца транзакции — долгая транзакция тормозит остальных; возможны дедлоки при захвате нескольких строк в разном порядке; нельзя держать блокировку, пока пользователь смотрит на форму. Варианты: NOWAIT (сразу ошибка), SKIP LOCKED (взять следующую свободную — очереди задач в таблице). Оптимистическая блокировка считает конфликт редким. У строки есть колонка version (или updated_at): 1. читаем строку вместе с версией; 2. меняем данные в приложении — сколько угодно долго; 3. записываем с проверкой: UPDATE ... SET ..., version = version + 1 WHERE id = ? AND version = ?; 4. обновлена 0 строк — кто-то изменил раньше: перечитать и повторить или показать пользователю конфликт. В JPA/Hibernate это поле с @Version и исключение…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

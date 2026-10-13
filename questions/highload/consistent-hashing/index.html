@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работает consistent hashing и зачем нужны виртуальные узлы? — вопрос с собеседования</title>
+<meta name="description" content="Ключи и узлы хешируются на одно кольцо; ключ принадлежит первому узлу по часовой стрелке. При добавлении или удалении узла переезжает только ~1/N…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/consistent-hashing/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/consistent-hashing/">
+<meta property="og:title" content="Как работает consistent hashing и зачем нужны виртуальные узлы? — вопрос с собеседования">
+<meta property="og:description" content="Ключи и узлы хешируются на одно кольцо; ключ принадлежит первому узлу по часовой стрелке. При добавлении или удалении узла переезжает только ~1/N…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Как работает consistent hashing и зачем нужны виртуальные узлы?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Как работает consistent hashing и зачем нужны виртуальные узлы?"}]}</script>
+  <h1>Как работает consistent hashing и зачем нужны виртуальные узлы?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Шардирование и распределение данных</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое кольцо хешей?</li><li>Почему hash % N плохо работает при добавлении сервера?</li><li>Что такое rendezvous hashing?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Ключи и узлы хешируются на одно <b>кольцо</b>; ключ принадлежит первому узлу по часовой стрелке. При добавлении или удалении узла переезжает только ~1/N ключей, а не почти все, как при <code>hash % N</code>.</p><ul><li>Без виртуальных узлов распределение неравномерно: дуги между узлами разной длины</li><li>Виртуальные узлы — 100–200 точек на кольце на сервер: нагрузка ровнее, ушедший узел делится между всеми</li><li>Веса — больше виртуальных узлов у мощного сервера</li></ul><p class="extra"><span>А ещё</span> Альтернативы: rendezvous (HRW), jump hash, Maglev; bounded load — ограничение перегрузки</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Consistent hashing и виртуальные узлы</p><script type="module" src="/widgets/consistent-hashing.js"></script><sotto-consistent-hashing theme="dark"></sotto-consistent-hashing></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p>**Проблема <code>hash % N</code>.** Ключ k идёт на сервер <code>hash(k) mod N</code>. Добавили сервер — N сменился, и ключ остаётся на месте, только если <code>hash mod N = hash mod (N+1)</code>: это примерно 1/(N+1) ключей. Остальные переезжают. Для кэша это мгновенный промах почти по всем ключам и удар по базе; для хранилища — перенос почти всех данных.</p>
+<p><b>Кольцо.</b> Пространство хешей (например, 0…2³²−1) замыкается в кольцо. Каждый узел хешируется в точку на кольце. Ключ хешируется в точку и принадлежит первому узлу, встреченному по часовой стрелке. Поиск — бинарный поиск по отсортированному списку точек, O(log N).</p>
+<ul><li><b>добавление узла</b> — он забирает ключи только у соседа на дуге перед собой; переезжает около 1/(N+1) ключей;</li><li><b>удаление</b> — его ключи уходят следующему узлу.</li></ul>
+<p><b>Виртуальные узлы.</b> С одной точкой на сервер дуги получаются разной длины — один сервер может получить в разы больше ключей. И при падении узла вся его нагрузка достаётся одному соседу. Решение — каждому серверу сотню-две точек (хешируем <code>server#1</code>, <code>server#2</code>, …). Дуги усредняются, разброс падает до нескольких процентов, а ключи упавшего узла расходятся по всем остальным. Веса — пропорциональное число точек.</p>
+<p><b>Где используется:</b> распределённые кэши (клиенты memcached, Redis Cluster использует 16384 фиксированных слота — разновидность того же подхода), Cassandra и DynamoDB (токены), балансировка с привязкой (Envoy ring hash, nginx <code>hash ... consistent</code>), CDN.</p>
+<p><b>Альтернативы:</b></p>
+<ul><li><b>rendezvous (HRW)</b> — для ключа считаем <code>hash(key, server)</code> для всех серверов и берём максимум. Равномерно без виртуальных узлов, но O(N) на ключ;</li><li><b>jump consistent hash</b> (Google) — O(log N), без памяти, но серверы только нумеруются и удаляются с конца;</li><li><b>Maglev</b> — таблица поиска для L4-балансировщиков;</li><li><b>фиксированные слоты</b> (Redis Cluster, Kafka-партиции): много слотов, слоты переносятся между узлами — переезд явный и управляемый.</li></ul>
+<p><b>Bounded load</b> — ограничение: узел не берёт больше (1 + ε) от средней нагрузки, лишнее уходит следующему по кольцу. Спасает от горячих ключей и неравномерности.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import bisect, hashlib
+
+def h(s): return int(hashlib.md5(s.encode()).hexdigest()[:8], 16)
+
+class Ring:
+    def __init__(self, nodes, vnodes=150):
+        self.points = sorted((h(f&quot;{n}#{i}&quot;), n) for n in nodes for i in range(vnodes))
+        self.keys = [p for p, _ in self.points]
+
+    def node(self, key):
+        i = bisect.bisect(self.keys, h(key)) % len(self.keys)
+        return self.points[i][1]</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Почему <code>hash % N</code> плох при изменении числа узлов, оценка доли переезда.</li><li>Устройство кольца и правило «первый по часовой».</li><li>Виртуальные узлы: равномерность и распределение нагрузки упавшего узла.</li><li>Примеры применения и альтернативы — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Забывать про виртуальные узлы и неравномерность.</li><li>Считать, что consistent hashing решает проблему горячих ключей.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/hot-keys/">Что делать с горячими ключами, на которые приходится непропорционально большая нагрузка?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/resharding/">Как перешардировать данные без простоя?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/consistent-hashing-vs-modulo/">Какую задачу решает consistent hashing по сравнению с обычным hash(key) % N?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/hash-table/">Как устроена хеш-таблица?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/highload/sharding-strategies/">Как выбрать ключ и стратегию шардирования?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работает consistent hashing и зачем нужны виртуальные узлы?","acceptedAnswer":{"@type":"Answer","text":"Ключи и узлы хешируются на одно кольцо; ключ принадлежит первому узлу по часовой стрелке. При добавлении или удалении узла переезжает только ~1/N ключей, а не почти все, как при hash % N. Без виртуальных узлов распределение неравномерно: дуги между узлами разной длины Виртуальные узлы — 100–200 точек на кольце на сервер: нагрузка ровнее, ушедший узел делится между всеми Веса — больше виртуальных узлов у мощного сервера Альтернативы: rendezvous (HRW), jump hash, Maglev; bounded load — ограничение перегрузки Проблема hash % N. Ключ k идёт на сервер hash(k) mod N. Добавили сервер — N сменился, и ключ остаётся на месте, только если hash mod N = hash mod (N+1): это примерно 1/(N+1) ключей. Остальные переезжают. Для кэша это мгновенный промах почти по всем ключам и удар по базе; для хранилища — перенос почти всех данных. Кольцо. Пространство хешей (например, 0…2³²−1) замыкается в кольцо. Каждый узел хешируется в точку на кольце. Ключ хешируется в точку и принадлежит первому узлу, встреченному по часовой стрелке. Поиск — бинарный поиск по отсортированному списку точек, O(log N). - добавление узла — он забирает ключи только у соседа на дуге перед собой; переезжает около 1/(N+1) ключей; - удаление — его ключи уходят следующему узлу. Виртуальные узлы. С одной точкой на сервер дуги получаются разной длины — один сервер может получить в разы больше ключей. И при падении узла вся его нагрузка…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

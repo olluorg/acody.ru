@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IoC и Dependency Injection — разбор для собеседования</title>
+<meta name="description" content="Принцип инверсии управления, DI как его форма, три способа внедрения и почему конструктор, разрешение циклических зависимостей.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/spring/ioc/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/spring/ioc/">
+<meta property="og:title" content="IoC и Dependency Injection — разбор для собеседования">
+<meta property="og:description" content="Принцип инверсии управления, DI как его форма, три способа внедрения и почему конструктор, разрешение циклических зависимостей.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#spring">Spring</a> <span>/</span> <span>IoC и Dependency Injection</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/articles/#spring"},{"@type":"ListItem","position":3,"name":"IoC и Dependency Injection"}]}</script>
+  <h1>IoC и Dependency Injection</h1>
+  <p class="lead">Принцип инверсии управления, DI как его форма, три способа внедрения и почему конструктор, разрешение циклических зависимостей.</p>
+  <article class="md"><h2>Inversion of Control</h2>
+<p>Inversion of Control (инверсия управления) — принцип: контроль над созданием, конфигурацией и жизненным циклом объектов передаётся внешнему контейнеру, а не пишется руками в коде. Это «Hollywood principle»: не вы зовёте фреймворк, а он зовёт ваш код.</p>
+<p>В Spring роль контейнера играет ApplicationContext: он создаёт объекты-бины, связывает их зависимости и управляет их жизнью. Ваш код перестаёт делать new для своих зависимостей.</p>
+<h2>Dependency Injection</h2>
+<p>DI — конкретная форма IoC: зависимости объекта передаются ему извне (контейнером), а не создаются им самим внутри через new. Объект лишь объявляет, что ему нужно, а кто и как это предоставит — забота контейнера.</p>
+<p>Важно не путать понятия: IoC — широкий принцип (управление отдано наружу), DI — один из способов его реализовать (через внедрение зависимостей). На собеседовании это частый уточняющий вопрос.</p>
+<h2>Три способа внедрения</h2>
+<p>Constructor injection — зависимости приходят параметрами конструктора (рекомендуемый). Setter injection — через сеттеры (для опциональных или переустанавливаемых зависимостей). Field injection — прямо в поле через <code>@Autowired</code> (не рекомендуется).</p>
+<p>С единственным конструктором аннотация <code>@Autowired</code> не нужна — Spring использует его автоматически.</p>
+<pre class="lang-java"><code>@Service
+class OrderService {
+    private final PaymentGateway gateway; // final — гарантированно установлен
+    OrderService(PaymentGateway gateway) { // один конструктор — @Autowired не нужен
+        this.gateway = gateway;
+    }
+}</code></pre>
+<h2>Почему конструктор</h2>
+<p>Конструкторная инъекция объективно лучше, а не просто «стиль». Поля можно сделать final (иммутабельность и безопасная публикация). Объект всегда создаётся полностью собранным — не бывает промежуточного состояния с null-зависимостями. Обязательные зависимости становятся явными: класс невозможно создать без них (fail-fast уже на старте контекста, а не NPE в рантайме).</p>
+<p>И главное для качества кода — тестируемость: класс с конструкторной инъекцией тестируется обычным new с моками, без поднятия Spring-контекста. Field injection, наоборот, прячет зависимости (по сигнатуре не видно, что нужно классу) и требует рефлексии/контейнера в тестах.</p>
+<h2>Циклические зависимости</h2>
+<p>Если A зависит от B, а B — от A через конструкторы, контейнер не может их собрать (для создания A нужен готовый B и наоборот) и бросает BeanCurrentlyInCreationException на старте.</p>
+<p>Цикл «лечат» setter/field-инъекцией или <code>@Lazy</code>/ObjectProvider, которые откладывают получение зависимости. Но это симптом: чаще всего циклическая зависимость — признак плохого дизайна, и правильный путь — рефакторинг (выделить третий компонент с общей логикой), а не обход. С Spring Boot 2.6+ циклы по умолчанию запрещены, что подталкивает именно к рефакторингу.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Чётко разделите IoC (принцип: управление отдано контейнеру) и DI (форма IoC: внедрение зависимостей). Перечислите три вида инъекции и аргументируйте конструктор по существу (final, полностью собранный объект, явные обязательные зависимости, fail-fast, тестируемость без контекста). Объясните, почему конструкторный цикл неразрешим и что это повод к рефакторингу, а не к обходу.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/spring/ioc-vs-di/">Как соотносятся IoC и DI в Spring?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/spring/constructor-injection/">Какие преимущества у constructor injection по сравнению с field injection? Выберите все верные.</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/spring/qualifier-primary/">Как разрешить неоднозначность, когда для внедрения подходят несколько бинов одного типа?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/inject-all-implementations/">Как внедрить сразу все реализации интерфейса и выбирать нужную в рантайме?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/spring/bean/">Бины: жизненный цикл и scopes</a><p>Бин и BeanDefinition, полный жизненный цикл, роль BeanPostProcessor, области видимости и их ловушки.</p></li><li><a href="/articles/spring/context-config/">ApplicationContext и конфигурация</a><p>BeanFactory против ApplicationContext, способы конфигурации, @Configuration full/lite, профили и Environment, @Conditional.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"IoC и Dependency Injection","description":"Принцип инверсии управления, DI как его форма, три способа внедрения и почему конструктор, разрешение циклических зависимостей.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/spring/ioc/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

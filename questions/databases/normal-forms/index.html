@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что требуют первые три нормальные формы? — вопрос с собеседования</title>
+<meta name="description" content="1НФ — атомарные значения, нет списков в ячейке. 2НФ — нет частичной зависимости неключевых полей от части составного ключа. 3НФ — нет транзитивных…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/normal-forms/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/normal-forms/">
+<meta property="og:title" content="Что требуют первые три нормальные формы? — вопрос с собеседования">
+<meta property="og:description" content="1НФ — атомарные значения, нет списков в ячейке. 2НФ — нет частичной зависимости неключевых полей от части составного ключа. 3НФ — нет транзитивных…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Что требуют первые три нормальные формы?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Что требуют первые три нормальные формы?"}]}</script>
+  <h1>Что требуют первые три нормальные формы?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Моделирование данных</span><span class="chip">SQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое 1НФ, 2НФ и 3НФ?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>1НФ</b> — атомарные значения, нет списков в ячейке. <b>2НФ</b> — нет частичной зависимости неключевых полей от части составного ключа. <b>3НФ</b> — нет транзитивных зависимостей (неключевое поле не зависит от другого неключевого).</p><ul><li>1НФ: не «телефоны: 123, 456», а отдельная таблица телефонов</li><li>2НФ: в позициях заказа (order_id, product_id) название товара зависит только от product_id — вынести</li><li>3НФ: город зависит от индекса, а не от клиента — вынести</li></ul><p class="extra"><span>А ещё</span> «Каждое неключевое поле зависит от ключа, всего ключа и ничего, кроме ключа»</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Практический смысл всех трёх один: каждый факт хранится в одном месте, поэтому аномалии вставки, обновления и удаления становятся невозможными. Нарушение 2NF: в таблице позиций заказа с ключом (заказ, товар) лежит название товара, зависящее только от товара, — и оно дублируется в каждой позиции. Нарушение 3NF: в таблице сотрудников рядом с кодом отдела лежит его название, которое зависит от кода, а не от сотрудника; переименование отдела потребует обновить все строки. Стоит помнить и продолжение: BCNF усиливает 3NF для случаев с несколькими перекрывающимися ключами-кандидатами. На практике проектируют до 3NF, а денормализуют потом и осознанно.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определение каждой формы с примером.</li><li>Какие аномалии они устраняют.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Заучивать формулировки без примера аномалии.</li><li>Считать нормализацию самоцелью и нормализовать витрины для чтения.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Несколько верных вариантов. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>1NF: значения атомарны — никаких списков и структур в одной ячейке</li><li class="ok"><span class="mark">✓</span>2NF: нет зависимости неключевого атрибута от части составного ключа</li><li class="ok"><span class="mark">✓</span>3NF: неключевые атрибуты зависят только от ключа, а не друг от друга — нет транзитивных зависимостей</li><li class="no"><span class="mark">✗</span>3NF требует, чтобы в таблице было не более трёх внешних ключей</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Приведите пример аномалии обновления при нарушении 3NF.</li><li>Когда денормализация оправдана и чем за неё платят?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/data-modeling/">Моделирование данных и целостность</a><p>Ключи и constraints, нормальные формы простыми словами, осознанная денормализация и каскадные действия.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/databases/normalization/">Что такое нормализация и когда оправдана денормализация?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что требуют первые три нормальные формы?","acceptedAnswer":{"@type":"Answer","text":"1НФ — атомарные значения, нет списков в ячейке. 2НФ — нет частичной зависимости неключевых полей от части составного ключа. 3НФ — нет транзитивных зависимостей (неключевое поле не зависит от другого неключевого). 1НФ: не «телефоны: 123, 456», а отдельная таблица телефонов 2НФ: в позициях заказа (order_id, product_id) название товара зависит только от product_id — вынести 3НФ: город зависит от индекса, а не от клиента — вынести «Каждое неключевое поле зависит от ключа, всего ключа и ничего, кроме ключа» Практический смысл всех трёх один: каждый факт хранится в одном месте, поэтому аномалии вставки, обновления и удаления становятся невозможными. Нарушение 2NF: в таблице позиций заказа с ключом (заказ, товар) лежит название товара, зависящее только от товара, — и оно дублируется в каждой позиции. Нарушение 3NF: в таблице сотрудников рядом с кодом отдела лежит его название, которое зависит от кода, а не от сотрудника; переименование отдела потребует обновить все строки. Стоит помнить и продолжение: BCNF усиливает 3NF для случаев с несколькими перекрывающимися ключами-кандидатами. На практике проектируют до 3NF, а денормализуют потом и осознанно."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

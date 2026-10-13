@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Нужны ли блокировки в многопоточном Python-коде, если есть GIL? — вопрос с собеседования</title>
+<meta name="description" content="Нужны: GIL защищает внутренние структуры интерпретатора, а не ваши инварианты. x += 1 — несколько инструкций байткода (прочитать, сложить, записать)…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/threading-race-lock/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/threading-race-lock/">
+<meta property="og:title" content="Нужны ли блокировки в многопоточном Python-коде, если есть GIL? — вопрос с собеседования">
+<meta property="og:description" content="Нужны: GIL защищает внутренние структуры интерпретатора, а не ваши инварианты. x += 1 — несколько инструкций байткода (прочитать, сложить, записать)…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Нужны ли блокировки в многопоточном Python-коде, если есть GIL?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Нужны ли блокировки в многопоточном Python-коде, если есть GIL?"}]}</script>
+  <h1>Нужны ли блокировки в многопоточном Python-коде, если есть GIL?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Конкурентность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Потокобезопасна ли операция x += 1 в Python?</li><li>Какие операции в Python атомарны?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Нужны</b>: GIL защищает внутренние структуры интерпретатора, а не ваши инварианты. <code>x += 1</code> — несколько инструкций байткода (прочитать, сложить, записать), и поток может быть прерван между ними — обновления теряются. Общие изменяемые данные защищают <b>threading.Lock</b> или передают через <b>queue.Queue</b>.</p><ul><li>Отдельные операции над list и dict (append, d[k] = v) атомарны в CPython — но это деталь реализации</li><li>Проверить-и-изменить (if k not in d: d[k] = ...) — гонка</li><li>В free-threaded сборке (3.13+) гонок станет больше, а не меньше</li></ul><p class="extra"><span>А ещё</span> Лучший способ — не делить изменяемое состояние: очереди и неизменяемые данные</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Что на самом деле делает GIL.</b> В каждый момент байткод выполняет один поток, но переключение возможно между любыми инструкциями (по умолчанию каждые 5 мс). <code>counter += 1</code> компилируется примерно в <code>LOAD</code>, <code>BINARY_OP +=</code>, <code>STORE</code> — два потока читают 5, оба пишут 6.</p>
+<pre class="lang-python"><code>import threading
+counter = 0
+lock = threading.Lock()
+
+def inc():
+    global counter
+    for _ in range(100_000):
+        with lock:
+            counter += 1</code></pre>
+<p>Без <code>with lock</code> итог при нескольких потоках может быть меньше ожидаемого.</p>
+<p><b>Атомарность в CPython.</b> Одиночные операции, реализованные одной инструкцией на C (<code>list.append</code>, <code>dict[key] = value</code>, <code>deque.popleft</code>), атомарны благодаря GIL. Но полагаться на это хрупко: сочетание двух атомарных операций уже не атомарно, а в сборке без GIL гарантии обеспечиваются по-другому.</p>
+<p><b>Инструменты:</b> <code>Lock</code>, <code>RLock</code> (реентерабельный), <code>Condition</code>, <code>Semaphore</code>, <code>Event</code>; <code>queue.Queue</code> — потокобезопасная очередь, лучший способ передавать работу между потоками.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>GIL не защищает пользовательские данные.</li><li>Почему x += 1 не атомарен.</li><li>Lock и Queue.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Из-за GIL гонок в Python не бывает».</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/gil/">Что такое GIL?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/race-condition/">Что такое состояние гонки?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/concurrent-futures/">Как пользоваться concurrent.futures и чем ThreadPoolExecutor отличается от ProcessPoolExecutor?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Нужны ли блокировки в многопоточном Python-коде, если есть GIL?","acceptedAnswer":{"@type":"Answer","text":"Нужны: GIL защищает внутренние структуры интерпретатора, а не ваши инварианты. x += 1 — несколько инструкций байткода (прочитать, сложить, записать), и поток может быть прерван между ними — обновления теряются. Общие изменяемые данные защищают threading.Lock или передают через queue.Queue. Отдельные операции над list и dict (append, d[k] = v) атомарны в CPython — но это деталь реализации Проверить-и-изменить (if k not in d: d[k] = ...) — гонка В free-threaded сборке (3.13+) гонок станет больше, а не меньше Лучший способ — не делить изменяемое состояние: очереди и неизменяемые данные Что на самом деле делает GIL. В каждый момент байткод выполняет один поток, но переключение возможно между любыми инструкциями (по умолчанию каждые 5 мс). counter += 1 компилируется примерно в LOAD, BINARY_OP +=, STORE — два потока читают 5, оба пишут 6. Без with lock итог при нескольких потоках может быть меньше ожидаемого. Атомарность в CPython. Одиночные операции, реализованные одной инструкцией на C (list.append, dict[key] = value, deque.popleft), атомарны благодаря GIL. Но полагаться на это хрупко: сочетание двух атомарных операций уже не атомарно, а в сборке без GIL гарантии обеспечиваются по-другому. Инструменты: Lock, RLock (реентерабельный), Condition, Semaphore, Event; queue.Queue — потокобезопасная очередь, лучший способ передавать работу между потоками."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

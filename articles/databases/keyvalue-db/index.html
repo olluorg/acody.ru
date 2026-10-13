@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Key-value хранилища — разбор для собеседования</title>
+<meta name="description" content="Простейшая модель доступа по ключу, типичные применения, Redis против DynamoDB, партиционирование и ограничения.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/databases/keyvalue-db/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/databases/keyvalue-db/">
+<meta property="og:title" content="Key-value хранилища — разбор для собеседования">
+<meta property="og:description" content="Простейшая модель доступа по ключу, типичные применения, Redis против DynamoDB, партиционирование и ограничения.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>Key-value хранилища</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"Key-value хранилища"}]}</script>
+  <h1>Key-value хранилища</h1>
+  <p class="lead">Простейшая модель доступа по ключу, типичные применения, Redis против DynamoDB, партиционирование и ограничения.</p>
+  <article class="md"><h2>Модель ключ-значение</h2>
+<p>Key-value — простейшая модель: словарь «ключ → значение» в масштабе кластера. Доступ по ключу близок к O(1), значение для хранилища обычно непрозрачно (просто байты/blob).</p>
+<p>Из простоты следуют и сила, и ограничение: чтения и записи по ключу очень быстрые и легко шардируются, но искать по содержимому значения нельзя — нет ad-hoc запросов и вторичных индексов «из коробки» (хотя некоторые системы их добавляют).</p>
+<h2>Типичные применения</h2>
+<p>Кэш (см. отдельный урок про Redis), пользовательские сессии, feature flags, rate limiting и счётчики, корзины, очереди задач, лидерборды — всё, где доступ идёт по понятному ключу.</p>
+<p>Паттерн ключа продумывают заранее: ключ кодирует то, как данные будут запрашиваться (user:42:cart), потому что других способов найти данные нет.</p>
+<h2>Дизайн ключей и структуры данных</h2>
+<p>Раз найти данные можно только по ключу, схема ключей И ЕСТЬ схема данных. Практика — иерархическое пространство имён с разделителем: домен:идентификатор:сущность (user:42:cart, session:ab12, ratelimit:ip:10.0.0.1:minute:42). Так ключи читаемы, не конфликтуют между сервисами и допускают версионирование при смене формата.</p>
+<p>Сразу закладывают и срок жизни: у эфемерных данных (сессии, лимиты, кэш) TTL ставят при записи, иначе хранилище со временем забивается мусором, который никто не решится удалить.</p>
+<p>Redis отличается тем, что значение не обязано быть непрозрачным blob'ом — у него есть типы, и операции над ними атомарны. Счётчик через INCR не требует read-modify-write и потому не теряет инкременты при гонке. Sorted set держит элементы упорядоченными по score, давая лидерборд без сортировки на клиенте. Hash позволяет обновить одно поле объекта, не перезаписывая его целиком.</p>
+<p>Отсюда практическое правило: прежде чем читать значение в приложение, менять и писать обратно, проверьте, нет ли атомарной команды, делающей это на стороне хранилища. Это и быстрее (один round-trip), и безопаснее при конкуренции.</p>
+<pre><code># счётчик запросов с окном в минуту: атомарно, без read-modify-write
+INCR ratelimit:ip:10.0.0.1:minute:42
+EXPIRE ratelimit:ip:10.0.0.1:minute:42 60
+
+# лидерборд на sorted set: порядок поддерживает само хранилище
+ZADD leaderboard 1500 user:42
+ZREVRANGE leaderboard 0 9 WITHSCORES   # топ-10
+
+# объект в hash: обновляем одно поле, а не весь документ
+HSET user:42 name &quot;Ann&quot; city &quot;Berlin&quot;
+HINCRBY user:42 visits 1</code></pre>
+<h2>Redis против DynamoDB</h2>
+<p>Redis — in-memory: предельно быстрый, с богатыми структурами (strings, hashes, lists, sets, sorted sets, streams), но объём ограничен памятью, а долговечность настраивается (RDB-снимки, AOF-журнал). Часто используется как кэш и быстрый стор эфемерных данных.</p>
+<p>DynamoDB — управляемый дисковый key-value/wide-column стор с предсказуемой задержкой на любом масштабе, настраиваемой согласованностью (eventual/strong чтения) и моделью на основе partition key + sort key. Это персистентный источник данных, а не кэш.</p>
+<h2>Партиционирование по ключу</h2>
+<p>Данные распределяются по узлам по хэшу ключа (часто consistent hashing, чтобы добавление/удаление узла перемещало минимум данных). Поэтому равномерность ключей напрямую определяет равномерность нагрузки.</p>
+<p>Горячий ключ (один популярный товар, один tenant) ломает эту идиллию: вся нагрузка летит в одну партицию. Лечат шардированием ключа, репликами на чтение или локальным кэшем.</p>
+<h2>Ограничения и согласованность</h2>
+<p>Нет джойнов, нет произвольных запросов, ограниченные транзакции — всё это плата за скорость и масштаб. Если задача требует связей и отчётов, key-value не подходит как основное хранилище.</p>
+<p>Согласованность зависит от системы: Redis-реплики асинхронны (возможна потеря последних записей при failover), DynamoDB предлагает выбор между eventual и strongly consistent чтением (второе дороже).</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Сильный ответ: подчеркните доступ только по ключу (отсюда дизайн ключей под запросы), отличие in-memory Redis от персистентного DynamoDB и проблему горячего ключа при партиционировании.</p>
+<p>Разверните первый тезис так: раз других способов найти данные нет, схема ключей проектируется ОТ ЗАПРОСОВ — сначала список сценариев доступа, потом пространство имён вида user:42:cart. Это тот же принцип query-first, что в Cassandra, и его полезно назвать явно.</p>
+<p>Разницу Redis и DynamoDB давайте через роль в системе, а не через список фич: Redis — in-memory, ограничен памятью, долговечность настраивается (RDB/AOF), поэтому его типичное место — кэш и эфемерные данные; DynamoDB — персистентный managed-стор с предсказуемой задержкой и выбором между eventual и strongly consistent чтением, то есть полноценный источник истины.</p>
+<p>Про горячий ключ говорите с решением: вся нагрузка летит в одну партицию, лечится шардированием ключа (добавляем суффикс и разносим по N партициям), репликами на чтение или локальным кэшем перед хранилищем.</p>
+<p>Завершите границей применимости — нет джойнов, нет произвольных запросов, ограниченные транзакции. Если задаче нужны связи и отчёты, key-value не годится как основное хранилище. Умение назвать, когда технология НЕ подходит, ценится выше умения её хвалить.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/databases/hot-key-kv/">Что такое проблема hot key (горячего ключа) в key-value хранилище и как её смягчают?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/redis-vs-dynamodb/">Чем Redis принципиально отличается от DynamoDB как key-value хранилище?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/partition-key-choice/">Почему выбор ключа партиционирования в key-value хранилище настолько важен?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/kv-limitations/">Какие ограничения характерны для чистой модели ключ-значение?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/kv-access/">Какой доступ к данным предоставляет хранилище ключ-значение?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/databases/nosql-overview/">NoSQL: семейства и когда их выбирать</a><p>Почему появился NoSQL, моделирование от access patterns, четыре семейства хранилищ, BASE против ACID и горизонтальное масштабирование.</p></li><li><a href="/articles/databases/redis-cache/">Redis и кэширование</a><p>Cache-aside и стратегии записи, TTL и eviction, защита от stampede и аккуратные распределённые блокировки.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Key-value хранилища","description":"Простейшая модель доступа по ключу, типичные применения, Redis против DynamoDB, партиционирование и ограничения.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/databases/keyvalue-db/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

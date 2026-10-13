@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как уложить голосового ассистента в задержку ответа около секунды? — вопрос с собеседования</title>
+<meta name="description" content="Задержка складывается из звеньев: определение конца фразы + финальное распознавание + время до первого токена модели + синтез первой фразы + сеть…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/voice-latency/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/voice-latency/">
+<meta property="og:title" content="Как уложить голосового ассистента в задержку ответа около секунды? — вопрос с собеседования">
+<meta property="og:description" content="Задержка складывается из звеньев: определение конца фразы + финальное распознавание + время до первого токена модели + синтез первой фразы + сеть…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как уложить голосового ассистента в задержку ответа около секунды?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как уложить голосового ассистента в задержку ответа около секунды?"}]}</script>
+  <h1>Как уложить голосового ассистента в задержку ответа около секунды?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">LLM в продакшене</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему голосовой бот отвечает с долгой паузой и как это исправить?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Задержка складывается из звеньев: <b>определение конца фразы</b> + <b>финальное распознавание</b> + <b>время до первого токена модели</b> + <b>синтез первой фразы</b> + сеть. Уложиться можно только <b>потоково</b>: распознавание идёт во время речи, модель начинает генерировать сразу, синтез озвучивает первое предложение, пока генерируется второе. Плюс <b>быстрая модель</b>, короткий промпт с кэшированием, близкие к пользователю серверы.</p><ul><li>Определение конца фразы — главный компромисс: рано — перебиваем, поздно — пауза</li><li>Speech-to-speech модели убирают часть звеньев, но сложнее в контроле</li><li>Заполнители («Секунду, проверяю заказ…») скрывают задержку инструментов</li></ul><p class="extra"><span>А ещё</span> Измерять p50 и p95 задержки от конца фразы до начала ответа на реальных звонках</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Бюджет (пример):</b></p>
+<div class="table"><table><thead><tr><th>звено</th><th>время</th></tr></thead><tbody><tr><td>конец фразы (VAD, пауза)</td><td>200–500 мс</td></tr><tr><td>финальный результат ASR</td><td>100–300 мс</td></tr><tr><td>первый токен LLM</td><td>200–600 мс</td></tr><tr><td>первый звук TTS</td><td>100–300 мс</td></tr><tr><td>сеть</td><td>50–150 мс</td></tr></tbody></table></div>
+<p><b>Приёмы:</b></p>
+<ul><li>потоковое распознавание с промежуточными результатами;</li><li>семантическое определение конца фразы (модель оценивает, закончил ли человек мысль), а не только пауза;</li><li>быстрая модель для первого ответа, сложная работа — асинхронно;</li><li>кэширование префикса промпта, короткая история;</li><li>синтез по предложениям, первым — короткая реплика;</li><li>обработка перебивания: остановить синтез и генерацию, учесть сказанное.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Разложение задержки по звеньям.</li><li>Потоковая обработка на каждом звене.</li><li>Определение конца фразы, перебивание и измерение.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/streaming-llm-responses/">Как реализовать потоковую выдачу ответа LLM пользователю?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-cost-latency/">Как снизить стоимость и задержку приложения на LLM?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/kv-cache-inference/">Как LLM генерирует текст и что такое KV-кэш?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как уложить голосового ассистента в задержку ответа около секунды?","acceptedAnswer":{"@type":"Answer","text":"Задержка складывается из звеньев: определение конца фразы + финальное распознавание + время до первого токена модели + синтез первой фразы + сеть. Уложиться можно только потоково: распознавание идёт во время речи, модель начинает генерировать сразу, синтез озвучивает первое предложение, пока генерируется второе. Плюс быстрая модель, короткий промпт с кэшированием, близкие к пользователю серверы. Определение конца фразы — главный компромисс: рано — перебиваем, поздно — пауза Speech-to-speech модели убирают часть звеньев, но сложнее в контроле Заполнители («Секунду, проверяю заказ…») скрывают задержку инструментов Измерять p50 и p95 задержки от конца фразы до начала ответа на реальных звонках Бюджет (пример): | звено | время | | --- | --- | | конец фразы (VAD, пауза) | 200–500 мс | | финальный результат ASR | 100–300 мс | | первый токен LLM | 200–600 мс | | первый звук TTS | 100–300 мс | | сеть | 50–150 мс | Приёмы: - потоковое распознавание с промежуточными результатами; - семантическое определение конца фразы (модель оценивает, закончил ли человек мысль), а не только пауза; - быстрая модель для первого ответа, сложная работа — асинхронно; - кэширование префикса промпта, короткая история; - синтез по предложениям, первым — короткая реплика; - обработка перебивания: остановить синтез и генерацию, учесть сказанное."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

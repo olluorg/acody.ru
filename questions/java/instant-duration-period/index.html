@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем Instant и LocalDateTime отличаются и когда брать Duration, а когда Period? — вопрос с собеседования</title>
+<meta name="description" content="Instant — момент на шкале (UTC, от эпохи); LocalDateTime — дата и время без зоны, моментом не является. Duration — машинное время в секундах и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/instant-duration-period/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/instant-duration-period/">
+<meta property="og:title" content="Чем Instant и LocalDateTime отличаются и когда брать Duration, а когда Period? — вопрос с собеседования">
+<meta property="og:description" content="Instant — момент на шкале (UTC, от эпохи); LocalDateTime — дата и время без зоны, моментом не является. Duration — машинное время в секундах и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Чем Instant и LocalDateTime отличаются и когда брать Duration, а когда Period?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Чем Instant и LocalDateTime отличаются и когда брать Duration, а когда Period?"}]}</script>
+  <h1>Чем Instant и LocalDateTime отличаются и когда брать Duration, а когда Period?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Дата и время</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Instant</b> — момент на шкале (UTC, от эпохи); <b>LocalDateTime</b> — дата и время без зоны, моментом не является. <b>Duration</b> — машинное время в секундах и наносекундах, <b>Period</b> — календарные годы, месяцы, дни.</p><ul><li>В день перехода на летнее время plus(Period.ofDays(1)) и plus(Duration.ofDays(1)) дают разное</li><li>Duration — таймауты, замеры; Period — «через месяц», возраст</li><li>Period.between для дат, Duration.between для моментов</li></ul><p class="extra"><span>А ещё</span> Для замеров производительности — System.nanoTime, а не Instant</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Instant — точка на глобальной шкале (эпоха, UTC), удобна для хранения и сравнения. LocalDateTime не задаёт момент, пока не привязан к зоне (ZonedDateTime). Duration измеряет машинное время в секундах/наносекундах, Period — календарные единицы; на стыке перехода на летнее время Period.ofDays(1) и Duration.ofHours(24) могут дать разный результат — поэтому тип берут по смыслу.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Instant против LocalDateTime.</li><li>Duration против Period с примером.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать LocalDateTime конкретным моментом без зоны.</li><li>Мерить календарные интервалы через Duration.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Instant — момент на шкале (UTC, эпоха); LocalDateTime — дата-время БЕЗ зоны. Duration — машинное время (секунды/нано), Period — календарные единицы (годы/месяцы/дни)</li><li class="no"><span class="mark">✗</span>Instant и LocalDateTime — синонимы; Duration и Period тоже</li><li class="no"><span class="mark">✗</span>LocalDateTime хранит зону, а Instant — нет</li><li class="no"><span class="mark">✗</span>Period измеряет секунды, Duration — месяцы</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Зачем хранить моменты в UTC?</li><li>Что добавляет ZonedDateTime к LocalDateTime?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/date-time/">Дата и время: java.time</a><p>Почему java.time вытеснил Date/Calendar, машинное (Instant) и человеческое (LocalDateTime) время, часовые пояса, Duration/Period и потокобезопасный DateTimeFormatter.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/localdatetime-vs-zoneddatetime/">Чем LocalDateTime отличается от ZonedDateTime?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/order-time-types/">В сервисе нужно сохранить момент оформления заказа и дату доставки, выбранную пользователем. Какие типы java.time возьмёшь и почему?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем Instant и LocalDateTime отличаются и когда брать Duration, а когда Period?","acceptedAnswer":{"@type":"Answer","text":"Instant — момент на шкале (UTC, от эпохи); LocalDateTime — дата и время без зоны, моментом не является. Duration — машинное время в секундах и наносекундах, Period — календарные годы, месяцы, дни. В день перехода на летнее время plus(Period.ofDays(1)) и plus(Duration.ofDays(1)) дают разное Duration — таймауты, замеры; Period — «через месяц», возраст Period.between для дат, Duration.between для моментов Для замеров производительности — System.nanoTime, а не Instant Instant — точка на глобальной шкале (эпоха, UTC), удобна для хранения и сравнения. LocalDateTime не задаёт момент, пока не привязан к зоне (ZonedDateTime). Duration измеряет машинное время в секундах/наносекундах, Period — календарные единицы; на стыке перехода на летнее время Period.ofDays(1) и Duration.ofHours(24) могут дать разный результат — поэтому тип берут по смыслу."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое LLM как судья (LLM-as-a-judge) и какие у этого подхода ловушки? — вопрос с собеседования</title>
+<meta name="description" content="Сильная модель оценивает ответы другой (или той же) модели по чёткой рубрике: верность фактам из контекста, полнота, следование формату. Это…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/llm-as-judge/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/llm-as-judge/">
+<meta property="og:title" content="Что такое LLM как судья (LLM-as-a-judge) и какие у этого подхода ловушки? — вопрос с собеседования">
+<meta property="og:description" content="Сильная модель оценивает ответы другой (или той же) модели по чёткой рубрике: верность фактам из контекста, полнота, следование формату. Это…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Что такое LLM как судья (LLM-as-a-judge) и какие у этого подхода ловушки?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Что такое LLM как судья (LLM-as-a-judge) и какие у этого подхода ловушки?"}]}</script>
+  <h1>Что такое LLM как судья (LLM-as-a-judge) и какие у этого подхода ловушки?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Оценка качества</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как автоматически оценивать ответы LLM?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Сильная модель оценивает ответы другой (или той же) модели по <b>чёткой рубрике</b>: верность фактам из контекста, полнота, следование формату. Это масштабирует оценку там, где точного ответа нет. Ловушки: <b>смещение к позиции</b> (в сравнении пар выигрывает первый или второй), <b>к длине</b> (длиннее — «лучше»), <b>к своему стилю</b>; судья ошибается — его нужно <b>калибровать по человеческой разметке</b>.</p><ul><li>Оценка по шкале с описанием каждого балла надёжнее «оцени от 1 до 10»</li><li>В попарном сравнении порядок меняют местами и усредняют</li><li>Бинарные критерии («есть ли утверждения без опоры на контекст») стабильнее баллов</li></ul><p class="extra"><span>А ещё</span> Где ответ проверяется кодом (формат JSON, точное значение) — проверяют кодом, а не судьёй</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Где применяют:</b> регрессионные тесты промптов и RAG-конвейера, сравнение моделей и версий, мониторинг качества в продакшене на выборке реальных запросов.</p>
+<p><b>Как сделать надёжнее:</b></p>
+<ul><li>рубрика с критериями и примерами для каждого уровня;</li><li>попросить сначала короткое обоснование, затем оценку;</li><li>бинарные или трёхуровневые шкалы вместо 1–10;</li><li>попарное сравнение — с перестановкой вариантов;</li><li>судья сильнее или хотя бы не слабее оцениваемой модели;</li><li><b>калибровка</b>: 50–200 примеров размечают люди, считают согласие судьи с людьми и правят рубрику, пока согласие не станет приемлемым.</li></ul>
+<p><b>Типовые метрики RAG</b>, которые считают судьёй: faithfulness (всё ли в ответе подтверждается найденными документами), answer relevance, context relevance. Фреймворки: Ragas, DeepEval, promptfoo.</p>
+<p><b>Ограничение:</b> судья не заменяет человеческую проверку на сложных и рискованных доменах, а метрики, которые оптимизируют напрямую, со временем перестают отражать качество.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Идея и где применяется.</li><li>Известные смещения судьи.</li><li>Как повысить надёжность и калибровать.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/llm-evaluation/">Как оценивать качество ответов LLM?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-observability/">Как наблюдать за LLM-приложением в продакшене?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое LLM как судья (LLM-as-a-judge) и какие у этого подхода ловушки?","acceptedAnswer":{"@type":"Answer","text":"Сильная модель оценивает ответы другой (или той же) модели по чёткой рубрике: верность фактам из контекста, полнота, следование формату. Это масштабирует оценку там, где точного ответа нет. Ловушки: смещение к позиции (в сравнении пар выигрывает первый или второй), к длине (длиннее — «лучше»), к своему стилю; судья ошибается — его нужно калибровать по человеческой разметке. Оценка по шкале с описанием каждого балла надёжнее «оцени от 1 до 10» В попарном сравнении порядок меняют местами и усредняют Бинарные критерии («есть ли утверждения без опоры на контекст») стабильнее баллов Где ответ проверяется кодом (формат JSON, точное значение) — проверяют кодом, а не судьёй Где применяют: регрессионные тесты промптов и RAG-конвейера, сравнение моделей и версий, мониторинг качества в продакшене на выборке реальных запросов. Как сделать надёжнее: - рубрика с критериями и примерами для каждого уровня; - попросить сначала короткое обоснование, затем оценку; - бинарные или трёхуровневые шкалы вместо 1–10; - попарное сравнение — с перестановкой вариантов; - судья сильнее или хотя бы не слабее оцениваемой модели; - калибровка: 50–200 примеров размечают люди, считают согласие судьи с людьми и правят рубрику, пока согласие не станет приемлемым. Типовые метрики RAG, которые считают судьёй: faithfulness (всё ли в ответе подтверждается найденными документами), answer relevance, context relevance. Фреймворки: Ragas, DeepEval, promptfoo. Ограничение: судья не заменяет человеческую проверку на сложных и рискованных доменах, а метрики, которые оптимизируют напрямую, со…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

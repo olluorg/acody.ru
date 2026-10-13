@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что гарантирует ключевое слово volatile для переменной? — вопрос с собеседования</title>
+<meta name="description" content="volatile даёт видимость (запись сразу видна другим потокам) и запрет переупорядочивания вокруг обращения, но не атомарность: count++ на volatile-поле…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/volatile/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/volatile/">
+<meta property="og:title" content="Что гарантирует ключевое слово volatile для переменной? — вопрос с собеседования">
+<meta property="og:description" content="volatile даёт видимость (запись сразу видна другим потокам) и запрет переупорядочивания вокруг обращения, но не атомарность: count++ на volatile-поле…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что гарантирует ключевое слово volatile для переменной?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что гарантирует ключевое слово volatile для переменной?"}]}</script>
+  <h1>Что гарантирует ключевое слово volatile для переменной?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Многопоточность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем volatile отличается от AtomicInteger?</li><li>Чем volatile отличается от AtomicInteger и когда какого достаточно?</li><li>Счётчик объявлен как volatile int counter, и несколько потоков выполняют counter++. Корректно ли это?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>volatile</b> даёт <b>видимость</b> (запись сразу видна другим потокам) и <b>запрет переупорядочивания</b> вокруг обращения, но <b>не атомарность</b>: <code>count++</code> на volatile-поле всё равно теряет обновления.</p><ul><li>Достаточно, когда пишет один поток, а читают остальные: флаг остановки, публикация готового объекта</li><li>Значение вычисляется из самого себя — AtomicInteger (CAS) или synchronized</li><li>Запись volatile → чтение того же поля задают happens-before: видно и всё, что записано до неё</li></ul><p class="extra"><span>А ещё</span> Под сильной конкуренцией за счётчик — LongAdder</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Проблема без volatile.</b> Каждое ядро работает со своими кэшами и регистрами, а компилятор (JIT) и процессор переставляют операции. Поток может бесконечно не увидеть изменение флага, записанного другим потоком:</p>
+<pre class="lang-java"><code>boolean running = true;              // без volatile
+while (running) { work(); }          // JIT может вынести чтение из цикла</code></pre>
+<p><b>Что гарантирует volatile</b> (модель памяти Java):</p>
+<ul><li><b>видимость</b> — чтение всегда возвращает последнее записанное значение;</li><li><b>упорядочивание</b> — операции не переставляются через обращение к volatile;</li><li><b>happens-before</b> — всё, что поток сделал до записи в volatile, видно потоку, прочитавшему это значение. Поэтому volatile-ссылкой можно безопасно опубликовать полностью построенный объект.</li></ul>
+<p><b>Чего нет — атомарности.</b> <code>count++</code> — это чтение, сложение и запись. Два потока читают 5, оба пишут 6 — одно увеличение потеряно.</p>
+<p><b>AtomicInteger</b> добавляет к той же видимости атомарные операции: <code>incrementAndGet</code> крутит цикл CAS — «записать новое, только если в памяти всё ещё старое, иначе повторить».</p>
+<p><b>Критерий выбора:</b></p>
+<div class="table"><table><thead><tr><th>ситуация</th><th>чего достаточно</th></tr></thead><tbody><tr><td>один пишет, многие читают (флаг, ссылка на конфиг)</td><td>volatile</td></tr><tr><td>новое значение зависит от старого (счётчик)</td><td>AtomicInteger / AtomicLong</td></tr><tr><td>очень много потоков увеличивают счётчик</td><td>LongAdder</td></tr><tr><td>несколько полей меняются согласованно</td><td>synchronized или Lock</td></tr></tbody></table></div></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Видимость и запрет переупорядочивания, happens-before.</li><li>Почему count++ не атомарен.</li><li>Чем AtomicInteger отличается и когда хватает volatile.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать volatile заменой synchronized.</li><li>Делать volatile-счётчик с ++.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Атомарность составных операций, например i++</li><li class="ok"><span class="mark">✓</span>Видимость изменений между потоками и запрет переупорядочивания, но не атомарность составных операций</li><li class="no"><span class="mark">✗</span>Полную потокобезопасность любого кода с этой переменной</li><li class="no"><span class="mark">✗</span>Хранение значения в регистре потока для скорости</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое happens-before?</li><li>Когда брать AtomicInteger вместо volatile?</li><li>Что такое проблема ABA и чем помогает AtomicStampedReference?</li><li>Почему double-checked locking требует volatile?</li><li>Чем LongAdder лучше AtomicInteger под высокой конкуренцией?</li><li>Что такое ABA-проблема в CAS?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/atomics/">volatile, атомарность и CAS</a><p>Разница видимости и атомарности, atomic-классы, compare-and-swap и ABA, контеншн и LongAdder.</p></li><li><a href="/articles/java/jmm/">Java Memory Model: happens-before и volatile</a><p>Зачем нужна модель памяти, видимость и переупорядочивание, отношение happens-before, семантика volatile и final, гонки данных.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/volatile-vs-synchronized/">Чем volatile отличается от synchronized?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/atomicinteger/">Что делает класс AtomicInteger?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/atomicinteger-cas/">Два потока одновременно вызывают incrementAndGet() у одного AtomicInteger. Что при этом происходит внутри и почему ни один инкремент не теряется?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/race-condition/">Что такое состояние гонки?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что гарантирует ключевое слово volatile для переменной?","acceptedAnswer":{"@type":"Answer","text":"volatile даёт видимость (запись сразу видна другим потокам) и запрет переупорядочивания вокруг обращения, но не атомарность: count++ на volatile-поле всё равно теряет обновления. Достаточно, когда пишет один поток, а читают остальные: флаг остановки, публикация готового объекта Значение вычисляется из самого себя — AtomicInteger (CAS) или synchronized Запись volatile → чтение того же поля задают happens-before: видно и всё, что записано до неё Под сильной конкуренцией за счётчик — LongAdder Проблема без volatile. Каждое ядро работает со своими кэшами и регистрами, а компилятор (JIT) и процессор переставляют операции. Поток может бесконечно не увидеть изменение флага, записанного другим потоком: Что гарантирует volatile (модель памяти Java): - видимость — чтение всегда возвращает последнее записанное значение; - упорядочивание — операции не переставляются через обращение к volatile; - happens-before — всё, что поток сделал до записи в volatile, видно потоку, прочитавшему это значение. Поэтому volatile-ссылкой можно безопасно опубликовать полностью построенный объект. Чего нет — атомарности. count++ — это чтение, сложение и запись. Два потока читают 5, оба пишут 6 — одно увеличение потеряно. AtomicInteger добавляет к той же видимости атомарные операции: incrementAndGet крутит цикл CAS — «записать новое, только если в памяти всё ещё старое, иначе повторить». Критерий выбора…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что показывают метрики allocation rate и promotion rate? — вопрос с собеседования</title>
+<meta name="description" content="Allocation rate — сколько МБ/с приложение создаёт объектов: чем выше, тем чаще minor GC. Promotion rate — сколько МБ/с переезжает в старое поколение…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/allocation-promotion-rate/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/allocation-promotion-rate/">
+<meta property="og:title" content="Что показывают метрики allocation rate и promotion rate? — вопрос с собеседования">
+<meta property="og:description" content="Allocation rate — сколько МБ/с приложение создаёт объектов: чем выше, тем чаще minor GC. Promotion rate — сколько МБ/с переезжает в старое поколение…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что показывают метрики allocation rate и promotion rate?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что показывают метрики allocation rate и promotion rate?"}]}</script>
+  <h1>Что показывают метрики allocation rate и promotion rate?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">JVM и сборка мусора</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Allocation rate</b> — сколько МБ/с приложение создаёт объектов: чем выше, тем чаще <b>minor GC</b>. <b>Promotion rate</b> — сколько МБ/с переезжает в старое поколение: чем выше, тем чаще <b>old/full GC</b>.</p><ul><li>Высокий allocation rate лечат кодом: меньше временных объектов, без лишней упаковки</li><li>Высокий promotion rate — объекты живут дольше одной-двух сборок или мал Survivor</li><li>Снимают из GC-логов (-Xlog:gc*), JFR, Micrometer</li></ul><p class="extra"><span>А ещё</span> Сотни МБ/с — норма для нагруженного сервиса; важна динамика и связь с паузами</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">GC: Eden, Survivor и продвижение</p><script type="module" src="/widgets/gc-generations.js"></script><sotto-gc-generations theme="dark"></sotto-gc-generations></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Allocation rate.</b> Eden заполняется со скоростью аллокаций; заполнился — minor GC. Удвоили аллокации — удвоили частоту молодых сборок. Источники: промежуточные коллекции в стримах, упаковка <code>Integer</code>, конкатенация строк в цикле, лишние DTO, логирование с формированием строк при выключенном уровне.</p>
+<p><b>Promotion rate.</b> Объекты, пережившие несколько молодых сборок (порог tenuring), уезжают в старое поколение. Если туда едет много «среднеживущего» — кэшей, буферов запросов, сессий, — старое поколение быстро заполняется и требует дорогих сборок. Признак premature promotion: высокий promotion rate при том, что объекты вскоре умирают.</p>
+<p><b>Где смотреть:</b> GC-логи и анализаторы (GCeasy, GCViewer), JFR (события выделения с профилем — какой код аллоцирует), метрики <code>jvm.gc.memory.allocated</code> и <code>jvm.gc.memory.promoted</code> в Micrometer.</p>
+<p>Анализ всегда в связке: частота и длительность пауз, обе метрики, живой набор после full GC.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определение и связь каждой метрики с видом сборок.</li><li>Как снизить каждую.</li><li>Где измерить.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Путать allocation rate с размером кучи.</li><li>Лечить высокий allocation rate только флагами.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>allocation rate — сколько МБ/с создаётся (высокий разгоняет minor GC); promotion rate — сколько уезжает в old (высокий ведёт к full GC)</li><li class="no"><span class="mark">✗</span>Это размеры -Xms и -Xmx соответственно</li><li class="no"><span class="mark">✗</span>allocation rate — частота full GC, promotion rate — частота minor GC</li><li class="no"><span class="mark">✗</span>Оба показывают только длительность пауз stop-the-world</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как высокий allocation rate связан с паузами?</li><li>Где взять эти метрики в проде?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/gc-tuning/">GC: тюнинг и мониторинг</a><p>Ключевые флаги, unified GC-логи, метрики (паузы, throughput, allocation/promotion rate) и диагностика частых проблем.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/gc-latency-diagnosis/">В проде выросли задержки, подозрение на GC. Опиши порядок диагностики — от сбора данных до вывода.</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/gc-tuning-start/">С чего правильно начинать настройку сборщика мусора?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/frequent-full-gc/">В приложении участились длинные паузы full GC, при этом старое поколение почти всегда заполнено. О чём это говорит?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что показывают метрики allocation rate и promotion rate?","acceptedAnswer":{"@type":"Answer","text":"Allocation rate — сколько МБ/с приложение создаёт объектов: чем выше, тем чаще minor GC. Promotion rate — сколько МБ/с переезжает в старое поколение: чем выше, тем чаще old/full GC. Высокий allocation rate лечат кодом: меньше временных объектов, без лишней упаковки Высокий promotion rate — объекты живут дольше одной-двух сборок или мал Survivor Снимают из GC-логов (-Xlog:gc), JFR, Micrometer Сотни МБ/с — норма для нагруженного сервиса; важна динамика и связь с паузами Allocation rate. Eden заполняется со скоростью аллокаций; заполнился — minor GC. Удвоили аллокации — удвоили частоту молодых сборок. Источники: промежуточные коллекции в стримах, упаковка Integer, конкатенация строк в цикле, лишние DTO, логирование с формированием строк при выключенном уровне. Promotion rate. Объекты, пережившие несколько молодых сборок (порог tenuring), уезжают в старое поколение. Если туда едет много «среднеживущего» — кэшей, буферов запросов, сессий, — старое поколение быстро заполняется и требует дорогих сборок. Признак premature promotion: высокий promotion rate при том, что объекты вскоре умирают. Где смотреть: GC-логи и анализаторы (GCeasy, GCViewer), JFR (события выделения с профилем — какой код аллоцирует), метрики jvm.gc.memory.allocated и jvm.gc.memory.promoted в Micrometer. Анализ всегда в связке: частота и длительность пауз, обе метрики, живой набор после…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

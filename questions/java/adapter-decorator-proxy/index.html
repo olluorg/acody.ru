@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>По какому признаку проще всего отличить Adapter от Decorator и Proxy? — вопрос с собеседования</title>
+<meta name="description" content="По интерфейсу: адаптер меняет интерфейс (InputStreamReader превращает байтовый поток в символьный), декоратор и прокси сохраняют его. Механизм у всех…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/adapter-decorator-proxy/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/adapter-decorator-proxy/">
+<meta property="og:title" content="По какому признаку проще всего отличить Adapter от Decorator и Proxy? — вопрос с собеседования">
+<meta property="og:description" content="По интерфейсу: адаптер меняет интерфейс (InputStreamReader превращает байтовый поток в символьный), декоратор и прокси сохраняют его. Механизм у всех…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>По какому признаку проще всего отличить Adapter от Decorator и Proxy?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"По какому признаку проще всего отличить Adapter от Decorator и Proxy?"}]}</script>
+  <h1>По какому признаку проще всего отличить Adapter от Decorator и Proxy?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Паттерны проектирования</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main">По <b>интерфейсу</b>: адаптер <b>меняет</b> интерфейс (InputStreamReader превращает байтовый поток в символьный), декоратор и прокси <b>сохраняют</b> его. Механизм у всех трёх один — композиция и делегирование, различие в намерении.</p><ul><li>Адаптер — совместимость</li><li>Декоратор — добавить поведение, клиент собирает цепочку</li><li>Прокси — управлять доступом: ленивость, права, транзакции</li></ul><p class="extra"><span>А ещё</span> Фасад тоже обёртка, но над целой подсистемой</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Механизм у всех трёх один — композиция и делегирование, поэтому различать надо по намерению. Адаптер решает задачу совместимости: интерфейс на выходе отличается от интерфейса обёрнутого объекта (InputStreamReader превращает байтовый поток в символьный). Декоратор сохраняет интерфейс и добавляет поведение (BufferedInputStream). Прокси сохраняет интерфейс и контролирует доступ (Hibernate lazy loading, Spring AOP).</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Критерий интерфейса.</li><li>Намерение каждого.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Различать эти паттерны по коду, а не по намерению — код у них похож.</li><li>Считать, что адаптер обязательно использует наследование: обычно это тоже композиция.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Адаптер меняет интерфейс, а декоратор и прокси его сохраняют</li><li class="no"><span class="mark">✗</span>Адаптер использует наследование, а декоратор и прокси — композицию</li><li class="no"><span class="mark">✗</span>Адаптер создаётся во время компиляции, а остальные — в рантайме</li><li class="no"><span class="mark">✗</span>Адаптер может обернуть только один объект, остальные — несколько</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем прокси отличается от декоратора, если интерфейс у обоих одинаковый?</li><li>К какому паттерну относится Arrays.asList?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/patterns-structural/">Структурные паттерны</a><p>Adapter, Decorator, Proxy и чем они отличаются друг от друга, Facade, Composite, Bridge и Flyweight — на примерах java.io, java.lang.reflect.Proxy и Spring AOP.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/java-io-decorator/">Какой паттерн лежит в основе конструкции new BufferedInputStream(new GZIPInputStream(new FileInputStream(file)))?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/proxy-vs-decorator/">Чем паттерн Proxy отличается от Decorator, если у обоих тот же интерфейс, что и у обёрнутого объекта?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/arrays-aslist-add/">Что произойдёт при вызове add на списке, полученном из Arrays.asList(array)?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/structural-patterns/">На каком приёме построено большинство структурных паттернов?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"По какому признаку проще всего отличить Adapter от Decorator и Proxy?","acceptedAnswer":{"@type":"Answer","text":"По интерфейсу: адаптер меняет интерфейс (InputStreamReader превращает байтовый поток в символьный), декоратор и прокси сохраняют его. Механизм у всех трёх один — композиция и делегирование, различие в намерении. Адаптер — совместимость Декоратор — добавить поведение, клиент собирает цепочку Прокси — управлять доступом: ленивость, права, транзакции Фасад тоже обёртка, но над целой подсистемой Механизм у всех трёх один — композиция и делегирование, поэтому различать надо по намерению. Адаптер решает задачу совместимости: интерфейс на выходе отличается от интерфейса обёрнутого объекта (InputStreamReader превращает байтовый поток в символьный). Декоратор сохраняет интерфейс и добавляет поведение (BufferedInputStream). Прокси сохраняет интерфейс и контролирует доступ (Hibernate lazy loading, Spring AOP)."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

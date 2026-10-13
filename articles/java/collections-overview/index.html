@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collections Framework: карта и выбор структуры — разбор для собеседования</title>
+<meta name="description" content="Иерархия интерфейсов, сложности операций основных структур, неизменяемые коллекции и принцип выбора по паттерну доступа.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/collections-overview/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/collections-overview/">
+<meta property="og:title" content="Collections Framework: карта и выбор структуры — разбор для собеседования">
+<meta property="og:description" content="Иерархия интерфейсов, сложности операций основных структур, неизменяемые коллекции и принцип выбора по паттерну доступа.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Collections Framework: карта и выбор структуры</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Collections Framework: карта и выбор структуры"}]}</script>
+  <h1>Collections Framework: карта и выбор структуры</h1>
+  <p class="lead">Иерархия интерфейсов, сложности операций основных структур, неизменяемые коллекции и принцип выбора по паттерну доступа.</p>
+  <article class="md"><h2>Иерархия интерфейсов</h2>
+<p>В основе — Iterable, от него Collection, а дальше три ветви: List (упорядоченная последовательность с дубликатами и доступом по индексу), Set (множество уникальных элементов) и Queue/Deque (очереди и двусторонние очереди).</p>
+<p>Map стоит особняком: это не Collection, а отдельная иерархия пар ключ→значение. У неё есть подинтерфейсы SortedMap/NavigableMap (упорядоченные карты), а её views (<code>keySet</code>, values, <code>entrySet</code>) — это коллекции, через которые Map интегрируется во фреймворк.</p>
+<p>Программируют против интерфейса (List, Map, Set), а конкретную реализацию выбирают под паттерн доступа — это позволяет менять структуру, не трогая остальной код. Ниже — по абзацу на каждую ключевую реализацию; внутреннему устройству каждой посвящён отдельный урок.</p>
+<h2>Списки и очереди: реализации</h2>
+<p>ArrayList — динамический массив: get/set по индексу O(1), add в конец амортизированно O(1), вставка/удаление в середину O(n) (сдвиг через arraycopy). Отличная cache locality, дефолтный выбор для списков.</p>
+<p>LinkedList — двусвязный список: доступ по индексу O(n), реализует и List, и Deque. На практике почти всегда проигрывает ArrayList/ArrayDeque из-за оверхеда узлов и промахов кэша — берут редко.</p>
+<p>ArrayDeque — двусторонняя очередь на кольцевом буфере: добавление/снятие с обоих концов O(1), отличная локальность. Современная замена и Stack (как стек), и LinkedList (как очередь); null хранить нельзя.</p>
+<p>PriorityQueue — бинарная куча в массиве: offer/poll O(log n), peek O(1) (минимум/экстремум по Comparator). Важно: итерация по очереди НЕ отсортирована, гарантирован только порядок извлечения через poll.</p>
+<h2>Множества и карты: реализации</h2>
+<p>HashMap — хеш-таблица бакетов (с превращением длинной цепочки в дерево): get/put/contains в среднем O(1), порядок не гарантирован. LinkedHashMap — HashMap плюс связанный список записей: сохраняет порядок вставки (или доступа) и служит основой LRU-кэша. TreeMap — красно-чёрное дерево: O(log n), всегда отсортирована, реализует NavigableMap (floor/ceiling, диапазоны).</p>
+<p>HashSet/LinkedHashSet/TreeSet — это множества поверх соответствующих карт (элемент хранится как ключ), поэтому их свойства и сложности повторяют HashMap/LinkedHashMap/TreeMap.</p>
+<p>Hashtable — легаси: синхронизированная хеш-таблица, не допускающая null. В новом коде её не используют — для однопоточного доступа берут HashMap, для конкурентного ConcurrentHashMap; знать её стоит лишь как исторический контраст. Аналогично Vector/Stack вытеснены ArrayList/ArrayDeque.</p>
+<p>Замечание про названия: в JDK нет класса «HashList». Если нужен «хеш + предсказуемый порядок» — это LinkedHashMap/LinkedHashSet (хеш-таблица + связанный список порядка); если нужен список — ArrayList или LinkedList.</p>
+<h2>Сложности операций — шпаргалка</h2>
+<p>Списки/очереди: ArrayList — индекс O(1), вставка в середину O(n); LinkedList — индекс O(n); ArrayDeque — концы O(1); PriorityQueue — offer/poll O(log n), peek O(1).</p>
+<p>Множества/карты: Hash* — в среднем O(1) (худший O(log n) благодаря дереву в бакете); Tree* — O(log n) и упорядоченность; Linked*-варианты — как Hash*, плюс поддержание порядка.</p>
+<p>Эти оценки — следствие устройства структур; в отдельных уроках разобрано, ПОЧЕМУ именно так (рост массива, бакеты и resize, красно-чёрное дерево, куча).</p>
+<h2>Конвертация между коллекциями</h2>
+<p>Базовые конвертации делаются через конструктор-копию и стоят O(n) (копируются ссылки на элементы): List→Set — <code>new HashSet&lt;&gt;(list)</code> (заодно убирает дубликаты), Set→List — <code>new ArrayList&lt;&gt;(set)</code>, List→отсортированный — <code>new TreeSet&lt;&gt;(list)</code> или <code>list.sort(...)</code>.</p>
+<p>Коллекция ↔ массив: <code>coll.toArray(new T[0])</code> даёт массив; <code>Arrays.asList(arr)</code> — список-ВИД фиксированного размера поверх массива (add/remove бросят исключение, но set работает и пишет в массив); <code>Arrays.stream(arr)</code> — поток по массиву.</p>
+<p>Через Stream: <code>stream.collect</code>(<code>Collectors.toList()</code>/<code>toSet()</code>/<code>toMap(...)</code>) или современные <code>toList()</code>/<code>Stream.toList()</code> (неизменяемый результат). Для неизменяемой копии существующей коллекции — <code>List.copyOf</code>/<code>Set.copyOf</code>/<code>Map.copyOf</code> (Java 10+), тоже O(n).</p>
+<pre class="lang-java"><code>List&lt;Integer&gt; list = List.of(1, 2, 2, 3);
+Set&lt;Integer&gt; set = new HashSet&lt;&gt;(list);     // дедупликация, O(n)
+List&lt;Integer&gt; back = new ArrayList&lt;&gt;(set);   // обратно в список, O(n)
+Integer[] arr = list.toArray(new Integer[0]); // в массив</code></pre>
+<h2>Неизменяемые и защитные коллекции</h2>
+<p>Неизменяемый снимок создают фабрики <code>List.of</code>/<code>Set.of</code>/<code>Map.of</code> (Java 9+): компактны, не принимают null, бросают UnsupportedOperationException на любую мутацию. Их возвращают из API и используют как константы. <code>List.copyOf(coll)</code> делает независимую неизменяемую КОПИЮ из существующей коллекции — после копирования изменения исходника на неё не влияют.</p>
+<p><code>Collections.unmodifiableList(list)</code> — это другое: read-only ВИД (обёртка) над существующим списком. Через обёртку менять нельзя, но это НЕ копия — изменения исходного списка видны сквозь неё. Зачем нужно: отдать наружу безопасный доступ к внутренней коллекции, не копируя её (например, геттер возвращает <code>Collections.unmodifiableList(items)</code>, чтобы вызывающий код не сломал инварианты класса).</p>
+<p>Отсюда правило выбора: нужен дешёвый read-only доступ к своим данным, которые вы сами контролируете — unmodifiable view; нужна гарантия, что результат не изменится никогда и ни от чего — отдавайте снимок (<code>List.copyOf</code>) или защитную копию (defensive copy) в конструкторе/геттере. Защитная копия — базовый приём дизайна неизменяемых классов.</p>
+<pre class="lang-java"><code>// view: запрещает мутацию ИЗВНЕ, но отражает изменения items
+public List&lt;Item&gt; items() { return Collections.unmodifiableList(items); }
+// snapshot: независимая неизменяемая копия
+public List&lt;Item&gt; snapshot() { return List.copyOf(items); }</code></pre>
+<h2>Fail-fast и потокобезопасность</h2>
+<p>Базовые коллекции (ArrayList, HashMap, …) не потокобезопасны. Их итераторы fail-fast: структурное изменение во время обхода роняет ConcurrentModificationException через счётчик <code>modCount</code> — это защита от багов, а не гарантия многопоточности.</p>
+<p>Для конкурентного доступа есть отдельное семейство (ConcurrentHashMap, CopyOnWriteArrayList) с weakly-consistent итераторами — ему посвящён отдельный урок. Старые обёртки <code>Collections.synchronizedXxx</code> берут единый замок и сильно уступают concurrent-коллекциям.</p>
+<h2>Выбор по паттерну доступа</h2>
+<p>Нужен индекс и обход по порядку — ArrayList. Нужна уникальность и быстрый поиск по значению — HashSet. Нужны пары и быстрый поиск по ключу — HashMap. Нужен порядок вставки — Linked*-варианты. Нужен отсортированный порядок и диапазонные запросы — TreeMap/TreeSet. Нужны очередь/стек — ArrayDeque. Нужна выборка минимума/максимума — PriorityQueue.</p>
+<p>Антипаттерн — выбирать структуру по привычке (всюду ArrayList или HashMap) без учёта операций, которые реально выполняются чаще всего.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Сильный ответ: уверенно рисуете иерархию (Collection vs Map), для каждой реализации называете устройство и сложности, и выбираете структуру от паттерна доступа. Умейте конвертировать (<code>new HashSet&lt;&gt;(list)</code> для дедупликации, <code>toArray</code>, <code>copyOf</code>) и объясните разницу снимка (<code>List.copyOf</code>) и view (<code>Collections.unmodifiableList</code>). Упомяните, что Hashtable/Vector/Stack — легаси, а fail-fast — это не потокобезопасность.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/arraylist-vs-linkedlist/">Чем ArrayList отличается от LinkedList и что брать по умолчанию?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/collections-hierarchy/">Что верно про иерархию Collections Framework?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/ordered-fast-lookup/">Нужна структура с быстрым поиском по ключу, которая при обходе отдаёт элементы в порядке их добавления. Что выбрать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/immutable-collections/">Что верно про неизменяемые и защитные коллекции?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/list-vs-set/">Чем List отличается от Set?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/choose-data-structure/">Как выбираешь структуру данных под задачу? Проведи рассуждение на примере: нужно хранить сессии пользователей с быстрым поиском по id и обходом в порядке добавления.</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/arraylist/">ArrayList: динамический массив изнутри</a><p>Бэкенд-массив, рост в 1.5×, амортизированная O(1), стоимость вставки/удаления и когда массив лучше.</p></li><li><a href="/articles/java/hashmap/">HashMap изнутри: бакеты, treeify, resize</a><p>Таблица бакетов, перемешивание хеша и индекс, превращение цепочки в дерево, ресайз и load factor, контракт ключа.</p></li><li><a href="/articles/java/equality/">Равенство: ==, equals и hashCode</a><p>Идентичность против логического равенства, контракт equals и hashCode, проблема equals с наследованием и корректная реализация.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Collections Framework: карта и выбор структуры","description":"Иерархия интерфейсов, сложности операций основных структур, неизменяемые коллекции и принцип выбора по паттерну доступа.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/collections-overview/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

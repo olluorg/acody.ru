@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вызов инструментов — карта «ИИ-инженер»</title>
+<meta name="description" content="Описание функций для модели, выполнение вызовов и обработка результатов.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/ai-engineer/tool-calling/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/ai-engineer/tool-calling/">
+<meta property="og:title" content="Вызов инструментов — карта «ИИ-инженер»">
+<meta property="og:description" content="Описание функций для модели, выполнение вызовов и обработка результатов.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/ai-engineer/#agents">ИИ-инженер</a> <span>/</span> <a href="/roadmap/ai-engineer/agents/">Инструменты и агенты</a> <span>/</span> <span>Вызов инструментов</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"ИИ-инженер","item":"https://learn.getsotto.ru/roadmap/ai-engineer/#agents"},{"@type":"ListItem","position":3,"name":"Инструменты и агенты","item":"https://learn.getsotto.ru/roadmap/ai-engineer/agents/"},{"@type":"ListItem","position":4,"name":"Вызов инструментов"}]}</script>
+  <h1>Вызов инструментов</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Описание функций для модели, выполнение вызовов и обработка результатов.</p>
+  <article class="md"><pre class="lang-python"><code>tools = [{
+    &quot;name&quot;: &quot;get_order_status&quot;,
+    &quot;description&quot;: &quot;Статус заказа по номеру. Используй, когда клиент спрашивает о заказе.&quot;,
+    &quot;input_schema&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;order_id&quot;: {&quot;type&quot;: &quot;string&quot;}}, &quot;required&quot;: [&quot;order_id&quot;]},
+}]</code></pre>
+<h3>Что важно знать</h3>
+<ul><li>Описание инструмента — тоже промпт: когда использовать, что возвращает, ограничения. Плохие описания — главная причина неверных вызовов.</li><li>Модель только <b>предлагает</b> вызов; выполняет код — и проверяет аргументы и права пользователя.</li><li>Результаты инструментов возвращают в диалог; большие — сокращают.</li><li>Ошибки инструмента сообщают модели текстом — она может исправить аргументы.</li><li>Опасные действия (оплата, удаление, письма) — с подтверждением человеком.</li><li>Параллельные вызовы ускоряют ответ.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 6 ч</small></h3><ul><li>Описывает инструмент схемой и обрабатывает цикл «вызов — результат — ответ»</li></ul><p class="rm-practice"><b>Практика.</b> Сделать ассистента с двумя инструментами — статус заказа и курс валют — и обработкой ошибок инструментов.</p></div><div class="rm-grade"><h3>Middle <small>≈ 6 ч</small></h3><ul><li>Пишет описания инструментов, при которых модель стабильно выбирает нужный, и измеряет точность выбора</li><li>Проверяет аргументы и права пользователя в коде инструмента</li><li>Требует подтверждения человека для необратимых действий</li></ul><p class="rm-practice"><b>Практика.</b> Довести точность выбора инструмента до 95% на наборе из 100 запросов к ассистенту с 8 инструментами.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/ai/tool-calling-agents/">Что такое вызов инструментов (tool calling) и агенты?</a> <span class="lvl lvl-middle">Middle</span><p>Модель получает описания инструментов (имя, параметры по схеме) и вместо текста может вернуть запрос на вызов; вызывает их код приложения и отдаёт результат обратно модели.</p></li><li><a href="/questions/ai/structured-output/">Как получить от LLM ответ в строгом формате, например JSON?</a> <span class="lvl lvl-middle">Middle</span><p>Используйте режим структурированного вывода по JSON-схеме, если API его поддерживает, и всегда валидируйте результат в коде.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/ai-engineer/agents/">← Инструменты и агенты</a><a class="next" href="/roadmap/ai-engineer/agent-design/">Проектирование агентов →</a></nav>
+  <p class="rm-back"><a href="/roadmap/ai-engineer/#agents">← Вся карта «ИИ-инженер»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Вызов инструментов","description":"Описание функций для модели, выполнение вызовов и обработка результатов.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/ai-engineer/tool-calling/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

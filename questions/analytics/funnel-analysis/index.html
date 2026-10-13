@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как анализировать воронку и искать, где теряются пользователи? — вопрос с собеседования</title>
+<meta name="description" content="Воронка — последовательность шагов к цели (просмотр → корзина → оформление → оплата) с конверсией между шагами. Анализ: найти шаг с наибольшим…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/funnel-analysis/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/funnel-analysis/">
+<meta property="og:title" content="Как анализировать воронку и искать, где теряются пользователи? — вопрос с собеседования">
+<meta property="og:description" content="Воронка — последовательность шагов к цели (просмотр → корзина → оформление → оплата) с конверсией между шагами. Анализ: найти шаг с наибольшим…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Как анализировать воронку и искать, где теряются пользователи?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Как анализировать воронку и искать, где теряются пользователи?"}]}</script>
+  <h1>Как анализировать воронку и искать, где теряются пользователи?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Продуктовые метрики</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Конверсия в покупку упала — как найти шаг, где проблема?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Воронка — последовательность шагов к цели (просмотр → корзина → оформление → оплата) с конверсией между шагами. Анализ: найти шаг с <b>наибольшим падением</b> относительно нормы или прошлого периода, разложить по <b>сегментам</b> (платформа, канал, новые и старые), проверить <b>трекинг</b>, затем сформулировать гипотезы и проверить экспериментом.</p><ul><li>Сравнивать с историей и сегментами, а не с абстрактной «хорошей конверсией»</li><li>Резкое падение на одном шаге в одной платформе — чаще всего баг или сломанный трекинг</li><li>Качественные данные (записи сессий, опросы, поддержка) объясняют «почему»</li></ul><p class="extra"><span>А ещё</span> Улучшение верхних шагов может снизить конверсию нижних: пришли менее мотивированные пользователи</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Шаги анализа:</b></p>
+<ol><li>Зафиксировать определение воронки: шаги, окно конверсии, единицу (пользователь или сессия).</li><li>Посчитать конверсию на каждом шаге и сравнить с прошлыми периодами.</li><li>Найти аномальный шаг; разрезать по платформе, версии приложения, браузеру, каналу, региону, новым и вернувшимся.</li><li>Исключить технические причины: релиз, ошибка платёжного шлюза, потеря событий.</li><li>Посмотреть качественные данные: записи сессий (Вебвизор), отзывы, обращения в поддержку.</li><li>Сформулировать гипотезы и проверить их в A/B-тесте.</li></ol>
+<p><b>Подводные камни:</b> смешение пользователей разного намерения на верхних шагах; события, отправляемые до или после реального действия; сравнение периодов с разной сезонностью.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Построение и разрезы воронки.</li><li>Проверка технических причин.</li><li>Связь с качественными данными и экспериментами.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/funnel-sql/">Как посчитать воронку конверсии на SQL?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/analytics/metric-drop-case/">Ключевая метрика вчера упала на 15%. Как будете разбираться?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/analytics/arpu-arppu/">Чем ARPU отличается от ARPPU и как раскладывать выручку на множители?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как анализировать воронку и искать, где теряются пользователи?","acceptedAnswer":{"@type":"Answer","text":"Воронка — последовательность шагов к цели (просмотр → корзина → оформление → оплата) с конверсией между шагами. Анализ: найти шаг с наибольшим падением относительно нормы или прошлого периода, разложить по сегментам (платформа, канал, новые и старые), проверить трекинг, затем сформулировать гипотезы и проверить экспериментом. Сравнивать с историей и сегментами, а не с абстрактной «хорошей конверсией» Резкое падение на одном шаге в одной платформе — чаще всего баг или сломанный трекинг Качественные данные (записи сессий, опросы, поддержка) объясняют «почему» Улучшение верхних шагов может снизить конверсию нижних: пришли менее мотивированные пользователи Шаги анализа: 1. Зафиксировать определение воронки: шаги, окно конверсии, единицу (пользователь или сессия). 2. Посчитать конверсию на каждом шаге и сравнить с прошлыми периодами. 3. Найти аномальный шаг; разрезать по платформе, версии приложения, браузеру, каналу, региону, новым и вернувшимся. 4. Исключить технические причины: релиз, ошибка платёжного шлюза, потеря событий. 5. Посмотреть качественные данные: записи сессий (Вебвизор), отзывы, обращения в поддержку. 6. Сформулировать гипотезы и проверить их в A/B-тесте. Подводные камни: смешение пользователей разного намерения на верхних шагах; события, отправляемые до или после реального действия; сравнение периодов с разной сезонностью."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что означают acks=0, acks=1 и acks=all у Kafka producer? — вопрос с собеседования</title>
+<meta name="description" content="acks=0 — не ждём подтверждения: максимум скорости, потери возможны. acks=1 — ждём запись лидером: потеря при падении лидера до репликации. acks=all …">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/brokers/producer-acks/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/brokers/producer-acks/">
+<meta property="og:title" content="Что означают acks=0, acks=1 и acks=all у Kafka producer? — вопрос с собеседования">
+<meta property="og:description" content="acks=0 — не ждём подтверждения: максимум скорости, потери возможны. acks=1 — ждём запись лидером: потеря при падении лидера до репликации. acks=all …">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/brokers/">Брокеры сообщений</a> <span>/</span> <span>Что означают acks=0, acks=1 и acks=all у Kafka producer?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/questions/brokers/"},{"@type":"ListItem","position":3,"name":"Что означают acks=0, acks=1 и acks=all у Kafka producer?"}]}</script>
+  <h1>Что означают acks=0, acks=1 и acks=all у Kafka producer?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Kafka Producer</span><span class="chip">Kafka</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как настроить продюсер Kafka, чтобы не терять сообщения?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>acks=0</b> — не ждём подтверждения: максимум скорости, потери возможны. <b>acks=1</b> — ждём запись лидером: потеря при падении лидера до репликации. <b>acks=all</b> — ждём все синхронные реплики (ISR): надёжно.</p><ul><li>acks=all по умолчанию с Kafka 3.0 (вместе с идемпотентностью)</li><li>Надёжность даёт связка: acks=all + min.insync.replicas=2 + replication.factor=3</li><li>Цена acks=all — задержка на репликацию</li></ul><p class="extra"><span>А ещё</span> acks=all при ISR из одного лидера — то же, что acks=1, отсюда min.insync.replicas</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>acks=0</b> — продюсер не ждёт ответа брокера. Сообщение может потеряться в сети или на брокере, а продюсер не узнает. Подходит для метрик и логов, где потеря допустима.</p>
+<p><b>acks=1</b> — брокер-лидер записал сообщение в свой журнал (в page cache) и ответил. Если лидер упадёт до того, как реплики скопировали сообщение, а лидером станет реплика без него, — подтверждённое сообщение потеряно.</p>
+<p><b>acks=all (-1)</b> — лидер отвечает, когда сообщение получили все реплики из ISR (in-sync replicas). Потеря возможна только при одновременной потере всех реплик ISR. Задержка выше — нужно дождаться реплик.</p>
+<p><b>Важно вместе:</b> если ISR сжался до одного лидера (реплики отстали), acks=all подтверждает после записи одним лидером. Поэтому задают <code>min.insync.replicas=2</code> на топике: при меньшем числе синхронных реплик брокер отклоняет запись с ошибкой — лучше отказ, чем ложная надёжность.</p>
+<p><b>Остальное для надёжности продюсера:</b> <code>enable.idempotence=true</code> (без дублей при повторах), достаточные <code>retries</code> и <code>delivery.timeout.ms</code>, обработка ошибок в callback отправки, <code>unclean.leader.election.enable=false</code>.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Что подтверждается при каждом значении.</li><li>Сценарий потери при acks=1.</li><li>Связка с min.insync.replicas и replication.factor.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать acks=all достаточным без min.insync.replicas.</li><li>Не обрабатывать ошибки отправки в callback.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>acks=0 — без подтверждения (fire-and-forget); acks=1 — ждать leader (потеря при падении до репликации); acks=all — ждать все ISR (надёжно при min.insync.replicas≥2)</li><li class="no"><span class="mark">✗</span>Это уровни приоритета: 0 низкий, 1 средний, all высокий</li><li class="no"><span class="mark">✗</span>acks=0 ждёт всех реплик, acks=all не ждёт никого</li><li class="no"><span class="mark">✗</span>acks определяет таймаут отправки в миллисекундах</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое ISR?</li><li>Как enable.idempotence связан с retries?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/brokers/kafka-producer/">Kafka Producer</a><p>Запись и сериализация, выбор партиции, батчинг и сжатие, acks и долговечность, идемпотентный producer и транзакции.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/brokers/min-insync-replicas/">Как min.insync.replicas работает вместе с acks=all?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/kafka-isr/">Что такое ISR (in-sync replicas) в Kafka и какую роль он играет?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/sync-async-replication/">Чем синхронная репликация отличается от асинхронной и что выбрать?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что означают acks=0, acks=1 и acks=all у Kafka producer?","acceptedAnswer":{"@type":"Answer","text":"acks=0 — не ждём подтверждения: максимум скорости, потери возможны. acks=1 — ждём запись лидером: потеря при падении лидера до репликации. acks=all — ждём все синхронные реплики (ISR): надёжно. acks=all по умолчанию с Kafka 3.0 (вместе с идемпотентностью) Надёжность даёт связка: acks=all + min.insync.replicas=2 + replication.factor=3 Цена acks=all — задержка на репликацию acks=all при ISR из одного лидера — то же, что acks=1, отсюда min.insync.replicas acks=0 — продюсер не ждёт ответа брокера. Сообщение может потеряться в сети или на брокере, а продюсер не узнает. Подходит для метрик и логов, где потеря допустима. acks=1 — брокер-лидер записал сообщение в свой журнал (в page cache) и ответил. Если лидер упадёт до того, как реплики скопировали сообщение, а лидером станет реплика без него, — подтверждённое сообщение потеряно. acks=all (-1) — лидер отвечает, когда сообщение получили все реплики из ISR (in-sync replicas). Потеря возможна только при одновременной потере всех реплик ISR. Задержка выше — нужно дождаться реплик. Важно вместе: если ISR сжался до одного лидера (реплики отстали), acks=all подтверждает после записи одним лидером. Поэтому задают min.insync.replicas=2 на топике: при меньшем числе синхронных реплик брокер отклоняет запись с ошибкой — лучше отказ, чем ложная надёжность. Остальное для надёжности продюсера…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

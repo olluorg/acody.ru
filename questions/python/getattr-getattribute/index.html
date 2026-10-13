@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем __getattr__ отличается от __getattribute__? — вопрос с собеседования</title>
+<meta name="description" content="__getattribute__ вызывается при каждом обращении к атрибуту — это сам механизм поиска. __getattr__ вызывается только если атрибут не найден обычным…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/getattr-getattribute/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/getattr-getattribute/">
+<meta property="og:title" content="Чем __getattr__ отличается от __getattribute__? — вопрос с собеседования">
+<meta property="og:description" content="__getattribute__ вызывается при каждом обращении к атрибуту — это сам механизм поиска. __getattr__ вызывается только если атрибут не найден обычным…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Чем __getattr__ отличается от __getattribute__?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Чем __getattr__ отличается от __getattribute__?"}]}</script>
+  <h1>Чем __getattr__ отличается от __getattribute__?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">ООП</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как перехватить обращение к несуществующему атрибуту?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>__getattribute__</b> вызывается при <b>каждом</b> обращении к атрибуту — это сам механизм поиска. <b>__getattr__</b> вызывается <b>только если атрибут не найден</b> обычным путём. Для прокси, ленивых атрибутов и обёрток используют __getattr__ — он безопаснее и дешевле.</p><ul><li>В __getattribute__ легко получить бесконечную рекурсию — обращаться через object.__getattribute__(self, name)</li><li>__getattr__ должен бросать AttributeError для неизвестных имён</li><li>Модуль тоже может иметь __getattr__ (PEP 562) — ленивый импорт, предупреждения об устаревании</li></ul><p class="extra"><span>А ещё</span> Пара для записи — __setattr__ и __delattr__</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>__getattribute__</b> — точка входа всякого <code>obj.name</code>. Реализация по умолчанию (<code>object.__getattribute__</code>) выполняет поиск: дескрипторы данных, словарь экземпляра, атрибуты класса. Переопределяют редко — для отладки, контроля доступа. Любое <code>self.x</code> внутри снова вызывает <code>__getattribute__</code> — рекурсия; обращаются через <code>super()</code> или <code>object.__getattribute__(self, name)</code>.</p>
+<p><b>__getattr__</b> — запасной путь: вызывается, когда обычный поиск бросил AttributeError. Подходит для:</p>
+<ul><li>прокси и обёрток — делегировать всё неизвестное обёрнутому объекту;</li><li>динамических атрибутов — API-клиент, где <code>client.users</code> строит запрос;</li><li>ленивой загрузки.</li></ul>
+<p>Важно бросать <code>AttributeError</code> для неизвестных имён: иначе ломаются <code>hasattr</code>, <code>getattr</code> с умолчанием, pickle и copy.</p>
+<p><b>Модульный __getattr__</b> (PEP 562): функция <code>__getattr__(name)</code> на уровне модуля вызывается для отсутствующих имён — ленивый импорт тяжёлых подмодулей, предупреждение об устаревших именах.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>class Proxy:
+    def __init__(self, target):
+        self._target = target
+    def __getattr__(self, name):          # только для отсутствующих
+        print(&quot;доступ к&quot;, name)
+        return getattr(self._target, name)</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Когда вызывается каждый.</li><li>Риск рекурсии.</li><li>Типичные применения.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/descriptors/">Что такое дескриптор и как на нём построены property и методы?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем __getattr__ отличается от __getattribute__?","acceptedAnswer":{"@type":"Answer","text":"__getattribute__ вызывается при каждом обращении к атрибуту — это сам механизм поиска. __getattr__ вызывается только если атрибут не найден обычным путём. Для прокси, ленивых атрибутов и обёрток используют __getattr__ — он безопаснее и дешевле. В __getattribute__ легко получить бесконечную рекурсию — обращаться через object.__getattribute__(self, name) __getattr__ должен бросать AttributeError для неизвестных имён Модуль тоже может иметь __getattr__ (PEP 562) — ленивый импорт, предупреждения об устаревании Пара для записи — __setattr__ и __delattr__ __getattribute__ — точка входа всякого obj.name. Реализация по умолчанию (object.__getattribute__) выполняет поиск: дескрипторы данных, словарь экземпляра, атрибуты класса. Переопределяют редко — для отладки, контроля доступа. Любое self.x внутри снова вызывает __getattribute__ — рекурсия; обращаются через super() или object.__getattribute__(self, name). __getattr__ — запасной путь: вызывается, когда обычный поиск бросил AttributeError. Подходит для: - прокси и обёрток — делегировать всё неизвестное обёрнутому объекту; - динамических атрибутов — API-клиент, где client.users строит запрос; - ленивой загрузки. Важно бросать AttributeError для неизвестных имён: иначе ломаются hasattr, getattr с умолчанием, pickle и copy. Модульный __getattr__ (PEP 562): функция __getattr__(name) на уровне модуля вызывается для отсутствующих имён — ленивый импорт тяжёлых подмодулей, предупреждение об…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

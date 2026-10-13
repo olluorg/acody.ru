@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что означает eventual consistency? — вопрос с собеседования</title>
+<meta name="description" content="Реплики со временем сойдутся, если записи прекратятся; сразу после записи разные читатели могут видеть разное. Компромисс ради доступности и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/eventual-consistency-db/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/eventual-consistency-db/">
+<meta property="og:title" content="Что означает eventual consistency? — вопрос с собеседования">
+<meta property="og:description" content="Реплики со временем сойдутся, если записи прекратятся; сразу после записи разные читатели могут видеть разное. Компромисс ради доступности и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Что означает eventual consistency?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Что означает eventual consistency?"}]}</script>
+  <h1>Что означает eventual consistency?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">CAP и согласованность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Где допустима итоговая согласованность?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Реплики <b>со временем сойдутся</b>, если записи прекратятся; сразу после записи разные читатели могут видеть разное. Компромисс ради доступности и скорости.</p><ul><li>Подходит: ленты, счётчики, поиск, рекомендации, кэши</li><li>Не подходит: деньги, остатки, уникальность, бронирования</li><li>Смягчают гарантиями сессии: read-your-writes, монотонные чтения</li></ul><p class="extra"><span>А ещё</span> Окно расхождения не гарантировано — под нагрузкой бывают секунды</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Это компромисс ради доступности и скорости: система всегда отвечает, но свежесть данных не гарантируется немедленно. Для лент и счётчиков обычно приемлемо, для денег — часто нет. Промежуточные гарантии (read-your-writes, monotonic reads) смягчают неудобства.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определение через сходимость.</li><li>Где допустима и где нет.</li><li>Промежуточные гарантии.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Путать eventual consistency с полным отсутствием согласованности.</li><li>Применять её там, где нужна строгая корректность.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Реплики со временем сходятся, но сразу после записи читатели могут видеть разные версии</li><li class="no"><span class="mark">✗</span>Запись синхронно фиксируется на всех репликах до ответа клиенту</li><li class="no"><span class="mark">✗</span>Данные никогда не приходят к согласованному состоянию</li><li class="no"><span class="mark">✗</span>Транзакция выполняется целиком или не выполняется вовсе</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое read-your-writes consistency?</li><li>Как кворумы влияют на согласованность?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/cap/">CAP и согласованность</a><p>Точная формулировка CAP и типичные искажения, неизбежность разделения и выбор C/A по операции, спектр согласованности и сессионные гарантии, кворумы N/R/W и их пределы, PACELC и разрешение конфликтов.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/eventual-consistency/">Что описывает eventual consistency?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/replication-lag/">Пользователь сохранил изменения, обновил страницу — а изменений нет. Что происходит и как это исправить?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/consistency-spectrum/">Какие промежуточные гарантии находятся между строгой и итоговой согласованностью?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что означает eventual consistency?","acceptedAnswer":{"@type":"Answer","text":"Реплики со временем сойдутся, если записи прекратятся; сразу после записи разные читатели могут видеть разное. Компромисс ради доступности и скорости. Подходит: ленты, счётчики, поиск, рекомендации, кэши Не подходит: деньги, остатки, уникальность, бронирования Смягчают гарантиями сессии: read-your-writes, монотонные чтения Окно расхождения не гарантировано — под нагрузкой бывают секунды Это компромисс ради доступности и скорости: система всегда отвечает, но свежесть данных не гарантируется немедленно. Для лент и счётчиков обычно приемлемо, для денег — часто нет. Промежуточные гарантии (read-your-writes, monotonic reads) смягчают неудобства."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

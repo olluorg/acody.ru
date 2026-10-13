@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое блочная модель CSS и чем content-box отличается от border-box? — вопрос с собеседования</title>
+<meta name="description" content="Каждый элемент — прямоугольник из content, padding, border, margin. При content-box (по умолчанию) width задаёт только содержимое, а padding и border…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/box-model/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/box-model/">
+<meta property="og:title" content="Что такое блочная модель CSS и чем content-box отличается от border-box? — вопрос с собеседования">
+<meta property="og:description" content="Каждый элемент — прямоугольник из content, padding, border, margin. При content-box (по умолчанию) width задаёт только содержимое, а padding и border…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Что такое блочная модель CSS и чем content-box отличается от border-box?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Что такое блочная модель CSS и чем content-box отличается от border-box?"}]}</script>
+  <h1>Что такое блочная модель CSS и чем content-box отличается от border-box?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Вёрстка и CSS</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему ширина элемента больше заданной в width?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Каждый элемент — прямоугольник из <b>content, padding, border, margin</b>. При <b>content-box</b> (по умолчанию) width задаёт только содержимое, а padding и border <b>добавляются сверху</b>. При <b>border-box</b> width включает padding и border — размеры предсказуемы, поэтому почти все проекты задают <code>*, *::before, *::after { box-sizing: border-box }</code>.</p><ul><li>margin не входит в размер элемента ни в одном режиме</li><li>Вертикальные margin соседних блоков схлопываются (берётся больший)</li><li>Внутри flex и grid схлопывания margin нет</li></ul><p class="extra"><span>А ещё</span> outline не занимает места и не влияет на раскладку</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><pre class="lang-css"><code>.card { width: 300px; padding: 20px; border: 2px solid; }
+/* content-box: реальная ширина 300 + 40 + 4 = 344px */
+/* border-box:  реальная ширина 300px, содержимое 256px */</code></pre>
+<p><b>Схлопывание margin:</b> у соседних блоков по вертикали между ними остаётся больший из двух отступов, а не сумма. То же происходит между родителем и первым ребёнком, если у родителя нет padding, border или он не создаёт новый контекст форматирования.</p>
+<p><b>Строчные элементы</b> (inline) игнорируют width, height и вертикальные margin; <code>inline-block</code> — ведёт себя как блок внутри строки.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Четыре части модели.</li><li>Разница box-sizing.</li><li>Схлопывание margin.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/flex-vs-grid/">Чем Flexbox отличается от Grid и когда что использовать?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое блочная модель CSS и чем content-box отличается от border-box?","acceptedAnswer":{"@type":"Answer","text":"Каждый элемент — прямоугольник из content, padding, border, margin. При content-box (по умолчанию) width задаёт только содержимое, а padding и border добавляются сверху. При border-box width включает padding и border — размеры предсказуемы, поэтому почти все проекты задают , ::before, ::after { box-sizing: border-box }. margin не входит в размер элемента ни в одном режиме Вертикальные margin соседних блоков схлопываются (берётся больший) Внутри flex и grid схлопывания margin нет outline не занимает места и не влияет на раскладку Схлопывание margin: у соседних блоков по вертикали между ними остаётся больший из двух отступов, а не сумма. То же происходит между родителем и первым ребёнком, если у родителя нет padding, border или он не создаёт новый контекст форматирования. Строчные элементы (inline) игнорируют width, height и вертикальные margin; inline-block — ведёт себя как блок внутри строки."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

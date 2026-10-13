@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как устанавливается и закрывается TCP-соединение? — вопрос с собеседования</title>
+<meta name="description" content="Установка — SYN → SYN-ACK → ACK: стороны обмениваются начальными номерами последовательности. Один оборот (RTT) до первых данных. Закрытие — FIN и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/tcp-handshake/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/tcp-handshake/">
+<meta property="og:title" content="Как устанавливается и закрывается TCP-соединение? — вопрос с собеседования">
+<meta property="og:description" content="Установка — SYN → SYN-ACK → ACK: стороны обмениваются начальными номерами последовательности. Один оборот (RTT) до первых данных. Закрытие — FIN и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Как устанавливается и закрывается TCP-соединение?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Как устанавливается и закрывается TCP-соединение?"}]}</script>
+  <h1>Как устанавливается и закрывается TCP-соединение?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Сети</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое трёхстороннее рукопожатие?</li><li>Зачем нужно состояние TIME_WAIT?</li><li>Почему на сервере тысячи соединений в TIME_WAIT?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Установка — <b>SYN → SYN-ACK → ACK</b>: стороны обмениваются начальными номерами последовательности. Один оборот (RTT) до первых данных.</p><ul><li>Закрытие — FIN и ACK в каждую сторону, соединение закрывается по половинам</li><li>Кто закрыл первым, ждёт в TIME_WAIT 2×MSL (в Linux 60 с)</li><li>Много TIME_WAIT у клиента — новый коннект на каждый запрос; лечится пулом и keep-alive</li></ul><p class="extra"><span>А ещё</span> SYN flood и SYN cookies; RST — аварийный разрыв</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">TCP: рукопожатие, потери и повторная передача</p><script type="module" src="/widgets/tcp.js"></script><sotto-tcp theme="dark"></sotto-tcp></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Установка соединения:</b></p>
+<ol><li>клиент шлёт <b>SYN</b> со своим начальным номером последовательности (ISN, случайный — защита от подделки);</li><li>сервер отвечает <b>SYN-ACK</b>: свой ISN и подтверждение номера клиента + 1;</li><li>клиент подтверждает <b>ACK</b>. Соединение установлено, можно слать данные.</li></ol>
+<p>Зачем три шага, а не два: обе стороны должны убедиться, что другая получила их номер последовательности. Цена — один RTT до начала обмена; с TLS 1.3 добавляется ещё один, отсюда интерес к keep-alive, пулам и QUIC.</p>
+<p>На сервере полуоткрытые соединения (получен SYN) лежат в очереди SYN, а установленные, но ещё не принятые <code>accept()</code>, — в очереди accept (размер — <code>backlog</code> в <code>listen</code> и <code>somaxconn</code>). Переполнение очереди при всплеске — потерянные соединения. <b>SYN flood</b> — атака множеством SYN без завершения; защита — SYN cookies: сервер не хранит состояние, а кодирует его в своём ISN.</p>
+<p><b>Закрытие.</b> TCP двунаправлен, каждая сторона закрывает свою половину: FIN → ACK, затем FIN → ACK с другой стороны (часто FIN и ACK объединяются). Можно закрыть запись и продолжать читать (half-close).</p>
+<p><b>TIME_WAIT.</b> Сторона, закрывшая первой, после последнего ACK ждёт 2×MSL (максимальное время жизни сегмента; в Linux фиксированно 60 секунд). Зачем: если последний ACK потерялся, другая сторона повторит FIN, и на него надо ответить; и чтобы опоздавшие сегменты старого соединения не попали в новое с теми же адресами и портами.</p>
+<p><b>Практика.</b> Тысячи соединений в TIME_WAIT у клиента — признак того, что на каждый запрос открывается новое соединение. Каждое держит локальный порт, а их около 28 тысяч в диапазоне по умолчанию — при высоком RPS к одному адресу порты кончаются (<code>Cannot assign requested address</code>). Решение — переиспользовать соединения: HTTP keep-alive, пул соединений к базе. <code>tcp_tw_reuse</code> помогает исходящим соединениям; старый <code>tcp_tw_recycle</code> был удалён, потому что ломал клиентов за NAT.</p>
+<p><b>RST</b> — аварийный сброс: порт закрыт (<code>connection refused</code>), приложение закрыло сокет с непрочитанными данными, или соединение неизвестно.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>$ ss -tan state time-wait | wc -l
+27841
+$ ss -tan | awk &#x27;{print $1}&#x27; | sort | uniq -c
+  27841 TIME-WAIT
+    112 ESTAB
+# клиент открывает соединение на каждый HTTP-запрос — нужен пул/keep-alive</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Три шага и зачем обмен номерами последовательности.</li><li>Закрытие по половинам, FIN и ACK.</li><li>Смысл TIME_WAIT и кто в нём оказывается.</li><li>Практика: исчерпание портов, keep-alive и пулы; очередь accept и SYN flood — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать TIME_WAIT ошибкой, которую надо отключить.</li><li>Думать, что в TIME_WAIT попадает всегда сервер.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/tcp-reliability/">Как TCP обеспечивает надёжную доставку и не перегружает сеть?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/tls-handshake/">Как работает HTTPS и TLS-рукопожатие?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/tcp-vs-udp/">Чем TCP отличается от UDP?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/highload/connection-pooling/">Зачем нужен пул соединений к базе и как выбрать его размер?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как устанавливается и закрывается TCP-соединение?","acceptedAnswer":{"@type":"Answer","text":"Установка — SYN → SYN-ACK → ACK: стороны обмениваются начальными номерами последовательности. Один оборот (RTT) до первых данных. Закрытие — FIN и ACK в каждую сторону, соединение закрывается по половинам Кто закрыл первым, ждёт в TIME_WAIT 2×MSL (в Linux 60 с) Много TIME_WAIT у клиента — новый коннект на каждый запрос; лечится пулом и keep-alive SYN flood и SYN cookies; RST — аварийный разрыв Установка соединения: 1. клиент шлёт SYN со своим начальным номером последовательности (ISN, случайный — защита от подделки); 2. сервер отвечает SYN-ACK: свой ISN и подтверждение номера клиента + 1; 3. клиент подтверждает ACK. Соединение установлено, можно слать данные. Зачем три шага, а не два: обе стороны должны убедиться, что другая получила их номер последовательности. Цена — один RTT до начала обмена; с TLS 1.3 добавляется ещё один, отсюда интерес к keep-alive, пулам и QUIC. На сервере полуоткрытые соединения (получен SYN) лежат в очереди SYN, а установленные, но ещё не принятые accept(), — в очереди accept (размер — backlog в listen и somaxconn). Переполнение очереди при всплеске — потерянные соединения. SYN flood — атака множеством SYN без завершения; защита — SYN cookies: сервер не хранит состояние, а кодирует его в своём ISN. Закрытие. TCP двунаправлен, каждая сторона закрывает…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

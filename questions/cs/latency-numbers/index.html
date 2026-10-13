@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие порядки задержек нужно знать разработчику? — вопрос с собеседования</title>
+<meta name="description" content="Наносекунды — процессор и кэши, ~100 нс — оперативная память, десятки–сотни микросекунд — SSD и сеть внутри дата-центра, миллисекунды — диск HDD и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/latency-numbers/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/latency-numbers/">
+<meta property="og:title" content="Какие порядки задержек нужно знать разработчику? — вопрос с собеседования">
+<meta property="og:description" content="Наносекунды — процессор и кэши, ~100 нс — оперативная память, десятки–сотни микросекунд — SSD и сеть внутри дата-центра, миллисекунды — диск HDD и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Какие порядки задержек нужно знать разработчику?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Какие порядки задержек нужно знать разработчику?"}]}</script>
+  <h1>Какие порядки задержек нужно знать разработчику?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Хранение данных</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Насколько память быстрее диска?</li><li>Сколько стоит запрос в другой дата-центр?</li><li>Latency numbers every programmer should know</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Наносекунды — процессор и кэши, ~100 нс — оперативная память, десятки–сотни микросекунд — SSD и сеть внутри дата-центра, миллисекунды — диск HDD и другой город, ~100 мс — другой континент.</p><ul><li>Каждый уровень дальше от процессора — в 10–1000 раз медленнее</li><li>Последовательный доступ намного быстрее случайного — и к памяти, и к диску</li><li>Сетевой вызов внутри ДЦ ≈ 0,5 мс — в тысячи раз дороже обращения к памяти</li></ul><p class="extra"><span>А ещё</span> Отсюда кэши, пакетная обработка и «не ходить в сеть в цикле»</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Абсолютные цифры меняются с железом, порядки — нет. Приблизительно:</p>
+<div class="table"><table><thead><tr><th>Операция</th><th>Время</th></tr></thead><tbody><tr><td>обращение к кэшу L1</td><td>~1 нс</td></tr><tr><td>неудачное предсказание перехода</td><td>~3 нс</td></tr><tr><td>кэш L2</td><td>~4 нс</td></tr><tr><td>захват свободного мьютекса</td><td>~20 нс</td></tr><tr><td>оперативная память</td><td>~100 нс</td></tr><tr><td>сжатие 1 КБ быстрым алгоритмом</td><td>~2 мкс</td></tr><tr><td>случайное чтение 4 КБ с NVMe SSD</td><td>~20–100 мкс</td></tr><tr><td>последовательное чтение 1 МБ из памяти</td><td>~10 мкс</td></tr><tr><td>последовательное чтение 1 МБ с SSD</td><td>~0,3 мс</td></tr><tr><td>оборот по сети внутри дата-центра</td><td>~0,2–0,5 мс</td></tr><tr><td>поиск на HDD</td><td>~5–10 мс</td></tr><tr><td>Москва — Санкт-Петербург и обратно</td><td>~10 мс</td></tr><tr><td>Москва — Франкфурт и обратно</td><td>~40 мс</td></tr><tr><td>через океан и обратно</td><td>~100–150 мс</td></tr></tbody></table></div>
+<p><b>Как применять:</b></p>
+<ul><li><b>кэш в памяти против базы</b> — обращение к памяти ~100 нс, к базе по сети с запросом — миллисекунда: разница в 10 000 раз;</li><li><b>запросы в цикле</b> — 1000 последовательных вызовов по 1 мс — секунда; одним пакетным запросом — несколько миллисекунд. Это проблема N+1;</li><li><b>последовательный доступ</b> — и память (кэш-линии, предвыборка), и диски (особенно HDD) быстрее читают подряд. Поэтому журналы, Kafka и LSM-деревья пишут последовательно;</li><li><b>география</b> — скорость света в оптоволокне ~200 000 км/с: из Москвы во Владивосток и обратно физически не быстрее ~65 мс. Синхронная репликация между континентами прибавляет это к каждой записи;</li><li><b>оценки на собеседовании</b> — «сервис делает 5 последовательных походов в другие сервисы и 3 запроса в базу» — уже 5–10 мс без всякой работы.</li></ul>
+<p><b>Пропускная способность</b> — отдельная ось: память — десятки ГБ/с, NVMe — единицы ГБ/с, сеть 10–100 Гбит/с. Задержка говорит, сколько ждать один запрос, пропускная способность — сколько данных пройдёт за секунду.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>Страница делает 30 запросов к базе последовательно, по 0,8 мс:   24 мс
+То же одним запросом с IN (...):                                1,5 мс
+Тот же ответ из локального кэша в памяти:                      &lt; 0,01 мс</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Порядки величин по уровням: кэш, память, SSD, сеть ДЦ, межгород, континент.</li><li>Последовательный доступ против случайного.</li><li>Выводы: кэши, пакетирование, меньше сетевых обходов.</li><li>Разница задержки и пропускной способности.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Заучивать точные цифры, не понимая отношений между уровнями.</li><li>Считать SSD «почти как память».</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/latency-percentiles/">Почему время ответа измеряют перцентилями, а не средним?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/orders-of-magnitude/">Какие порядки величин стоит держать в голове при оценке на салфетке?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/page-cache/">Почему повторное чтение файла быстрее первого?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/big-o/">Что такое О-большое (Big O) и зачем оценивать сложность алгоритма?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие порядки задержек нужно знать разработчику?","acceptedAnswer":{"@type":"Answer","text":"Наносекунды — процессор и кэши, ~100 нс — оперативная память, десятки–сотни микросекунд — SSD и сеть внутри дата-центра, миллисекунды — диск HDD и другой город, ~100 мс — другой континент. Каждый уровень дальше от процессора — в 10–1000 раз медленнее Последовательный доступ намного быстрее случайного — и к памяти, и к диску Сетевой вызов внутри ДЦ ≈ 0,5 мс — в тысячи раз дороже обращения к памяти Отсюда кэши, пакетная обработка и «не ходить в сеть в цикле» Абсолютные цифры меняются с железом, порядки — нет. Приблизительно: | Операция | Время | | --- | --- | | обращение к кэшу L1 | ~1 нс | | неудачное предсказание перехода | ~3 нс | | кэш L2 | ~4 нс | | захват свободного мьютекса | ~20 нс | | оперативная память | ~100 нс | | сжатие 1 КБ быстрым алгоритмом | ~2 мкс | | случайное чтение 4 КБ с NVMe SSD | ~20–100 мкс | | последовательное чтение 1 МБ из памяти | ~10 мкс | | последовательное чтение 1 МБ с SSD | ~0,3 мс | | оборот по сети внутри дата-центра | ~0,2–0,5 мс | | поиск на HDD | ~5–10 мс | | Москва — Санкт-Петербург и обратно | ~10 мс | | Москва — Франкфурт и обратно | ~40 мс | | через океан и обратно | ~100–150 мс | Как применять: - кэш в памяти против базы — обращение к памяти ~100 нс, к базе по сети с запросом — миллисекунда: разница в 10 000 раз; - запросы в цикле — 1000 последовательных вызовов по 1 мс — секунда; одним пакетным…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

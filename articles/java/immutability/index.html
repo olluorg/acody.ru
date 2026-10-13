@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Проектирование неизменяемых классов — разбор для собеседования</title>
+<meta name="description" content="Зачем нужна неизменяемость, рецепт immutable-класса, защитные копии, безопасная публикация и records.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/immutability/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/immutability/">
+<meta property="og:title" content="Проектирование неизменяемых классов — разбор для собеседования">
+<meta property="og:description" content="Зачем нужна неизменяемость, рецепт immutable-класса, защитные копии, безопасная публикация и records.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Проектирование неизменяемых классов</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Проектирование неизменяемых классов"}]}</script>
+  <h1>Проектирование неизменяемых классов</h1>
+  <p class="lead">Зачем нужна неизменяемость, рецепт immutable-класса, защитные копии, безопасная публикация и records.</p>
+  <article class="md"><h2>Что даёт неизменяемость</h2>
+<p>Неизменяемый (immutable) объект — тот, чьё наблюдаемое состояние не меняется после создания. Это не самоцель, а мощный инструмент простоты и безопасности.</p>
+<p>Плюсы: потокобезопасность без всякой синхронизации (нечего портить гонкой), безопасность как ключей Map и элементов Set (хеш не «уедет»), свободное кэширование и шаринг одного экземпляра, и просто более лёгкие рассуждения о коде — значение нельзя поменять «из-под ног». Поэтому общий совет — делать классы неизменяемыми по умолчанию, а изменяемость вводить только при необходимости.</p>
+<h2>Рецепт immutable-класса</h2>
+<p>Чтобы класс был по-настоящему неизменяемым: (1) не давать сеттеров и иных мутаторов; (2) все поля сделать private final; (3) запретить наследование (класс final или приватный конструктор + фабрики), иначе подкласс может добавить изменяемость; (4) если поля ссылаются на изменяемые объекты — делать защитные копии на входе и выходе; (5) не давать ссылке this утечь из конструктора (см. безопасную публикацию).</p>
+<p>Пункты 1–3 очевидны, а 4 — самый забываемый и важный.</p>
+<h2>Защитные копии</h2>
+<p>Если конструктор просто сохранит переданную ссылку на изменяемый объект (List, массив, Date), вызывающий сохранит свою копию ссылки и сможет поменять «внутренности» вашего объекта снаружи — неизменяемость иллюзорна. Поэтому изменяемые входные данные копируют в конструкторе, а в геттере возвращают копию или неизменяемое представление.</p>
+<p>Это и есть defensive copy — базовый приём дизайна immutable-классов и защиты инвариантов вообще.</p>
+<pre class="lang-java"><code>final class Period {
+    private final List&lt;Event&gt; events;
+    Period(List&lt;Event&gt; events) {
+        this.events = List.copyOf(events);   // копия на входе — снаружи не подменят
+    }
+    List&lt;Event&gt; events() { return events; } // уже неизменяемый список
+}</code></pre>
+<h2>Безопасная публикация</h2>
+<p>Неизменяемость и многопоточность связаны напрямую: объект, у которого ВСЕ поля final и ссылка this не утекла из конструктора, по модели памяти Java безопасно публикуется — любой поток, получивший ссылку на готовый объект, увидит его поля корректно установленными без синхронизации (final field freeze).</p>
+<p>Именно поэтому «immutable ⇒ потокобезопасен». Подробно про этот механизм — в уроке про JMM.</p>
+<h2>Стоимость и приёмы</h2>
+<p>Цена неизменяемости — копирование при «изменении»: вместо мутации создают новый объект (методы <code>withX</code>, возвращающие копию с одним изменённым полем). Для редких изменений это дёшево; для частых — используют изменяемый Builder, который собирает состояние, а на выходе отдаёт неизменяемый результат, или специализированные persistent-структуры.</p>
+<p>Главное — не превращать «<code>withX</code> на каждый чих» в источник мусора в горячем цикле; там уместен мутабельный буфер с финальной заморозкой.</p>
+<h2>records</h2>
+<p>Современный лаконичный способ объявить неизменяемый носитель данных — record (см. урок про современную Java): он автоматически делает компоненты private final, генерирует конструктор, геттеры, equals/<code>hashCode</code> и <code>toString</code>.</p>
+<p>Важная оговорка: record гарантирует неизменяемость только своих ССЫЛОК, но не делает защитных копий за вас. Если компонент — изменяемый List, его всё равно нужно копировать в компактном конструкторе, иначе «неизменяемая» запись протекает.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Назовите выгоды (потокобезопасность, безопасные ключи, кэшируемость) и рецепт (final-класс, private final поля, без сеттеров, защитные копии, не публиковать this). Подчеркните defensive copy на входе/выходе как самый забываемый пункт, свяжите immutable с безопасной публикацией (все поля final → потокобезопасен) и оговорите, что record не делает защитных копий сам.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/immutable-class-recipe/">Что требуется, чтобы класс был ПО-НАСТОЯЩЕМУ неизменяемым?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/immutability-benefits/">Что даёт неизменяемость (immutability) объекта?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/defensive-copy/">Конструктор сохранил переданный List по ссылке (this.items = items). Почему объект всё равно изменяем?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/immutable-thread-safety/">Почему про immutable-объект говорят «потокобезопасен без синхронизации»?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/immutable-modification-cost/">Как в immutable-дизайне моделируют «изменение» и снижают его цену?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/record-defensive-copy/">Чего record НЕ делает за вас при проектировании неизменяемого носителя данных?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/equality/">Равенство: ==, equals и hashCode</a><p>Идентичность против логического равенства, контракт equals и hashCode, проблема equals с наследованием и корректная реализация.</p></li><li><a href="/articles/java/initialization/">final, static и порядок инициализации</a><p>Семантика final (и почему это не immutable), static-члены, порядок инициализации класса и объекта, константы и ловушки.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Проектирование неизменяемых классов","description":"Зачем нужна неизменяемость, рецепт immutable-класса, защитные копии, безопасная публикация и records.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/immutability/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

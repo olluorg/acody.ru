@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как устроена SecurityFilterChain в Spring Security? — вопрос с собеседования</title>
+<meta name="description" content="Spring Security — цепочка сервлетных фильтров. В контейнер встраивается DelegatingFilterProxy → FilterChainProxy, который выбирает подходящую…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/security-filter-chain/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/security-filter-chain/">
+<meta property="og:title" content="Как устроена SecurityFilterChain в Spring Security? — вопрос с собеседования">
+<meta property="og:description" content="Spring Security — цепочка сервлетных фильтров. В контейнер встраивается DelegatingFilterProxy → FilterChainProxy, который выбирает подходящую…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Как устроена SecurityFilterChain в Spring Security?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Как устроена SecurityFilterChain в Spring Security?"}]}</script>
+  <h1>Как устроена SecurityFilterChain в Spring Security?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Spring Security</span><span class="chip ver">Spring Boot &gt;=3</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как настраивать Spring Security 6?</li><li>Что такое DelegatingFilterProxy?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Spring Security — <b>цепочка сервлетных фильтров</b>. В контейнер встраивается <code>DelegatingFilterProxy</code> → <code>FilterChainProxy</code>, который выбирает подходящую **<code>SecurityFilterChain</code>** по запросу и прогоняет его через её фильтры (CORS, CSRF, аутентификация, ExceptionTranslation, Authorization).</p><ul><li>Конфигурация — бином SecurityFilterChain и HttpSecurity с лямбдами (WebSecurityConfigurerAdapter удалён в Spring Security 6)</li><li>Несколько цепочек — разные правила для /api/** и веб-страниц, порядок через @Order</li><li>Порядок правил внутри authorizeHttpRequests важен: первое совпадение решает</li></ul><p class="extra"><span>А ещё</span> Отладка: logging.level.org.springframework.security=TRACE</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Встраивание:</b> Spring Boot регистрирует фильтр <code>DelegatingFilterProxy</code> (сервлетный фильтр, который делегирует бину) → <code>FilterChainProxy</code>. Тот хранит список <code>SecurityFilterChain</code>, у каждой — правило выбора запросов (<code>securityMatcher</code>) и свой набор фильтров. Срабатывает первая подходящая цепочка.</p>
+<p><b>Фильтры в цепочке</b> (упрощённо, по порядку): <code>CorsFilter</code>, <code>CsrfFilter</code>, <code>LogoutFilter</code>, фильтры аутентификации (<code>UsernamePasswordAuthenticationFilter</code>, <code>BearerTokenAuthenticationFilter</code>, <code>BasicAuthenticationFilter</code>), <code>SecurityContextHolderFilter</code>, <code>ExceptionTranslationFilter</code> (превращает исключения безопасности в 401/403), <code>AuthorizationFilter</code>.</p>
+<p><b>Конфигурация Spring Security 6:</b></p>
+<pre class="lang-java"><code>@Bean
+SecurityFilterChain api(HttpSecurity http) throws Exception {
+    return http
+        .securityMatcher(&quot;/api/**&quot;)
+        .authorizeHttpRequests(a -&gt; a
+            .requestMatchers(HttpMethod.GET, &quot;/api/public/**&quot;).permitAll()
+            .requestMatchers(&quot;/api/admin/**&quot;).hasRole(&quot;ADMIN&quot;)
+            .anyRequest().authenticated())
+        .oauth2ResourceServer(o -&gt; o.jwt(Customizer.withDefaults()))
+        .sessionManagement(s -&gt; s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .csrf(c -&gt; c.disable())
+        .build();
+}</code></pre>
+<p><b>Ловушки:</b> правила проверяются по порядку — <code>anyRequest()</code> должен быть последним; <code>WebSecurityConfigurerAdapter</code> и <code>antMatchers</code> из старых статей в Spring Security 6 удалены; свой фильтр добавлять через <code>addFilterBefore/After</code> в нужное место.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Цепочка фильтров и FilterChainProxy.</li><li>Несколько SecurityFilterChain.</li><li>Конфигурация в стиле Spring Security 6.</li><li>Порядок правил.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Копировать конфигурацию с WebSecurityConfigurerAdapter.</li><li>Ставить anyRequest() до конкретных правил.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое SecurityContext?</li><li>Где обрабатываются 401 и 403?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/spring-security-deep/">Spring Security: фильтр-цепочка и авторизация</a><p>SecurityFilterChain, аутентификация (UserDetailsService/PasswordEncoder), SecurityContext, авторизация запросов и CSRF/CORS/сессии.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/spring-security-authn-authz/">Как в Spring Security устроены аутентификация и авторизация — какие объекты за них отвечают?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/security-rule-order/">В конфигурации указано сначала anyRequest().authenticated(), а затем requestMatchers(&quot;/public/**&quot;).permitAll(). Что получится?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/spring-security-filters-basic/">Как Spring Security встраивается в обработку запроса?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/spring/filter-vs-interceptor/">Чем Servlet Filter отличается от HandlerInterceptor?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как устроена SecurityFilterChain в Spring Security?","acceptedAnswer":{"@type":"Answer","text":"Spring Security — цепочка сервлетных фильтров. В контейнер встраивается DelegatingFilterProxy → FilterChainProxy, который выбирает подходящую SecurityFilterChain по запросу и прогоняет его через её фильтры (CORS, CSRF, аутентификация, ExceptionTranslation, Authorization). Конфигурация — бином SecurityFilterChain и HttpSecurity с лямбдами (WebSecurityConfigurerAdapter удалён в Spring Security 6) Несколько цепочек — разные правила для /api/ и веб-страниц, порядок через @Order Порядок правил внутри authorizeHttpRequests важен: первое совпадение решает Отладка: logging.level.org.springframework.security=TRACE Встраивание: Spring Boot регистрирует фильтр DelegatingFilterProxy (сервлетный фильтр, который делегирует бину) → FilterChainProxy. Тот хранит список SecurityFilterChain, у каждой — правило выбора запросов (securityMatcher) и свой набор фильтров. Срабатывает первая подходящая цепочка. Фильтры в цепочке (упрощённо, по порядку): CorsFilter, CsrfFilter, LogoutFilter, фильтры аутентификации (UsernamePasswordAuthenticationFilter, BearerTokenAuthenticationFilter, BasicAuthenticationFilter), SecurityContextHolderFilter, ExceptionTranslationFilter (превращает исключения безопасности в 401/403), AuthorizationFilter. Конфигурация Spring Security 6: Ловушки: правила проверяются по порядку — anyRequest() должен быть последним; WebSecurityConfigurerAdapter и antMatchers из старых статей в Spring Security 6 удалены; свой фильтр добавлять через addFilterBefore/After в нужное место."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

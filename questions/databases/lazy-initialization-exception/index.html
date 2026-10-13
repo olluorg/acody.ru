@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему возникает LazyInitializationException в Hibernate и как его правильно лечить? — вопрос с собеседования</title>
+<meta name="description" content="Ленивую связь трогают после закрытия сессии (вне транзакции, в контроллере или сериализаторе) — прокси не может выполнить запрос и бросает…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/lazy-initialization-exception/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/lazy-initialization-exception/">
+<meta property="og:title" content="Почему возникает LazyInitializationException в Hibernate и как его правильно лечить? — вопрос с собеседования">
+<meta property="og:description" content="Ленивую связь трогают после закрытия сессии (вне транзакции, в контроллере или сериализаторе) — прокси не может выполнить запрос и бросает…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Почему возникает LazyInitializationException в Hibernate и как его правильно лечить?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Почему возникает LazyInitializationException в Hibernate и как его правильно лечить?"}]}</script>
+  <h1>Почему возникает LazyInitializationException в Hibernate и как его правильно лечить?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">ORM и N+1</span><span class="chip">Hibernate / JPA</span><span class="chip">Spring Data</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему падает LazyInitializationException?</li><li>Что такое Open Session in View?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Ленивую связь трогают <b>после закрытия сессии</b> (вне транзакции, в контроллере или сериализаторе) — прокси не может выполнить запрос и бросает исключение.</p><ul><li>Правильно: загрузить нужное заранее — JOIN FETCH, @EntityGraph, DTO-проекция</li><li>Open Session in View «лечит» ценой запросов из слоя представления и N+1</li><li>Включение EAGER — плохое лечение: грузит лишнее всегда</li></ul><p class="extra"><span>А ещё</span> В Spring Boot <code>spring.jpa.open-in-view</code> по умолчанию true с предупреждением — лучше выключить</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Lazy-связь Hibernate отдаёт как proxy и грузит при первом обращении — но только пока открыта persistence-сессия. Если обратиться к ней уже после коммита/закрытия сессии (например, в контроллере/сериализаторе), proxy не может выполнить запрос и бросает LazyInitializationException. Правильное лечение — заранее загрузить ровно нужные связи в запросе через JOIN FETCH или @EntityGraph, либо вернуть DTO-проекцию с нужными полями. Антипаттерны: глобальный EAGER (тянет лишнее во всех сценариях и плодит запросы) и Open Session In View (держит сессию открытой на весь HTTP-запрос — маскирует проблему и провоцирует N+1 в слое представления).</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Причина: сессия закрыта, прокси не загрузить.</li><li>Правильные решения: загрузка в запросе, DTO.</li><li>Почему OSIV и EAGER — плохие решения.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Чинить глобальным EAGER.</li><li>Полагаться на Open-Session-In-View вместо явной загрузки связей.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Обращение к lazy-связи происходит вне открытой сессии/транзакции — proxy не может догрузить данные; лечат загрузкой нужных связей в запросе (JOIN FETCH/EntityGraph) или DTO-проекцией, а не open-session-in-view</li><li class="no"><span class="mark">✗</span>Связь помечена EAGER, и Hibernate отказывается её грузить</li><li class="no"><span class="mark">✗</span>База недоступна на момент старта приложения</li><li class="no"><span class="mark">✗</span>Сущность не имеет первичного ключа</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем @EntityGraph отличается от JOIN FETCH?</li><li>Почему Open Session In View считают антипаттерном?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/orm/">ORM, persistence context и N+1</a><p>Что делает ORM, lazy/eager и proxy, механизм N+1, способы лечения и типичные грабли.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/databases/n-plus-one/">Что такое проблема N+1 запросов и как её решать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/dto-projection/">Почему для эндпоинта, отдающего список из тысяч записей, обычно предпочитают проекцию в DTO, а не загрузку сущностей?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/persistence-context/">Что верно про persistence context (сессию) в JPA?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему возникает LazyInitializationException в Hibernate и как его правильно лечить?","acceptedAnswer":{"@type":"Answer","text":"Ленивую связь трогают после закрытия сессии (вне транзакции, в контроллере или сериализаторе) — прокси не может выполнить запрос и бросает исключение. Правильно: загрузить нужное заранее — JOIN FETCH, @EntityGraph, DTO-проекция Open Session in View «лечит» ценой запросов из слоя представления и N+1 Включение EAGER — плохое лечение: грузит лишнее всегда В Spring Boot spring.jpa.open-in-view по умолчанию true с предупреждением — лучше выключить Lazy-связь Hibernate отдаёт как proxy и грузит при первом обращении — но только пока открыта persistence-сессия. Если обратиться к ней уже после коммита/закрытия сессии (например, в контроллере/сериализаторе), proxy не может выполнить запрос и бросает LazyInitializationException. Правильное лечение — заранее загрузить ровно нужные связи в запросе через JOIN FETCH или @EntityGraph, либо вернуть DTO-проекцию с нужными полями. Антипаттерны: глобальный EAGER (тянет лишнее во всех сценариях и плодит запросы) и Open Session In View (держит сессию открытой на весь HTTP-запрос — маскирует проблему и провоцирует N+1 в слое представления)."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

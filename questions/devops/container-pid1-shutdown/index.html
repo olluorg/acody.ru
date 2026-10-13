@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему контейнер не останавливается корректно и «висит» до SIGKILL? — вопрос с собеседования</title>
+<meta name="description" content="Процесс с PID 1 в контейнере особенный: ядро не применяет к нему действия сигналов по умолчанию, и если приложение не обрабатывает SIGTERM, оно его…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/container-pid1-shutdown/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/container-pid1-shutdown/">
+<meta property="og:title" content="Почему контейнер не останавливается корректно и «висит» до SIGKILL? — вопрос с собеседования">
+<meta property="og:description" content="Процесс с PID 1 в контейнере особенный: ядро не применяет к нему действия сигналов по умолчанию, и если приложение не обрабатывает SIGTERM, оно его…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Почему контейнер не останавливается корректно и «висит» до SIGKILL?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Почему контейнер не останавливается корректно и «висит» до SIGKILL?"}]}</script>
+  <h1>Почему контейнер не останавливается корректно и «висит» до SIGKILL?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Docker и контейнеры</span><span class="chip">Docker</span><span class="chip">Kubernetes</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем exec-форма CMD отличается от shell-формы?</li><li>Что такое проблема PID 1 в контейнере?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Процесс с PID 1 в контейнере особенный: ядро <b>не применяет к нему действия сигналов по умолчанию</b>, и если приложение не обрабатывает SIGTERM, оно его игнорирует. Частая причина — <b>shell-форма</b> <code>CMD java -jar app.jar</code>: PID 1 становится <code>sh</code>, который <b>не передаёт сигнал</b> приложению. Итог — ожидание таймаута (10 с в Docker, 30 с в Kubernetes) и SIGKILL.</p><ul><li>Exec-форма: CMD ["java", "-jar", "app.jar"] — приложение само PID 1</li><li>В скриптах-обёртках — exec "$@" в конце</li><li>tini или docker run --init — минимальный init, передаёт сигналы и собирает зомби</li></ul><p class="extra"><span>А ещё</span> В Kubernetes ещё нужна пауза перед остановкой (preStop), чтобы балансировщик успел убрать под</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Почему SIGTERM игнорируется.</b> Для обычного процесса ядро по умолчанию завершает его при SIGTERM. Для PID 1 в pid-namespace это правило отключено: сигнал действует, только если установлен обработчик. Многие программы обработчика не ставят.</p>
+<p><b>Shell-форма:</b> <code>CMD java -jar app.jar</code> превращается в <code>/bin/sh -c &quot;java -jar app.jar&quot;</code>. Sh получает SIGTERM и не пересылает его дочерним процессам.</p>
+<p><b>Исправления:</b></p>
+<ul><li>exec-форма CMD и ENTRYPOINT;</li><li>в entrypoint-скрипте последней строкой <code>exec java …</code>;</li><li><code>tini</code> как PID 1 (или <code>--init</code>) — пересылает сигналы и собирает зомби-процессы;</li><li>приложение корректно обрабатывает SIGTERM: Spring Boot — <code>server.shutdown=graceful</code>.</li></ul>
+<p><b>Kubernetes:</b> при удалении пода одновременно начинается остановка и исключение из Service. Без <code>preStop</code> с короткой паузой часть запросов приходит в уже останавливающийся под.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Особенность PID 1 и сигналов.</li><li>Shell против exec формы.</li><li>tini и graceful shutdown приложения.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/signals-shutdown/">Чем SIGTERM отличается от SIGKILL и как правильно завершать сервис?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/dockerfile-best-practices/">Как написать хороший Dockerfile?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/k8s-probes/">Приложение долго стартует, а Kubernetes перезапускает его по кругу. Как правильно настроить пробы?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему контейнер не останавливается корректно и «висит» до SIGKILL?","acceptedAnswer":{"@type":"Answer","text":"Процесс с PID 1 в контейнере особенный: ядро не применяет к нему действия сигналов по умолчанию, и если приложение не обрабатывает SIGTERM, оно его игнорирует. Частая причина — shell-форма CMD java -jar app.jar: PID 1 становится sh, который не передаёт сигнал приложению. Итог — ожидание таймаута (10 с в Docker, 30 с в Kubernetes) и SIGKILL. Exec-форма: CMD [\"java\", \"-jar\", \"app.jar\"] — приложение само PID 1 В скриптах-обёртках — exec \"$@\" в конце tini или docker run --init — минимальный init, передаёт сигналы и собирает зомби В Kubernetes ещё нужна пауза перед остановкой (preStop), чтобы балансировщик успел убрать под Почему SIGTERM игнорируется. Для обычного процесса ядро по умолчанию завершает его при SIGTERM. Для PID 1 в pid-namespace это правило отключено: сигнал действует, только если установлен обработчик. Многие программы обработчика не ставят. Shell-форма: CMD java -jar app.jar превращается в /bin/sh -c \"java -jar app.jar\". Sh получает SIGTERM и не пересылает его дочерним процессам. Исправления: - exec-форма CMD и ENTRYPOINT; - в entrypoint-скрипте последней строкой exec java …; - tini как PID 1 (или --init) — пересылает сигналы и собирает зомби-процессы; - приложение корректно обрабатывает SIGTERM: Spring Boot — server.shutdown=graceful. Kubernetes: при удалении пода одновременно начинается остановка и исключение из Service. Без preStop с короткой паузой часть запросов приходит в уже останавливающийся под."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

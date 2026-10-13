@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что требуется, чтобы класс был ПО-НАСТОЯЩЕМУ неизменяемым? — вопрос с собеседования</title>
+<meta name="description" content="Рецепт: все поля private final, нет сеттеров и других мутаторов, запрет наследования (final-класс или приватный конструктор с фабриками), защитные…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/immutable-class-recipe/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/immutable-class-recipe/">
+<meta property="og:title" content="Что требуется, чтобы класс был ПО-НАСТОЯЩЕМУ неизменяемым? — вопрос с собеседования">
+<meta property="og:description" content="Рецепт: все поля private final, нет сеттеров и других мутаторов, запрет наследования (final-класс или приватный конструктор с фабриками), защитные…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что требуется, чтобы класс был ПО-НАСТОЯЩЕМУ неизменяемым?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что требуется, чтобы класс был ПО-НАСТОЯЩЕМУ неизменяемым?"}]}</script>
+  <h1>Что требуется, чтобы класс был ПО-НАСТОЯЩЕМУ неизменяемым?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">ООП</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое immutable object и как его сделать в Java?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Рецепт: <b>все поля private final</b>, <b>нет сеттеров</b> и других мутаторов, <b>запрет наследования</b> (final-класс или приватный конструктор с фабриками), <b>защитные копии</b> изменяемых данных на входе и на выходе, <b>this не утекает</b> из конструктора.</p><ul><li>Забывают чаще всего защитные копии</li><li>Польза: потокобезопасность без синхронизации, надёжные ключи HashMap, простое рассуждение</li><li>Record закрывает первые пункты, но не копии</li></ul><p class="extra"><span>А ещё</span> «Изменение» — новый объект через withX</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><pre class="lang-java"><code>public final class Order {
+    private final String id;
+    private final List&lt;Item&gt; items;
+
+    public Order(String id, List&lt;Item&gt; items) {
+        this.id = Objects.requireNonNull(id);
+        this.items = List.copyOf(items);   // копия на входе
+    }
+    public List&lt;Item&gt; items() { return items; }   // уже неизменяемый список
+    public Order withItem(Item i) {
+        var copy = new ArrayList&lt;&gt;(items); copy.add(i);
+        return new Order(id, copy);
+    }
+}</code></pre>
+<p><b>Зачем каждый пункт:</b></p>
+<ul><li><b>final-поля</b> — нельзя переприсвоить; плюс гарантия видимости по модели памяти;</li><li><b>нет сеттеров</b> — состояние фиксируется в конструкторе;</li><li><b>final-класс</b> — иначе подкласс добавит изменяемые поля или переопределит геттер;</li><li><b>защитные копии</b> — если сохранить переданный список по ссылке, вызывающий изменит его снаружи; если отдать внутренний список, изменит получатель;</li><li><b>this не утекает</b> — нельзя регистрировать объект как слушателя в конструкторе.</li></ul>
+<p>Элементы внутри тоже должны быть неизменяемыми, иначе неизменяемость поверхностная.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Полный рецепт.</li><li>Зачем запрещать наследование.</li><li>Защитные копии.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что private-полей достаточно.</li><li>Возвращать из геттера внутренний изменяемый объект без копии.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>private final поля, отсутствие сеттеров/мутаторов, запрет наследования (final-класс или фабрики) и защитные копии изменяемых полей</li><li class="no"><span class="mark">✗</span>Достаточно объявить все поля private</li><li class="no"><span class="mark">✗</span>Достаточно убрать сеттеры; геттеры могут возвращать внутренние изменяемые объекты как есть</li><li class="no"><span class="mark">✗</span>Достаточно пометить класс комментарием immutable</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Зачем запрещать наследование?</li><li>Почему private final без защитных копий не спасает?</li><li>Почему String immutable?</li><li>Что такое safe publication?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/immutability/">Проектирование неизменяемых классов</a><p>Зачем нужна неизменяемость, рецепт immutable-класса, защитные копии, безопасная публикация и records.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/immutability-benefits/">Что даёт неизменяемость (immutability) объекта?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/defensive-copy/">Конструктор сохранил переданный List по ссылке (this.items = items). Почему объект всё равно изменяем?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/immutable-thread-safety/">Почему про immutable-объект говорят «потокобезопасен без синхронизации»?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/record-defensive-copy/">Чего record НЕ делает за вас при проектировании неизменяемого носителя данных?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что требуется, чтобы класс был ПО-НАСТОЯЩЕМУ неизменяемым?","acceptedAnswer":{"@type":"Answer","text":"Рецепт: все поля private final, нет сеттеров и других мутаторов, запрет наследования (final-класс или приватный конструктор с фабриками), защитные копии изменяемых данных на входе и на выходе, this не утекает из конструктора. Забывают чаще всего защитные копии Польза: потокобезопасность без синхронизации, надёжные ключи HashMap, простое рассуждение Record закрывает первые пункты, но не копии «Изменение» — новый объект через withX Зачем каждый пункт: - final-поля — нельзя переприсвоить; плюс гарантия видимости по модели памяти; - нет сеттеров — состояние фиксируется в конструкторе; - final-класс — иначе подкласс добавит изменяемые поля или переопределит геттер; - защитные копии — если сохранить переданный список по ссылке, вызывающий изменит его снаружи; если отдать внутренний список, изменит получатель; - this не утекает — нельзя регистрировать объект как слушателя в конструкторе. Элементы внутри тоже должны быть неизменяемыми, иначе неизменяемость поверхностная."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

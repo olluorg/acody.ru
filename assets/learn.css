@@ -1,0 +1,11 @@
+/* Отличия платформы от лендинга sotto: знак в логотипе, шапка без кнопок, партнёрский блок. */
+.logo .mark { flex: none; }
+.top .nav { margin-left: auto; }
+@media (max-width: 1000px) { .top .nav { display: flex; gap: 14px; font-size: 14px; } }
+@media (max-width: 560px) { .top .nav a:not(:first-child) { display: none; } }
+.partner { padding: 56px 0; }
+.partner .wrap { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between;
+  background: var(--surface); border: 1px solid var(--line-2); border-radius: 22px; padding: 28px 32px; }
+.partner .wrap > div { max-width: 640px; }
+.partner h2 { font-size: 26px; margin: 6px 0 10px; }
+.partner p { color: var(--muted); margin: 0; }

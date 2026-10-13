@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем отличается is от ==? — вопрос с собеседования</title>
+<meta name="description" content="== сравнивает значения, is — что это один и тот же объект. == вызывает __eq__, его можно переопределить is сравнивает идентичность, как id(a) ==…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/is-vs-eq/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/is-vs-eq/">
+<meta property="og:title" content="Чем отличается is от ==? — вопрос с собеседования">
+<meta property="og:description" content="== сравнивает значения, is — что это один и тот же объект. == вызывает __eq__, его можно переопределить is сравнивает идентичность, как id(a) ==…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Чем отличается is от ==?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Чем отличается is от ==?"}]}</script>
+  <h1>Чем отличается is от ==?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Типы данных</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>В чём разница между оператором is и ==?</li><li>Почему None сравнивают через is?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><code>==</code> сравнивает <b>значения</b>, <code>is</code> — что это <b>один и тот же объект</b>.</p><ul><li><code>==</code> вызывает <code>__eq__</code>, его можно переопределить</li><li><code>is</code> сравнивает идентичность, как <code>id(a) == id(b)</code></li></ul><p class="extra"><span>А ещё</span> <code>is</code> — для <code>None</code>, <code>True</code>/<code>False</code> и сентинелов; числа и строки через <code>is</code> не сравнивают</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><code>a == b</code> спрашивает объект «равен ли ты другому» — вызывает <code>a.__eq__(b)</code>. Класс сам решает, что значит равенство: два разных списка с одинаковыми элементами равны.</p>
+<p><code>a is b</code> проверяет, что оба имени указывают на один объект в памяти. Это сравнение нельзя переопределить, и оно быстрее.</p>
+<p>Где использовать <code>is</code>:</p>
+<ul><li>проверка на <code>None</code>: <code>if x is None</code> — так советует PEP 8. <code>x == None</code> может дать неожиданный результат, если у класса странный <code>__eq__</code>;</li><li>синглтоны и сентинелы: <code>_missing = object(); if value is _missing</code>.</li></ul>
+<p>Ловушка: <code>a = 256; b = 256; a is b</code> даёт <code>True</code>, а для 1000 может дать <code>False</code>. CPython заранее создаёт и переиспользует маленькие целые числа (от −5 до 256) и некоторые строки. Это деталь реализации, на неё нельзя опираться — числа и строки сравнивают через <code>==</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>a = [1, 2]
+b = [1, 2]
+c = a
+a == b    # True  — одинаковые значения
+a is b    # False — разные объекты
+a is c    # True  — один объект
+
+x = None
+if x is None:
+    print(&quot;нет значения&quot;)</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Чёткое разделение: значение против идентичности объекта.</li><li><code>==</code> переопределяется через <code>__eq__</code>, <code>is</code> — нет.</li><li><code>is None</code> как правильная идиома.</li><li>Знание про кэш маленьких чисел как деталь реализации, а не правило.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Сравнивать строки или числа через <code>is</code> («у меня работало»).</li><li>Говорить, что <code>is</code> сравнивает «адреса переменных» — сравниваются объекты.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/mutable-immutable/">Чем изменяемые типы отличаются от неизменяемых?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/dunder-str-repr/">Что такое магические методы? Чем __str__ отличается от __repr__?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/copy-deepcopy/">Чем поверхностная копия отличается от глубокой?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем отличается is от ==?","acceptedAnswer":{"@type":"Answer","text":"== сравнивает значения, is — что это один и тот же объект. == вызывает __eq__, его можно переопределить is сравнивает идентичность, как id(a) == id(b) is — для None, True/False и сентинелов; числа и строки через is не сравнивают a == b спрашивает объект «равен ли ты другому» — вызывает a.__eq__(b). Класс сам решает, что значит равенство: два разных списка с одинаковыми элементами равны. a is b проверяет, что оба имени указывают на один объект в памяти. Это сравнение нельзя переопределить, и оно быстрее. Где использовать is: - проверка на None: if x is None — так советует PEP 8. x == None может дать неожиданный результат, если у класса странный __eq__; - синглтоны и сентинелы: _missing = object(); if value is _missing. Ловушка: a = 256; b = 256; a is b даёт True, а для 1000 может дать False. CPython заранее создаёт и переиспользует маленькие целые числа (от −5 до 256) и некоторые строки. Это деталь реализации, на неё нельзя опираться — числа и строки сравнивают через ==."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

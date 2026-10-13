@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как в Go обрабатывают ошибки и зачем нужны errors.Is, errors.As и %w? — вопрос с собеседования</title>
+<meta name="description" content="Ошибка — обычное значение типа error, которое функция возвращает последним: if err != nil { return ... }. Оборачивают с контекстом через…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/go/errors-as-values/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/go/errors-as-values/">
+<meta property="og:title" content="Как в Go обрабатывают ошибки и зачем нужны errors.Is, errors.As и %w? — вопрос с собеседования">
+<meta property="og:description" content="Ошибка — обычное значение типа error, которое функция возвращает последним: if err != nil { return ... }. Оборачивают с контекстом через…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/go/">Go</a> <span>/</span> <span>Как в Go обрабатывают ошибки и зачем нужны errors.Is, errors.As и %w?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Go","item":"https://learn.getsotto.ru/questions/go/"},{"@type":"ListItem","position":3,"name":"Как в Go обрабатывают ошибки и зачем нужны errors.Is, errors.As и %w?"}]}</script>
+  <h1>Как в Go обрабатывают ошибки и зачем нужны errors.Is, errors.As и %w?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Ошибки и panic</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему в Go нет исключений?</li><li>Как обернуть ошибку в Go, сохранив исходную?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Ошибка — <b>обычное значение</b> типа error, которое функция возвращает последним: <code>if err != nil { return ... }</code>. Оборачивают с контекстом через <b>fmt.Errorf("...: %w", err)</b>. Проверяют <b>errors.Is</b> (совпадение с конкретной ошибкой в цепочке) и <b>errors.As</b> (найти ошибку нужного типа).</p><ul><li>Сравнение err == ErrNotFound не работает для обёрнутых — только errors.Is</li><li>Сигнальные ошибки: var ErrNotFound = errors.New("not found")</li><li>Свой тип ошибки — для данных (код, поле)</li></ul><p class="extra"><span>А ещё</span> errors.Join (1.20) — объединить несколько ошибок</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Почему значения, а не исключения.</b> Путь ошибки виден в коде явно: каждая функция, которая может упасть, это показывает, а вызывающий решает, что делать. Нет скрытых переходов через несколько уровней стека. Цена — многословность.</p>
+<p><b>Оборачивание.</b> <code>%w</code> сохраняет исходную ошибку внутри новой; цепочка раскручивается <code>errors.Unwrap</code>. Сообщение получается вида «repo.Get 42: dial tcp: connection refused» — контекст каждого уровня. <code>%v</code> вместо <code>%w</code> добавит текст, но разорвёт цепочку для Is и As.</p>
+<p><b>Правила:</b></p>
+<ul><li>обрабатывать ошибку один раз: либо вернуть с контекстом, либо залогировать, но не оба;</li><li>не игнорировать (<code>_ = f()</code>) без явной причины;</li><li>не сравнивать по тексту <code>err.Error()</code>;</li><li>сигнальные ошибки — часть API пакета, менять их нельзя.</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-go"><code>var ErrNotFound = errors.New(&quot;not found&quot;)
+
+func (r *Repo) Get(id int) (*User, error) {
+    u, err := r.db.query(id)
+    if errors.Is(err, sql.ErrNoRows) {
+        return nil, ErrNotFound
+    }
+    if err != nil {
+        return nil, fmt.Errorf(&quot;repo.Get %d: %w&quot;, id, err)
+    }
+    return u, nil
+}
+
+if errors.Is(err, ErrNotFound) { http.Error(w, &quot;нет&quot;, 404) }
+
+var ve *ValidationError
+if errors.As(err, &amp;ve) { log.Println(ve.Field) }</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Ошибки как значения.</li><li>Оборачивание через %w.</li><li>errors.Is и errors.As.</li><li>Правила обработки.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/go/panic-recover/">Когда в Go используют panic и как работает recover?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/go/nil-interface/">Почему интерфейс с nil-указателем внутри не равен nil?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/exception-chaining/">Что такое цепочки исключений (raise from) и как правильно создавать свои исключения?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/checked-vs-unchecked/">Чем checked-исключения отличаются от unchecked?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как в Go обрабатывают ошибки и зачем нужны errors.Is, errors.As и %w?","acceptedAnswer":{"@type":"Answer","text":"Ошибка — обычное значение типа error, которое функция возвращает последним: if err != nil { return ... }. Оборачивают с контекстом через fmt.Errorf(\"...: %w\", err). Проверяют errors.Is (совпадение с конкретной ошибкой в цепочке) и errors.As (найти ошибку нужного типа). Сравнение err == ErrNotFound не работает для обёрнутых — только errors.Is Сигнальные ошибки: var ErrNotFound = errors.New(\"not found\") Свой тип ошибки — для данных (код, поле) errors.Join (1.20) — объединить несколько ошибок Почему значения, а не исключения. Путь ошибки виден в коде явно: каждая функция, которая может упасть, это показывает, а вызывающий решает, что делать. Нет скрытых переходов через несколько уровней стека. Цена — многословность. Оборачивание. %w сохраняет исходную ошибку внутри новой; цепочка раскручивается errors.Unwrap. Сообщение получается вида «repo.Get 42: dial tcp: connection refused» — контекст каждого уровня. %v вместо %w добавит текст, но разорвёт цепочку для Is и As. Правила: - обрабатывать ошибку один раз: либо вернуть с контекстом, либо залогировать, но не оба; - не игнорировать (_ = f()) без явной причины; - не сравнивать по тексту err.Error(); - сигнальные ошибки — часть API пакета, менять их нельзя."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

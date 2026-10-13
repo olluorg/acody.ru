@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Из каких основных областей состоит память JVM и что где хранится? — вопрос с собеседования</title>
+<meta name="description" content="Куча (heap) — все объекты и массивы, общая для потоков, её чистит GC. Стек — у каждого потока свой: кадры вызовов с локальными переменными и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/jvm-memory-areas/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/jvm-memory-areas/">
+<meta property="og:title" content="Из каких основных областей состоит память JVM и что где хранится? — вопрос с собеседования">
+<meta property="og:description" content="Куча (heap) — все объекты и массивы, общая для потоков, её чистит GC. Стек — у каждого потока свой: кадры вызовов с локальными переменными и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Из каких основных областей состоит память JVM и что где хранится?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Из каких основных областей состоит память JVM и что где хранится?"}]}</script>
+  <h1>Из каких основных областей состоит память JVM и что где хранится?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">JVM и сборка мусора</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое Metaspace?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Куча</b> (heap) — все объекты и массивы, общая для потоков, её чистит GC. <b>Стек</b> — у каждого потока свой: кадры вызовов с локальными переменными и ссылками. <b>Metaspace</b> — метаданные классов, в нативной памяти вне кучи.</p><ul><li>Размеры: куча -Xms/-Xmx, стек -Xss, Metaspace -XX:MaxMetaspaceSize</li><li>Ещё вне кучи: кодовый кэш JIT, direct-буферы, стеки потоков, структуры GC</li><li>Ошибки: OutOfMemoryError: Java heap space / Metaspace, StackOverflowError</li></ul><p class="extra"><span>А ещё</span> PermGen заменён Metaspace в Java 8</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">GC: Eden, Survivor и продвижение</p><script type="module" src="/widgets/gc-generations.js"></script><sotto-gc-generations theme="dark"></sotto-gc-generations></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Куча.</b> Здесь живут все объекты, созданные через <code>new</code>, и массивы. Общая для всех потоков. Делится на поколения (молодое: Eden и Survivor; старое) или на регионы (G1, ZGC). Именно её обходит сборщик мусора.</p>
+<p><b>Стек потока.</b> Каждый вызов метода кладёт кадр: локальные переменные (примитивы — значением, объекты — ссылкой), аргументы, промежуточные значения. Метод вернулся — кадр снят, сборка мусора не нужна. Глубокая рекурсия переполняет стек — <code>StackOverflowError</code>.</p>
+<p><b>Metaspace</b> (Java 8+) — описания классов: поля, методы, байт-код, константный пул. Лежит в нативной памяти и по умолчанию растёт без ограничения. Утечка загрузчиков классов (передеплой в сервере приложений, динамически генерируемые классы) приводит к <code>OutOfMemoryError: Metaspace</code>. До Java 8 это была PermGen внутри кучи фиксированного размера.</p>
+<p><b>Прочее вне кучи:</b> кодовый кэш (скомпилированный JIT машинный код), direct ByteBuffer, структуры сборщика, стеки всех потоков. Поэтому процесс Java всегда занимает больше, чем <code>-Xmx</code> — важно в контейнерах.</p>
+<p>Статические поля хранятся в объекте <code>Class</code>, то есть в куче, — частая путаница.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Назначение кучи, стека, Metaspace.</li><li>Что общее, а что своё у потока.</li><li>Какие ошибки бывают у каждой области.</li><li>Память процесса больше -Xmx.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что статические поля лежат в Metaspace.</li><li>Путать Metaspace и PermGen.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое поколения в куче?</li><li>Где живут статические поля?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/jvm-memory/">Память JVM и устройство объекта</a><p>Runtime data areas, стек против кучи, заголовок объекта и выравнивание, compressed oops и metaspace.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/stack-vs-heap-jvm/">Что верно про стек и кучу в JVM?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/heap-vs-stack/">Где размещаются объекты, создаваемые оператором new?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/jvm-heap-in-container/">Java-приложение запускают в контейнере с лимитом памяти. Как правильно задать размер кучи?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/stack-vs-heap/">Чем стек отличается от кучи?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Из каких основных областей состоит память JVM и что где хранится?","acceptedAnswer":{"@type":"Answer","text":"Куча (heap) — все объекты и массивы, общая для потоков, её чистит GC. Стек — у каждого потока свой: кадры вызовов с локальными переменными и ссылками. Metaspace — метаданные классов, в нативной памяти вне кучи. Размеры: куча -Xms/-Xmx, стек -Xss, Metaspace -XX:MaxMetaspaceSize Ещё вне кучи: кодовый кэш JIT, direct-буферы, стеки потоков, структуры GC Ошибки: OutOfMemoryError: Java heap space / Metaspace, StackOverflowError PermGen заменён Metaspace в Java 8 Куча. Здесь живут все объекты, созданные через new, и массивы. Общая для всех потоков. Делится на поколения (молодое: Eden и Survivor; старое) или на регионы (G1, ZGC). Именно её обходит сборщик мусора. Стек потока. Каждый вызов метода кладёт кадр: локальные переменные (примитивы — значением, объекты — ссылкой), аргументы, промежуточные значения. Метод вернулся — кадр снят, сборка мусора не нужна. Глубокая рекурсия переполняет стек — StackOverflowError. Metaspace (Java 8+) — описания классов: поля, методы, байт-код, константный пул. Лежит в нативной памяти и по умолчанию растёт без ограничения. Утечка загрузчиков классов (передеплой в сервере приложений, динамически генерируемые классы) приводит к OutOfMemoryError: Metaspace. До Java 8 это была PermGen внутри кучи фиксированного размера. Прочее вне кучи: кодовый кэш (скомпилированный JIT машинный код), direct ByteBuffer, структуры…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

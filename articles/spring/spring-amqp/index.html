@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spring AMQP и RabbitMQ — разбор для собеседования</title>
+<meta name="description" content="RabbitTemplate, @RabbitListener, exchanges, bindings, manual ack, retries, DLQ и prefetch.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/spring/spring-amqp/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/spring/spring-amqp/">
+<meta property="og:title" content="Spring AMQP и RabbitMQ — разбор для собеседования">
+<meta property="og:description" content="RabbitTemplate, @RabbitListener, exchanges, bindings, manual ack, retries, DLQ и prefetch.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#spring">Spring</a> <span>/</span> <span>Spring AMQP и RabbitMQ</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/articles/#spring"},{"@type":"ListItem","position":3,"name":"Spring AMQP и RabbitMQ"}]}</script>
+  <h1>Spring AMQP и RabbitMQ</h1>
+  <p class="lead">RabbitTemplate, @RabbitListener, exchanges, bindings, manual ack, retries, DLQ и prefetch.</p>
+  <article class="md"><h2>RabbitTemplate</h2>
+<p>RabbitTemplate отправляет сообщения в exchange с routing key. В отличие от Kafka, producer обычно не пишет напрямую в queue: exchange маршрутизирует по bindings.</p>
+<p>Для JSON payload настраивают MessageConverter, например Jackson2JsonMessageConverter, и следят за совместимостью формата.</p>
+<p>Надёжная отправка: publisher confirms — это асинхронное подтверждение от брокера, что сообщение принято (включается publisher-confirm-type: correlated), а publisher returns возвращает сообщение, которое не попало ни в одну очередь (mandatory=true, когда нет подходящего binding). Без confirms «успешный» <code>convertAndSend</code> лишь значит, что сообщение ушло в сокет, а не что брокер его сохранил, — на сбое сети оно может потеряться молча.</p>
+<pre class="lang-java"><code>rabbitTemplate.convertAndSend(
+    &quot;orders.exchange&quot;,
+    &quot;order.paid&quot;,
+    new OrderPaid(orderId)
+);</code></pre>
+<h2>@RabbitListener</h2>
+<p><code>@RabbitListener</code> подписывает метод на queue, а listener container управляет consumers, concurrency, prefetch, ack и ошибками.</p>
+<p>Prefetch ограничивает число сообщений, которые consumer получил, но ещё не подтвердил. Это важный регулятор fairness и памяти.</p>
+<pre class="lang-java"><code>@RabbitListener(queues = &quot;billing.order-paid&quot;)
+void on(OrderPaid event) {
+    billing.handle(event);
+}</code></pre>
+<h2>Ack, nack и requeue</h2>
+<p>Режимы подтверждения в Spring AMQP: AUTO (по умолчанию) — контейнер подтверждает сообщение после успешного выполнения listener-а, а при исключении отклоняет; MANUAL — приложение само вызывает <code>basicAck</code>/<code>basicNack</code>; NONE — подтверждение уходит сразу при доставке, как autoAck в клиенте RabbitMQ, и при падении сообщение теряется. Не путайте AUTO в Spring с autoAck брокера: это противоположные по надёжности режимы.</p>
+<p>Опасная настройка — бесконечно requeue poison message. Обычно нужны ограниченные retries, backoff и DLQ.</p>
+<h2>DLQ через DLX</h2>
+<p>В RabbitMQ dead lettering обычно строится через Dead Letter Exchange: queue настраивают с x-dead-letter-exchange и, при необходимости, x-dead-letter-routing-key.</p>
+<p>В DLQ полезно сохранять исходные headers и причину отказа, а также иметь redrive-процесс после исправления ошибки.</p>
+<h2>Kafka или RabbitMQ в Spring</h2>
+<p>Spring Kafka удобен для event log, replay и независимых consumer groups. Spring AMQP удобен для work queues, routing, DLQ/delay patterns и командной обработки.</p>
+<p>Выбор должен идти от семантики: событие-история или задача-команда, нужен ли replay, порядок, routing, TTL и delay.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Подчеркните ключевое отличие от Kafka: продюсер пишет в EXCHANGE (типы direct/topic/fanout/headers), а тот по bindings маршрутизирует в очереди — продюсер не знает про очереди. Объясните prefetch (число неподтверждённых сообщений у consumer — регулятор fairness и памяти), manual ack/nack и опасность бесконечного requeue poison-сообщения → ограниченные ретраи + DLQ через Dead Letter Exchange. Для надёжной отправки назовите publisher confirms. Завершите выбором Kafka (event log/replay/порядок в партиции) vs RabbitMQ (work queue/routing/DLQ/TTL/delay).</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/spring/rabbittemplate/">Для чего нужен RabbitTemplate в Spring AMQP?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/rabbitlistener-ack-prefetch/">Как @RabbitListener работает с ack и зачем нужен prefetch?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/spring-amqp-or-kafka/">Когда в Spring выбрать AMQP/RabbitMQ, а когда Kafka?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/rabbit-nack-requeue-loop/">Слушатель RabbitMQ при ошибке обработки делает nack с requeue = true. Чем это опасно?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/rabbitmq-ack-basic/">Что означает подтверждение (ack) сообщения в RabbitMQ?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/spring/spring-kafka/">Spring Kafka</a><p>KafkaTemplate, @KafkaListener, listener containers, offset ack, error handling, retries и DLT.</p></li><li><a href="/articles/brokers/rabbitmq-sqs/">RabbitMQ, SQS и классические очереди</a><p>Модель exchange/binding/queue, ack/nack и publisher confirms, prefetch, DLQ через DLX, отложенные сообщения, SQS Standard vs FIFO и visibility timeout.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Spring AMQP и RabbitMQ","description":"RabbitTemplate, @RabbitListener, exchanges, bindings, manual ack, retries, DLQ и prefetch.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/spring/spring-amqp/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

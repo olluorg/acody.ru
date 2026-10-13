@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое RAG и как он устроен? — вопрос с собеседования</title>
+<meta name="description" content="RAG — модель отвечает по найденным документам: сначала поиск релевантных фрагментов, затем генерация ответа с ними в контексте. Индексация: документы…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/what-is-rag/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/what-is-rag/">
+<meta property="og:title" content="Что такое RAG и как он устроен? — вопрос с собеседования">
+<meta property="og:description" content="RAG — модель отвечает по найденным документам: сначала поиск релевантных фрагментов, затем генерация ответа с ними в контексте. Индексация: документы…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Что такое RAG и как он устроен?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Что такое RAG и как он устроен?"}]}</script>
+  <h1>Что такое RAG и как он устроен?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">RAG</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое Retrieval-Augmented Generation?</li><li>Как научить LLM отвечать по своим документам?</li><li>Из каких шагов состоит RAG-конвейер?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">RAG — модель отвечает <b>по найденным документам</b>: сначала <b>поиск</b> релевантных фрагментов, затем <b>генерация</b> ответа с ними в контексте.</p><ul><li>Индексация: документы → фрагменты → эмбеддинги → индекс</li><li>Запрос: вопрос → поиск фрагментов → промпт «ответь по контексту» → ответ со ссылками</li></ul><p class="extra"><span>А ещё</span> Плюсы: свежие и закрытые данные без дообучения, источники для проверки, меньше галлюцинаций</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Зачем.</b> Модель не знает ваших внутренних документов и событий после даты обучения, а дообучать её ради фактов дорого и ненадёжно. RAG подкладывает нужные знания в контекст в момент запроса.</p>
+<p><b>Индексация (заранее):</b></p>
+<ol><li>загрузить документы и извлечь текст (PDF, вики, тикеты);</li><li>разрезать на фрагменты (chunking) с метаданными — источник, раздел, дата, права;</li><li>посчитать эмбеддинги фрагментов;</li><li>сохранить в индекс — векторный и часто полнотекстовый.</li></ol>
+<p><b>Ответ на запрос:</b></p>
+<ol><li>при необходимости переформулировать вопрос (учесть историю диалога);</li><li>найти top-k фрагментов: векторный или гибридный поиск, фильтры;</li><li>переранжировать и отобрать лучшие;</li><li>собрать промпт: инструкция отвечать только по контексту, фрагменты с пометками источников, вопрос;</li><li>сгенерировать ответ со ссылками на источники.</li></ol>
+<p><b>Где ломается:</b> не нашёлся нужный фрагмент (самая частая проблема), нашёлся, но модель его не использовала или исказила, фрагменты противоречат друг другу. Поэтому поиск и генерацию оценивают отдельно.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><p>Ассистент поддержки: «Можно ли вернуть товар после 14 дней?» → поиск по базе правил → два фрагмента о возвратах → ответ «Да, если товар не использовался: до 30 дней по программе лояльности (Правила возврата, п. 4.2)».</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Идея: поиск + генерация, знания в контексте, а не в весах.</li><li>Этапы индексации и обработки запроса.</li><li>Плюсы по сравнению с «голой» моделью.</li><li>Где RAG ломается.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Сводить RAG к «векторной базе».</li><li>Не упоминать, что качество в первую очередь зависит от поиска.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/ai/chunking/">Как разбивать документы на фрагменты для RAG?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/rag-vs-finetuning/">Когда использовать RAG, а когда дообучение модели?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/rag-quality/">Как улучшить качество RAG, если он отвечает плохо?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/embeddings/">Что такое эмбеддинги?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/vector-search/">Как устроен векторный поиск?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/hallucinations/">Что такое галлюцинации LLM и как с ними бороться?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое RAG и как он устроен?","acceptedAnswer":{"@type":"Answer","text":"RAG — модель отвечает по найденным документам: сначала поиск релевантных фрагментов, затем генерация ответа с ними в контексте. Индексация: документы → фрагменты → эмбеддинги → индекс Запрос: вопрос → поиск фрагментов → промпт «ответь по контексту» → ответ со ссылками Плюсы: свежие и закрытые данные без дообучения, источники для проверки, меньше галлюцинаций Зачем. Модель не знает ваших внутренних документов и событий после даты обучения, а дообучать её ради фактов дорого и ненадёжно. RAG подкладывает нужные знания в контекст в момент запроса. Индексация (заранее): 1. загрузить документы и извлечь текст (PDF, вики, тикеты); 2. разрезать на фрагменты (chunking) с метаданными — источник, раздел, дата, права; 3. посчитать эмбеддинги фрагментов; 4. сохранить в индекс — векторный и часто полнотекстовый. Ответ на запрос: 1. при необходимости переформулировать вопрос (учесть историю диалога); 2. найти top-k фрагментов: векторный или гибридный поиск, фильтры; 3. переранжировать и отобрать лучшие; 4. собрать промпт: инструкция отвечать только по контексту, фрагменты с пометками источников, вопрос; 5. сгенерировать ответ со ссылками на источники. Где ломается: не нашёлся нужный фрагмент (самая частая проблема), нашёлся, но модель его не использовала…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

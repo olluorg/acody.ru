@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Для чего предназначен record? — вопрос с собеседования</title>
+<meta name="description" content="record — компактный неизменяемый носитель данных: поля в заголовке, а конструктор, аксессоры, equals, hashCode и toString создаёт компилятор. Поля…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/record/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/record/">
+<meta property="og:title" content="Для чего предназначен record? — вопрос с собеседования">
+<meta property="og:description" content="record — компактный неизменяемый носитель данных: поля в заголовке, а конструктор, аксессоры, equals, hashCode и toString создаёт компилятор. Поля…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Для чего предназначен record?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Для чего предназначен record?"}]}</script>
+  <h1>Для чего предназначен record?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Современная Java</span><span class="chip ver">Java &gt;=16</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем record отличается от обычного класса?</li><li>Можно ли добавить проверку в конструктор record?</li><li>Можно ли использовать record как JPA-сущность?</li><li>Что такое record и когда его использовать?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">record — <b>компактный неизменяемый носитель данных</b>: поля в заголовке, а конструктор, аксессоры, equals, hashCode и toString создаёт компилятор.</p><ul><li>Поля final, наследоваться от класса нельзя, но интерфейсы реализовывать можно</li><li>Проверки — в компактном конструкторе</li></ul><p class="extra"><span>А ещё</span> Неизменяемы поля, а не объекты по ссылкам: список внутри нужно копировать</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Record (Java 16) убирает шаблонный код для классов-данных: DTO, ключей составных карт, промежуточных результатов. Объявление <code>record Point(int x, int y)</code> даёт:</p>
+<ul><li><code>private final</code> поля <code>x</code> и <code>y</code>;</li><li>канонический конструктор;</li><li>аксессоры <code>x()</code> и <code>y()</code> (без префикса get);</li><li><code>equals</code> и <code>hashCode</code> по значениям полей;</li><li>читаемый <code>toString</code>.</li></ul>
+<p>Ограничения: record неявно <code>final</code>, не может наследовать класс (но реализует интерфейсы), не может объявлять дополнительные поля экземпляра. Можно добавлять методы, статические поля и конструкторы.</p>
+<p>Проверку и нормализацию данных делают в <b>компактном конструкторе</b> — без списка параметров.</p>
+<p>Важная тонкость: неизменяемы ссылки, а не объекты. Если поле — список, его стоит копировать в неизменяемый (<code>List.copyOf</code>).</p>
+<p>JPA-сущностью record быть не может: Hibernate нужны изменяемые поля и конструктор без аргументов. А вот для DTO и проекций запросов он отлично подходит.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>public record Money(BigDecimal amount, String currency) {
+    public Money {                                  // компактный конструктор
+        if (amount.signum() &lt; 0) throw new IllegalArgumentException(&quot;amount &lt; 0&quot;);
+        currency = currency.toUpperCase();
+    }
+}
+
+new Money(new BigDecimal(&quot;10&quot;), &quot;rub&quot;).equals(new Money(new BigDecimal(&quot;10&quot;), &quot;RUB&quot;)); // true</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Что генерирует компилятор.</li><li>Неизменяемость и ограничения.</li><li>Компактный конструктор для проверок.</li><li>Нюанс с изменяемыми полями и JPA — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Пытаться добавить сеттеры или унаследовать record от класса.</li><li>Считать объект полностью неизменяемым при изменяемых полях внутри.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Для компактного объявления неизменяемого носителя данных: компилятор сам создаёт конструктор, аксессоры, equals, hashCode и toString</li><li class="no"><span class="mark">✗</span>Для объявления класса, поля которого можно менять без сеттеров</li><li class="no"><span class="mark">✗</span>Для замены интерфейсов в функциональном программировании</li><li class="no"><span class="mark">✗</span>Для описания таблиц базы данных</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что делает компактный конструктор?</li><li>Когда record — неудачный выбор?</li><li>Чем record отличается от class?</li><li>Что такое compact constructor?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/records/">Records: компактные носители данных</a><p>Что генерирует record, канонический и компактный конструкторы, ограничения и когда применять.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/record-array-equals/">Что произойдёт, если объявить record с полем-массивом и сравнить два таких объекта с одинаковым содержимым массива?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/record-features/">Что верно про record в Java?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/record-when-not/">Когда record — неудачный выбор?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Для чего предназначен record?","acceptedAnswer":{"@type":"Answer","text":"record — компактный неизменяемый носитель данных: поля в заголовке, а конструктор, аксессоры, equals, hashCode и toString создаёт компилятор. Поля final, наследоваться от класса нельзя, но интерфейсы реализовывать можно Проверки — в компактном конструкторе Неизменяемы поля, а не объекты по ссылкам: список внутри нужно копировать Record (Java 16) убирает шаблонный код для классов-данных: DTO, ключей составных карт, промежуточных результатов. Объявление record Point(int x, int y) даёт: - private final поля x и y; - канонический конструктор; - аксессоры x() и y() (без префикса get); - equals и hashCode по значениям полей; - читаемый toString. Ограничения: record неявно final, не может наследовать класс (но реализует интерфейсы), не может объявлять дополнительные поля экземпляра. Можно добавлять методы, статические поля и конструкторы. Проверку и нормализацию данных делают в компактном конструкторе — без списка параметров. Важная тонкость: неизменяемы ссылки, а не объекты. Если поле — список, его стоит копировать в неизменяемый (List.copyOf). JPA-сущностью record быть не может: Hibernate нужны изменяемые поля и конструктор без аргументов. А вот для DTO и проекций запросов он отлично подходит."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

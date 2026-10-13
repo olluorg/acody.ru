@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем Comparable отличается от Comparator и что значит согласованность порядка с equals? — вопрос с собеседования</title>
+<meta name="description" content="Comparable — естественный порядок, который задаёт сам класс (compareTo), один. Comparator — внешний порядок, их может быть сколько угодно…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/comparable-vs-comparator/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/comparable-vs-comparator/">
+<meta property="og:title" content="Чем Comparable отличается от Comparator и что значит согласованность порядка с equals? — вопрос с собеседования">
+<meta property="og:description" content="Comparable — естественный порядок, который задаёт сам класс (compareTo), один. Comparator — внешний порядок, их может быть сколько угодно…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Чем Comparable отличается от Comparator и что значит согласованность порядка с equals?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Чем Comparable отличается от Comparator и что значит согласованность порядка с equals?"}]}</script>
+  <h1>Чем Comparable отличается от Comparator и что значит согласованность порядка с equals?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Коллекции</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как сортировать объекты в Java?</li><li>Comparable или Comparator — в чём разница, и что значит требование согласованности порядка с equals?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Comparable</b> — естественный порядок, который задаёт сам класс (<code>compareTo</code>), один. <b>Comparator</b> — внешний порядок, их может быть сколько угодно, комбинируются через <code>comparing().thenComparing()</code>. <b>Согласованность с equals</b>: <code>compareTo == 0</code> ровно тогда, когда <code>equals == true</code>.</p><ul><li>String, Integer, LocalDate реализуют Comparable</li><li>Comparator — когда класс чужой или нужны разные сортировки</li><li>Несогласованный порядок ломает TreeSet и TreeMap: «равные» по сравнению элементы теряются</li></ul><p class="extra"><span>А ещё</span> Не сравнивать вычитанием <code>a - b</code> — переполнение; Integer.compare</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Comparable&lt;T&gt;</b> реализует сам класс: <code>int compareTo(T other)</code> — отрицательное, ноль или положительное. Это его естественный порядок, используемый <code>Collections.sort</code>, <code>TreeSet</code>, <code>Arrays.sort</code> без компаратора.</p>
+<p><b>Comparator&lt;T&gt;</b> — отдельный объект сравнения. Передаётся в <code>sort</code>, <code>TreeMap</code>, <code>stream.sorted</code>, <code>max</code>. Удобные фабрики:</p>
+<pre class="lang-java"><code>users.sort(Comparator.comparing(User::lastName)
+                     .thenComparing(User::firstName)
+                     .thenComparing(User::age, Comparator.reverseOrder()));</code></pre>
+<p><code>nullsFirst</code>, <code>nullsLast</code>, <code>reversed()</code>.</p>
+<p><b>Согласованность с equals.</b> Порядок согласован, если <code>a.compareTo(b) == 0</code> тогда и только тогда, когда <code>a.equals(b)</code>. Сортированные коллекции (<code>TreeSet</code>, <code>TreeMap</code>) определяют одинаковость <b>только</b> через сравнение. Если компаратор считает равными разные по equals объекты (сравнение только по фамилии), TreeSet молча отбросит второго Петрова, хотя HashSet хранил бы обоих. Известный пример несогласованности в JDK — <code>BigDecimal</code>: <code>2.0</code> и <code>2.00</code> не равны по equals, но compareTo даёт 0.</p>
+<p><b>Ловушки:</b> сравнение через вычитание (<code>return a.x - b.x</code>) переполняется для больших значений — <code>Integer.compare</code>; контракт требует транзитивности и антисимметричности, нарушение даёт <code>IllegalArgumentException: Comparison method violates its general contract</code> в TimSort.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Различие: внутренний единственный порядок против внешних.</li><li>Комбинирование компараторов.</li><li>Согласованность с equals и последствия для TreeSet.</li><li>Ловушка с вычитанием.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Сравнивать вычитанием.</li><li>Делать TreeSet с компаратором по неуникальному полю.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Comparator реализуют внутри класса, Comparable — снаружи</li><li class="no"><span class="mark">✗</span>Comparable сравнивает строки, Comparator — числа</li><li class="ok"><span class="mark">✓</span>Comparable задаёт естественный порядок внутри класса (compareTo); Comparator — внешний порядок (compare), их может быть много</li><li class="no"><span class="mark">✗</span>Это одно и то же</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как безопасно сравнивать int?</li><li>Что значит comparator consistent with equals?</li><li>Почему BigDecimal — классический пример несогласованного compareTo?</li><li>Как правильно собрать компаратор по нескольким полям с nulls?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/treemap/">TreeMap, TreeSet и сортировка</a><p>Красно-чёрное дерево, NavigableMap, Comparable против Comparator, согласованность с equals и TimSort.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/jc-161/">В TreeSet добавили два объекта, для которых equals возвращает false, но компаратор считает их равными. Что произойдёт?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/hashset-linkedhashset-treeset/">Чем HashSet, LinkedHashSet и TreeSet отличаются?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/stable-sort/">Что такое устойчивая (стабильная) сортировка и когда это важно?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем Comparable отличается от Comparator и что значит согласованность порядка с equals?","acceptedAnswer":{"@type":"Answer","text":"Comparable — естественный порядок, который задаёт сам класс (compareTo), один. Comparator — внешний порядок, их может быть сколько угодно, комбинируются через comparing().thenComparing(). Согласованность с equals: compareTo == 0 ровно тогда, когда equals == true. String, Integer, LocalDate реализуют Comparable Comparator — когда класс чужой или нужны разные сортировки Несогласованный порядок ломает TreeSet и TreeMap: «равные» по сравнению элементы теряются Не сравнивать вычитанием a - b — переполнение; Integer.compare Comparable<T> реализует сам класс: int compareTo(T other) — отрицательное, ноль или положительное. Это его естественный порядок, используемый Collections.sort, TreeSet, Arrays.sort без компаратора. Comparator<T> — отдельный объект сравнения. Передаётся в sort, TreeMap, stream.sorted, max. Удобные фабрики: nullsFirst, nullsLast, reversed(). Согласованность с equals. Порядок согласован, если a.compareTo(b) == 0 тогда и только тогда, когда a.equals(b). Сортированные коллекции (TreeSet, TreeMap) определяют одинаковость только через сравнение. Если компаратор считает равными разные по equals объекты (сравнение только по фамилии), TreeSet молча отбросит второго Петрова, хотя HashSet хранил бы обоих. Известный пример несогласованности в JDK — BigDecimal: 2.0 и 2.00 не равны по equals, но compareTo даёт 0. Ловушки: сравнение через вычитание (return a.x - b.x) переполняется для больших значений…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

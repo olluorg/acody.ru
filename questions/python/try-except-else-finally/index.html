@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работают try, except, else и finally? — вопрос с собеседования</title>
+<meta name="description" content="try — опасный код, except — обработка, else — если ошибки не было, finally — всегда. Ловите конкретные исключения, а не except: и не Exception без…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/try-except-else-finally/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/try-except-else-finally/">
+<meta property="og:title" content="Как работают try, except, else и finally? — вопрос с собеседования">
+<meta property="og:description" content="try — опасный код, except — обработка, else — если ошибки не было, finally — всегда. Ловите конкретные исключения, а не except: и не Exception без…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Как работают try, except, else и finally?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Как работают try, except, else и finally?"}]}</script>
+  <h1>Как работают try, except, else и finally?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Исключения и контекстные менеджеры</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Когда выполняется блок else в try?</li><li>Зачем нужен finally?</li><li>Почему нельзя писать голый except?</li><li>Как создать своё исключение?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><code>try</code> — опасный код, <code>except</code> — обработка, <code>else</code> — если <b>ошибки не было</b>, <code>finally</code> — <b>всегда</b>.</p><ul><li>Ловите конкретные исключения, а не <code>except:</code> и не <code>Exception</code> без нужды</li><li><code>raise ... from e</code> сохраняет причину исходной ошибки</li></ul><p class="extra"><span>А ещё</span> Свои исключения наследуют от <code>Exception</code>, обычно с общим базовым классом проекта</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Порядок выполнения:</p>
+<ol><li>выполняется блок <code>try</code>;</li><li>если возникло исключение, ищется первый подходящий <code>except</code> (по типу, с учётом наследования) — поэтому более частные исключения пишут выше;</li><li>если исключения не было, выполняется <code>else</code>;</li><li>в любом случае в конце выполняется <code>finally</code> — даже при <code>return</code> или необработанной ошибке.</li></ol>
+<p>Зачем <code>else</code>: в <code>try</code> оставляют только строку, которая может упасть, а продолжение кладут в <code>else</code>. Так случайно не перехватится ошибка из кода, который вы не собирались защищать.</p>
+<p>Зачем <code>finally</code>: освобождение ресурсов — закрыть файл, соединение, снять блокировку. Чаще для этого используют <code>with</code>.</p>
+<p>Почему плох голый <code>except:</code>: он ловит всё, включая <code>KeyboardInterrupt</code> и <code>SystemExit</code>, и прячет ошибки. <code>except Exception</code> лучше, но тоже скрывает баги, если за ним нет логирования или повторного <code>raise</code>.</p>
+<p><code>raise NewError(...) from e</code> связывает исключения: в трейсбеке видна исходная причина. Свои исключения делают наследниками <code>Exception</code> — обычно от общего класса проекта (<code>class AppError(Exception)</code>), чтобы их можно было ловить вместе.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>class ConfigError(Exception):
+    pass
+
+def load(path):
+    try:
+        f = open(path, encoding=&quot;utf-8&quot;)
+    except FileNotFoundError as e:
+        raise ConfigError(f&quot;нет файла {path}&quot;) from e
+    else:
+        with f:
+            return f.read()
+    finally:
+        print(&quot;попытка загрузки завершена&quot;)</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Порядок выполнения всех четырёх блоков.</li><li>Назначение <code>else</code> и <code>finally</code> на примерах.</li><li>Почему нельзя ловить всё подряд.</li><li>Свои исключения и <code>raise ... from</code>.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Писать <code>except Exception: pass</code>.</li><li>Ставить общий <code>except Exception</code> выше частных — частные никогда не сработают.</li><li>Думать, что <code>finally</code> не выполнится при <code>return</code> внутри <code>try</code>.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/context-manager/">Что такое контекстный менеджер и как работает with?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/decorators/">Что такое декоратор и как его написать?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работают try, except, else и finally?","acceptedAnswer":{"@type":"Answer","text":"try — опасный код, except — обработка, else — если ошибки не было, finally — всегда. Ловите конкретные исключения, а не except: и не Exception без нужды raise ... from e сохраняет причину исходной ошибки Свои исключения наследуют от Exception, обычно с общим базовым классом проекта Порядок выполнения: 1. выполняется блок try; 2. если возникло исключение, ищется первый подходящий except (по типу, с учётом наследования) — поэтому более частные исключения пишут выше; 3. если исключения не было, выполняется else; 4. в любом случае в конце выполняется finally — даже при return или необработанной ошибке. Зачем else: в try оставляют только строку, которая может упасть, а продолжение кладут в else. Так случайно не перехватится ошибка из кода, который вы не собирались защищать. Зачем finally: освобождение ресурсов — закрыть файл, соединение, снять блокировку. Чаще для этого используют with. Почему плох голый except:: он ловит всё, включая KeyboardInterrupt и SystemExit, и прячет ошибки. except Exception лучше, но тоже скрывает баги, если за ним нет логирования или повторного raise. raise NewError(...) from e связывает исключения: в трейсбеке видна исходная причина. Свои…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как организовать сбор логов из множества сервисов? — вопрос с собеседования</title>
+<meta name="description" content="Приложения пишут структурированные логи (JSON) в stdout; агент на узле (Fluent Bit, Vector, Promtail) собирает их, добавляет метаданные (под…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/logging-pipeline/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/logging-pipeline/">
+<meta property="og:title" content="Как организовать сбор логов из множества сервисов? — вопрос с собеседования">
+<meta property="og:description" content="Приложения пишут структурированные логи (JSON) в stdout; агент на узле (Fluent Bit, Vector, Promtail) собирает их, добавляет метаданные (под…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Как организовать сбор логов из множества сервисов?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Как организовать сбор логов из множества сервисов?"}]}</script>
+  <h1>Как организовать сбор логов из множества сервисов?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Мониторинг и логи</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем ELK отличается от Loki?</li><li>Зачем нужны структурированные логи?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Приложения пишут <b>структурированные логи</b> (JSON) в <b>stdout</b>; <b>агент</b> на узле (Fluent Bit, Vector, Promtail) собирает их, добавляет метаданные (под, namespace, сервис) и отправляет в <b>хранилище</b> с поиском. <b>ELK/OpenSearch</b> индексирует весь текст — мощный поиск, но дорого по диску и памяти. <b>Loki</b> индексирует только метки, а текст хранит сжатым в объектном хранилище — в разы дешевле, но поиск по содержимому медленнее.</p><ul><li>trace_id в каждой строке связывает логи с трейсами и запросом</li><li>Уровни логирования и сэмплирование: DEBUG в проде на высоком трафике разоряет</li><li>Не логировать персональные данные, пароли, токены</li></ul><p class="extra"><span>А ещё</span> Сроки хранения: горячие дни для поиска, архив дешевле или удаление</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Структурированный лог:</b></p>
+<pre class="lang-json"><code>{&quot;ts&quot;:&quot;2026-10-13T10:15:02Z&quot;,&quot;level&quot;:&quot;ERROR&quot;,&quot;service&quot;:&quot;orders&quot;,
+ &quot;trace_id&quot;:&quot;4bf92f35&quot;,&quot;order_id&quot;:&quot;A-1042&quot;,&quot;msg&quot;:&quot;payment timeout&quot;,
+ &quot;duration_ms&quot;:3012}</code></pre>
+<p>Поля позволяют фильтровать и считать, а не разбирать текст регулярками.</p>
+<p><b>Сравнение хранилищ:</b></p>
+<div class="table"><table><thead><tr><th></th><th>ELK / OpenSearch</th><th>Loki</th></tr></thead><tbody><tr><td>индекс</td><td>полнотекстовый по всем полям</td><td>только метки</td></tr><tr><td>стоимость</td><td>высокая</td><td>низкая</td></tr><tr><td>поиск</td><td>быстрый по любому слову</td><td>фильтр по меткам + перебор</td></tr><tr><td>эксплуатация</td><td>сложный кластер</td><td>проще, объектное хранилище</td></tr></tbody></table></div>
+<p><b>Надёжность конвейера:</b> буферизация в агенте или очередь (Kafka) перед хранилищем — пик логов не должен ронять приложения или терять данные; лимиты на размер и частоту.</p>
+<p><b>Метки в Loki</b> — как в Prometheus: высокая кардинальность (user_id в метке) ломает хранилище; такие значения — в теле строки.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Конвейер: stdout → агент → хранилище.</li><li>Структурированные логи и trace_id.</li><li>Компромисс ELK и Loki, стоимость и хранение.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/observability-vs-monitoring/">Чем наблюдаемость (observability) отличается от мониторинга?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/three-pillars/">Какие три сигнала составляют основу наблюдаемости?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/prometheus-metrics/">Как работает Prometheus и какие типы метрик в нём есть?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/linux-disk-full/">Диск заполнен, а du показывает, что места занято мало. В чём дело?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как организовать сбор логов из множества сервисов?","acceptedAnswer":{"@type":"Answer","text":"Приложения пишут структурированные логи (JSON) в stdout; агент на узле (Fluent Bit, Vector, Promtail) собирает их, добавляет метаданные (под, namespace, сервис) и отправляет в хранилище с поиском. ELK/OpenSearch индексирует весь текст — мощный поиск, но дорого по диску и памяти. Loki индексирует только метки, а текст хранит сжатым в объектном хранилище — в разы дешевле, но поиск по содержимому медленнее. trace_id в каждой строке связывает логи с трейсами и запросом Уровни логирования и сэмплирование: DEBUG в проде на высоком трафике разоряет Не логировать персональные данные, пароли, токены Сроки хранения: горячие дни для поиска, архив дешевле или удаление Структурированный лог: Поля позволяют фильтровать и считать, а не разбирать текст регулярками. Сравнение хранилищ: | | ELK / OpenSearch | Loki | | --- | --- | --- | | индекс | полнотекстовый по всем полям | только метки | | стоимость | высокая | низкая | | поиск | быстрый по любому слову | фильтр по меткам + перебор | | эксплуатация | сложный кластер | проще, объектное хранилище | Надёжность конвейера: буферизация в агенте или очередь (Kafka) перед хранилищем — пик логов не должен ронять приложения или терять данные; лимиты на размер и частоту. Метки в Loki — как в Prometheus: высокая кардинальность (user_id в метке) ломает хранилище; такие значения — в теле строки."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

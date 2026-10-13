@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое p-value и как работает проверка статистических гипотез? — вопрос с собеседования</title>
+<meta name="description" content="Формулируют нулевую гипотезу (эффекта нет) и альтернативу. p-value — вероятность получить такие или ещё более сильные различия, если нулевая гипотеза…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/p-value-hypothesis/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/p-value-hypothesis/">
+<meta property="og:title" content="Что такое p-value и как работает проверка статистических гипотез? — вопрос с собеседования">
+<meta property="og:description" content="Формулируют нулевую гипотезу (эффекта нет) и альтернативу. p-value — вероятность получить такие или ещё более сильные различия, если нулевая гипотеза…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Что такое p-value и как работает проверка статистических гипотез?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Что такое p-value и как работает проверка статистических гипотез?"}]}</script>
+  <h1>Что такое p-value и как работает проверка статистических гипотез?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Статистика</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что значит «результат статистически значим»?</li><li>Почему p-value — не вероятность того, что гипотеза верна?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Формулируют <b>нулевую гипотезу</b> (эффекта нет) и альтернативу. <b>p-value</b> — вероятность получить такие или ещё более сильные различия, <b>если нулевая гипотеза верна</b>. Если p-value меньше заранее выбранного уровня <b>α</b> (часто 0,05) — отвергаем нулевую гипотезу.</p><ul><li>p-value — НЕ вероятность того, что нулевая гипотеза верна</li><li>«Не значимо» ≠ «эффекта нет»: возможно, не хватило данных</li><li>Значимость не равна важности: на миллионах пользователей значим и крошечный эффект</li></ul><p class="extra"><span>А ещё</span> Вместе с p-value показывают размер эффекта и доверительный интервал</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Сотни A/B-тестов: ложные срабатывания, подглядывание и мощность</p><script type="module" src="/widgets/ab-simulator.js"></script><sotto-ab-simulator theme="dark"></sotto-ab-simulator></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Процедура:</b></p>
+<ol><li>До эксперимента: гипотезы, метрика, уровень α, размер выборки.</li><li>Собрать данные.</li><li>Посчитать статистику теста (t-тест, z-тест для долей, хи-квадрат, Манна-Уитни) и p-value.</li><li>Сравнить с α и сделать вывод.</li></ol>
+<p><b>Пример интерпретации.</b> p = 0,03: если бы новая кнопка не влияла на конверсию, различие не меньше наблюдаемого получалось бы примерно в 3% случаев из-за случайности. Это достаточно редко, чтобы при α = 0,05 считать эффект реальным.</p>
+<p><b>Типичные неверные трактовки:</b></p>
+<ul><li>«вероятность, что эффект случаен, — 3%»;</li><li>«вероятность, что новая версия лучше, — 97%»;</li><li>p = 0,06 — «почти значимо, давайте добавим данных» — это подгонка.</li></ul>
+<p><b>Выбор теста:</b> доли — z-тест или хи-квадрат; средние при больших выборках — t-тест (ЦПТ); сильно скошенные метрики — бутстреп или непараметрические тесты (с осторожностью: Манна-Уитни проверяет не равенство средних).</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Нулевая гипотеза и определение p-value.</li><li>Уровень значимости и решение.</li><li>Типичные неверные трактовки.</li><li>Значимость против практической важности.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/analytics/type-errors-power/">Что такое ошибки первого и второго рода и мощность теста?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/clt-confidence-intervals/">Что такое центральная предельная теорема и доверительный интервал?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/analytics/ab-test-design/">Как спроектировать A/B-тест от гипотезы до решения?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/multiple-testing/">Что такое проблема множественных сравнений?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое p-value и как работает проверка статистических гипотез?","acceptedAnswer":{"@type":"Answer","text":"Формулируют нулевую гипотезу (эффекта нет) и альтернативу. p-value — вероятность получить такие или ещё более сильные различия, если нулевая гипотеза верна. Если p-value меньше заранее выбранного уровня α (часто 0,05) — отвергаем нулевую гипотезу. p-value — НЕ вероятность того, что нулевая гипотеза верна «Не значимо» ≠ «эффекта нет»: возможно, не хватило данных Значимость не равна важности: на миллионах пользователей значим и крошечный эффект Вместе с p-value показывают размер эффекта и доверительный интервал Процедура: 1. До эксперимента: гипотезы, метрика, уровень α, размер выборки. 2. Собрать данные. 3. Посчитать статистику теста (t-тест, z-тест для долей, хи-квадрат, Манна-Уитни) и p-value. 4. Сравнить с α и сделать вывод. Пример интерпретации. p = 0,03: если бы новая кнопка не влияла на конверсию, различие не меньше наблюдаемого получалось бы примерно в 3% случаев из-за случайности. Это достаточно редко, чтобы при α = 0,05 считать эффект реальным. Типичные неверные трактовки: - «вероятность, что эффект случаен, — 3%»; - «вероятность, что новая версия лучше, — 97%»; - p = 0,06 — «почти значимо, давайте добавим данных» — это подгонка. Выбор теста: доли — z-тест или хи-квадрат; средние при больших выборках — t-тест (ЦПТ); сильно скошенные метрики — бутстреп или непараметрические тесты (с осторожностью: Манна-Уитни проверяет не равенство средних)."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

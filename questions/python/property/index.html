@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое @property и зачем он нужен? — вопрос с собеседования</title>
+<meta name="description" content="@property превращает метод в атрибут: снаружи obj.area, внутри — вычисление или проверка. @x.setter — проверка при присваивании, без сеттера …">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/property/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/property/">
+<meta property="og:title" content="Что такое @property и зачем он нужен? — вопрос с собеседования">
+<meta property="og:description" content="@property превращает метод в атрибут: снаружи obj.area, внутри — вычисление или проверка. @x.setter — проверка при присваивании, без сеттера …">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Что такое @property и зачем он нужен?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Что такое @property и зачем он нужен?"}]}</script>
+  <h1>Что такое @property и зачем он нужен?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">ООП</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как сделать геттер и сеттер в Python?</li><li>Как сделать атрибут только для чтения?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><code>@property</code> превращает метод в <b>атрибут</b>: снаружи <code>obj.area</code>, внутри — вычисление или проверка.</p><ul><li><code>@x.setter</code> — проверка при присваивании, без сеттера — атрибут только для чтения</li><li>Можно начать с обычного атрибута и позже заменить на property, не ломая вызывающий код</li></ul><p class="extra"><span>А ещё</span> В Python не пишут <code>get_x()</code>/<code>set_x()</code> заранее — в этом и смысл</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><code>property</code> — встроенный дескриптор. Методы с декоратором <code>@property</code> вызываются при обращении к атрибуту, без скобок.</p>
+<p>Зачем:</p>
+<ul><li><b>вычисляемые атрибуты</b> — <code>rect.area</code> считается из ширины и высоты;</li><li><b>проверка значений</b> — сеттер не даст записать отрицательный возраст;</li><li><b>только для чтения</b> — если сеттер не объявлен, присваивание бросит <code>AttributeError</code>;</li><li><b>эволюция интерфейса</b> — класс начинается с обычного публичного атрибута, а когда появляется логика, атрибут заменяют на property. Код, который пишет <code>obj.x</code>, менять не нужно. Поэтому в Python не принято сразу писать геттеры и сеттеры, как в Java.</li></ul>
+<p>Значение обычно хранят в атрибуте с подчёркиванием (<code>self._age</code>) — это соглашение «внутреннее, не трогать снаружи». Двойное подчёркивание включает искажение имени (name mangling) и нужно редко.</p>
+<p>Для дорогих вычислений, которые не меняются, есть <code>functools.cached_property</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>class Person:
+    def __init__(self, age):
+        self.age = age               # проходит через сеттер
+
+    @property
+    def age(self):
+        return self._age
+
+    @age.setter
+    def age(self, value):
+        if value &lt; 0:
+            raise ValueError(&quot;возраст не может быть отрицательным&quot;)
+        self._age = value
+
+    @property
+    def is_adult(self):              # только чтение
+        return self._age &gt;= 18
+
+p = Person(20)
+p.age = -1        # ValueError
+p.is_adult = True # AttributeError</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Доступ к методу как к атрибуту.</li><li>Применения: вычисление, проверка, только чтение.</li><li>Почему в Python не пишут геттеры заранее.</li><li>Соглашение с подчёркиванием.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Хранить значение в атрибуте с тем же именем, что и property, — бесконечная рекурсия.</li><li>Делать в property тяжёлую или с побочными эффектами работу — от атрибута её не ждут.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/staticmethod-classmethod/">Чем @staticmethod отличается от @classmethod?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/decorators/">Что такое декоратор и как его написать?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/class-self-init/">Что такое self и __init__ в классе?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое @property и зачем он нужен?","acceptedAnswer":{"@type":"Answer","text":"@property превращает метод в атрибут: снаружи obj.area, внутри — вычисление или проверка. @x.setter — проверка при присваивании, без сеттера — атрибут только для чтения Можно начать с обычного атрибута и позже заменить на property, не ломая вызывающий код В Python не пишут get_x()/set_x() заранее — в этом и смысл property — встроенный дескриптор. Методы с декоратором @property вызываются при обращении к атрибуту, без скобок. Зачем: - вычисляемые атрибуты — rect.area считается из ширины и высоты; - проверка значений — сеттер не даст записать отрицательный возраст; - только для чтения — если сеттер не объявлен, присваивание бросит AttributeError; - эволюция интерфейса — класс начинается с обычного публичного атрибута, а когда появляется логика, атрибут заменяют на property. Код, который пишет obj.x, менять не нужно. Поэтому в Python не принято сразу писать геттеры и сеттеры, как в Java. Значение обычно хранят в атрибуте с подчёркиванием (self._age) — это соглашение «внутреннее, не трогать снаружи». Двойное подчёркивание включает искажение имени (name mangling) и нужно редко. Для дорогих вычислений, которые не меняются, есть functools.cached_property."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

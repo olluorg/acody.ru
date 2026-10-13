@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Области видимости и замыкания — карта «Frontend-разработчик»</title>
+<meta name="description" content="var, let и const, всплытие, лексическое окружение и замыкания.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/frontend/js-scope/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/frontend/js-scope/">
+<meta property="og:title" content="Области видимости и замыкания — карта «Frontend-разработчик»">
+<meta property="og:description" content="var, let и const, всплытие, лексическое окружение и замыкания.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/frontend/#javascript">Frontend-разработчик</a> <span>/</span> <a href="/roadmap/frontend/javascript/">JavaScript</a> <span>/</span> <span>Области видимости и замыкания</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Frontend-разработчик","item":"https://learn.getsotto.ru/roadmap/frontend/#javascript"},{"@type":"ListItem","position":3,"name":"JavaScript","item":"https://learn.getsotto.ru/roadmap/frontend/javascript/"},{"@type":"ListItem","position":4,"name":"Области видимости и замыкания"}]}</script>
+  <h1>Области видимости и замыкания</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">var, let и const, всплытие, лексическое окружение и замыкания.</p>
+  <article class="md"><p><b>Замыкание</b> — функция вместе с окружением, в котором она создана: она помнит переменные внешней функции даже после её завершения.</p>
+<pre class="lang-js"><code>function counter() {
+  let n = 0;
+  return () =&gt; ++n;
+}
+const next = counter();
+next(); next();   // 2 — n живёт в замыкании</code></pre>
+<h3>Что важно знать</h3>
+<ul><li><code>var</code> — область видимости функции, всплывает со значением <code>undefined</code>; <code>let</code>/<code>const</code> — блочная область, до объявления — «временная мёртвая зона» (ReferenceError).</li><li><code>const</code> запрещает переприсваивание, но не изменение объекта.</li><li>Классическая задача: цикл <code>for (var i…)</code> с <code>setTimeout</code> печатает одно и то же число; с <code>let</code> у каждой итерации своя переменная.</li><li>Где применяются замыкания: приватное состояние, фабрики функций, <code>debounce</code> и <code>throttle</code>, обработчики событий, хуки React.</li><li>Замыкание удерживает переменные в памяти — источник утечек, если держать ссылку на большие объекты в долгоживущем обработчике.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 6 ч</small></h3><ul><li>Объясняет разницу var, let и const и временную мёртвую зону</li><li>Объясняет замыкание и пишет на нём счётчик, debounce и throttle</li></ul><p class="rm-practice"><b>Практика.</b> Реализовать debounce и throttle с тестами и объяснить задачу с setTimeout в цикле на var и let.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/frontend/var-let-const/">Чем var отличается от let и const?</a> <span class="lvl lvl-junior">Junior</span><p>var — область видимости функции, поднимается (hoisting) со значением undefined, допускает повторное объявление. let и const — область видимости блока {}, до строки объявления …</p></li><li><a href="/questions/frontend/closures/">Что такое замыкание в JavaScript и где оно применяется?</a> <span class="lvl lvl-junior">Junior</span><p>Замыкание — функция вместе с лексическим окружением, в котором она создана: она помнит переменные внешней функции даже после её завершения. Применение: приватное состояние…</p></li><li><a href="/questions/frontend/debounce-throttle/">Чем debounce отличается от throttle?</a> <span class="lvl lvl-junior">Junior</span><p>Debounce — вызвать функцию, только когда события прекратились на N мс: поиск по вводу, сохранение черновика, resize. Throttle — вызывать не чаще раза в N мс, пока события идут…</p></li></ul></section><section class="block"><h2>Документация</h2><ul class="links"><li><a href="https://learn.javascript.ru/closure" rel="noopener" target="_blank">learn.javascript.ru: Замыкание ↗</a></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/frontend/js-types/">← Типы, сравнение и копирование</a><a class="next" href="/roadmap/frontend/js-this-prototypes/">this, прототипы и классы →</a></nav>
+  <p class="rm-back"><a href="/roadmap/frontend/#javascript">← Вся карта «Frontend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Области видимости и замыкания","description":"var, let и const, всплытие, лексическое окружение и замыкания.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/frontend/js-scope/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

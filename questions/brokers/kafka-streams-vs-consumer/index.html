@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем Kafka Streams отличается от обычного Kafka Consumer? — вопрос с собеседования</title>
+<meta name="description" content="Consumer API — низкоуровневое чтение: опрос, коммит, обработка вручную. Kafka Streams — библиотека потоковой обработки поверх Kafka: преобразования…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/brokers/kafka-streams-vs-consumer/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/brokers/kafka-streams-vs-consumer/">
+<meta property="og:title" content="Чем Kafka Streams отличается от обычного Kafka Consumer? — вопрос с собеседования">
+<meta property="og:description" content="Consumer API — низкоуровневое чтение: опрос, коммит, обработка вручную. Kafka Streams — библиотека потоковой обработки поверх Kafka: преобразования…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/brokers/">Брокеры сообщений</a> <span>/</span> <span>Чем Kafka Streams отличается от обычного Kafka Consumer?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/questions/brokers/"},{"@type":"ListItem","position":3,"name":"Чем Kafka Streams отличается от обычного Kafka Consumer?"}]}</script>
+  <h1>Чем Kafka Streams отличается от обычного Kafka Consumer?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Экосистема Kafka</span><span class="chip">Kafka</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое Kafka Streams?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Consumer API</b> — низкоуровневое чтение: опрос, коммит, обработка вручную. <b>Kafka Streams</b> — библиотека потоковой обработки поверх Kafka: преобразования, агрегации, соединения потоков, окна, локальное состояние и exactly-once.</p><ul><li>Состояние в локальных хранилищах (RocksDB) с резервированием в changelog-топиках</li><li>Масштабируется как группа: задачи по партициям</li><li>Не отдельный кластер — просто библиотека в вашем приложении</li></ul><p class="extra"><span>А ещё</span> Альтернативы — Flink (отдельный кластер, богаче), ksqlDB (SQL поверх Streams)</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Consumer API:</b> приложение само крутит цикл <code>poll()</code>, обрабатывает записи, коммитит offset, хранит состояние где-то во внешней базе. Полный контроль, но агрегации, окна и соединения потоков приходится писать вручную.</p>
+<p><b>Kafka Streams</b> — Java-библиотека, которая строит обработку как топологию: <code>stream.filter().groupByKey().windowedBy(...).count()</code>. Возможности:</p>
+<ul><li><b>без состояния</b> — фильтрация, преобразование, ветвление;</li><li><b>с состоянием</b> — агрегаты, счётчики, соединения потоков и таблиц (KStream, KTable, GlobalKTable), окна по времени события;</li><li><b>локальное состояние</b> — RocksDB на диске экземпляра, каждое изменение дублируется в changelog-топик, поэтому при падении состояние восстанавливается;</li><li><b>exactly-once</b> — <code>processing.guarantee=exactly_once_v2</code>;</li><li><b>масштабирование</b> — задачи привязаны к партициям; запускаем больше экземпляров — задачи перераспределяются.</li></ul>
+<p><b>Когда что:</b> простая реакция на событие (отправить письмо, записать в базу) — consumer или Spring Kafka. Агрегации, окна, обогащение потока — Kafka Streams. Очень сложные пайплайны, много источников и SQL — Flink.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Различие уровня абстракции.</li><li>Возможности Streams: состояние, окна, соединения, exactly-once.</li><li>Как хранится и восстанавливается состояние.</li><li>Когда что выбирать.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать Kafka Streams отдельным кластером, как Flink.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Это два разных протокола поверх TCP, не связанные между собой</li><li class="no"><span class="mark">✗</span>Streams — отдельный кластер вместо Kafka</li><li class="no"><span class="mark">✗</span>Streams работает только с Avro, Consumer — только с JSON</li><li class="ok"><span class="mark">✓</span>Kafka Streams — клиентская библиотека stream-processing поверх Consumer API: топология, state stores (RocksDB + changelog), windowing и exactly-once в рамках Kafka</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое state store?</li><li>Чем Kafka Streams отличается от Flink?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/brokers/kafka-ecosystem/">Kafka API и экосистема</a><p>Клиентские API, Kafka Connect и Debezium, Streams и stream-processing, ksqlDB, Schema Registry и MirrorMaker для multi-DC.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/brokers/log-compaction/">Что делает log compaction в Kafka и для чего применяется?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/delivery-semantics/">Чем отличаются at-most-once, at-least-once и exactly-once?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем Kafka Streams отличается от обычного Kafka Consumer?","acceptedAnswer":{"@type":"Answer","text":"Consumer API — низкоуровневое чтение: опрос, коммит, обработка вручную. Kafka Streams — библиотека потоковой обработки поверх Kafka: преобразования, агрегации, соединения потоков, окна, локальное состояние и exactly-once. Состояние в локальных хранилищах (RocksDB) с резервированием в changelog-топиках Масштабируется как группа: задачи по партициям Не отдельный кластер — просто библиотека в вашем приложении Альтернативы — Flink (отдельный кластер, богаче), ksqlDB (SQL поверх Streams) Consumer API: приложение само крутит цикл poll(), обрабатывает записи, коммитит offset, хранит состояние где-то во внешней базе. Полный контроль, но агрегации, окна и соединения потоков приходится писать вручную. Kafka Streams — Java-библиотека, которая строит обработку как топологию: stream.filter().groupByKey().windowedBy(...).count(). Возможности: - без состояния — фильтрация, преобразование, ветвление; - с состоянием — агрегаты, счётчики, соединения потоков и таблиц (KStream, KTable, GlobalKTable), окна по времени события; - локальное состояние — RocksDB на диске экземпляра, каждое изменение дублируется в changelog-топик, поэтому при падении состояние восстанавливается; - exactly-once — processing.guarantee=exactly_once_v2; - масштабирование — задачи привязаны к партициям; запускаем больше экземпляров — задачи перераспределяются. Когда что: простая реакция на событие (отправить…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

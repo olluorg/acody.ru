@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spring Batch, Integration и API styles — разбор для собеседования</title>
+<meta name="description" content="Batch jobs, enterprise integration patterns, Spring Data REST, HATEOAS и GraphQL.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/spring/integration-batch-api/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/spring/integration-batch-api/">
+<meta property="og:title" content="Spring Batch, Integration и API styles — разбор для собеседования">
+<meta property="og:description" content="Batch jobs, enterprise integration patterns, Spring Data REST, HATEOAS и GraphQL.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#spring">Spring</a> <span>/</span> <span>Spring Batch, Integration и API styles</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/articles/#spring"},{"@type":"ListItem","position":3,"name":"Spring Batch, Integration и API styles"}]}</script>
+  <h1>Spring Batch, Integration и API styles</h1>
+  <p class="lead">Batch jobs, enterprise integration patterns, Spring Data REST, HATEOAS и GraphQL.</p>
+  <article class="md"><h2>Spring Batch</h2>
+<p>Spring Batch нужен для пакетной обработки: большие файлы, nightly jobs, миграции, отчёты, регулярная синхронизация.</p>
+<p>Модель строится вокруг Job, Step, ItemReader, ItemProcessor и ItemWriter. Важные свойства: restartability, chunk processing, skip/retry и job repository.</p>
+<p>Ключевая деталь chunk-обработки — commit-interval: Step читает и обрабатывает элементы по одному, но писатель вызывается раз на пачку (chunk), и каждая пачка — это одна транзакция. Размер chunk-а определяет границу транзакции и компромисс: большой chunk быстрее (меньше коммитов), но при сбое откатывается и переобрабатывается вся пачка, плюс растёт потребление памяти. Job repository хранит метаданные выполнения (какие Step/chunk завершились), поэтому после падения job можно перезапустить с места, а не с нуля. Для устойчивости к «плохим» строкам настраивают skip (пропустить запись с ошибкой до лимита) и retry (повторить транзиентную ошибку).</p>
+<pre class="lang-java"><code>// chunk(100): на каждые 100 элементов — один writer-вызов в одной транзакции
+stepBuilder.&lt;Input, Output&gt;chunk(100, txManager)
+    .reader(reader).processor(processor).writer(writer)
+    .faultTolerant().skipLimit(10).skip(ParseException.class);</code></pre>
+<h2>Spring Integration</h2>
+<p>Spring Integration реализует enterprise integration patterns: channels, endpoints, transformers, routers, filters, adapters.</p>
+<p>Его выбирают, когда нужно связать разные транспортные и доменные системы декларативным pipeline, а не писать ручной glue-code в сервисах.</p>
+<h2>Spring Data REST и HATEOAS</h2>
+<p>Spring Data REST может быстро публиковать repository как REST API. Это удобно для admin/internal CRUD, но опасно как публичный API без контроля контракта.</p>
+<p>HATEOAS добавляет ссылки в представления ресурсов, чтобы клиент мог обнаруживать доступные действия. На практике важно не перегрузить API ссылками без реальной пользы.</p>
+<h2>GraphQL</h2>
+<p>GraphQL позволяет клиенту запросить ровно нужные поля и объединить связанные данные одним запросом.</p>
+<p>Главные backend-риски: N+1 на resolvers, сложность authorization на уровне полей и защита от слишком дорогих запросов.</p>
+<p>N+1 в GraphQL особенно коварен: клиент запрашивает список из N объектов и по вложенному полю каждого — резолвер этого поля вызывается N раз, по запросу в БД на каждый. Стандартное решение — DataLoader: он откладывает (батчит) обращения внутри одного тика и склеивает их в один запрос по списку ключей (плюс кэш в рамках запроса). В Spring for GraphQL это <code>@BatchMapping</code> или BatchLoaderRegistry. Дорогие запросы ограничивают лимитом глубины/сложности (query depth/complexity limit), иначе клиент может уронить сервер одним глубоко вложенным запросом.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Различайте инструменты по задаче. Spring Batch — пакетная обработка (Job/Step/ItemReader-Processor-Writer, chunk-processing с коммитом по пачкам, restartability, skip/retry, job repository) для больших файлов и ночных задач. Spring Integration — enterprise integration patterns (channels/endpoints/adapters/routers) для декларативной связки систем вместо ручного glue-code.</p>
+<p>По стилям API: Spring Data REST быстро публикует репозитории как REST (удобно для internal CRUD, рискованно как публичный контракт), а GraphQL даёт клиенту выбирать поля одним запросом ценой N+1 на резолверах, field-level авторизации и защиты от дорогих запросов. Выбор — от клиента и нужного контроля над контрактом.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/spring/spring-batch-basics/">Что такое Spring Batch и из каких основных частей состоит batch job?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/spring-integration/">Когда полезен Spring Integration?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/graphql-risks/">Какие основные backend-риски у GraphQL?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/batch-chunk-processing/">Как устроена chunk-ориентированная обработка в Spring Batch и что она даёт?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/spring-batch-purpose/">Для чего предназначен Spring Batch?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/spring/data/">Spring Data JPA: репозитории и Hibernate</a><p>Абстракция репозитория, derived queries и @Query, persistence context и dirty checking, lazy/N+1 и почему DTO, а не entity.</p></li><li><a href="/articles/spring/cloud-platform/">Spring Cloud: config, discovery, gateway, tracing</a><p>Config Server, Eureka/DiscoveryClient, Spring Cloud Gateway и распределённая трассировка.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Spring Batch, Integration и API styles","description":"Batch jobs, enterprise integration patterns, Spring Data REST, HATEOAS и GraphQL.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/spring/integration-batch-api/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

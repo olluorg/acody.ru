@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HashMap изнутри: бакеты, treeify, resize — разбор для собеседования</title>
+<meta name="description" content="Таблица бакетов, перемешивание хеша и индекс, превращение цепочки в дерево, ресайз и load factor, контракт ключа.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/hashmap/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/hashmap/">
+<meta property="og:title" content="HashMap изнутри: бакеты, treeify, resize — разбор для собеседования">
+<meta property="og:description" content="Таблица бакетов, перемешивание хеша и индекс, превращение цепочки в дерево, ресайз и load factor, контракт ключа.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>HashMap изнутри: бакеты, treeify, resize</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"HashMap изнутри: бакеты, treeify, resize"}]}</script>
+  <h1>HashMap изнутри: бакеты, treeify, resize</h1>
+  <p class="lead">Таблица бакетов, перемешивание хеша и индекс, превращение цепочки в дерево, ресайз и load factor, контракт ключа.</p>
+  <article class="md"><h2>Таблица бакетов</h2>
+<p>HashMap хранит данные в массиве <code>Node[]</code> table — это «бакеты» (корзины). Каждый Node держит hash ключа, сам ключ, значение и ссылку next на следующий узел в том же бакете.</p>
+<p>Длина таблицы всегда степень двойки. Это позволяет вычислять индекс бакета быстрой битовой операцией index = (n - 1) &amp; hash вместо дорогого деления по модулю.</p>
+<figure><img src="/articles/assets/hashmap-buckets.webp" alt="Ключ проходит через хеш-функцию и попадает в бакет; коллизии образуют цепочку, которая при росте превращается в дерево." loading="lazy"><figcaption>Хеш ключа выбирает бакет; коллизии хранятся цепочкой, а после порога — сбалансированным деревом.</figcaption></figure>
+<h2>Перемешивание хеша</h2>
+<p>Перед вычислением индекса <code>hashCode</code> ключа «перемешивается»: hash = h ^ (h &gt;&gt;&gt; 16). Поскольку индекс берёт только младшие биты ((n-1) &amp; hash), без перемешивания старшие биты <code>hashCode</code> не влияли бы на бакет, и хеши, различающиеся только сверху, давали бы коллизии.</p>
+<p>XOR со сдвигом «подмешивает» старшие биты в младшие, снижая кластеризацию при посредственных <code>hashCode</code> — дёшево и эффективно.</p>
+<pre class="lang-java"><code>static final int hash(Object key) {
+    int h;
+    return (key == null) ? 0 : (h = key.hashCode()) ^ (h &gt;&gt;&gt; 16);
+}
+// индекс бакета: (table.length - 1) &amp; hash</code></pre>
+<h2>Коллизии и treeify</h2>
+<p>Ключи с одинаковым индексом попадают в один бакет и образуют связный список. Поиск в нём линейный, поэтому при плохом распределении производительность деградирует.</p>
+<p>Чтобы ограничить деградацию, длинная цепочка превращается в красно-чёрное дерево (treeify) при ≥ 8 узлах в бакете, но только если таблица уже ≥ 64; иначе вместо treeify делается resize. При уменьшении дерево разворачивается обратно в список при ≤ 6 узлах. В дереве поиск — O(log n), и для упорядочивания узлов используются hash и, при возможности, Comparable ключа.</p>
+<h2>Resize и load factor</h2>
+<p>threshold = capacity × <code>loadFactor</code> (по умолчанию 0.75). Как только size превышает threshold, таблица удваивается, и элементы перераспределяются. 0.75 — компромисс: меньше даёт меньше коллизий, но больше памяти и ресайзов; больше экономит память ценой длинных цепочек. Распределение по Пуассону показывает, что при 0.75 длинные бакеты крайне редки.</p>
+<p>При удвоении узел остаётся в текущем бакете или уезжает в бакет index + <code>oldCapacity</code> — это решает один «новый» бит хеша, поэтому перераспределение дешевле полного пересчёта. Если итоговый размер известен, задавайте начальную ёмкость, чтобы избежать серии ресайзов.</p>
+<div class="widget-in"><script type="module" src="/widgets/hashmap-put.js"></script><sotto-hashmap-put theme="dark"></sotto-hashmap-put></div>
+<h2>Контракт ключа</h2>
+<p>Корректность HashMap держится на контракте equals/<code>hashCode</code>: равные ключи обязаны иметь равный <code>hashCode</code>, иначе put и get «разойдутся» по разным бакетам и значение потеряется.</p>
+<p>Ключи должны быть фактически неизменяемыми по полям, участвующим в <code>hashCode</code>: если у лежащего в карте ключа изменить такое поле, его хеш-бакет перестанет соответствовать, и элемент станет недостижим. HashMap допускает один null-ключ (бакет 0) и null-значения.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Эталонный разбор: таблица степени двойки → индекс (n-1)&amp;hash → перемешивание h^(h&gt;&gt;&gt;16) → коллизии списком → treeify при 8 и таблице ≥64 → resize при load factor 0.75 с делением бакета по одному биту. Свяжите всё с контрактом equals/<code>hashCode</code> и неизменяемостью ключа — это уровень, на котором видно, что человек реально шарит.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/equals-hashcode-contract/">Какое правило связывает equals() и hashCode()?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/hashmap-vs-hashtable-vs-chm/">Чем HashMap отличается от Hashtable и ConcurrentHashMap?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jc-021/">Что происходит в HashMap при коллизии ключей?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jc-213/">Что верно про ёмкость и load factor в HashMap?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/hashmap-bucket/">Как HashMap находит место для пары ключ-значение?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/equality/">Равенство: ==, equals и hashCode</a><p>Идентичность против логического равенства, контракт equals и hashCode, проблема equals с наследованием и корректная реализация.</p></li><li><a href="/articles/java/collections-overview/">Collections Framework: карта и выбор структуры</a><p>Иерархия интерфейсов, сложности операций основных структур, неизменяемые коллекции и принцип выбора по паттерну доступа.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"HashMap изнутри: бакеты, treeify, resize","description":"Таблица бакетов, перемешивание хеша и индекс, превращение цепочки в дерево, ресайз и load factor, контракт ключа.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/hashmap/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

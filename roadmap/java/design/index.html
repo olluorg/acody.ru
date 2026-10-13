@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Дизайн и паттерны — карта «Java»</title>
+<meta name="description" content="SOLID, DRY, KISS, порождающие, структурные и поведенческие паттерны.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/java/design/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/java/design/">
+<meta property="og:title" content="Дизайн и паттерны — карта «Java»">
+<meta property="og:description" content="SOLID, DRY, KISS, порождающие, структурные и поведенческие паттерны.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/">Backend-разработчик</a> <span>/</span> <a href="/roadmap/java/#design">Java</a> <span>/</span> <span>Дизайн и паттерны</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://learn.getsotto.ru/roadmap/backend/"},{"@type":"ListItem","position":3,"name":"Java","item":"https://learn.getsotto.ru/roadmap/java/#design"},{"@type":"ListItem","position":4,"name":"Дизайн и паттерны"}]}</script>
+  <h1>Дизайн и паттерны</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">SOLID, DRY, KISS, порождающие, структурные и поведенческие паттерны.</p>
+  <article class="md"><h3>Что важно знать</h3>
+<ul><li><b>SOLID</b>: единственная ответственность, открытость к расширению, подстановка Лисков, разделение интерфейсов, инверсия зависимостей.</li><li><b>Паттерны</b> — словарь решений: строитель, фабрика, стратегия, декоратор, адаптер, наблюдатель, шаблонный метод.</li><li>Паттерн без проблемы — лишняя сложность.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 6 ч</small></h3><ul><li>Объясняет принципы SOLID на примерах</li><li>Узнаёт в коде основные паттерны — фабрика, строитель, стратегия, наблюдатель, декоратор</li></ul><p class="rm-practice"><b>Практика.</b> Найти 5 паттернов в исходниках JDK или Spring и объяснить, какую задачу они решают.</p></div><div class="rm-grade"><h3>Middle <small>≈ 8 ч</small></h3><ul><li>Применяет паттерн для решения конкретной проблемы, а не ради паттерна</li><li>Находит нарушения SOLID в коде и рефакторит их</li></ul><p class="rm-practice"><b>Практика.</b> Отрефакторить класс на 500 строк с несколькими ответственностями по SOLID с тестами до и после.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/java/single-responsibility-principle/">Что на самом деле утверждает Single Responsibility Principle?</a> <span class="lvl lvl-junior">Junior</span><p>SRP: у модуля одна причина для изменения — он отвечает перед одним актором (группой заинтересованных людей).</p></li><li><a href="/questions/java/ocp-if-chain/">В коде расчёта комиссии есть метод с цепочкой if по типу платежа, и при добавлении каждого нового способа оплаты приходится править этот метод и ещё три похожих. Какой принцип SOLID нарушен в первую очередь?</a> <span class="lvl lvl-middle">Middle</span><p>Open/Closed Principle: новое поведение требует правки существующего кода, а не добавления нового. Растущая цепочка if или switch по типу, повторённая в нескольких местах, …</p></li><li><a href="/questions/java/dip-ports/">Доменный сервис работает с базой напрямую через JPA-репозиторий Spring Data. Как применить Dependency Inversion Principle, и что именно здесь «инвертируется»?</a> <span class="lvl lvl-senior">Senior</span><p>Домен объявляет интерфейс-порт на своём языке (OrderRepository в доменном пакете), инфраструктура его реализует. Инвертируется не только стрелка зависимости, но и владение…</p></li><li><a href="/questions/java/dry-principle/">Что означает принцип DRY?</a> <span class="lvl lvl-junior">Junior</span><p>DRY — Don&#x27;t Repeat Yourself: каждое знание (правило, расчёт) должно быть записано в одном месте.</p></li><li><a href="/questions/java/liskov-substitution/">Что такое Liskov Substitution Principle и что обязан соблюдать подтип?</a> <span class="lvl lvl-middle">Middle</span><p>Подтип должен быть подставим вместо базового типа без сюрпризов для вызывающего: не усиливать предусловия, не ослаблять постусловия, сохранять инварианты, не бросать новых…</p></li><li><a href="/questions/java/visitor/">Зачем нужен паттерн Visitor, какова его цена и чем его можно заменить в современной Java?</a> <span class="lvl lvl-senior">Senior</span><p>Visitor выносит операции за пределы иерархии: удобно, когда типы стабильны, а операций много. Цена — асимметрия: новая операция дешёвая, новый тип требует править всех визиторов…</p></li></ul></section><section class="block"><h2>Разборы темы</h2><ul class="links"><li><a href="/articles/java/design-principles/">DRY, KISS, YAGNI и качество связей</a><p>Дублирование знания против дублирования текста, цена преждевременной абстракции, связность и связанность, закон Деметры, каталог code smells и когда рефакторить.</p></li><li><a href="/articles/java/patterns-behavioral/">Поведенческие паттерны</a><p>Strategy, Template Method, Observer, Command, Chain of Responsibility, State, Iterator и Visitor — с примерами из JDK, Spring и заменой паттернов лямбдами и sealed-типами.</p></li><li><a href="/articles/java/patterns-creational/">Порождающие паттерны</a><p>Factory Method против статической фабрики Блоха, Abstract Factory, Builder в двух версиях, Prototype и почему clone() считают ошибкой, object pool — с примерами из JDK и Spring.</p></li><li><a href="/articles/java/patterns-structural/">Структурные паттерны</a><p>Adapter, Decorator, Proxy и чем они отличаются друг от друга, Facade, Composite, Bridge и Flyweight — на примерах java.io, java.lang.reflect.Proxy и Spring AOP.</p></li><li><a href="/articles/java/solid/">SOLID: пять принципов дизайна</a><p>SRP, OCP, LSP, ISP, DIP — что каждая буква значит на самом деле, как выглядит нарушение в Java-коде, чем DIP отличается от DI и IoC.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/java/io-data/">← Ввод-вывод и данные</a><a class="next" href="/roadmap/java/build-test/">Сборка, тесты и логирование →</a></nav>
+  <p class="rm-back"><a href="/roadmap/java/#design">← Вся карта «Java»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Дизайн и паттерны","description":"SOLID, DRY, KISS, порождающие, структурные и поведенческие паттерны.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/java/design/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

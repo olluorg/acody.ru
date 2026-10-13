@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое Spring Batch и из каких основных частей состоит batch job? — вопрос с собеседования</title>
+<meta name="description" content="Spring Batch — фреймворк для пакетной обработки больших объёмов: Job состоит из Step, шаг обычно chunk-ориентированный — ItemReader → ItemProcessor →…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/spring-batch-basics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/spring-batch-basics/">
+<meta property="og:title" content="Что такое Spring Batch и из каких основных частей состоит batch job? — вопрос с собеседования">
+<meta property="og:description" content="Spring Batch — фреймворк для пакетной обработки больших объёмов: Job состоит из Step, шаг обычно chunk-ориентированный — ItemReader → ItemProcessor →…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Что такое Spring Batch и из каких основных частей состоит batch job?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Что такое Spring Batch и из каких основных частей состоит batch job?"}]}</script>
+  <h1>Что такое Spring Batch и из каких основных частей состоит batch job?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Spring Batch и Integration</span><span class="chip">Spring</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как устроен batch job в Spring Batch?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Spring Batch</b> — фреймворк для пакетной обработки больших объёмов: <b>Job</b> состоит из <b>Step</b>, шаг обычно chunk-ориентированный — <b>ItemReader → ItemProcessor → ItemWriter</b> пачками с коммитом на каждую пачку.</p><ul><li>JobRepository хранит состояние в базе — упавшее задание продолжается с места остановки</li><li>Пропуск (skip) и повтор (retry) ошибочных записей, листенеры</li><li>Масштабирование: многопоточный шаг, партиционирование, удалённые чанки</li></ul><p class="extra"><span>А ещё</span> Tasklet — шаг из одного действия (удалить файлы, вызвать процедуру)</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Задачи:</b> ночная выгрузка, импорт файлов, перерасчёт, рассылка — миллионы записей, которые нужно обработать надёжно и с возможностью продолжить после сбоя.</p>
+<p><b>Модель:</b></p>
+<ul><li><b>Job</b> — задание, последовательность шагов; <b>JobInstance</b> — запуск с конкретными параметрами (дата), <b>JobExecution</b> — попытка запуска;</li><li><b>Step</b> — шаг: chunk-ориентированный или Tasklet;</li><li><b>chunk-шаг</b>: <code>ItemReader</code> читает по одной записи, <code>ItemProcessor</code> преобразует или фильтрует, <code>ItemWriter</code> пишет пачку из N записей в одной транзакции;</li><li><b>JobRepository</b> — таблицы в базе с состоянием выполнения: какой шаг, сколько прочитано, где остановились.</li></ul>
+<p><b>Надёжность:</b> при падении задание перезапускается с теми же параметрами и продолжает с последнего закоммиченного чанка (если reader умеет сохранять позицию). <code>faultTolerant().skip(...).skipLimit(100).retry(...)</code> — пропуск плохих записей и повтор временных ошибок.</p>
+<p><b>Готовые компоненты:</b> читатели и писатели для файлов (CSV, XML, JSON), JDBC (курсор, постраничное чтение), JPA, Kafka, MongoDB.</p>
+<p><b>Масштабирование:</b> несколько потоков на шаг, партиционирование данных по диапазонам между исполнителями, удалённые чанки через брокер.</p>
+<p><b>Spring Batch 5</b> (Boot 3): <code>@EnableBatchProcessing</code> больше не нужен в Boot, JobBuilder и StepBuilder вместо фабрик.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Job, Step, chunk: reader, processor, writer.</li><li>JobRepository и перезапуск.</li><li>Skip и retry, масштабирование.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Писать пакетную обработку одной огромной транзакцией.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое chunk-oriented processing?</li><li>Где хранится состояние batch job?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/integration-batch-api/">Spring Batch, Integration и API styles</a><p>Batch jobs, enterprise integration patterns, Spring Data REST, HATEOAS и GraphQL.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/batch-chunk-processing/">Как устроена chunk-ориентированная обработка в Spring Batch и что она даёт?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/spring-batch-purpose/">Для чего предназначен Spring Batch?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое Spring Batch и из каких основных частей состоит batch job?","acceptedAnswer":{"@type":"Answer","text":"Spring Batch — фреймворк для пакетной обработки больших объёмов: Job состоит из Step, шаг обычно chunk-ориентированный — ItemReader → ItemProcessor → ItemWriter пачками с коммитом на каждую пачку. JobRepository хранит состояние в базе — упавшее задание продолжается с места остановки Пропуск (skip) и повтор (retry) ошибочных записей, листенеры Масштабирование: многопоточный шаг, партиционирование, удалённые чанки Tasklet — шаг из одного действия (удалить файлы, вызвать процедуру) Задачи: ночная выгрузка, импорт файлов, перерасчёт, рассылка — миллионы записей, которые нужно обработать надёжно и с возможностью продолжить после сбоя. Модель: - Job — задание, последовательность шагов; JobInstance — запуск с конкретными параметрами (дата), JobExecution — попытка запуска; - Step — шаг: chunk-ориентированный или Tasklet; - chunk-шаг: ItemReader читает по одной записи, ItemProcessor преобразует или фильтрует, ItemWriter пишет пачку из N записей в одной транзакции; - JobRepository — таблицы в базе с состоянием выполнения: какой шаг, сколько прочитано, где остановились. Надёжность: при падении задание перезапускается с теми же параметрами и продолжает с последнего закоммиченного чанка (если reader умеет сохранять позицию). faultTolerant().skip(...).skipLimit(100).retry(...) — пропуск плохих записей и повтор временных ошибок. Готовые компоненты: читатели и писатели для…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

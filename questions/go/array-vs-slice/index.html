@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем массив отличается от среза в Go? — вопрос с собеседования</title>
+<meta name="description" content="Массив [5]int — значение фиксированного размера, размер — часть типа ([3]int и [4]int — разные типы); присваивание и передача копируют все элементы…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/go/array-vs-slice/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/go/array-vs-slice/">
+<meta property="og:title" content="Чем массив отличается от среза в Go? — вопрос с собеседования">
+<meta property="og:description" content="Массив [5]int — значение фиксированного размера, размер — часть типа ([3]int и [4]int — разные типы); присваивание и передача копируют все элементы…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/go/">Go</a> <span>/</span> <span>Чем массив отличается от среза в Go?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Go","item":"https://learn.getsotto.ru/questions/go/"},{"@type":"ListItem","position":3,"name":"Чем массив отличается от среза в Go?"}]}</script>
+  <h1>Чем массив отличается от среза в Go?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Срезы, мапы и строки</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Массив</b> <code>[5]int</code> — значение <b>фиксированного размера</b>, размер — часть типа (<code>[3]int</code> и <code>[4]int</code> — разные типы); присваивание и передача <b>копируют все элементы</b>. <b>Срез</b> <code>[]int</code> — дескриптор над массивом с переменной длиной; копирование дешёвое, данные общие.</p><ul><li>На практике почти всегда используют срезы</li><li>Массивы — для фиксированных данных: ключи мапы ([16]byte для хеша), буферы на стеке</li><li>Массивы можно сравнивать через ==, срезы — нет (только slices.Equal)</li></ul><p class="extra"><span>А ещё</span> Литерал [...]int{1, 2, 3} — массив, []int{1, 2, 3} — срез</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Срезы Go: len, cap, append и общий массив</p><script type="module" src="/widgets/go-slices.js"></script><sotto-go-slices theme="dark"></sotto-go-slices></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><pre class="lang-go"><code>a := [3]int{1, 2, 3}
+b := a          // копия
+b[0] = 100      // a[0] по-прежнему 1
+
+s := []int{1, 2, 3}
+t := s          // тот же массив
+t[0] = 100      // s[0] тоже 100</code></pre>
+<p><b>Почему массивы редко нужны.</b> Размер известен на этапе компиляции и входит в тип — функцию для <code>[3]int</code> нельзя вызвать с <code>[4]int</code>. Срезы универсальнее.</p>
+<p><b>Где массивы полезны:</b> сравнимость и хешируемость — массив можно сделать ключом мапы; хеши <code>sha256.Sum256</code> возвращают <code>[32]byte</code>; небольшие буферы, которые компилятор может разместить на стеке.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Размер как часть типа.</li><li>Копирование против общего массива.</li><li>Где массивы применяют.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/slice-internals/">Как устроен срез (slice) в Go?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем массив отличается от среза в Go?","acceptedAnswer":{"@type":"Answer","text":"Массив [5]int — значение фиксированного размера, размер — часть типа ([3]int и [4]int — разные типы); присваивание и передача копируют все элементы. Срез []int — дескриптор над массивом с переменной длиной; копирование дешёвое, данные общие. На практике почти всегда используют срезы Массивы — для фиксированных данных: ключи мапы ([16]byte для хеша), буферы на стеке Массивы можно сравнивать через ==, срезы — нет (только slices.Equal) Литерал [...]int{1, 2, 3} — массив, []int{1, 2, 3} — срез Почему массивы редко нужны. Размер известен на этапе компиляции и входит в тип — функцию для [3]int нельзя вызвать с [4]int. Срезы универсальнее. Где массивы полезны: сравнимость и хешируемость — массив можно сделать ключом мапы; хеши sha256.Sum256 возвращают [32]byte; небольшие буферы, которые компилятор может разместить на стеке."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

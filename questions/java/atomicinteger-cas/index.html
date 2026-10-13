@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Два потока одновременно вызывают incrementAndGet() у одного AtomicInteger. Что при этом происходит внутри и почему ни один инкремент не теряется? — вопрос с собеседования</title>
+<meta name="description" content="CAS-цикл: прочитать значение, вычислить новое и записать, только если в памяти всё ещё старое (одна атомарная инструкция процессора). Проиграл гонку…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/atomicinteger-cas/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/atomicinteger-cas/">
+<meta property="og:title" content="Два потока одновременно вызывают incrementAndGet() у одного AtomicInteger. Что при этом происходит внутри и почему ни один инкремент не теряется? — вопрос с собеседования">
+<meta property="og:description" content="CAS-цикл: прочитать значение, вычислить новое и записать, только если в памяти всё ещё старое (одна атомарная инструкция процессора). Проиграл гонку…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Два потока одновременно вызывают incrementAndGet() у одного AtomicInteger. Что при этом происходит внутри и почему ни один инкремент не теряется?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Два потока одновременно вызывают incrementAndGet() у одного AtomicInteger. Что при этом происходит внутри и почему ни один инкремент не теряется?"}]}</script>
+  <h1>Два потока одновременно вызывают incrementAndGet() у одного AtomicInteger. Что при этом происходит внутри и почему ни один инкремент не теряется?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Многопоточность</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>CAS-цикл</b>: прочитать значение, вычислить новое и записать, <b>только если в памяти всё ещё старое</b> (одна атомарная инструкция процессора). Проиграл гонку — повторить с новым значением. Блокировок нет, поток не засыпает.</p><ul><li>Из двух одновременных CAS успешен ровно один</li><li>На x86 — инструкция lock cmpxchg</li><li>При сильной конкуренции растёт число повторов — LongAdder</li></ul><p class="extra"><span>А ещё</span> Lock-free: система в целом прогрессирует, даже если отдельный поток задержан</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Начни с механизма: incrementAndGet не блокирует ничего, а крутит CAS-цикл. Поток читает текущее значение (пусть 5), вычисляет новое (6) и вызывает аппаратную инструкцию compare-and-swap: «если в памяти всё ещё 5 — положи 6, иначе не трогай». Инструкция атомарна на уровне процессора, поэтому из двух потоков успевает ровно один; проигравший видит, что CAS не прошёл, перечитывает уже 6, вычисляет 7 и повторяет попытку. Ни один инкремент не теряется именно потому, что запись условная — она привязана к тому значению, которое поток видел. Дальше назови свойство: это lock-free — поток не засыпает на мониторе, deadlock невозможен, но и гарантии для конкретного потока нет, он может проигрывать гонку несколько раз подряд. Закончи ценой: при сильной конкуренции цикл повторов и «пинг-понг» кэш-линии между ядрами делают один общий счётчик узким местом — тогда берут LongAdder, который разносит счёт по ячейкам. И упомяни ABA: CAS сравнивает значение, а не историю, поэтому A→B→A он не заметит; где это важно, нужен AtomicStampedReference.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механика CAS и цикла повторов.</li><li>Почему ни один инкремент не теряется.</li><li>Ограничения под высокой конкуренцией.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что atomic-классы «внутри синхронизированы» — поток не блокируется, а повторяет попытку.</li><li>Обещать, что CAS всегда быстрее synchronized: под высокой конкуренцией цикл повторов проигрывает.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое ABA-проблема и чем помогает AtomicStampedReference?</li><li>Почему при высокой конкуренции LongAdder обгоняет AtomicLong?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/atomics/">volatile, атомарность и CAS</a><p>Разница видимости и атомарности, atomic-классы, compare-and-swap и ABA, контеншн и LongAdder.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/atomicinteger/">Что делает класс AtomicInteger?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/aba-problem/">Что такое ABA-проблема в алгоритмах на CAS?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/longadder-vs-atomiclong/">Чем LongAdder выигрывает у AtomicLong при высокой конкуренции и в чём его ограничение?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/atomic-cas/">Что такое атомарные операции и CAS?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Два потока одновременно вызывают incrementAndGet() у одного AtomicInteger. Что при этом происходит внутри и почему ни один инкремент не теряется?","acceptedAnswer":{"@type":"Answer","text":"CAS-цикл: прочитать значение, вычислить новое и записать, только если в памяти всё ещё старое (одна атомарная инструкция процессора). Проиграл гонку — повторить с новым значением. Блокировок нет, поток не засыпает. Из двух одновременных CAS успешен ровно один На x86 — инструкция lock cmpxchg При сильной конкуренции растёт число повторов — LongAdder Lock-free: система в целом прогрессирует, даже если отдельный поток задержан Начни с механизма: incrementAndGet не блокирует ничего, а крутит CAS-цикл. Поток читает текущее значение (пусть 5), вычисляет новое (6) и вызывает аппаратную инструкцию compare-and-swap: «если в памяти всё ещё 5 — положи 6, иначе не трогай». Инструкция атомарна на уровне процессора, поэтому из двух потоков успевает ровно один; проигравший видит, что CAS не прошёл, перечитывает уже 6, вычисляет 7 и повторяет попытку. Ни один инкремент не теряется именно потому, что запись условная — она привязана к тому значению, которое поток видел. Дальше назови свойство: это lock-free — поток не засыпает на мониторе, deadlock невозможен, но и гарантии для конкретного потока нет, он может проигрывать гонку несколько раз подряд. Закончи ценой: при сильной конкуренции цикл повторов и «пинг-понг» кэш-линии между ядрами делают один общий счётчик узким местом — тогда берут LongAdder, который разносит счёт…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зачем компании единый шлюз к LLM и что в нём должно быть? — вопрос с собеседования</title>
+<meta name="description" content="Когда LLM используют несколько команд, каждая заново решает одни задачи: ключи, лимиты, повторы, учёт затрат, логирование, защиту данных. Шлюз …">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/llm-gateway/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/llm-gateway/">
+<meta property="og:title" content="Зачем компании единый шлюз к LLM и что в нём должно быть? — вопрос с собеседования">
+<meta property="og:description" content="Когда LLM используют несколько команд, каждая заново решает одни задачи: ключи, лимиты, повторы, учёт затрат, логирование, защиту данных. Шлюз …">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Зачем компании единый шлюз к LLM и что в нём должно быть?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Зачем компании единый шлюз к LLM и что в нём должно быть?"}]}</script>
+  <h1>Зачем компании единый шлюз к LLM и что в нём должно быть?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">LLM в продакшене</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое LLM gateway?</li><li>Как организовать доступ нескольких команд к языковым моделям?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Когда LLM используют несколько команд, каждая заново решает одни задачи: ключи, лимиты, повторы, учёт затрат, логирование, защиту данных. <b>Шлюз</b> — единая точка доступа к моделям: <b>единый API</b> (часто совместимый с OpenAI), <b>маршрутизация</b> между провайдерами и своими моделями, <b>резервирование</b>, <b>квоты и учёт затрат</b> по командам, <b>логирование и трассировка</b>, <b>маскирование персональных данных</b>, <b>кэширование</b>, политики допустимых моделей.</p><ul><li>Ключи провайдеров не раздаются командам — только токены шлюза</li><li>Смена провайдера или модели — конфигурацией, без правок в сервисах</li><li>Готовые решения: LiteLLM, Portkey, облачные шлюзы; часто дорабатывают своё</li></ul><p class="extra"><span>А ещё</span> Риск — единая точка отказа и лишняя задержка: шлюз должен быть отказоустойчивым и лёгким</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Функции:</b></p>
+<ul><li>аутентификация сервисов, квоты и бюджеты на команду, оповещения о перерасходе;</li><li>маршрутизация: по модели, по стоимости, по доступности; резервный провайдер при ошибках;</li><li>повторы, таймауты, ограничение параллельности под лимиты провайдеров;</li><li>логирование запросов и ответов с маскированием, трассировка, метрики задержки и ошибок;</li><li>кэш префикса и семантический кэш (опционально);</li><li>политики: какие модели разрешены для каких данных (персональные данные — только российский провайдер или свой контур);</li><li>централизованные guardrails.</li></ul>
+<p><b>Компромиссы:</b> дополнительный сетевой переход и задержка; шлюз должен проксировать потоковые ответы без буферизации; поддержка специфичных возможностей провайдеров (инструменты, кэш, структурный вывод) отстаёт от SDK.</p>
+<p><b>Когда не нужен:</b> одна команда, один провайдер, один сервис — тонкой обёртки в коде достаточно.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Проблемы, которые решает шлюз при нескольких командах.</li><li>Ключевые функции: маршрутизация, квоты, учёт, логирование, политики данных.</li><li>Компромиссы и когда шлюз избыточен.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/llm-system-design/">Спроектируйте ассистента поддержки интернет-магазина на LLM.</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/ai/llm-observability/">Как наблюдать за LLM-приложением в продакшене?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-cost-latency/">Как снизить стоимость и задержку приложения на LLM?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/model-selection/">Как выбрать модель для LLM-продукта — большая или маленькая, своя или по API?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Зачем компании единый шлюз к LLM и что в нём должно быть?","acceptedAnswer":{"@type":"Answer","text":"Когда LLM используют несколько команд, каждая заново решает одни задачи: ключи, лимиты, повторы, учёт затрат, логирование, защиту данных. Шлюз — единая точка доступа к моделям: единый API (часто совместимый с OpenAI), маршрутизация между провайдерами и своими моделями, резервирование, квоты и учёт затрат по командам, логирование и трассировка, маскирование персональных данных, кэширование, политики допустимых моделей. Ключи провайдеров не раздаются командам — только токены шлюза Смена провайдера или модели — конфигурацией, без правок в сервисах Готовые решения: LiteLLM, Portkey, облачные шлюзы; часто дорабатывают своё Риск — единая точка отказа и лишняя задержка: шлюз должен быть отказоустойчивым и лёгким Функции: - аутентификация сервисов, квоты и бюджеты на команду, оповещения о перерасходе; - маршрутизация: по модели, по стоимости, по доступности; резервный провайдер при ошибках; - повторы, таймауты, ограничение параллельности под лимиты провайдеров; - логирование запросов и ответов с маскированием, трассировка, метрики задержки и ошибок; - кэш префикса и семантический кэш (опционально); - политики: какие модели разрешены для каких данных (персональные данные — только российский провайдер или свой контур); - централизованные guardrails. Компромиссы: дополнительный сетевой переход и задержка; шлюз должен проксировать потоковые ответы без буферизации; поддержка специфичных возможностей провайдеров (инструменты, кэш, структурный вывод) отстаёт от SDK. Когда не нужен: одна команда, один провайдер, один сервис — тонкой обёртки в коде достаточно."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как в Spring Boot 3 возвращать ошибки REST API в едином формате? — вопрос с собеседования</title>
+<meta name="description" content="@RestControllerAdvice с @ExceptionHandler централизует обработку, а ответ — ProblemDetail (стандарт RFC 9457, application/problem+json): type, title…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/problem-detail-errors/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/problem-detail-errors/">
+<meta property="og:title" content="Как в Spring Boot 3 возвращать ошибки REST API в едином формате? — вопрос с собеседования">
+<meta property="og:description" content="@RestControllerAdvice с @ExceptionHandler централизует обработку, а ответ — ProblemDetail (стандарт RFC 9457, application/problem+json): type, title…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Как в Spring Boot 3 возвращать ошибки REST API в едином формате?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Как в Spring Boot 3 возвращать ошибки REST API в едином формате?"}]}</script>
+  <h1>Как в Spring Boot 3 возвращать ошибки REST API в едином формате?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Spring MVC и REST</span><span class="chip">Spring Boot</span><span class="chip">Spring</span><span class="chip ver">Spring Boot &gt;=3</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое ProblemDetail?</li><li>Как централизованно обрабатывать исключения в REST API?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>@RestControllerAdvice</b> с <b>@ExceptionHandler</b> централизует обработку, а ответ — <b>ProblemDetail</b> (стандарт RFC 9457, <code>application/problem+json</code>): type, title, status, detail, instance и свои поля.</p><ul><li>Spring 6 / Boot 3: <code>ProblemDetail</code> и <code>ErrorResponse</code> из коробки</li><li><code>spring.mvc.problemdetails.enabled=true</code> — стандартные исключения MVC в этом формате</li><li>Наружу — понятный код ошибки и correlation id, без стектрейса</li></ul><p class="extra"><span>А ещё</span> Валидация: MethodArgumentNotValidException → 400 с полями ошибок</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Централизация.</b> Класс с <code>@RestControllerAdvice</code> содержит методы <code>@ExceptionHandler(OrderNotFoundException.class)</code> и применяется ко всем контроллерам: маппинг исключений на HTTP-ответы в одном месте, без try/catch в каждом методе.</p>
+<p><b>Единый формат — ProblemDetail.</b> RFC 9457 (ранее 7807) описывает тело ошибки: <code>type</code> (URI типа проблемы), <code>title</code>, <code>status</code>, <code>detail</code>, <code>instance</code> и расширения. Spring Framework 6 добавил класс <code>ProblemDetail</code> и интерфейс <code>ErrorResponse</code>; <code>ResponseEntityExceptionHandler</code> можно расширить, чтобы стандартные исключения MVC (неверный JSON, неподдерживаемый метод, ошибки валидации) тоже возвращались в этом формате. В Spring Boot — <code>spring.mvc.problemdetails.enabled=true</code>.</p>
+<p><b>Что отдавать:</b></p>
+<ul><li>правильный статус: 400 — неверный запрос, 404 — нет ресурса, 409 — конфликт состояния, 422 — бизнес-валидация, 500 — неожиданная ошибка;</li><li>машинный код ошибки (<code>type</code> или своё поле <code>code</code>) для клиентов;</li><li>ошибки полей валидации списком;</li><li>trace/correlation id для поддержки;</li><li>никаких стектрейсов и SQL — их в лог.</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>@RestControllerAdvice
+class ApiErrors {
+    @ExceptionHandler(OrderNotFoundException.class)
+    ProblemDetail notFound(OrderNotFoundException e) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
+        pd.setType(URI.create(&quot;https://api.shop.ru/errors/order-not-found&quot;));
+        pd.setProperty(&quot;orderId&quot;, e.orderId());
+        return pd;
+    }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>@RestControllerAdvice и @ExceptionHandler.</li><li>ProblemDetail и RFC 9457 в Spring 6 / Boot 3.</li><li>Правильные статусы и что нельзя отдавать наружу.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Отдавать стектрейс клиенту.</li><li>Возвращать 200 с полем error.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>@RestControllerAdvice с @ExceptionHandler, возвращающими ProblemDetail (RFC 9457); включить spring.mvc.problemdetails.enabled для стандартных исключений</li><li class="no"><span class="mark">✗</span>Ловить исключения в каждом контроллере try/catch и возвращать строку с текстом ошибки</li><li class="no"><span class="mark">✗</span>Возвращать стектрейс в теле ответа, чтобы клиент видел причину</li><li class="no"><span class="mark">✗</span>Всегда возвращать 200 с полем error в теле</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое ProblemDetail?</li><li>Как залогировать ошибку, но не отдать её детали клиенту?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/rest-api/">REST API: статусы, согласование и семантика</a><p>Ресурсы и HTTP-глаголы, статус-коды как контракт, content negotiation и message converters, идемпотентность и версионирование.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/controlleradvice-scope/">Чем @ControllerAdvice отличается от @ExceptionHandler внутри контроллера?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/invalid-request-body/">В контроллере стоит @Valid @RequestBody CreateUserRequest, и клиент прислал невалидное тело. Что произойдёт по умолчанию?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/secure-public-api/">Какие меры безопасности вы заложите при проектировании публичного REST API с личным кабинетом пользователя?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как в Spring Boot 3 возвращать ошибки REST API в едином формате?","acceptedAnswer":{"@type":"Answer","text":"@RestControllerAdvice с @ExceptionHandler централизует обработку, а ответ — ProblemDetail (стандарт RFC 9457, application/problem+json): type, title, status, detail, instance и свои поля. Spring 6 / Boot 3: ProblemDetail и ErrorResponse из коробки spring.mvc.problemdetails.enabled=true — стандартные исключения MVC в этом формате Наружу — понятный код ошибки и correlation id, без стектрейса Валидация: MethodArgumentNotValidException → 400 с полями ошибок Централизация. Класс с @RestControllerAdvice содержит методы @ExceptionHandler(OrderNotFoundException.class) и применяется ко всем контроллерам: маппинг исключений на HTTP-ответы в одном месте, без try/catch в каждом методе. Единый формат — ProblemDetail. RFC 9457 (ранее 7807) описывает тело ошибки: type (URI типа проблемы), title, status, detail, instance и расширения. Spring Framework 6 добавил класс ProblemDetail и интерфейс ErrorResponse; ResponseEntityExceptionHandler можно расширить, чтобы стандартные исключения MVC (неверный JSON, неподдерживаемый метод, ошибки валидации) тоже возвращались в этом формате. В Spring Boot — spring.mvc.problemdetails.enabled=true. Что отдавать: - правильный статус: 400 — неверный запрос, 404 — нет ресурса, 409 — конфликт состояния, 422 — бизнес-валидация, 500 — неожиданная ошибка; - машинный код ошибки (type или своё поле code) для клиентов; - ошибки…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

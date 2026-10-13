@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое журнал предзаписи (WAL) и зачем он нужен? — вопрос с собеседования</title>
+<meta name="description" content="Сначала запись в журнал, потом в данные. Перед изменением страниц база дописывает в конец журнала, что собирается изменить, и делает fsync. После…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/wal/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/wal/">
+<meta property="og:title" content="Что такое журнал предзаписи (WAL) и зачем он нужен? — вопрос с собеседования">
+<meta property="og:description" content="Сначала запись в журнал, потом в данные. Перед изменением страниц база дописывает в конец журнала, что собирается изменить, и делает fsync. После…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Что такое журнал предзаписи (WAL) и зачем он нужен?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Что такое журнал предзаписи (WAL) и зачем он нужен?"}]}</script>
+  <h1>Что такое журнал предзаписи (WAL) и зачем он нужен?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Хранение данных</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как база данных переживает внезапное отключение питания?</li><li>Что такое write-ahead log?</li><li>Как работает репликация через журнал?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Сначала запись в журнал, потом в данные.</b> Перед изменением страниц база дописывает в конец журнала, что собирается изменить, и делает fsync. После сбоя журнал проигрывается заново — подтверждённые транзакции восстанавливаются.</p><ul><li>Последовательная запись журнала дешевле случайной записи страниц</li><li>Страницы данных пишутся на диск позже, пачками — на контрольной точке (checkpoint)</li><li>Коммит = журнал на диске; отсюда цена fsync и group commit</li></ul><p class="extra"><span>А ещё</span> Тот же журнал — основа репликации, point-in-time recovery и CDC (Debezium)</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Проблема.</b> Транзакция меняет несколько страниц в разных местах файла. Если записывать их сразу и питание пропадёт посередине, на диске окажется половина изменений — нарушится атомарность. А если ждать записи всех страниц при каждом коммите — это много случайных fsync.</p>
+<p><b>Решение — журнал предзаписи:</b></p>
+<ol><li>изменение сначала описывается записью в журнале (что, где, новое значение) — последовательное дописывание в конец файла;</li><li>при коммите журнал сбрасывается на диск (fsync) до записи подтверждения клиенту — это и есть <b>durability</b> из ACID;</li><li>изменённые страницы остаются в памяти (буферный кэш) и пишутся на диск позже, в фоне;</li><li>периодически выполняется <b>контрольная точка</b>: все грязные страницы сбрасываются, и журнал до этого места больше не нужен для восстановления.</li></ol>
+<p><b>Восстановление после сбоя:</b> с последней контрольной точки журнал читается и изменения повторяются (redo). Транзакции без записи о коммите отбрасываются (в PostgreSQL их версии строк просто невидимы благодаря MVCC; в других СУБД есть ещё undo-журнал для отката).</p>
+<p><b>Почему это быстрее:</b> запись в конец файла последовательная, а несколько коммитов можно сбросить одним fsync (<b>group commit</b>). Сами страницы данных пишутся реже и пачками.</p>
+<p><b>Журнал как поток изменений:</b></p>
+<ul><li><b>репликация</b> — реплика получает журнал и применяет его (физическая потоковая репликация PostgreSQL, binlog в MySQL);</li><li><b>восстановление на момент времени</b> — базовая копия плюс архив журнала до нужной секунды;</li><li><b>CDC</b> — логическое декодирование журнала публикует изменения в Kafka (Debezium) без двойной записи из приложения.</li></ul>
+<p><b>Настройки компромисса:</b> <code>synchronous_commit = off</code> в PostgreSQL не ждёт fsync при коммите — быстрее, но при падении можно потерять последние доли секунды транзакций (без порчи данных). <code>innodb_flush_log_at_trx_commit</code> в MySQL — то же самое.</p>
+<p>Идея журнала повсюду: файловые системы с журналированием (ext4), Kafka (вся система — журнал), LSM-хранилища, Raft (реплицированный журнал).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>LSN 0/16B3F20  BEGIN xid=812
+LSN 0/16B3F58  UPDATE accounts page=17 slot=4  balance: 500 → 300
+LSN 0/16B3FA0  UPDATE accounts page=93 slot=1  balance: 100 → 300
+LSN 0/16B3FE8  COMMIT xid=812     ← fsync до этой записи, затем «OK» клиенту
+...                               ← страницы 17 и 93 запишутся на checkpoint</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Правило: журнал на диск раньше данных.</li><li>Как это даёт атомарность и долговечность после сбоя.</li><li>Почему быстрее: последовательная запись, group commit, отложенная запись страниц.</li><li>Контрольные точки и восстановление.</li><li>Журнал как основа репликации и CDC — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Думать, что при коммите база синхронно пишет все изменённые страницы.</li><li>Путать WAL с логами приложения.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/mvcc/">Что такое MVCC и как он позволяет читать без блокировок?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/page-cache/">Почему повторное чтение файла быстрее первого?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/lsm-tree/">Что такое LSM-дерево и чем оно отличается от B-дерева?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/databases/acid/">Что означает аббревиатура ACID?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое журнал предзаписи (WAL) и зачем он нужен?","acceptedAnswer":{"@type":"Answer","text":"Сначала запись в журнал, потом в данные. Перед изменением страниц база дописывает в конец журнала, что собирается изменить, и делает fsync. После сбоя журнал проигрывается заново — подтверждённые транзакции восстанавливаются. Последовательная запись журнала дешевле случайной записи страниц Страницы данных пишутся на диск позже, пачками — на контрольной точке (checkpoint) Коммит = журнал на диске; отсюда цена fsync и group commit Тот же журнал — основа репликации, point-in-time recovery и CDC (Debezium) Проблема. Транзакция меняет несколько страниц в разных местах файла. Если записывать их сразу и питание пропадёт посередине, на диске окажется половина изменений — нарушится атомарность. А если ждать записи всех страниц при каждом коммите — это много случайных fsync. Решение — журнал предзаписи: 1. изменение сначала описывается записью в журнале (что, где, новое значение) — последовательное дописывание в конец файла; 2. при коммите журнал сбрасывается на диск (fsync) до записи подтверждения клиенту — это и есть durability из ACID; 3. изменённые страницы остаются в памяти (буферный кэш) и пишутся на диск позже, в фоне; 4. периодически выполняется контрольная точка: все грязные страницы сбрасываются, и журнал до этого места больше не нужен для восстановления. Восстановление после сбоя: с последней контрольной точки журнал читается и изменения повторяются (redo). Транзакции без записи о…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

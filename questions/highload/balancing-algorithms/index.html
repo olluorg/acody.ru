@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие алгоритмы балансировки нагрузки вы знаете и когда какой лучше? — вопрос с собеседования</title>
+<meta name="description" content="Round robin — по кругу, хорош при одинаковых серверах и запросах. Least connections / least requests — тому, у кого меньше активных, учитывает…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/balancing-algorithms/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/balancing-algorithms/">
+<meta property="og:title" content="Какие алгоритмы балансировки нагрузки вы знаете и когда какой лучше? — вопрос с собеседования">
+<meta property="og:description" content="Round robin — по кругу, хорош при одинаковых серверах и запросах. Least connections / least requests — тому, у кого меньше активных, учитывает…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Какие алгоритмы балансировки нагрузки вы знаете и когда какой лучше?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Какие алгоритмы балансировки нагрузки вы знаете и когда какой лучше?"}]}</script>
+  <h1>Какие алгоритмы балансировки нагрузки вы знаете и когда какой лучше?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Балансировка нагрузки</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем round robin хуже least connections?</li><li>Что такое power of two choices?</li><li>Когда нужна балансировка по хешу?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Round robin</b> — по кругу, хорош при одинаковых серверах и запросах. <b>Least connections / least requests</b> — тому, у кого меньше активных, учитывает медленные запросы и серверы. <b>Power of two choices</b> — взять двух случайных и выбрать менее загруженного: почти как least, но без глобального состояния.</p><ul><li>Взвешенные варианты — для серверов разной мощности</li><li>По хешу ключа (consistent hashing) — когда важна привязка: кэш, сессии, шард</li><li>Случайный выбор хуже всех: очереди на неудачливых серверах</li></ul><p class="extra"><span>А ещё</span> У нескольких балансировщиков без общего состояния least connections даёт стадный эффект — p2c устойчивее</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Балансировка: round robin, least connections, power of two choices</p><script type="module" src="/widgets/load-balancer.js"></script><sotto-load-balancer theme="dark"></sotto-load-balancer></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Round robin</b> — по очереди. Просто и без состояния. Работает, когда серверы одинаковы и запросы примерно одинаковые. Плохо, когда один сервер начал тормозить (GC, соседи, тяжёлый запрос): он продолжает получать ту же долю, его очередь растёт, хвост задержки — тоже. <b>Взвешенный</b> — серверам разной мощности пропорционально весу.</p>
+<p><b>Случайный</b> выбор — то же в среднем, но хуже: по случайности некоторые серверы получают серию запросов подряд.</p>
+<p><b>Least connections / least outstanding requests</b> — тому, у кого сейчас меньше всего запросов в работе. Медленный сервер автоматически получает меньше: его запросы дольше висят. Хорошо для разнородных запросов и долгих соединений. Минус — нужно знать актуальную загрузку всех серверов; при нескольких балансировщиках каждый видит только свои запросы, и все разом шлют на «самый свободный» — стадный эффект.</p>
+<p><b>Power of two choices (p2c)</b> — выбрать двух случайных и отправить менее загруженному. Удивительный результат теории вероятностей: максимальная загрузка падает экспоненциально по сравнению со случайным выбором, и это почти так же хорошо, как глобальный минимум. Не нужно опрашивать всех, нет стадного эффекта. Используется в Envoy, Finagle, NGINX (<code>random two least_conn</code>), gRPC.</p>
+<p><b>Пиковая EWMA</b> (peak exponentially-weighted moving average, Linkerd, Finagle) — учитывает и число запросов, и недавнюю задержку сервера.</p>
+<p><b>По хешу ключа</b> — один и тот же пользователь или ключ всегда попадает на тот же сервер. Нужен, когда у сервера есть состояние: локальный кэш, сессии в памяти, шард данных, WebSocket-комнаты. Обычный <code>hash % N</code> при изменении N перетасует почти всё — поэтому consistent hashing. Минус — горячие ключи создают горячие серверы.</p>
+<p><b>Как выбрать:</b></p>
+<ul><li>одинаковые stateless-серверы, короткие запросы — round robin;</li><li>разная длительность запросов или риск медленных экземпляров — least requests или p2c;</li><li>много балансировщиков или клиентская балансировка — p2c;</li><li>серверы с состоянием по ключу — consistent hashing (с ограничением нагрузки, bounded load).</li></ul>
+<p><b>Вместе с алгоритмом</b> нужны проверки здоровья, выбрасывание медленных (outlier detection), медленный старт для только что поднятых экземпляров (иначе least connections завалит холодный сервер).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import random
+
+def p2c(servers):
+    a, b = random.sample(servers, 2)
+    return a if a.in_flight &lt;= b.in_flight else b
+
+# 100 серверов, случайный выбор: максимальная очередь ~ ln n / ln ln n
+# power of two choices: максимальная очередь ~ ln ln n — на практике в разы меньше</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Round robin, least connections, хеш — и чем они отличаются.</li><li>Почему round robin плох при медленном экземпляре.</li><li>Power of two choices и чем он лучше глобального минимума при многих балансировщиках.</li><li>Когда нужна привязка по ключу и consistent hashing.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Least connections всегда лучший» — при нескольких балансировщиках и холодном старте — нет.</li><li>Привязка сессий там, где сервис можно сделать stateless.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/health-checks/">Как балансировщик понимает, что экземпляр сервиса нездоров?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/consistent-hashing/">Как работает consistent hashing и зачем нужны виртуальные узлы?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/load-balancing-l4-l7/">Чем балансировщик L4 отличается от L7?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/tail-latency/">Как бороться с хвостовыми задержками в распределённой системе?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/queueing-utilization/">Почему при загрузке сервера 90% время ответа растёт в разы, хотя запас ещё есть?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие алгоритмы балансировки нагрузки вы знаете и когда какой лучше?","acceptedAnswer":{"@type":"Answer","text":"Round robin — по кругу, хорош при одинаковых серверах и запросах. Least connections / least requests — тому, у кого меньше активных, учитывает медленные запросы и серверы. Power of two choices — взять двух случайных и выбрать менее загруженного: почти как least, но без глобального состояния. Взвешенные варианты — для серверов разной мощности По хешу ключа (consistent hashing) — когда важна привязка: кэш, сессии, шард Случайный выбор хуже всех: очереди на неудачливых серверах У нескольких балансировщиков без общего состояния least connections даёт стадный эффект — p2c устойчивее Round robin — по очереди. Просто и без состояния. Работает, когда серверы одинаковы и запросы примерно одинаковые. Плохо, когда один сервер начал тормозить (GC, соседи, тяжёлый запрос): он продолжает получать ту же долю, его очередь растёт, хвост задержки — тоже. Взвешенный — серверам разной мощности пропорционально весу. Случайный выбор — то же в среднем, но хуже: по случайности некоторые серверы получают серию запросов подряд. Least connections / least outstanding requests — тому, у кого сейчас меньше всего запросов в работе. Медленный сервер автоматически получает меньше: его запросы дольше висят. Хорошо для разнородных запросов и долгих соединений. Минус — нужно знать актуальную загрузку всех серверов; при нескольких балансировщиках каждый видит только свои запросы, и все разом шлют на «самый свободный» — стадный эффект. Power of two choices (p2c) — выбрать двух случайных и…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

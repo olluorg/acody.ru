@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем позитивное тестирование отличается от негативного? — вопрос с собеседования</title>
+<meta name="description" content="Позитивное — проверка с корректными данными и ожидаемыми действиями; негативное — с некорректными, чтобы убедиться, что система правильно…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/qa/positive-negative-testing/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/qa/positive-negative-testing/">
+<meta property="og:title" content="Чем позитивное тестирование отличается от негативного? — вопрос с собеседования">
+<meta property="og:description" content="Позитивное — проверка с корректными данными и ожидаемыми действиями; негативное — с некорректными, чтобы убедиться, что система правильно…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/qa/">Тестирование (QA)</a> <span>/</span> <span>Чем позитивное тестирование отличается от негативного?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Тестирование (QA)","item":"https://learn.getsotto.ru/questions/qa/"},{"@type":"ListItem","position":3,"name":"Чем позитивное тестирование отличается от негативного?"}]}</script>
+  <h1>Чем позитивное тестирование отличается от негативного?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Виды тестирования</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Приведите примеры негативных проверок</li><li>Что такое негативный тест-кейс?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Позитивное</b> — проверка с корректными данными и ожидаемыми действиями; <b>негативное</b> — с некорректными, чтобы убедиться, что система <b>правильно обрабатывает ошибку</b>.</p><ul><li>Сначала позитивные: работает ли основной сценарий</li><li>Негативные: пустые поля, неверный формат, слишком длинные значения, спецсимволы, нет сети</li></ul><p class="extra"><span>А ещё</span> Цель негативной проверки — понятная ошибка, а не падение и не сохранение мусора</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Позитивное тестирование</b> проверяет, что система делает то, что должна, при правильном использовании: корректный email и пароль — вход выполнен.</p>
+<p><b>Негативное тестирование</b> проверяет реакцию на неправильные данные и действия. Ожидаемый результат — не «ничего не работает», а корректная обработка: понятное сообщение, данные не сохранились, система не упала, не появилось уязвимости.</p>
+<p>Что проверять в негативных сценариях:</p>
+<ul><li>пустые обязательные поля, пробелы вместо значения;</li><li>неверный формат: буквы в поле телефона, email без <code>@</code>;</li><li>значения за границами: слишком длинная строка, отрицательное число;</li><li>спецсимволы и попытки инъекций: <code>&lt;script&gt;</code>, <code>&#x27; OR 1=1 --</code>;</li><li>действия не по сценарию: двойное нажатие кнопки, кнопка «назад» при оплате, обрыв сети;</li><li>доступ без прав: открыть чужой заказ по ссылке.</li></ul>
+<p>Обычно начинают с позитивных проверок: если основной сценарий не работает, негативные смысла не имеют.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><p>Поле «Возраст» (18–99, целое число). Позитивные: 18, 45, 99. Негативные: 17, 100, пусто, «двадцать», 25.5, −5, 99999999999, пробел.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определение через корректные и некорректные данные.</li><li>Ожидаемый результат негативной проверки — правильная обработка ошибки.</li><li>Набор типовых негативных проверок.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что негативный тест «должен упасть».</li><li>Ограничиться пустыми полями.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/qa/boundary-values/">Что такое анализ граничных значений?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/qa/equivalence-partitioning/">Что такое классы эквивалентности?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/qa/test-pencil/">Протестируйте карандаш (ручку, лифт, кружку)</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем позитивное тестирование отличается от негативного?","acceptedAnswer":{"@type":"Answer","text":"Позитивное — проверка с корректными данными и ожидаемыми действиями; негативное — с некорректными, чтобы убедиться, что система правильно обрабатывает ошибку. Сначала позитивные: работает ли основной сценарий Негативные: пустые поля, неверный формат, слишком длинные значения, спецсимволы, нет сети Цель негативной проверки — понятная ошибка, а не падение и не сохранение мусора Позитивное тестирование проверяет, что система делает то, что должна, при правильном использовании: корректный email и пароль — вход выполнен. Негативное тестирование проверяет реакцию на неправильные данные и действия. Ожидаемый результат — не «ничего не работает», а корректная обработка: понятное сообщение, данные не сохранились, система не упала, не появилось уязвимости. Что проверять в негативных сценариях: - пустые обязательные поля, пробелы вместо значения; - неверный формат: буквы в поле телефона, email без @; - значения за границами: слишком длинная строка, отрицательное число; - спецсимволы и попытки инъекций: <script>, ' OR 1=1 --; - действия не по сценарию: двойное нажатие кнопки, кнопка «назад» при оплате, обрыв сети; - доступ без прав: открыть чужой заказ по ссылке. Обычно начинают с позитивных проверок: если основной сценарий не работает, негативные смысла не имеют."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

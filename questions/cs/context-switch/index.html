@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое переключение контекста и почему оно дорогое? — вопрос с собеседования</title>
+<meta name="description" content="Ядро останавливает один поток, сохраняет его регистры и состояние и загружает другой. Прямая цена — единицы микросекунд, но главное — остывшие кэши…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/context-switch/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/context-switch/">
+<meta property="og:title" content="Что такое переключение контекста и почему оно дорогое? — вопрос с собеседования">
+<meta property="og:description" content="Ядро останавливает один поток, сохраняет его регистры и состояние и загружает другой. Прямая цена — единицы микросекунд, но главное — остывшие кэши…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Что такое переключение контекста и почему оно дорогое?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Что такое переключение контекста и почему оно дорогое?"}]}</script>
+  <h1>Что такое переключение контекста и почему оно дорогое?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Операционные системы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему тысяча потоков работает медленнее, чем восемь?</li><li>Сколько стоит переключение между потоками?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Ядро останавливает один поток, сохраняет его регистры и состояние и загружает другой. Прямая цена — единицы микросекунд, но главное — <b>остывшие кэши</b> процессора.</p><ul><li>Между процессами дороже: меняется адресное пространство, сбрасывается TLB</li><li>Причины: истёк квант времени, поток ушёл ждать ввода-вывода или блокировки</li><li>Потоков больше, чем ядер, — больше переключений и меньше полезной работы</li></ul><p class="extra"><span>А ещё</span> Отсюда пулы потоков, event loop и виртуальные потоки</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>На ядре процессора в каждый момент выполняется один поток. Чтобы выполнялись многие, ядро ОС переключает их: сохраняет регистры, счётчик команд и указатель стека текущего потока в его структуре, выбирает следующий по правилам планировщика и восстанавливает его состояние.</p>
+<p><b>Когда переключаются:</b></p>
+<ul><li><b>вытеснение</b> — поток израсходовал квант времени (единицы миллисекунд), или проснулся поток с более высоким приоритетом;</li><li><b>добровольно</b> — поток ушёл ждать: чтение с диска или из сети, захват занятого мьютекса, <code>sleep</code>, ожидание условия.</li></ul>
+<p><b>Из чего цена:</b></p>
+<ul><li><b>прямая</b> — вход в ядро, сохранение и восстановление регистров, работа планировщика. Порядок единиц микросекунд;</li><li><b>косвенная</b> — новый поток работает с другими данными, кэши L1/L2 и предсказатель переходов заполнены чужим. Первое время он работает медленно, пока кэши не прогреются. Это часто дороже прямой части;</li><li><b>между процессами</b> — ещё и смена таблиц страниц, сброс TLB (кэша трансляции адресов).</li></ul>
+<p><b>Практические следствия:</b></p>
+<ul><li>для вычислений потоков больше, чем ядер, не нужно — они только мешают друг другу;</li><li>для ввода-вывода раньше заводили поток на соединение, и при десятках тысяч соединений система тратила время на переключения и память на стеки. Отсюда неблокирующий ввод-вывод и event loop (nginx, Node.js, asyncio), а в Java 21 — виртуальные потоки: переключение между ними делает JVM в пользовательском пространстве, без ядра;</li><li>захват спорной блокировки — это тоже переключение: поток засыпает и просыпается. Поэтому короткие критические секции и спин-блокировки на короткое ожидание.</li></ul>
+<p>Посмотреть число переключений: <code>vmstat 1</code> (колонка <code>cs</code>), <code>pidstat -w</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>vmstat 1
+procs ---------memory-------- ---system-- ------cpu-----
+ r  b   swpd   free   ...       in    cs   us sy id wa
+32  0      0  812344  ...     9100 185000  41 38 21  0</code></pre>
+<p>Сотни тысяч переключений в секунду и высокий <code>sy</code> (время в ядре) — признак того, что потоков слишком много или они дерутся за блокировку.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Что сохраняется и восстанавливается.</li><li>Две причины: вытеснение и ожидание.</li><li>Косвенная цена через кэши, а не только прямая.</li><li>Вывод: число потоков под задачу, пулы, event loop, виртуальные потоки.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Больше потоков — быстрее» для вычислительной задачи.</li><li>Считать, что переключение между потоками и процессами стоит одинаково.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/os-scheduler/">Как планировщик ОС решает, какой поток выполнять?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/thread-pool/">Зачем нужен пул потоков и как выбрать его размер?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/process-vs-thread/">Чем процесс отличается от потока?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/highload/c10k-event-loop/">Как один сервер держит сотни тысяч одновременных соединений?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое переключение контекста и почему оно дорогое?","acceptedAnswer":{"@type":"Answer","text":"Ядро останавливает один поток, сохраняет его регистры и состояние и загружает другой. Прямая цена — единицы микросекунд, но главное — остывшие кэши процессора. Между процессами дороже: меняется адресное пространство, сбрасывается TLB Причины: истёк квант времени, поток ушёл ждать ввода-вывода или блокировки Потоков больше, чем ядер, — больше переключений и меньше полезной работы Отсюда пулы потоков, event loop и виртуальные потоки На ядре процессора в каждый момент выполняется один поток. Чтобы выполнялись многие, ядро ОС переключает их: сохраняет регистры, счётчик команд и указатель стека текущего потока в его структуре, выбирает следующий по правилам планировщика и восстанавливает его состояние. Когда переключаются: - вытеснение — поток израсходовал квант времени (единицы миллисекунд), или проснулся поток с более высоким приоритетом; - добровольно — поток ушёл ждать: чтение с диска или из сети, захват занятого мьютекса, sleep, ожидание условия. Из чего цена: - прямая — вход в ядро, сохранение и восстановление регистров, работа планировщика. Порядок единиц микросекунд; - косвенная — новый поток работает с другими данными, кэши L1/L2 и предсказатель переходов заполнены чужим. Первое время он работает медленно, пока кэши не прогреются. Это часто дороже прямой части; - между процессами — ещё и смена таблиц страниц…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

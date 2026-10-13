@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spring Cloud: config, discovery, gateway, tracing — разбор для собеседования</title>
+<meta name="description" content="Config Server, Eureka/DiscoveryClient, Spring Cloud Gateway и распределённая трассировка.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/spring/cloud-platform/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/spring/cloud-platform/">
+<meta property="og:title" content="Spring Cloud: config, discovery, gateway, tracing — разбор для собеседования">
+<meta property="og:description" content="Config Server, Eureka/DiscoveryClient, Spring Cloud Gateway и распределённая трассировка.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#spring">Spring</a> <span>/</span> <span>Spring Cloud: config, discovery, gateway, tracing</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/articles/#spring"},{"@type":"ListItem","position":3,"name":"Spring Cloud: config, discovery, gateway, tracing"}]}</script>
+  <h1>Spring Cloud: config, discovery, gateway, tracing</h1>
+  <p class="lead">Config Server, Eureka/DiscoveryClient, Spring Cloud Gateway и распределённая трассировка.</p>
+  <article class="md"><h2>Зачем Spring Cloud</h2>
+<p>Когда монолит разрезан на сервисы, появляются задачи, которых раньше не было: где хранить настройки десятка сервисов, как сервису найти соседа, через какую точку внешний трафик попадает внутрь и как проследить запрос, прошедший через пять сервисов. Spring Cloud — набор библиотек, которые решают эти задачи на стороне приложения.</p>
+<p>Важная оговорка с самого начала: в Kubernetes заметную часть этих задач уже решает платформа. Поэтому полезно знать не только, как устроен каждый компонент, но и когда он не нужен.</p>
+<h2>Config Server</h2>
+<p>Spring Cloud Config Server — отдельный сервис, который раздаёт конфигурацию всем приложениям. Источник настроек — чаще всего Git-репозиторий: файлы вида <code>orders-service-prod.yml</code> лежат в нём, а сервис при старте спрашивает у Config Server свою конфигурацию по имени приложения и профилю.</p>
+<p>Что это даёт: настройки меняются без пересборки артефакта, история изменений хранится в Git, одинаковые параметры не копируются по репозиториям сервисов. Обновить настройки без перезапуска помогает <code>@RefreshScope</code> и событие обновления.</p>
+<p>Чего Config Server не решает — хранения секретов. Пароли и ключи в Git-репозитории остаются уязвимыми даже в закрытом репозитории. Для них используют Vault, облачный KMS или секреты Kubernetes. В Kubernetes обычную конфигурацию часто отдают через ConfigMap, и отдельный Config Server тогда не нужен.</p>
+<h2>Service discovery</h2>
+<p>Сервисы в облаке постоянно перезапускаются и меняют адреса, поэтому вызывать соседа по жёстко прописанному <code>host:port</code> нельзя. Service discovery позволяет обращаться по логическому имени: сервис при старте регистрируется в реестре, а клиент спрашивает у реестра живые экземпляры и выбирает один из них (балансировка на стороне клиента).</p>
+<p>Классический реестр в Spring Cloud — Eureka из стека Netflix. В Kubernetes ту же роль выполняют объект Service и встроенный DNS: имя <code>orders-service</code> и так разрешается в живые поды. Поэтому в Kubernetes Eureka обычно избыточна.</p>
+<h2>API Gateway</h2>
+<p>Gateway — единая точка входа для внешнего трафика. Spring Cloud Gateway принимает запрос и по правилам маршрутизации передаёт его нужному сервису. На шлюзе удобно делать то, что одинаково для всех сервисов: завершение TLS, проверку токена, ограничение частоты запросов, добавление correlation id, постепенное переключение трафика на новую версию.</p>
+<p>Главное правило: на шлюзе не должно быть бизнес-логики. Если в него начинают переносить правила предметной области, он превращается во второй монолит, который нужно выкатывать вместе со всеми сервисами.</p>
+<pre class="lang-yaml"><code>spring:
+  cloud:
+    gateway:
+      routes:
+        - id: orders
+          uri: lb://orders-service     # lb — балансировка через discovery
+          predicates:
+            - Path=/orders/**</code></pre>
+<h2>Распределённая трассировка</h2>
+<p>Трассировка связывает один пользовательский запрос в цепочке сервисов: каждый сервис получает trace id из заголовка, создаёт свой span и передаёт контекст дальше. В системе вроде Zipkin или Jaeger видно, сколько времени запрос провёл в каждом сервисе и где возникла ошибка.</p>
+<p>В Spring Boot 3 трассировку строят на Micrometer Tracing с мостом в OpenTelemetry. Spring Cloud Sleuth, о котором пишут старые материалы, больше не развивается — для Boot 3 он не подходит.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Разберите компоненты по задачам, а не по названиям: Config Server — централизованная конфигурация (но секреты — в Vault или KMS), discovery — поиск по логическому имени, Gateway — единая точка входа без бизнес-логики, трассировка — путь запроса через сервисы на Micrometer Tracing и OpenTelemetry.</p>
+<p>Сильный акцент — граница с платформой. В Kubernetes discovery даёт Service и DNS, конфигурацию — ConfigMap, а часть функций шлюза и трассировки может взять на себя service mesh вроде Istio. Выбирать компоненты стоит по тому, чего не хватает в инфраструктуре, а не подключать весь Spring Cloud по привычке.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/spring/config-server/">Зачем нужен Spring Cloud Config Server?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/spring-cloud-gateway/">Какая основная роль Spring Cloud Gateway?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/service-discovery/">Что такое service discovery и где здесь Eureka?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/distributed-tracing-propagation/">Что необходимо, чтобы распределённая трассировка связала запрос, прошедший через несколько сервисов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/service-discovery-basic/">Зачем нужен service discovery в системе из многих сервисов?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/spring/resilience-observability/">Resilience: таймауты, ретраи и circuit breaker</a><p>Защита от каскадных отказов: таймауты, безопасные ретраи, состояния circuit breaker, bulkhead и rate limiter, fallback и порядок паттернов.</p></li><li><a href="/articles/spring/http-security/">HTTP, cookies и сессии</a><p>Семантика HTTP-методов и кэширование, cookies и их флаги безопасности, stateful против stateless сессий, HTTPS и граница authn/authz.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Spring Cloud: config, discovery, gateway, tracing","description":"Config Server, Eureka/DiscoveryClient, Spring Cloud Gateway и распределённая трассировка.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/spring/cloud-platform/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Координация: семафоры, защёлки и барьеры — разбор для собеседования</title>
+<meta name="description" content="Semaphore, CountDownLatch, CyclicBarrier, Phaser и Exchanger — что каждый делает и когда выбирать.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/coordination/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/coordination/">
+<meta property="og:title" content="Координация: семафоры, защёлки и барьеры — разбор для собеседования">
+<meta property="og:description" content="Semaphore, CountDownLatch, CyclicBarrier, Phaser и Exchanger — что каждый делает и когда выбирать.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Координация: семафоры, защёлки и барьеры</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Координация: семафоры, защёлки и барьеры"}]}</script>
+  <h1>Координация: семафоры, защёлки и барьеры</h1>
+  <p class="lead">Semaphore, CountDownLatch, CyclicBarrier, Phaser и Exchanger — что каждый делает и когда выбирать.</p>
+  <article class="md"><h2>Зачем готовые примитивы</h2>
+<p>Координацию можно собрать на wait/notify, но это легко сделать неправильно (потерянные сигналы, гонки). Пакет <code>java.util.concurrent</code> даёт проверенные высокоуровневые примитивы под типовые задачи — их и используют вместо ручной синхронизации.</p>
+<p>Под капотом большинство построено на AbstractQueuedSynchronizer (AQS) — общем каркасе для очередей ожидающих потоков.</p>
+<h2>Semaphore</h2>
+<p>Semaphore хранит набор «пермитов»: <code>acquire()</code> забирает один (блокируясь, если их нет), <code>release()</code> возвращает. Это ограничитель одновременного доступа: семафор с N пермитами пускает не более N потоков сразу — например, ограничить число параллельных обращений к внешнему сервису или пул соединений.</p>
+<p>Семафор с одним пермитом работает как (не реентерабельная!) блокировка. Поддерживает <code>tryAcquire</code> с таймаутом и режим fairness. Важно: release не обязан вызывать тот же поток, что acquire — это не владение, а счётчик разрешений.</p>
+<pre class="lang-java"><code>Semaphore limit = new Semaphore(10); // не более 10 одновременно
+limit.acquire();
+try { callExternalService(); }
+finally { limit.release(); }</code></pre>
+<h2>CountDownLatch</h2>
+<p>CountDownLatch — одноразовый шлюз с счётчиком: потоки ждут на <code>await()</code>, пока счётчик не дойдёт до нуля через <code>countDown()</code>. Два классических применения: дождаться, пока N задач завершатся (главный поток ждёт), или одновременно стартовать N потоков по одному сигналу (защёлка на 1).</p>
+<p>Ключевое ограничение — одноразовость: после достижения нуля защёлку нельзя переиспользовать.</p>
+<h2>CyclicBarrier</h2>
+<p>CyclicBarrier — точка встречи фиксированной группы потоков: каждый вызывает <code>await()</code> и блокируется, пока ВСЕ участники не подойдут, после чего они одновременно продолжают. В отличие от latch, барьер переиспользуем (циклический) и подходит для итеративных/фазовых вычислений.</p>
+<p>Можно задать barrier action — код, который выполнится один раз при срабатывании барьера. Если один поток уходит по таймауту/прерыванию, барьер «ломается» (BrokenBarrierException) для всех.</p>
+<h2>Phaser и Exchanger</h2>
+<p>Phaser — гибкий барьер с динамическим числом участников (register/<code>arriveAndDeregister</code>) и явными фазами: подходит, когда количество потоков меняется между этапами, чего CyclicBarrier с фиксированным N не умеет. Exchanger — точка обмена данными между ровно двумя потоками: оба вызывают <code>exchange(value)</code> и получают значение друг друга.</p>
+<p>Шпаргалка выбора: ограничить одновременный доступ — Semaphore; дождаться завершения событий (одноразово) — CountDownLatch; циклическая встреча фиксированной группы — CyclicBarrier; динамические фазы — Phaser; парный обмен — Exchanger.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Чётко противопоставьте примитивы: Semaphore (N пермитов, ограничение доступа, release не привязан к потоку), CountDownLatch (одноразовый, дождаться N), CyclicBarrier (переиспользуемый рандеву группы + barrier action), Phaser (динамические участники/фазы), Exchanger (обмен между двумя). Упомяните, что многие построены на AQS.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/latch-barrier-semaphore/">Чем различаются CountDownLatch, CyclicBarrier и Semaphore?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/semaphore-rate-limit/">Нужно ограничить число одновременных обращений к внешнему API десятью, не ограничивая при этом число рабочих потоков. Какой примитив подходит?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/countdownlatch-reuse/">Можно ли переиспользовать CountDownLatch после того, как счётчик дошёл до нуля?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/semaphore-release-finally/">В коде вызывается semaphore.acquire(), затем работа с ресурсом, затем semaphore.release() в конце метода. Что здесь опасно?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/countdownlatch/">Что делает CountDownLatch?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/locks/">Явные блокировки: ReentrantLock, RW и Condition</a><p>Когда synchronized мало, ReentrantLock с tryLock/fairness, ReadWriteLock и StampedLock, Condition вместо wait/notify.</p></li><li><a href="/articles/java/completablefuture/">Future и CompletableFuture</a><p>Ограничения Future, асинхронная композиция CompletableFuture, async-варианты с пулами и обработка ошибок.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Координация: семафоры, защёлки и барьеры","description":"Semaphore, CountDownLatch, CyclicBarrier, Phaser и Exchanger — что каждый делает и когда выбирать.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/coordination/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

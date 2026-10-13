@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stream API: устройство и ленивый конвейер — разбор для собеседования</title>
+<meta name="description" content="Что такое стрим, источники, промежуточные против терминальных, ленивость и short-circuiting, stateful-операции, параллельность и примитивные стримы.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/streams/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/streams/">
+<meta property="og:title" content="Stream API: устройство и ленивый конвейер — разбор для собеседования">
+<meta property="og:description" content="Что такое стрим, источники, промежуточные против терминальных, ленивость и short-circuiting, stateful-операции, параллельность и примитивные стримы.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Stream API: устройство и ленивый конвейер</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Stream API: устройство и ленивый конвейер"}]}</script>
+  <h1>Stream API: устройство и ленивый конвейер</h1>
+  <p class="lead">Что такое стрим, источники, промежуточные против терминальных, ленивость и short-circuiting, stateful-операции, параллельность и примитивные стримы.</p>
+  <article class="md"><h2>Что такое Stream</h2>
+<p>Stream — это не структура данных, а конвейер обработки последовательности элементов. Он не хранит элементы (тянет их из источника), не изменяет источник и одноразовый: после терминальной операции стрим использован, повторно по нему не пройти.</p>
+<p>Идея — описать ЧТО сделать с данными декларативно (filter→map→collect), а не КАК итерировать вручную.</p>
+<h2>Источники</h2>
+<p>Стрим получают из коллекции (<code>collection.stream()</code>, <code>parallelStream()</code>), массива (<code>Arrays.stream</code>), явных значений (<code>Stream.of</code>), диапазона (<code>IntStream.range</code>), строк файла (<code>Files.lines</code>) и генераторов (<code>Stream.iterate</code>/generate — потенциально бесконечные).</p>
+<p>Бесконечные источники безопасны только с обрывающими операциями (limit, <code>findFirst</code>) — иначе обработка не завершится.</p>
+<h2>Промежуточные против терминальных</h2>
+<p>Операции делятся на промежуточные (intermediate) — возвращают новый Stream и ленивы (map, filter, sorted, distinct, limit, peek) — и терминальные (terminal) — запускают обработку и дают результат/побочный эффект (collect, <code>forEach</code>, reduce, count, <code>findFirst</code>, <code>anyMatch</code>).</p>
+<p>Без терминальной операции конвейер не выполнится вообще: цепочка map/filter без collect/<code>forEach</code> — это no-op. Ровно одна терминальная операция завершает стрим.</p>
+<pre class="lang-java"><code>List&lt;String&gt; names = users.stream()
+    .filter(User::isActive)  // ленивая (intermediate)
+    .map(User::name)          // ленивая (intermediate)
+    .toList();                // терминальная — здесь всё и считается</code></pre>
+<h2>Ленивость и short-circuiting</h2>
+<p>Конвейер обрабатывает элементы по одному сквозь все операции (а не «весь filter, потом весь map»). Эта ленивость даёт два эффекта: операции сливаются (fusion) в один проход, и обрывающие операции (<code>findFirst</code>, <code>anyMatch</code>, limit) останавливают обработку, как только результат ясен — остальные элементы не трогаются.</p>
+<p>Поэтому <code>users.stream().filter(...).findFirst()</code> не фильтрует весь список, а останавливается на первом подходящем. peek помогает увидеть реальный порядок обработки при отладке.</p>
+<figure><img src="/articles/assets/streams-pipeline.webp" alt="Ленивый конвейер Stream API: источник → промежуточные операции filter и map → терминальная операция; элементы проходят по одному." loading="lazy"><figcaption>Stream — ленивый конвейер: элемент проходит через filter и map к терминальной операции по одному, а не вся коллекция разом.</figcaption></figure>
+<h2>Stateless, stateful и параллельность</h2>
+<p>Операции бывают stateless (map, filter — элемент обрабатывается независимо) и stateful (sorted, distinct, limit — требуют состояния/буфера или знания обо всём входе, поэтому могут «материализовать» поток). Стрим обычно сохраняет encounter order источника.</p>
+<p><code>parallelStream()</code> распараллеливает обработку на общем ForkJoinPool. Это выгодно лишь при большом объёме, дорогой на элемент работе и хорошо делимом источнике (ArrayList — да, LinkedList — плохо). Ловушки: побочные эффекты в лямбдах (гонки), затраты на разбиение/слияние, общий <code>commonPool</code>, неупорядоченность — поэтому параллелизм включают по замеру, а не по умолчанию.</p>
+<h2>Примитивные стримы</h2>
+<p><code>Stream&lt;Integer&gt;</code> боксит каждый элемент. Для чисел есть IntStream/LongStream/DoubleStream без боксинга — с удобными <code>sum()</code>, <code>average()</code>, <code>summaryStatistics()</code>.</p>
+<p>Переходы между ними: <code>mapToInt</code>/<code>mapToObj</code>/boxed. В числовой обработке это и быстрее, и выразительнее (range, <code>rangeClosed</code>).</p>
+<pre class="lang-java"><code>int total = orders.stream().mapToInt(Order::amount).sum(); // без боксинга</code></pre>
+<h2>Как отвечать на собеседовании</h2>
+<p>Скажите, что Stream — конвейер, не хранилище, одноразовый и не мутирует источник; разделите intermediate (ленивые) и terminal (запускает) и подчеркните, что без терминальной ничего не считается. Объясните ленивость + short-circuiting (один проход, <code>findFirst</code>/limit обрывают), stateful-операции и осознанный выбор parallel (объём/делимость/без side effects). Упомяните примитивные стримы против боксинга.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/stream-intermediate-terminal/">Чем промежуточные операции Stream отличаются от терминальных?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/stream-map-flatmap-filter/">Чем map, flatMap и filter отличаются в Stream API?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/stream-reuse/">Переменной присвоили Stream, вызвали count(), а затем на той же переменной вызвали forEach(). Что произойдёт?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/filter-before-map/">В конвейере стоят filter и map. Почему порядок filter перед map обычно предпочтительнее обратного?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/stream-api/">Что такое Stream в Java?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/lambdas/">Лямбды и функциональные интерфейсы</a><p>SAM-интерфейсы, лямбда против анонимного класса, замыкания и effectively final, ссылки на методы и стандартные интерфейсы.</p></li><li><a href="/articles/java/collectors/">Collectors и свёртка</a><p>reduce против collect, базовые коллекторы и ловушка toMap, группировка и downstream-коллекторы, характеристики и параллельность.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Stream API: устройство и ленивый конвейер","description":"Что такое стрим, источники, промежуточные против терминальных, ленивость и short-circuiting, stateful-операции, параллельность и примитивные стримы.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/streams/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

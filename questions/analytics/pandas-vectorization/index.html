@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему apply и циклы в pandas медленные и как писать быстрее? — вопрос с собеседования</title>
+<meta name="description" content="Векторные операции над столбцами (df[&quot;a&quot;] df[&quot;b&quot;], np.where, .str, .dt) выполняются в C над массивами. apply по строкам и циклы iterrows вызывают…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/pandas-vectorization/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/pandas-vectorization/">
+<meta property="og:title" content="Почему apply и циклы в pandas медленные и как писать быстрее? — вопрос с собеседования">
+<meta property="og:description" content="Векторные операции над столбцами (df[&quot;a&quot;] df[&quot;b&quot;], np.where, .str, .dt) выполняются в C над массивами. apply по строкам и циклы iterrows вызывают…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Почему apply и циклы в pandas медленные и как писать быстрее?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Почему apply и циклы в pandas медленные и как писать быстрее?"}]}</script>
+  <h1>Почему apply и циклы в pandas медленные и как писать быстрее?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Python и pandas</span><span class="chip">pandas</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое векторизация в pandas?</li><li>Как обработать в pandas файл, который не помещается в память?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Векторные операции над столбцами (<code>df[&quot;a&quot;] * df[&quot;b&quot;]</code>, <code>np.where</code>, <code>.str</code>, <code>.dt</code>) выполняются в C над массивами. <b>apply по строкам</b> и циклы <code>iterrows</code> вызывают Python-функцию на каждую строку — медленнее в десятки–сотни раз. Для больших данных: правильные <b>типы</b> (category, int32), чтение <b>частями</b> (chunksize), <b>колоночные форматы</b> (Parquet) и движки <b>Polars</b> или <b>DuckDB</b>.</p><ul><li>Условия — np.where, np.select, а не apply с if</li><li>category для строк с малым числом значений сокращает память в разы</li><li>Parquet читает только нужные столбцы и хранит типы</li></ul><p class="extra"><span>А ещё</span> DuckDB позволяет запускать SQL прямо по Parquet и датафреймам</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Почему apply медленный.</b> pandas хранит столбцы как массивы NumPy. Векторная операция — один вызов C-кода на весь столбец. <code>apply(axis=1)</code> создаёт объект строки и вызывает Python-функцию миллионы раз.</p>
+<p><b>Приёмы ускорения:</b></p>
+<ul><li>арифметика, сравнения, <code>np.where</code>, <code>np.select</code> — вместо условий в apply;</li><li>методы <code>.str</code> и <code>.dt</code> для строк и дат;</li><li><code>merge</code> со справочником вместо <code>map</code> с функцией;</li><li><code>groupby().transform</code> вместо цикла по группам.</li></ul>
+<p><b>Большие данные:</b></p>
+<ul><li>типы: <code>category</code>, <code>int32</code>, <code>float32</code>, даты как datetime;</li><li><code>read_csv(chunksize=…)</code> — обработка частями с агрегированием;</li><li>Parquet вместо CSV — в разы быстрее и меньше;</li><li><b>Polars</b> — многопоточный, ленивое выполнение;</li><li><b>DuckDB</b> — SQL-движок в процессе, хорошо справляется с данными больше памяти.</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code># медленно
+df[&quot;segment&quot;] = df.apply(lambda r: &quot;vip&quot; if r.amount &gt; 10_000 else &quot;regular&quot;, axis=1)
+
+# быстро
+df[&quot;segment&quot;] = np.where(df[&quot;amount&quot;] &gt; 10_000, &quot;vip&quot;, &quot;regular&quot;)
+
+# память
+df[&quot;city&quot;] = df[&quot;city&quot;].astype(&quot;category&quot;)
+df = pd.read_parquet(&quot;orders.parquet&quot;, columns=[&quot;user_id&quot;, &quot;amount&quot;, &quot;city&quot;])</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Векторизация и почему apply медленный.</li><li>Конкретные приёмы замены.</li><li>Работа с данными, не помещающимися в память.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/pandas-groupby-merge/">Как работают groupby и merge в pandas и какие у них ловушки?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/python-speedup/">Почему Python медленный и как ускорить вычисления?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему apply и циклы в pandas медленные и как писать быстрее?","acceptedAnswer":{"@type":"Answer","text":"Векторные операции над столбцами (df[\"a\"] df[\"b\"], np.where, .str, .dt) выполняются в C над массивами. apply по строкам и циклы iterrows вызывают Python-функцию на каждую строку — медленнее в десятки–сотни раз. Для больших данных: правильные типы (category, int32), чтение частями (chunksize), колоночные форматы (Parquet) и движки Polars или DuckDB. Условия — np.where, np.select, а не apply с if category для строк с малым числом значений сокращает память в разы Parquet читает только нужные столбцы и хранит типы DuckDB позволяет запускать SQL прямо по Parquet и датафреймам Почему apply медленный. pandas хранит столбцы как массивы NumPy. Векторная операция — один вызов C-кода на весь столбец. apply(axis=1) создаёт объект строки и вызывает Python-функцию миллионы раз. Приёмы ускорения: - арифметика, сравнения, np.where, np.select — вместо условий в apply; - методы .str и .dt для строк и дат; - merge со справочником вместо map с функцией; - groupby().transform вместо цикла по группам. Большие данные: - типы: category, int32, float32, даты как datetime; - read_csv(chunksize=…) — обработка частями с агрегированием; - Parquet вместо CSV — в разы быстрее и меньше; - Polars — многопоточный, ленивое выполнение; - DuckDB — SQL-движок в процессе, хорошо справляется с данными больше памяти."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как устроен LRU-кэш и какие ещё бывают политики вытеснения? — вопрос с собеседования</title>
+<meta name="description" content="LRU выбрасывает то, к чему дольше всего не обращались. O(1) на операцию даёт пара хеш-таблица + двусвязный список: таблица находит узел, список…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/lru-lfu/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/lru-lfu/">
+<meta property="og:title" content="Как устроен LRU-кэш и какие ещё бывают политики вытеснения? — вопрос с собеседования">
+<meta property="og:description" content="LRU выбрасывает то, к чему дольше всего не обращались. O(1) на операцию даёт пара хеш-таблица + двусвязный список: таблица находит узел, список…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Как устроен LRU-кэш и какие ещё бывают политики вытеснения?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Как устроен LRU-кэш и какие ещё бывают политики вытеснения?"}]}</script>
+  <h1>Как устроен LRU-кэш и какие ещё бывают политики вытеснения?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Кэши под нагрузкой</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Реализуйте LRU-кэш с O(1) на операцию.</li><li>Чем LRU отличается от LFU?</li><li>Почему полное сканирование таблицы вымывает кэш?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>LRU</b> выбрасывает то, к чему дольше всего не обращались. O(1) на операцию даёт пара <b>хеш-таблица + двусвязный список</b>: таблица находит узел, список хранит порядок использования.</p><ul><li>LFU — выбрасывает то, к чему обращались реже всего: держит популярное, но медленно забывает старое</li><li>Слабость LRU — однократное сканирование вымывает горячие данные</li><li>Современные: SLRU, 2Q, ARC, W-TinyLFU (Caffeine) — защита от сканирования и частотные фильтры</li></ul><p class="extra"><span>А ещё</span> Redis: maxmemory-policy allkeys-lru / allkeys-lfu — приближённые, по выборке ключей</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">LRU-кэш: хеш-таблица плюс двусвязный список</p><script type="module" src="/widgets/lru-cache.js"></script><sotto-lru-cache theme="dark"></sotto-lru-cache></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>LRU (least recently used).</b> Гипотеза — недавно использованное скоро понадобится снова. Реализация за O(1):</p>
+<ul><li><b>хеш-таблица</b> ключ → узел списка;</li><li><b>двусвязный список</b> в порядке использования: голова — самый свежий, хвост — самый старый;</li><li><code>get</code>: найти узел через таблицу, перенести в голову;</li><li><code>put</code>: если ключ есть — обновить и перенести в голову; если нет — создать узел в голове, а при переполнении удалить хвост (и из таблицы).</li></ul>
+<p>Двусвязный — чтобы удалить узел из середины за O(1). В Python — <code>OrderedDict</code> с <code>move_to_end</code> и <code>popitem(last=False)</code>, в Java — <code>LinkedHashMap</code> с <code>accessOrder = true</code> и <code>removeEldestEntry</code>.</p>
+<p><b>LFU (least frequently used)</b> — считает обращения, выбрасывает наименее частый. Хорошо держит стабильно популярное, но плохо забывает: вчерашний хит с миллионом обращений сидит в кэше навсегда. Нужны старение счётчиков и O(1)-структура (списки по частотам).</p>
+<p><b>Проблемы LRU:</b></p>
+<ul><li><b>вымывание сканированием</b> — один отчёт, читающий всю таблицу, или обход каталога краулером проталкивает через кэш миллионы ключей, которые больше не понадобятся, и вытесняет горячие;</li><li><b>одноразовые ключи</b> занимают место наравне с популярными.</li></ul>
+<p><b>Улучшения:</b></p>
+<ul><li><b>SLRU / 2Q</b> — новый ключ попадает в «испытательный» сегмент и переходит в основной, только если к нему обратились снова;</li><li><b>ARC</b> — адаптивно делит место между «недавними» и «частыми»;</li><li><b>W-TinyLFU</b> (Caffeine в Java, Ristretto в Go) — маленькое LRU-окно для новых и частотный фильтр на count-min sketch при входе в основную часть: новый ключ вытеснит жертву, только если встречался чаще неё. Близко к оптимальному на реальных нагрузках;</li><li><b>TTL</b> — отдельно от политики: данные устаревают по времени.</li></ul>
+<p><b>Где важно:</b> локальные кэши в сервисах, буферный кэш базы (в PostgreSQL — clock sweep, приближение LRU со счётчиком использования), page cache ОС, CDN, Redis (<code>allkeys-lru</code>/<code>allkeys-lfu</code> — приближённые: выбирают жертву из случайной выборки ключей, а не держат точный список).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>from collections import OrderedDict
+
+class LRU:
+    def __init__(self, capacity):
+        self.cap, self.data = capacity, OrderedDict()
+
+    def get(self, key):
+        if key not in self.data:
+            return None
+        self.data.move_to_end(key)          # стал самым свежим
+        return self.data[key]
+
+    def put(self, key, value):
+        self.data[key] = value
+        self.data.move_to_end(key)
+        if len(self.data) &gt; self.cap:
+            self.data.popitem(last=False)   # вытесняем самый старый</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Хеш-таблица + двусвязный список и почему именно они.</li><li>Операции get и put за O(1) с переносом в голову и удалением хвоста.</li><li>LFU и его недостаток.</li><li>Вымывание сканированием и современные политики — для middle+.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Хранить порядок в массиве или односвязном списке — удаление становится O(n).</li><li>Забыть удалить вытесненный ключ из хеш-таблицы.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/cache-hit-ratio/">Как оценить, насколько кэш разгружает базу, и что будет, если он упадёт?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/hash-table/">Как устроена хеш-таблица?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/system-design/caching-basics/">Зачем нужно кэширование и какие у него главные риски?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/highload/redis-at-scale/">Какие проблемы бывают с Redis под высокой нагрузкой?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как устроен LRU-кэш и какие ещё бывают политики вытеснения?","acceptedAnswer":{"@type":"Answer","text":"LRU выбрасывает то, к чему дольше всего не обращались. O(1) на операцию даёт пара хеш-таблица + двусвязный список: таблица находит узел, список хранит порядок использования. LFU — выбрасывает то, к чему обращались реже всего: держит популярное, но медленно забывает старое Слабость LRU — однократное сканирование вымывает горячие данные Современные: SLRU, 2Q, ARC, W-TinyLFU (Caffeine) — защита от сканирования и частотные фильтры Redis: maxmemory-policy allkeys-lru / allkeys-lfu — приближённые, по выборке ключей LRU (least recently used). Гипотеза — недавно использованное скоро понадобится снова. Реализация за O(1): - хеш-таблица ключ → узел списка; - двусвязный список в порядке использования: голова — самый свежий, хвост — самый старый; - get: найти узел через таблицу, перенести в голову; - put: если ключ есть — обновить и перенести в голову; если нет — создать узел в голове, а при переполнении удалить хвост (и из таблицы). Двусвязный — чтобы удалить узел из середины за O(1). В Python — OrderedDict с move_to_end и popitem(last=False), в Java — LinkedHashMap с accessOrder = true и removeEldestEntry. LFU (least frequently used) — считает обращения, выбрасывает наименее частый. Хорошо держит стабильно популярное, но плохо забывает: вчерашний хит с миллионом обращений сидит в кэше навсегда. Нужны старение счётчиков и O(1)-структура (списки по частотам). Проблемы LRU: - вымывание сканированием …"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

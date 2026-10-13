@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JDBC и безопасные запросы — разбор для собеседования</title>
+<meta name="description" content="Connection/Statement/ResultSet, PreparedStatement против инъекций, ручные транзакции, ресурсы и пул соединений.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/databases/jdbc/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/databases/jdbc/">
+<meta property="og:title" content="JDBC и безопасные запросы — разбор для собеседования">
+<meta property="og:description" content="Connection/Statement/ResultSet, PreparedStatement против инъекций, ручные транзакции, ресурсы и пул соединений.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>JDBC и безопасные запросы</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"JDBC и безопасные запросы"}]}</script>
+  <h1>JDBC и безопасные запросы</h1>
+  <p class="lead">Connection/Statement/ResultSet, PreparedStatement против инъекций, ручные транзакции, ресурсы и пул соединений.</p>
+  <article class="md"><h2>Что такое JDBC</h2>
+<p>JDBC — стандартный Java API доступа к реляционным БД. Приложение работает с абстракциями Connection, Statement/PreparedStatement и ResultSet, а конкретный драйвер реализует протокол нужной СУБД.</p>
+<p>Соединение получают не через DriverManager напрямую, а обычно из DataSource (пула): открыть TCP-соединение и аутентифицироваться дорого, поэтому соединения переиспользуют.</p>
+<h2>PreparedStatement против SQL injection</h2>
+<p>Statement выполняет готовую строку SQL и провоцирует склейку с пользовательским вводом — прямой путь к SQL injection. PreparedStatement отделяет шаблон запроса от параметров: значения передаются отдельно и не могут изменить структуру запроса.</p>
+<p>Бонус — драйвер/БД могут переиспользовать подготовленный план для повторяющихся запросов. Параметризовать можно только значения; имя таблицы/колонки через ? не подставить — это часть структуры.</p>
+<pre class="lang-java"><code>try (PreparedStatement st = con.prepareStatement(
+        &quot;select * from users where email = ?&quot;)) {
+    st.setString(1, email); // значение, а не часть SQL
+    try (ResultSet rs = st.executeQuery()) {
+        while (rs.next()) { /* ... */ }
+    }
+}</code></pre>
+<h2>Ручные транзакции</h2>
+<p>По умолчанию каждая команда — отдельная транзакция (<code>autoCommit</code>=true). Чтобы объединить несколько операций, <code>autoCommit</code> отключают, выполняют операции и завершают commit, а при ошибке — rollback.</p>
+<p>Перед возвратом соединения в пул важно вернуть его в исходное состояние (<code>autoCommit</code>), иначе следующий пользователь получит «грязное» соединение.</p>
+<pre class="lang-java"><code>con.setAutoCommit(false);
+try {
+    // несколько операций в одной транзакции
+    con.commit();
+} catch (SQLException e) {
+    con.rollback();
+    throw e;
+} finally {
+    con.setAutoCommit(true);
+}</code></pre>
+<h2>Ресурсы и пул соединений</h2>
+<p>Connection, Statement и ResultSet — закрываемые ресурсы; try-with-resources закрывает их в обратном порядке даже при исключении. Утечка соединений быстро исчерпывает пул и кладёт приложение.</p>
+<p>Пул (HikariCP и пр.) ограничивает число соединений и переиспользует их. Размер пула подбирают под БД, а не «побольше»: слишком большой пул создаёт перегрузку на стороне базы.</p>
+<p>Контринтуитивный факт, который любят спрашивать: увеличение пула часто СНИЖАЕТ пропускную способность. Соединения упираются в число ядер и дисков БД, а лишние лишь плодят конкуренцию за одни и те же ресурсы и переключения контекста. Отсюда рекомендация HikariCP держать пул небольшим (десятки, а не сотни) и лечить нехватку соединений ускорением запросов, а не расширением пула.</p>
+<p>Если соединений не хватает, поток ждёт в пуле до <code>connectionTimeout</code> и получает исключение. Поэтому долгие операции (внешние HTTP-вызовы, тяжёлые вычисления) не держат внутри транзакции: соединение всё это время занято и недоступно остальным.</p>
+<h2>Чтение больших результатов</h2>
+<p>По умолчанию JDBC-драйвер вычитывает результат запроса целиком в память клиента. На выборке в миллионы строк это OutOfMemoryError, и никакой try-with-resources от него не спасёт.</p>
+<p>Лечится потоковым чтением: <code>setFetchSize(N)</code> просит драйвер отдавать результат порциями по N строк. Нюанс в том, что у драйверов разные требования. В PostgreSQL курсор на стороне сервера работает только при <code>autoCommit</code>=false — иначе <code>fetchSize</code> молча игнорируется. В MySQL исторически нужен приём с <code>setFetchSize(Integer.MIN_VALUE)</code> для построчного стриминга.</p>
+<p>Ещё дешевле не тянуть лишнее вообще: ограничивать выборку LIMIT/keyset-пагинацией и перечислять нужные колонки вместо SELECT *.</p>
+<pre class="lang-java"><code>con.setAutoCommit(false);   // в PostgreSQL обязательно для серверного курсора
+try (PreparedStatement st = con.prepareStatement(&quot;select id, total from orders&quot;)) {
+    st.setFetchSize(1000);  // тянем порциями, а не весь результат в память
+    try (ResultSet rs = st.executeQuery()) {
+        while (rs.next()) { /* обрабатываем построчно */ }
+    }
+}</code></pre>
+<h2>Batch и сгенерированные ключи</h2>
+<p>Когда нужно вставить/обновить много строк, по одному <code>executeUpdate</code> на строку — это сетевой round-trip на каждую операцию, что катастрофически медленно. Batch (<code>addBatch</code>/<code>executeBatch</code>) накапливает команды и отправляет их пачкой за один-два round-trip, ускоряя массовую запись в разы. Для PreparedStatement обычно ставят <code>addBatch</code> в цикле и периодически делают <code>executeBatch</code> (раз в N строк, чтобы не раздувать память), всё внутри одной транзакции.</p>
+<p>Важный нюанс для MySQL: реальное склеивание в один INSERT включается только с параметром драйвера <code>rewriteBatchedStatements</code>=true — без него batch почти не даёт выигрыша.</p>
+<p>Авто-сгенерированный ключ (auto-increment/identity) после вставки получают через Statement.RETURN_GENERATED_KEYS и <code>getGeneratedKeys()</code>, а не отдельным SELECT — это и быстрее, и без гонки.</p>
+<pre class="lang-java"><code>try (PreparedStatement st = con.prepareStatement(
+        &quot;insert into orders(user_id, total) values (?, ?)&quot;)) {
+    for (Order o : orders) {
+        st.setLong(1, o.userId());
+        st.setBigDecimal(2, o.total());
+        st.addBatch();              // накапливаем
+    }
+    st.executeBatch();              // одна пачка вместо N round-trips
+}</code></pre>
+<h2>Как отвечать на собеседовании</h2>
+<p>Ключевые тезисы: PreparedStatement параметризует и защищает от инъекций; транзакцию ведут через <code>autoCommit</code>=false + commit/rollback; ресурсы закрывают через try-with-resources; соединения берут из пула, потому что их создание дорого; массовую запись делают через batch (<code>addBatch</code>/<code>executeBatch</code>, для MySQL — <code>rewriteBatchedStatements</code>), а сгенерированные ключи берут через <code>getGeneratedKeys</code>. В Spring ручное управление обычно заменяет <code>@Transactional</code>.</p>
+<p>Про инъекции отвечайте механизмом, а не лозунгом: PreparedStatement передаёт значение ОТДЕЛЬНО от текста запроса, поэтому оно физически не может изменить его структуру. И сразу добавьте границу применимости — параметризовать можно только значения, имя таблицы или колонки через ? не подставить, там нужен whitelist допустимых значений в коде.</p>
+<p>Два места, где кандидат выглядит практиком: соединение перед возвратом в пул надо вернуть в исходное состояние (<code>autoCommit</code>), иначе следующий получит «грязное»; и большой результат надо читать через <code>setFetchSize</code>, иначе драйвер вытянет всё в память — с оговоркой, что в PostgreSQL для этого обязателен <code>autoCommit</code>=false.</p>
+<p>Если зайдёт разговор про пул — скажите, что размер подбирают под возможности БД и что раздутый пул обычно снижает пропускную способность, а не повышает.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/databases/prepared-statement/">Чем PreparedStatement безопаснее обычного Statement?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/databases/jdbc-manual-transaction/">Как в JDBC выполнить несколько операций в одной транзакции вручную?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/jdbc-connection-pool/">Зачем нужен пул соединений и почему его размер обычно невелик?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/jdbc-bulk-insert/">Нужно вставить 100 000 строк через JDBC. Что даст наибольший эффект?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/what-is-jdbc/">Что такое JDBC?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/databases/transactions/">Транзакции, изоляция и блокировки</a><p>ACID по буквам, аномалии чтения, уровни изоляции, MVCC и оптимистичные/пессимистичные блокировки.</p></li><li><a href="/articles/databases/orm/">ORM, persistence context и N+1</a><p>Что делает ORM, lazy/eager и proxy, механизм N+1, способы лечения и типичные грабли.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"JDBC и безопасные запросы","description":"Connection/Statement/ResultSet, PreparedStatement против инъекций, ручные транзакции, ресурсы и пул соединений.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/databases/jdbc/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

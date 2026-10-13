@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как вы ведёте DS-проект от постановки задачи до внедрения? — вопрос с собеседования</title>
+<meta name="description" content="Большинство DS-проектов проваливаются не из-за модели, а из-за постановки и внедрения. Этапы: понимание бизнеса (решение, которое изменится, и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/ds-project-lifecycle/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/ds-project-lifecycle/">
+<meta property="og:title" content="Как вы ведёте DS-проект от постановки задачи до внедрения? — вопрос с собеседования">
+<meta property="og:description" content="Большинство DS-проектов проваливаются не из-за модели, а из-за постановки и внедрения. Этапы: понимание бизнеса (решение, которое изменится, и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как вы ведёте DS-проект от постановки задачи до внедрения?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как вы ведёте DS-проект от постановки задачи до внедрения?"}]}</script>
+  <h1>Как вы ведёте DS-проект от постановки задачи до внедрения?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">MLOps и модели в продакшене</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое CRISP-DM?</li><li>Почему большинство ML-моделей не доходят до продакшена?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Большинство DS-проектов проваливаются не из-за модели, а из-за <b>постановки и внедрения</b>. Этапы: <b>понимание бизнеса</b> (решение, которое изменится, и метрика успеха) → <b>понимание данных</b> → <b>подготовка</b> → <b>моделирование</b> с базовой линией → <b>оценка</b> с заказчиком → <b>внедрение</b> и <b>мониторинг</b>. Цикл итеративный; первая версия должна дойти до пользователей быстро, даже если она простая.</p><ul><li>Ранняя проверка: есть ли данные нужного качества и действие на основе модели</li><li>Базовая линия — правило или простая модель — часто уже даёт большую часть эффекта</li><li>Заказчик видит промежуточные результаты, а не только финальный отчёт</li></ul><p class="extra"><span>А ещё</span> Критерий успеха — изменение бизнес-метрики, а не ROC-AUC</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Причины провалов:</b></p>
+<ul><li>нет действия на основе предсказания;</li><li>данные в продакшене не совпадают с обучающими;</li><li>модель некому внедрить и поддерживать;</li><li>метрика модели не связана с бизнесом;</li><li>проект слишком долго без видимого результата.</li></ul>
+<p><b>Практики:</b></p>
+<ul><li>короткий документ постановки: решение, метрика, данные, риски, критерии остановки;</li><li>быстрый прототип и проверка на исторических данных;</li><li>договорённость с инженерами о внедрении с первого дня;</li><li>пилот с контрольной группой;</li><li>план поддержки: мониторинг, переобучение, владелец.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Этапы проекта и их итеративность.</li><li>Причины провалов и как их избежать.</li><li>Бизнес-метрика как критерий успеха.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/ml-system-design/">Спроектируйте ML-систему для предсказания оттока клиентов.</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/ai/mlops-lifecycle/">Что такое MLOps и как модель попадает в продакшен?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/ab-testing-models/">Почему хорошая офлайн-метрика модели не гарантирует успех в продакшене и как проверить модель онлайн?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как вы ведёте DS-проект от постановки задачи до внедрения?","acceptedAnswer":{"@type":"Answer","text":"Большинство DS-проектов проваливаются не из-за модели, а из-за постановки и внедрения. Этапы: понимание бизнеса (решение, которое изменится, и метрика успеха) → понимание данных → подготовка → моделирование с базовой линией → оценка с заказчиком → внедрение и мониторинг. Цикл итеративный; первая версия должна дойти до пользователей быстро, даже если она простая. Ранняя проверка: есть ли данные нужного качества и действие на основе модели Базовая линия — правило или простая модель — часто уже даёт большую часть эффекта Заказчик видит промежуточные результаты, а не только финальный отчёт Критерий успеха — изменение бизнес-метрики, а не ROC-AUC Причины провалов: - нет действия на основе предсказания; - данные в продакшене не совпадают с обучающими; - модель некому внедрить и поддерживать; - метрика модели не связана с бизнесом; - проект слишком долго без видимого результата. Практики: - короткий документ постановки: решение, метрика, данные, риски, критерии остановки; - быстрый прототип и проверка на исторических данных; - договорённость с инженерами о внедрении с первого дня; - пилот с контрольной группой; - план поддержки: мониторинг, переобучение, владелец."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

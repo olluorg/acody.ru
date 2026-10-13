@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как сервису пережить нагрузку выше его возможностей? — вопрос с собеседования</title>
+<meta name="description" content="При перегрузке лучше быстро отказать части запросов, чем медленно обслуживать все: иначе очереди растут, все запросы опаздывают, клиенты повторяют, и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/load-shedding/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/load-shedding/">
+<meta property="og:title" content="Как сервису пережить нагрузку выше его возможностей? — вопрос с собеседования">
+<meta property="og:description" content="При перегрузке лучше быстро отказать части запросов, чем медленно обслуживать все: иначе очереди растут, все запросы опаздывают, клиенты повторяют, и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Как сервису пережить нагрузку выше его возможностей?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Как сервису пережить нагрузку выше его возможностей?"}]}</script>
+  <h1>Как сервису пережить нагрузку выше его возможностей?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Перегрузка, лимиты и ретраи</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое load shedding?</li><li>Что такое адаптивное ограничение параллелизма?</li><li>Как не упасть целиком при пиковой нагрузке?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">При перегрузке лучше быстро <b>отказать части</b> запросов, чем медленно обслуживать все: иначе очереди растут, все запросы опаздывают, клиенты повторяют, и пропускная способность падает до нуля.</p><ul><li>Отказывать рано и дёшево: на входе, по длине очереди или времени ожидания</li><li>Приоритеты: сначала отбрасывать фоновое и второстепенное, оплату — в последнюю очередь</li><li>Адаптивный лимит параллелизма (как окно TCP): растёт, пока задержка в норме, и падает при росте</li></ul><p class="extra"><span>А ещё</span> Плюс деградация функциональности: отключить рекомендации, отдать кэш, упростить ответ</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Очередь и утилизация: почему при 90% всё тормозит</p><script type="module" src="/widgets/queueing.js"></script><sotto-queueing theme="dark"></sotto-queueing></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Почему перегрузка ведёт к коллапсу.</b> Когда запросов больше, чем сервис может обработать, очередь растёт, а с ней и время ответа. Клиенты не дожидаются ответа и уходят по таймауту — но сервер всё равно тратит ресурсы на их запросы. Клиенты повторяют — нагрузка ещё растёт. В итоге сервер на 100% занят работой, результат которой никому не нужен: <b>полезная</b> пропускная способность падает (goodput → 0), хотя CPU загружен полностью.</p>
+<p><b>Load shedding — сознательный отказ:</b></p>
+<ul><li><b>ограничение параллелизма</b> — не больше N запросов в работе (семафор), лишние сразу 503/429. N по закону Литтла: пропускная способность × нормальное время ответа;</li><li><b>по времени в очереди</b> — запрос, простоявший в очереди дольше X (или дольше оставшегося дедлайна клиента), выбрасывается без обработки: его всё равно не дождутся. Вариант — очередь LIFO при перегрузке: свежие запросы успеют, старые и так потеряны;</li><li><b>CoDel для запросов</b> — если очередь не опустошалась дольше интервала, начинать сбрасывать;</li><li><b>адаптивный лимит</b> (Netflix concurrency-limits, AIMD/Vegas/Gradient): лимит растёт, пока задержка не растёт, и уменьшается, когда растёт. Не нужно знать пропускную способность заранее — она меняется с выкатками, данными, соседями.</li></ul>
+<p><b>Приоритеты.</b> Не все запросы равны: проверка здоровья, платежи, вход пользователя — важнее фоновой синхронизации, предзагрузки и аналитики. Метка приоритета (заголовок) и отбрасывание с нижних уровней первыми. Отличать новые сессии от продолжающихся: лучше обслужить начатую оформление заказа.</p>
+<p><b>Деградация</b> — вместо отказа дать упрощённый ответ: из кэша (даже устаревший), без персонализации, без второстепенных блоков, меньше результатов поиска. Флаги аварийного отключения тяжёлых функций.</p>
+<p><b>Вокруг:</b> отказ должен быть дешёвым (до разбора тела и походов в базу), клиенты — с повторами с отсрочкой и бюджетом повторов, чтобы отказы не превращались в шторм, автомасштабирование — для устойчивого роста, а не для секундных пиков.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import asyncio, time
+limit = asyncio.Semaphore(64)          # ≈ RPS × нормальная задержка
+
+async def handle(request):
+    if request.deadline - time.monotonic() &lt; 0.05:
+        return Response(503)           # клиент уже не дождётся — не тратим ресурсы
+    if limit.locked():
+        return Response(503, headers={&quot;Retry-After&quot;: &quot;1&quot;})   # отказ дешёвый и быстрый
+    async with limit:
+        return await process(request)</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механизм коллапса: очереди, таймауты, повторы, goodput → 0.</li><li>Ранний дешёвый отказ: лимит параллелизма, время в очереди.</li><li>Приоритизация и деградация.</li><li>Адаптивные лимиты — для senior.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Держать огромные очереди «чтобы не терять запросы».</li><li>Отказывать после того, как работа уже сделана (после похода в базу).</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/timeouts-retries/">Как правильно настраивать таймауты и повторы запросов?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/graceful-degradation/">Нагрузка превысила возможности сервиса. Какие приёмы позволяют деградировать управляемо, а не упасть целиком?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/backpressure/">Что такое backpressure и как его реализовать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/rate-limiting/">Какие алгоритмы ограничения частоты запросов вы знаете?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/queueing-utilization/">Почему при загрузке сервера 90% время ответа растёт в разы, хотя запас ещё есть?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как сервису пережить нагрузку выше его возможностей?","acceptedAnswer":{"@type":"Answer","text":"При перегрузке лучше быстро отказать части запросов, чем медленно обслуживать все: иначе очереди растут, все запросы опаздывают, клиенты повторяют, и пропускная способность падает до нуля. Отказывать рано и дёшево: на входе, по длине очереди или времени ожидания Приоритеты: сначала отбрасывать фоновое и второстепенное, оплату — в последнюю очередь Адаптивный лимит параллелизма (как окно TCP): растёт, пока задержка в норме, и падает при росте Плюс деградация функциональности: отключить рекомендации, отдать кэш, упростить ответ Почему перегрузка ведёт к коллапсу. Когда запросов больше, чем сервис может обработать, очередь растёт, а с ней и время ответа. Клиенты не дожидаются ответа и уходят по таймауту — но сервер всё равно тратит ресурсы на их запросы. Клиенты повторяют — нагрузка ещё растёт. В итоге сервер на 100% занят работой, результат которой никому не нужен: полезная пропускная способность падает (goodput → 0), хотя CPU загружен полностью. Load shedding — сознательный отказ: - ограничение параллелизма — не больше N запросов в работе (семафор), лишние сразу 503/429. N по закону Литтла: пропускная способность × нормальное время ответа; - по времени в очереди — запрос, простоявший в очереди дольше X (или дольше оставшегося дедлайна клиента), выбрасывается без обработки: его всё равно не дождутся. Вариант — очередь LIFO при перегрузке: свежие запросы успеют, старые и так потеряны; - CoDel для запросов …"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

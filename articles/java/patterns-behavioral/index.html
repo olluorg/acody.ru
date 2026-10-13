@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Поведенческие паттерны — разбор для собеседования</title>
+<meta name="description" content="Strategy, Template Method, Observer, Command, Chain of Responsibility, State, Iterator и Visitor — с примерами из JDK, Spring и заменой паттернов…">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/patterns-behavioral/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/patterns-behavioral/">
+<meta property="og:title" content="Поведенческие паттерны — разбор для собеседования">
+<meta property="og:description" content="Strategy, Template Method, Observer, Command, Chain of Responsibility, State, Iterator и Visitor — с примерами из JDK, Spring и заменой паттернов…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Поведенческие паттерны</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Поведенческие паттерны"}]}</script>
+  <h1>Поведенческие паттерны</h1>
+  <p class="lead">Strategy, Template Method, Observer, Command, Chain of Responsibility, State, Iterator и Visitor — с примерами из JDK, Spring и заменой паттернов лямбдами и sealed-типами.</p>
+  <article class="md"><h2>О чём эта группа</h2>
+<p>Поведенческие паттерны описывают, как объекты распределяют обязанности и общаются между собой. Если порождающие про «как создать», а структурные про «как собрать», то эти — про «кто что делает и в каком порядке».</p>
+<p>Отдельная особенность этой группы в современной Java: часть паттернов схлопнулась до языковых средств. Strategy, Command и Observer, которые в 1994 году требовали иерархии классов, сегодня выражаются лямбдой и функциональным интерфейсом. Умение это заметить — заметный плюс на интервью.</p>
+<h2>Strategy</h2>
+<p>Strategy выносит взаимозаменяемые алгоритмы за общий интерфейс, чтобы клиент выбирал нужный, не меняясь сам. Это рабочая лошадь OCP: новый алгоритм — новая реализация, а не новая ветка в switch.</p>
+<p>Канонический пример в JDK — Comparator: сортировка одна, а порядок задаётся передаваемой стратегией. Туда же RejectedExecutionHandler в ThreadPoolExecutor (что делать с задачей при переполнении очереди — AbortPolicy, CallerRunsPolicy и другие) и ThreadFactory.</p>
+<p>В современной Java стратегия чаще всего — это функциональный интерфейс и лямбда: отдельный класс на алгоритм нужен, только когда у стратегии есть состояние, зависимости или её нужно именовать и тестировать отдельно.</p>
+<p>Идиома Spring, которую полезно назвать: внедрить <code>List&lt;PaymentHandler&gt;</code> или <code>Map&lt;String, PaymentHandler&gt;</code> и выбирать реализацию по ключу. Контейнер соберёт все бины, и добавление нового способа оплаты не потребует правок в диспетчере.</p>
+<pre class="lang-java"><code>// Strategy как функциональный интерфейс.
+list.sort(Comparator.comparing(User::lastName)
+                    .thenComparing(User::firstName));
+
+// Strategy как набор бинов — идиома Spring и живой OCP.
+@Service
+class PaymentService {
+    private final Map&lt;PaymentType, PaymentHandler&gt; handlers; // Spring соберёт все
+    void pay(Payment p) { handlers.get(p.type()).handle(p); }
+}</code></pre>
+<h2>Template Method</h2>
+<p>Template Method задаёт скелет алгоритма в базовом классе и оставляет подклассам заполнение отдельных шагов. Порядок шагов фиксирован и защищён — обычно метод-шаблон делают final.</p>
+<p>Пример в JDK: AbstractList реализует всю логику списка поверх абстрактных <code>get(int)</code> и <code>size()</code>; <code>InputStream.read(byte[], int, int)</code> реализован через абстрактный <code>read()</code>. В сервлетах <code>HttpServlet.service()</code> разбирает HTTP-метод и вызывает <code>doGet</code>/<code>doPost</code> — вы переопределяете шаг, а не диспетчеризацию.</p>
+<p>Ключевое противопоставление, которое любят спрашивать: Template Method против Strategy. Оба параметризуют поведение, но Template Method делает это наследованием на этапе компиляции (жёстко, один шаг — один подкласс, доступ к protected-состоянию базового класса), а Strategy — композицией в рантайме (гибко, стратегию можно подменить и переиспользовать). По принципу «композиция важнее наследования» при прочих равных предпочитают Strategy.</p>
+<p>Важный нюанс про JdbcTemplate из Spring: его часто называют примером Template Method, но по механизму это скорее template + callback. Вы не наследуетесь от JdbcTemplate, а передаёте RowMapper или ResultSetExtractor — то есть шаг приходит композицией, а не переопределением. Это удачный пример замены наследования композицией, и его стоит проговорить именно так.</p>
+<h2>Observer</h2>
+<p>Observer уведомляет набор подписчиков об изменении состояния субъекта, не связывая их напрямую. Это основа событийной модели.</p>
+<p>Историческая деталь, которую полезно знать: <code>java.util.Observer</code> и Observable объявлены deprecated начиная с Java 9 — у них не было ни типобезопасности, ни гарантий порядка, ни поддержки конкурентности. Ссылаться на них как на актуальный пример не стоит; лучше назвать PropertyChangeListener, слушателей Swing или современные механизмы.</p>
+<p>Актуальные воплощения: события Spring — ApplicationEventPublisher и <code>@EventListener</code> (плюс <code>@TransactionalEventListener</code>, который откладывает обработку до коммита транзакции); Reactive Streams с парой Publisher/Subscriber, где к базовому Observer добавлен backpressure; брокеры сообщений как тот же паттерн, растянутый на сеть.</p>
+<p>Ловушки, которые отличают глубокий ответ. Синхронный слушатель по умолчанию выполняется в том же потоке и в той же транзакции, что и издатель, поэтому его исключение может откатить основную операцию. Подписчики, которых забыли отписать, — классическая утечка памяти (субъект держит на них сильные ссылки). И порядок уведомления в общем случае не гарантирован — полагаться на него нельзя.</p>
+<h2>Command, Chain of Responsibility, State</h2>
+<p>Command упаковывает запрос в объект: его можно передать, поставить в очередь, залогировать, отменить. В Java это Runnable и Callable, которые вы отдаёте в ExecutorService: сама задача отделена от того, кто и когда её выполнит. Отмена и повтор — тоже отсюда, а в распределённом варианте команда становится сообщением в брокере.</p>
+<p>Chain of Responsibility пропускает запрос по цепочке обработчиков, пока кто-то его не обработает или цепочка не кончится. Самые наглядные примеры — цепочка сервлетных фильтров (каждый решает, вызывать ли <code>chain.doFilter</code> дальше) и фильтр-цепочка Spring Security, где аутентификация, авторизация и CSRF — отдельные звенья. Туда же интерсепторы HTTP-клиентов и middleware.</p>
+<p>State меняет поведение объекта при смене его внутреннего состояния — снаружи выглядит так, будто объект сменил класс. Практическое применение — рабочие процессы со статусами (заказ: новый → оплачен → отгружен → закрыт), где вместо разбухающего switch по статусу в каждом методе логика раскладывается по объектам-состояниям, а переходы становятся явными и проверяемыми.</p>
+<p>State и Strategy структурно почти неразличимы — оба делегируют работу подставляемому объекту. Разница в намерении и в том, кто управляет подстановкой: стратегию выбирает клиент и она обычно не меняется по ходу, а состояние меняет себя само в ответ на события, и переходы — часть логики.</p>
+<h2>Iterator, Visitor и современные замены</h2>
+<p>Iterator даёт последовательный доступ к элементам, не раскрывая внутреннее устройство коллекции. Это <code>java.util.Iterator</code>, и он же — пример Factory Method: каждая коллекция сама создаёт свой итератор. Практическая часть темы (fail-fast, ConcurrentModificationException, weakly consistent итераторы конкурентных коллекций) разобрана в отдельном уроке.</p>
+<p>Visitor выносит операцию из иерархии типов в отдельный объект — так добавление новой операции не требует правки всех классов. Цена известна: добавить операцию легко, добавить новый тип в иерархию тяжело (нужно править всех визиторов). Примеры в платформе: <code>java.nio.file.FileVisitor</code> для обхода дерева файлов и ElementVisitor в API обработки аннотаций.</p>
+<p>Современная Java даёт визитору прямую альтернативу: sealed-иерархия плюс switch с pattern matching. Набор наследников закрыт, поэтому компилятор проверяет исчерпываемость switch — вы получаете главное преимущество визитора (внешняя операция и контроль полноты) без ритуала с accept/visit. Это хороший пример того, как язык поглощает паттерн.</p>
+<p>Общий вывод по группе, который стоит озвучить: паттерн — это словарь для описания решения, а не обязательный к применению код. Половина поведенческих паттернов в современной Java пишется лямбдой в одну строку, и настаивать на классической реализации с иерархией классов там, где хватает функционального интерфейса, — это карго-культ.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Готовьте ответы парами-противопоставлениями — их спрашивают чаще, чем определения. Strategy против Template Method: композиция в рантайме против наследования на этапе компиляции. Strategy против State: клиент выбирает и не меняет против объект меняет себя сам. Chain of Responsibility против декоратора: звено может прервать цепочку, декоратор всегда делегирует дальше.</p>
+<p>На каждый паттерн держите пример из платформы: Comparator — Strategy, <code>HttpServlet.service</code> — Template Method, <code>@EventListener</code> и Reactive Streams — Observer, Runnable в ExecutorService — Command, сервлетные фильтры и Spring Security — Chain of Responsibility, <code>java.util.Iterator</code> — Iterator, FileVisitor — Visitor.</p>
+<p>Обязательно упомяните современный срез: <code>java.util.Observable</code> устарел с Java 9, стратегии и команды сегодня чаще лямбды, а sealed-типы с pattern matching заменяют визитор с проверкой исчерпываемости на компиляторе. Это показывает, что вы знаете не книгу 1994 года, а актуальную платформу.</p>
+<p>И держите в запасе одну фразу про меру: паттерны — общий словарь для обсуждения дизайна; называть их полезно, натягивать на задачу, где хватает обычного метода, — вредно.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/comparator-strategy/">Какой паттерн представляет java.util.Comparator?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/template-method-vs-strategy/">В чём принципиальная разница между Template Method и Strategy?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/observer-modern-java/">Что верно про реализацию паттерна Observer в современной Java?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/chain-of-responsibility/">Какой паттерн реализуют цепочка сервлетных фильтров и фильтр-цепочка Spring Security?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/state-vs-strategy/">State и Strategy структурно почти одинаковы. Что их различает?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/visitor/">Зачем нужен паттерн Visitor, какова его цена и чем его можно заменить в современной Java?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/behavioral-patterns/">Что описывают поведенческие паттерны?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/patterns-structural/">Структурные паттерны</a><p>Adapter, Decorator, Proxy и чем они отличаются друг от друга, Facade, Composite, Bridge и Flyweight — на примерах java.io, java.lang.reflect.Proxy и Spring AOP.</p></li><li><a href="/articles/java/lambdas/">Лямбды и функциональные интерфейсы</a><p>SAM-интерфейсы, лямбда против анонимного класса, замыкания и effectively final, ссылки на методы и стандартные интерфейсы.</p></li><li><a href="/articles/java/sealed-pattern/">Sealed-типы и pattern matching</a><p>Закрытые иерархии через sealed, pattern matching в instanceof и switch, деконструкция записей и проверка исчерпываемости.</p></li><li><a href="/articles/java/solid/">SOLID: пять принципов дизайна</a><p>SRP, OCP, LSP, ISP, DIP — что каждая буква значит на самом деле, как выглядит нарушение в Java-коде, чем DIP отличается от DI и IoC.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Поведенческие паттерны","description":"Strategy, Template Method, Observer, Command, Chain of Responsibility, State, Iterator и Visitor — с примерами из JDK, Spring и заменой паттернов лямбдами и sealed-типами.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/patterns-behavioral/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

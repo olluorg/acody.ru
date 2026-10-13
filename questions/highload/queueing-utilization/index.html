@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему при загрузке сервера 90% время ответа растёт в разы, хотя запас ещё есть? — вопрос с собеседования</title>
+<meta name="description" content="Запросы приходят неравномерно, и при высокой загрузке они ждут в очереди. Время ожидания растёт как ρ / (1 − ρ): при 50% загрузки ожидание равно…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/queueing-utilization/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/queueing-utilization/">
+<meta property="og:title" content="Почему при загрузке сервера 90% время ответа растёт в разы, хотя запас ещё есть? — вопрос с собеседования">
+<meta property="og:description" content="Запросы приходят неравномерно, и при высокой загрузке они ждут в очереди. Время ожидания растёт как ρ / (1 − ρ): при 50% загрузки ожидание равно…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Почему при загрузке сервера 90% время ответа растёт в разы, хотя запас ещё есть?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Почему при загрузке сервера 90% время ответа растёт в разы, хотя запас ещё есть?"}]}</script>
+  <h1>Почему при загрузке сервера 90% время ответа растёт в разы, хотя запас ещё есть?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Задержка, пропускная способность и очереди</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое закон Литтла?</li><li>Как утилизация влияет на задержку?</li><li>Почему нельзя держать серверы загруженными на 95%?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Запросы приходят неравномерно, и при высокой загрузке они ждут в <b>очереди</b>. Время ожидания растёт как ρ / (1 − ρ): при 50% загрузки ожидание равно времени обработки, при 90% — в 9 раз больше, при 99% — в 99.</p><ul><li>Закон Литтла: L = λ · W — запросов в системе = поток × время в системе</li><li>Задержку определяет не средняя загрузка, а очереди при всплесках</li><li>Отсюда запас мощности 30–50%, автомасштабирование заранее и ограничение очередей</li></ul><p class="extra"><span>А ещё</span> Тот же закон даёт размер пула: потоков = RPS × время ответа</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Очередь и утилизация: почему при 90% всё тормозит</p><script type="module" src="/widgets/queueing.js"></script><sotto-queueing theme="dark"></sotto-queueing></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Почему возникает очередь, если сервер не загружен на 100%.</b> Запросы приходят случайно: иногда три подряд, иногда пауза. В паузу сервер простаивает — это время потеряно, а пачку приходится обрабатывать по очереди. Чем выше загрузка, тем реже паузы, в которые очередь успевает рассосаться.</p>
+<p><b>Модель M/M/1</b> (случайный поток, случайное время обработки, один обработчик) даёт:</p>
+<ul><li>среднее время в системе W = S / (1 − ρ), где S — время обработки, ρ — загрузка;</li><li>при ρ = 0,5 → W = 2S; ρ = 0,8 → 5S; ρ = 0,9 → 10S; ρ = 0,99 → 100S.</li></ul>
+<p>Кривая похожа на хоккейную клюшку: до 60–70% почти ровно, после 80% резкий рост. Реальные системы с несколькими обработчиками (M/M/c) ведут себя лучше — больше рабочих делят одну очередь, — но характер тот же. А хвост (p99) растёт ещё сильнее среднего.</p>
+<p><b>Закон Литтла:</b> L = λ · W. Среднее число запросов в системе равно интенсивности потока, умноженной на среднее время пребывания. Работает для любой устойчивой системы, без предположений о распределениях. Применения:</p>
+<ul><li>2000 RPS × 50 мс = 100 запросов одновременно — столько нужно потоков или соединений к базе;</li><li>если пул соединений 20, а запрос держит соединение 100 мс, предел — 200 RPS к базе, дальше — очередь;</li><li>рост времени ответа зависимости в 3 раза при той же нагрузке утроит число занятых потоков — так одна медленная зависимость съедает пул.</li></ul>
+<p><b>Практические выводы:</b></p>
+<ul><li>держать запас: целевая загрузка CPU 50–70%, а не 95%;</li><li>автомасштабирование по задержке или длине очереди, а не только по CPU, и с запасом на время запуска новых экземпляров;</li><li>уменьшение времени обработки работает вдвойне: снижает и S, и ρ;</li><li>очереди ограничивать — бесконечная очередь при перегрузке означает бесконечную задержку (backpressure, load shedding);</li><li>изменчивость вредна: тяжёлые запросы вперемешку с лёгкими дают хвосты — их разводят по разным пулам.</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>Сервис: 8 потоков, обработка 40 мс → предел 8 / 0,04 = 200 RPS.
+При 100 RPS (ρ = 0,5) — ждать почти не приходится.
+При 180 RPS (ρ = 0,9) — среднее время в несколько раз выше, p99 — в десятки.
+При 210 RPS очередь растёт без ограничения: каждую секунду +10 запросов.</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Причина очереди: неравномерный поток и простой в паузах.</li><li>Нелинейный рост задержки, формула или хотя бы форма кривой.</li><li>Закон Литтла и пример расчёта пула.</li><li>Выводы: запас мощности, ограниченные очереди, масштабирование по задержке.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Пока CPU не 100%, всё хорошо».</li><li>Путать пропускную способность (RPS) и задержку — они связаны через очередь.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/backpressure/">Что такое backpressure и как его реализовать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/amdahl-scalability/">Почему удвоение числа серверов не удваивает пропускную способность?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/latency-percentiles/">Почему время ответа измеряют перцентилями, а не средним?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/os-scheduler/">Как планировщик ОС решает, какой поток выполнять?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/thread-pool/">Зачем нужен пул потоков и как выбрать его размер?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему при загрузке сервера 90% время ответа растёт в разы, хотя запас ещё есть?","acceptedAnswer":{"@type":"Answer","text":"Запросы приходят неравномерно, и при высокой загрузке они ждут в очереди. Время ожидания растёт как ρ / (1 − ρ): при 50% загрузки ожидание равно времени обработки, при 90% — в 9 раз больше, при 99% — в 99. Закон Литтла: L = λ W — запросов в системе = поток × время в системе Задержку определяет не средняя загрузка, а очереди при всплесках Отсюда запас мощности 30–50%, автомасштабирование заранее и ограничение очередей Тот же закон даёт размер пула: потоков = RPS × время ответа Почему возникает очередь, если сервер не загружен на 100%. Запросы приходят случайно: иногда три подряд, иногда пауза. В паузу сервер простаивает — это время потеряно, а пачку приходится обрабатывать по очереди. Чем выше загрузка, тем реже паузы, в которые очередь успевает рассосаться. Модель M/M/1 (случайный поток, случайное время обработки, один обработчик) даёт: - среднее время в системе W = S / (1 − ρ), где S — время обработки, ρ — загрузка; - при ρ = 0,5 → W = 2S; ρ = 0,8 → 5S; ρ = 0,9 → 10S; ρ = 0,99 → 100S. Кривая похожа на хоккейную клюшку: до 60–70% почти ровно, после 80% резкий рост. Реальные системы с несколькими обработчиками (M/M/c) ведут себя лучше — больше рабочих делят одну очередь, — но характер тот же. А хвост (p99) растёт ещё сильнее среднего. Закон Литтла: L = λ W. Среднее число запросов в системе равно интенсивности потока, умноженной на среднее время пребывания…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

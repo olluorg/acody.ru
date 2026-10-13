@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зачем нужен пул соединений к базе и как выбрать его размер? — вопрос с собеседования</title>
+<meta name="description" content="Установка соединения — TCP, TLS, аутентификация, а в PostgreSQL ещё и новый процесс: миллисекунды и память. Пул держит готовые соединения и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/connection-pooling/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/connection-pooling/">
+<meta property="og:title" content="Зачем нужен пул соединений к базе и как выбрать его размер? — вопрос с собеседования">
+<meta property="og:description" content="Установка соединения — TCP, TLS, аутентификация, а в PostgreSQL ещё и новый процесс: миллисекунды и память. Пул держит готовые соединения и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Зачем нужен пул соединений к базе и как выбрать его размер?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Зачем нужен пул соединений к базе и как выбрать его размер?"}]}</script>
+  <h1>Зачем нужен пул соединений к базе и как выбрать его размер?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Сеть и ввод-вывод</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему нельзя открывать соединение на каждый запрос?</li><li>Что такое PgBouncer?</li><li>Почему пул на 500 соединений работает хуже, чем на 50?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Установка соединения — TCP, TLS, аутентификация, а в PostgreSQL ещё и новый процесс: миллисекунды и память. Пул держит готовые соединения и <b>ограничивает</b> их число.</p><ul><li>Размер пула базы — небольшой: порядка ядер базы × 2, а не «по числу потоков приложения»</li><li>Больше соединений, чем база может обрабатывать параллельно, — только очереди внутри базы и конкуренция за блокировки</li><li>Сумма пулов всех экземпляров приложения не должна превышать лимит базы — отсюда PgBouncer</li></ul><p class="extra"><span>А ещё</span> HTTP-клиенты тоже: keep-alive и пул соединений к каждому хосту</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Цена соединения.</b> Новое соединение к PostgreSQL: TCP-рукопожатие, TLS, аутентификация, запуск отдельного серверного процесса (fork) с собственной памятью — единицы миллисекунд и мегабайты памяти на сервере. Делать это на каждый запрос — удвоить задержку и нагрузку. Пул (HikariCP, pgxpool, SQLAlchemy pool) открывает соединения заранее и раздаёт их запросам на время транзакции.</p>
+<p><b>Почему пул должен быть маленьким.</b> Интуиция «больше соединений — больше параллелизма» неверна. База выполняет параллельно столько, сколько у неё ядер и дисковой очереди. Лишние соединения:</p>
+<ul><li>конкурируют за CPU — переключения контекста;</li><li>конкурируют за блокировки и буферы — растёт время каждого запроса;</li><li>тратят память на сервере (work_mem на каждый сортирующий запрос!).</li></ul>
+<p>Пропускная способность при 50 соединениях часто выше, чем при 500, а задержка — ниже. Отправная формула (HikariCP): соединений ≈ ядра базы × 2 + число дисков. Дальше — по нагрузочным тестам. Ожидание свободного соединения в пуле лучше, чем очередь внутри базы: его видно метрикой и им можно управлять (таймаут на получение соединения).</p>
+<p><b>Сумма пулов.</b> 40 экземпляров приложения × пул 20 = 800 соединений, а PostgreSQL комфортно держит сотни. Решения:</p>
+<ul><li>уменьшить пулы экземпляров;</li><li><b>PgBouncer</b> (Odyssey, pgcat) между приложением и базой: тысячи клиентских соединений мультиплексируются на десятки серверных. Режим transaction pooling — серверное соединение выдаётся на время транзакции; ограничения — сессионное состояние (prepared statements исторически, <code>SET</code>, advisory locks, временные таблицы);</li><li>закон Литтла для проверки: RPS к базе × время транзакции = нужное число одновременно занятых соединений.</li></ul>
+<p><b>Практика:</b></p>
+<ul><li>держать соединение только на время транзакции; не делать внешние HTTP-вызовы, пока соединение взято, — пул кончится;</li><li>таймауты: получение соединения из пула, запрос (<code>statement_timeout</code>), простаивающая транзакция (<code>idle_in_transaction_session_timeout</code>);</li><li>метрики пула: занято, ожидающих, время ожидания;</li><li>проверка живости соединений и пересоздание после переключения мастера.</li></ul>
+<p><b>HTTP-клиенты</b> — та же история: keep-alive и пул соединений на хост экономят TCP- и TLS-рукопожатия; один клиент на приложение, а не новый на каждый запрос (иначе TIME_WAIT и исчерпание портов).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>Приложение: 12 экземпляров × HikariCP maximumPoolSize=10 → 120 соединений.
+База: 16 ядер, SSD → разумно ~32–40 активных.
+Сделали: PgBouncer в transaction-режиме, default_pool_size=40;
+приложение может держать хоть 1000 клиентских соединений, база видит 40.
+Пропускная способность выросла, p99 упал: запросы ждут в пуле, а не дерутся в базе.</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Из чего складывается цена соединения.</li><li>Почему пул должен быть маленьким, связь с ядрами базы.</li><li>Сумма пулов экземпляров и PgBouncer, его ограничения.</li><li>Практика: не держать соединение во время внешних вызовов, таймауты, метрики.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ставить пул по числу потоков приложения (200).</li><li>Брать соединение в начале обработки HTTP-запроса и держать до конца.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/queueing-utilization/">Почему при загрузке сервера 90% время ответа растёт в разы, хотя запас ещё есть?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/tcp-handshake/">Как устанавливается и закрывается TCP-соединение?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/thread-pool/">Зачем нужен пул потоков и как выбрать его размер?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/scale-the-bottleneck/">Сервер приложений загружен на 30% по CPU, но задержки растут, а пул соединений к базе занят полностью. Что даст добавление ещё нескольких серверов приложений?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Зачем нужен пул соединений к базе и как выбрать его размер?","acceptedAnswer":{"@type":"Answer","text":"Установка соединения — TCP, TLS, аутентификация, а в PostgreSQL ещё и новый процесс: миллисекунды и память. Пул держит готовые соединения и ограничивает их число. Размер пула базы — небольшой: порядка ядер базы × 2, а не «по числу потоков приложения» Больше соединений, чем база может обрабатывать параллельно, — только очереди внутри базы и конкуренция за блокировки Сумма пулов всех экземпляров приложения не должна превышать лимит базы — отсюда PgBouncer HTTP-клиенты тоже: keep-alive и пул соединений к каждому хосту Цена соединения. Новое соединение к PostgreSQL: TCP-рукопожатие, TLS, аутентификация, запуск отдельного серверного процесса (fork) с собственной памятью — единицы миллисекунд и мегабайты памяти на сервере. Делать это на каждый запрос — удвоить задержку и нагрузку. Пул (HikariCP, pgxpool, SQLAlchemy pool) открывает соединения заранее и раздаёт их запросам на время транзакции. Почему пул должен быть маленьким. Интуиция «больше соединений — больше параллелизма» неверна. База выполняет параллельно столько, сколько у неё ядер и дисковой очереди. Лишние соединения: - конкурируют за CPU — переключения контекста; - конкурируют за блокировки и буферы — растёт время каждого запроса; - тратят память на сервере (work_mem на каждый сортирующий запрос!). Пропускная способность при 50 соединениях часто выше, чем при 500, а задержка — ниже. Отправная формула (HikariCP): соединений ≈ ядра базы × 2 +…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

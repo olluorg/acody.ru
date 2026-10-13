@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что важно задавать при отправке через KafkaTemplate? — вопрос с собеседования</title>
+<meta name="description" content="Задавать ключ (порядок и партиция по сущности), сериализатор и формат, обрабатывать результат отправки — она асинхронная; для надёжности — acks=all и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/kafkatemplate-send/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/kafkatemplate-send/">
+<meta property="og:title" content="Что важно задавать при отправке через KafkaTemplate? — вопрос с собеседования">
+<meta property="og:description" content="Задавать ключ (порядок и партиция по сущности), сериализатор и формат, обрабатывать результат отправки — она асинхронная; для надёжности — acks=all и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Что важно задавать при отправке через KafkaTemplate?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Что важно задавать при отправке через KafkaTemplate?"}]}</script>
+  <h1>Что важно задавать при отправке через KafkaTemplate?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Spring Kafka</span><span class="chip">Kafka</span><span class="chip ver">Spring Boot &gt;=3</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как надёжно отправлять сообщения через KafkaTemplate?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Задавать <b>ключ</b> (порядок и партиция по сущности), <b>сериализатор</b> и формат, обрабатывать <b>результат отправки</b> — она асинхронная; для надёжности — <code>acks=all</code> и идемпотентный продюсер (по умолчанию с Kafka 3).</p><ul><li><code>send(topic, key, value)</code> возвращает CompletableFuture (Spring Kafka 3) — ошибку видно только в нём</li><li>Отправка в той же транзакции с базой не атомарна — outbox или транзакции Kafka</li><li>Заголовки: тип события, версия схемы, trace id</li></ul><p class="extra"><span>А ещё</span> Для сквозной трассировки — observation-enabled у шаблона</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Ключ.</b> <code>kafkaTemplate.send(&quot;orders&quot;, order.id().toString(), event)</code> — все события заказа попадут в одну партицию и будут обработаны по порядку. Без ключа порядок не гарантирован.</p>
+<p><b>Асинхронность.</b> <code>send</code> сразу возвращает <code>CompletableFuture&lt;SendResult&gt;</code> (в Spring Kafka 3; раньше — ListenableFuture). Если ошибку не обработать, сообщение может потеряться незаметно: логировать в <code>whenComplete</code>, при необходимости повторять или сохранять в outbox. Синхронный <code>.get()</code> с таймаутом — когда нужно гарантировать отправку до ответа клиенту.</p>
+<p><b>Надёжность продюсера</b> (<code>spring.kafka.producer.*</code>): <code>acks=all</code>, <code>enable.idempotence=true</code> (по умолчанию с Kafka 3.0), <code>retries</code> и <code>delivery.timeout.ms</code>, на топике <code>min.insync.replicas=2</code>.</p>
+<p><b>Сериализация:</b> <code>JsonSerializer</code> (с заголовком типа) или Avro/Protobuf со Schema Registry для контрактов между командами.</p>
+<p><b>Согласованность с базой:</b> сохранить заказ в базе и отправить событие — две разные системы. Если упасть между ними, событие потеряется или уйдёт без записи в базе. Решения — <b>transactional outbox</b> (событие в таблицу в той же транзакции, публикация отдельным процессом) или CDC. Транзакции Kafka (<code>transactional.id</code>) делают атомарной отправку в несколько топиков и коммит offset, но не запись в базу.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Ключ сообщения и порядок.</li><li>Асинхронный результат и обработка ошибок.</li><li>Настройки надёжности.</li><li>Проблема двойной записи и outbox.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Игнорировать результат send.</li><li>Отправлять событие из @Transactional-метода и считать это атомарным.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Только текст сообщения, ничего больше</li><li class="no"><span class="mark">✗</span>Обязательно номер партиции вручную для каждого сообщения</li><li class="ok"><span class="mark">✓</span>Key (партиционирование и порядок событий одной сущности), topic, а также headers/correlation id</li><li class="no"><span class="mark">✗</span>Пароль брокера в каждом сообщении</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как KafkaTemplate сообщает об ошибке отправки?</li><li>Когда нужен transactional KafkaTemplate?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/spring-kafka/">Spring Kafka</a><p>KafkaTemplate, @KafkaListener, listener containers, offset ack, error handling, retries и DLT.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/brokers/producer-partitioner/">Как Kafka producer выбирает партицию для сообщения?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/producer-acks/">Что означают acks=0, acks=1 и acks=all у Kafka producer?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/idempotent-producer/">Что даёт идемпотентный Kafka producer (enable.idempotence=true)?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/system-design/transactional-outbox/">Почему для надёжной публикации события после изменения данных применяют transactional outbox, а не двухфазный коммит?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что важно задавать при отправке через KafkaTemplate?","acceptedAnswer":{"@type":"Answer","text":"Задавать ключ (порядок и партиция по сущности), сериализатор и формат, обрабатывать результат отправки — она асинхронная; для надёжности — acks=all и идемпотентный продюсер (по умолчанию с Kafka 3). send(topic, key, value) возвращает CompletableFuture (Spring Kafka 3) — ошибку видно только в нём Отправка в той же транзакции с базой не атомарна — outbox или транзакции Kafka Заголовки: тип события, версия схемы, trace id Для сквозной трассировки — observation-enabled у шаблона Ключ. kafkaTemplate.send(\"orders\", order.id().toString(), event) — все события заказа попадут в одну партицию и будут обработаны по порядку. Без ключа порядок не гарантирован. Асинхронность. send сразу возвращает CompletableFuture<SendResult> (в Spring Kafka 3; раньше — ListenableFuture). Если ошибку не обработать, сообщение может потеряться незаметно: логировать в whenComplete, при необходимости повторять или сохранять в outbox. Синхронный .get() с таймаутом — когда нужно гарантировать отправку до ответа клиенту. Надёжность продюсера (spring.kafka.producer.): acks=all, enable.idempotence=true (по умолчанию с Kafka 3.0), retries и delivery.timeout.ms, на топике min.insync.replicas=2. Сериализация: JsonSerializer (с заголовком типа) или Avro/Protobuf со Schema Registry для контрактов между командами. Согласованность с базой: сохранить заказ в базе и отправить событие — две разные…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

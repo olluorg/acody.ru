@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работают наследование, super() и MRO? — вопрос с собеседования</title>
+<meta name="description" content="MRO — порядок, в котором Python ищет метод по иерархии классов; super() вызывает следующий класс в MRO. MRO строится алгоритмом C3, смотреть…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/inheritance-super-mro/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/inheritance-super-mro/">
+<meta property="og:title" content="Как работают наследование, super() и MRO? — вопрос с собеседования">
+<meta property="og:description" content="MRO — порядок, в котором Python ищет метод по иерархии классов; super() вызывает следующий класс в MRO. MRO строится алгоритмом C3, смотреть…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Как работают наследование, super() и MRO?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Как работают наследование, super() и MRO?"}]}</script>
+  <h1>Как работают наследование, super() и MRO?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">ООП</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое MRO в Python?</li><li>Как работает множественное наследование?</li><li>Что делает super()?</li><li>Что такое ромбовидное наследование?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>MRO</b> — порядок, в котором Python ищет метод по иерархии классов; <code>super()</code> вызывает <b>следующий класс в MRO</b>.</p><ul><li>MRO строится алгоритмом C3, смотреть: <code>Class.__mro__</code> или <code>Class.mro()</code></li><li><code>super()</code> — не «родитель», а следующий по MRO; это важно при множественном наследовании</li></ul><p class="extra"><span>А ещё</span> Ромб решается тем, что общий предок в MRO встречается один раз</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>При наследовании класс получает атрибуты и методы родителей и может их переопределить. Когда вызывается метод, Python ищет его по <b>MRO</b> (method resolution order) — линейному списку классов: сам класс, затем родители, в конце <code>object</code>.</p>
+<p>При множественном наследовании MRO строится алгоритмом C3. Он гарантирует, что класс идёт раньше своих родителей, порядок родителей из объявления сохраняется, и каждый класс встречается один раз. Поэтому «ромб» (B и C наследуют A, D наследует B и C) не вызывает метод A дважды: MRO будет D, B, C, A, object.</p>
+<p><code>super()</code> возвращает объект, который ищет методы, начиная со следующего класса после текущего в MRO <b>того объекта</b>, для которого вызван метод. Поэтому в <code>B.__init__</code> вызов <code>super().__init__()</code> при создании D пойдёт в C, а не сразу в A. Это позволяет строить «кооперативное» наследование: каждый класс вызывает <code>super()</code>, и вся цепочка отрабатывает по одному разу.</p>
+<p>На практике множественное наследование используют для миксинов — небольших классов с одной добавкой поведения.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>class A:
+    def hello(self):
+        return &quot;A&quot;
+
+class B(A):
+    def hello(self):
+        return &quot;B&quot; + super().hello()
+
+class C(A):
+    def hello(self):
+        return &quot;C&quot; + super().hello()
+
+class D(B, C):
+    pass
+
+D.__mro__     # (D, B, C, A, object)
+D().hello()   # &#x27;BCA&#x27; — super() в B ведёт в C, а не в A</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определение MRO и как его посмотреть.</li><li><code>super()</code> — следующий в MRO, а не просто родитель.</li><li>Как решается ромбовидное наследование.</li><li>Применение: миксины, кооперативные <code>__init__</code>.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Утверждать, что <code>super()</code> всегда вызывает непосредственного родителя.</li><li>Вызывать родителя напрямую (<code>A.__init__(self)</code>) в множественном наследовании — метод может выполниться дважды.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/class-self-init/">Что такое self и __init__ в классе?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/staticmethod-classmethod/">Чем @staticmethod отличается от @classmethod?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/dunder-str-repr/">Что такое магические методы? Чем __str__ отличается от __repr__?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работают наследование, super() и MRO?","acceptedAnswer":{"@type":"Answer","text":"MRO — порядок, в котором Python ищет метод по иерархии классов; super() вызывает следующий класс в MRO. MRO строится алгоритмом C3, смотреть: Class.__mro__ или Class.mro() super() — не «родитель», а следующий по MRO; это важно при множественном наследовании Ромб решается тем, что общий предок в MRO встречается один раз При наследовании класс получает атрибуты и методы родителей и может их переопределить. Когда вызывается метод, Python ищет его по MRO (method resolution order) — линейному списку классов: сам класс, затем родители, в конце object. При множественном наследовании MRO строится алгоритмом C3. Он гарантирует, что класс идёт раньше своих родителей, порядок родителей из объявления сохраняется, и каждый класс встречается один раз. Поэтому «ромб» (B и C наследуют A, D наследует B и C) не вызывает метод A дважды: MRO будет D, B, C, A, object. super() возвращает объект, который ищет методы, начиная со следующего класса после текущего в MRO того объекта, для которого вызван метод. Поэтому в B.__init__ вызов super().__init__() при создании D пойдёт в C, а не сразу в A. Это позволяет строить «кооперативное» наследование: каждый класс вызывает super(), и вся цепочка отрабатывает по одному разу. На…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

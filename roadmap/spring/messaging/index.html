@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сообщения в Spring — карта «Spring»</title>
+<meta name="description" content="Spring Kafka, Spring AMQP и Spring Cloud Stream.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/spring/messaging/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/spring/messaging/">
+<meta property="og:title" content="Сообщения в Spring — карта «Spring»">
+<meta property="og:description" content="Spring Kafka, Spring AMQP и Spring Cloud Stream.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/">Backend-разработчик</a> <span>/</span> <a href="/roadmap/java/">Java</a> <span>/</span> <a href="/roadmap/spring/#messaging">Spring</a> <span>/</span> <span>Сообщения в Spring</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://learn.getsotto.ru/roadmap/backend/"},{"@type":"ListItem","position":3,"name":"Java","item":"https://learn.getsotto.ru/roadmap/java/"},{"@type":"ListItem","position":4,"name":"Spring","item":"https://learn.getsotto.ru/roadmap/spring/#messaging"},{"@type":"ListItem","position":5,"name":"Сообщения в Spring"}]}</script>
+  <h1>Сообщения в Spring</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-middle">с Middle</span></div>
+  <p class="lead">Spring Kafka, Spring AMQP и Spring Cloud Stream.</p>
+  <article class="md"><h3>Что важно знать</h3>
+<ul><li><code>KafkaTemplate</code>, <code>@KafkaListener</code>, <code>DefaultErrorHandler</code>, DLT.</li><li>Режимы подтверждения и транзакции Kafka в Spring.</li><li><code>RabbitTemplate</code>, <code>@RabbitListener</code>, ack-режимы, повторы.</li><li>Cloud Stream — функции и биндинги, переносимость между брокерами.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Middle <small>≈ 8 ч</small></h3><ul><li>Пишет продюсер и потребитель Kafka на Spring Kafka с обработкой ошибок и DLT</li><li>Настраивает подтверждения и повторы в Spring AMQP</li><li>Объясняет, когда уместна абстракция Spring Cloud Stream</li></ul><p class="rm-practice"><b>Практика.</b> Реализовать обработку событий заказа на Spring Kafka с повторами, DLT и интеграционным тестом в Testcontainers.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/spring/kafkalistener-basic/">Что делает аннотация @KafkaListener?</a> <span class="lvl lvl-junior">Junior</span><p>@KafkaListener(topics = &quot;orders&quot;, groupId = &quot;billing&quot;) объявляет обработчик: цикл poll(), десериализацию, вызов метода и коммит offset берёт на себя контейнер Spring Kafka.</p></li><li><a href="/questions/spring/kafkatemplate-send/">Что важно задавать при отправке через KafkaTemplate?</a> <span class="lvl lvl-middle">Middle</span><p>Задавать ключ (порядок и партиция по сущности), сериализатор и формат, обрабатывать результат отправки — она асинхронная; для надёжности — acks=all и идемпотентный продюсер (по…</p></li><li><a href="/questions/spring/kafkalistener-container-commit/">Как @KafkaListener связан с listener container и offset commit?</a> <span class="lvl lvl-senior">Senior</span><p>@KafkaListener — метод, который вызывает listener container: контейнер крутит цикл poll() в своих потоках, вызывает метод для записей и коммитит offset по AckMode. По умолчанию…</p></li><li><a href="/questions/spring/rabbitmq-ack-basic/">Что означает подтверждение (ack) сообщения в RabbitMQ?</a> <span class="lvl lvl-junior">Junior</span><p>Ack — сигнал брокеру, что сообщение обработано: до него сообщение считается невыполненным и при обрыве соединения вернётся в очередь другому потребителю.</p></li><li><a href="/questions/spring/rabbittemplate/">Для чего нужен RabbitTemplate в Spring AMQP?</a> <span class="lvl lvl-middle">Middle</span><p>RabbitTemplate — основной способ отправки в Spring AMQP: convertAndSend(exchange, routingKey, payload) с конвертером сообщений (JSON через Jackson2JsonMessageConverter), плюс…</p></li><li><a href="/questions/spring/spring-kafka-retry-dlt/">Как в Spring Kafka обычно строят retry и dead letter topic?</a> <span class="lvl lvl-senior">Senior</span><p>Два способа: блокирующий — DefaultErrorHandler с BackOff и DeadLetterPublishingRecoverer (повторы на месте, партиция ждёт); неблокирующий — @RetryableTopic: запись уходит в…</p></li></ul></section><section class="block"><h2>Разборы темы</h2><ul class="links"><li><a href="/articles/spring/cloud-stream/">Spring Cloud Stream</a><p>Binder abstraction, functional model, bindings, consumer groups, partitioning и trade-offs поверх Kafka/RabbitMQ.</p></li><li><a href="/articles/spring/spring-amqp/">Spring AMQP и RabbitMQ</a><p>RabbitTemplate, @RabbitListener, exchanges, bindings, manual ack, retries, DLQ и prefetch.</p></li><li><a href="/articles/spring/spring-kafka/">Spring Kafka</a><p>KafkaTemplate, @KafkaListener, listener containers, offset ack, error handling, retries и DLT.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/spring/testing/">← Тестирование Spring Boot</a><a class="next" href="/roadmap/spring/cloud/">Микросервисы на Spring →</a></nav>
+  <p class="rm-back"><a href="/roadmap/spring/#messaging">← Вся карта «Spring»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Сообщения в Spring","description":"Spring Kafka, Spring AMQP и Spring Cloud Stream.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/spring/messaging/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

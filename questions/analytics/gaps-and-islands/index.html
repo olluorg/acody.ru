@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как найти самую длинную серию дней подряд, когда пользователь был активен? — вопрос с собеседования</title>
+<meta name="description" content="Классический приём «gaps and islands»: пронумеровать даты активности пользователя ROW_NUMBER и вычесть номер из даты — у дней одной непрерывной серии…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/gaps-and-islands/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/gaps-and-islands/">
+<meta property="og:title" content="Как найти самую длинную серию дней подряд, когда пользователь был активен? — вопрос с собеседования">
+<meta property="og:description" content="Классический приём «gaps and islands»: пронумеровать даты активности пользователя ROW_NUMBER и вычесть номер из даты — у дней одной непрерывной серии…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Как найти самую длинную серию дней подряд, когда пользователь был активен?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Как найти самую длинную серию дней подряд, когда пользователь был активен?"}]}</script>
+  <h1>Как найти самую длинную серию дней подряд, когда пользователь был активен?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">SQL для аналитика</span><span class="chip">SQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое задача gaps and islands?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Классический приём «gaps and islands»: пронумеровать даты активности пользователя ROW_NUMBER и <b>вычесть номер из даты</b> — у дней одной непрерывной серии разность одинакова. Затем группировать по (пользователь, эта разность) и считать длину серии.</p><ul><li>Сначала убрать дубли — одна строка на пользователя и день</li><li>Работает для любых последовательностей с шагом 1: дни, номера, часы</li><li>Альтернатива — LAG: отметить начало новой серии, накопительной суммой получить номер серии</li></ul><p class="extra"><span>А ещё</span> Тот же приём находит периоды простоя, разрывы в номерах документов</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Почему работает.</b> Если даты идут подряд (1, 2, 3 сентября), их номера тоже идут подряд (1, 2, 3), и разность постоянна. На пропуске дата перескакивает дальше номера — разность меняется, начинается новый «остров».</p>
+<p><b>Вариант через LAG:</b></p>
+<pre class="lang-sql"><code>SELECT user_id, d,
+       SUM(CASE WHEN d - LAG(d) OVER w = 1 THEN 0 ELSE 1 END) OVER w AS island
+FROM days
+WINDOW w AS (PARTITION BY user_id ORDER BY d);</code></pre>
+<p>Флаг «новая серия» там, где разрыв больше одного дня, а нарастающая сумма флагов даёт номер серии. Этот вариант легче обобщить на разрывы «больше 30 минут» (сессии).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-sql"><code>WITH days AS (
+  SELECT DISTINCT user_id, event_time::date AS d FROM events
+),
+grp AS (
+  SELECT user_id, d,
+         d - (ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY d))::int AS island
+  FROM days
+)
+SELECT user_id, MIN(d) AS start_day, MAX(d) AS end_day, COUNT(*) AS streak
+FROM grp
+GROUP BY user_id, island
+ORDER BY streak DESC;</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Приём «дата минус номер».</li><li>Дедупликация дней.</li><li>Вариант через LAG и нарастающую сумму.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/window-functions/">Что такое оконные функции в SQL и чем они отличаются от GROUP BY?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как найти самую длинную серию дней подряд, когда пользователь был активен?","acceptedAnswer":{"@type":"Answer","text":"Классический приём «gaps and islands»: пронумеровать даты активности пользователя ROW_NUMBER и вычесть номер из даты — у дней одной непрерывной серии разность одинакова. Затем группировать по (пользователь, эта разность) и считать длину серии. Сначала убрать дубли — одна строка на пользователя и день Работает для любых последовательностей с шагом 1: дни, номера, часы Альтернатива — LAG: отметить начало новой серии, накопительной суммой получить номер серии Тот же приём находит периоды простоя, разрывы в номерах документов Почему работает. Если даты идут подряд (1, 2, 3 сентября), их номера тоже идут подряд (1, 2, 3), и разность постоянна. На пропуске дата перескакивает дальше номера — разность меняется, начинается новый «остров». Вариант через LAG: Флаг «новая серия» там, где разрыв больше одного дня, а нарастающая сумма флагов даёт номер серии. Этот вариант легче обобщить на разрывы «больше 30 минут» (сессии)."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

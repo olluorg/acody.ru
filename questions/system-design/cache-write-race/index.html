@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>После обновления строки приложение записывает новое значение в кэш. Изредка в кэше навсегда остаётся устаревшее значение. Что происходит и как правильно? — вопрос с собеседования</title>
+<meta name="description" content="Гонка: читатель прочитал старое из базы, писатель обновил базу и кэш, читатель записал старое поверх. Лечится удалением ключа вместо перезаписи плюс…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/cache-write-race/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/cache-write-race/">
+<meta property="og:title" content="После обновления строки приложение записывает новое значение в кэш. Изредка в кэше навсегда остаётся устаревшее значение. Что происходит и как правильно? — вопрос с собеседования">
+<meta property="og:description" content="Гонка: читатель прочитал старое из базы, писатель обновил базу и кэш, читатель записал старое поверх. Лечится удалением ключа вместо перезаписи плюс…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>После обновления строки приложение записывает новое значение в кэш. Изредка в кэше навсегда остаётся устаревшее значение. Что происходит и как правильно?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"После обновления строки приложение записывает новое значение в кэш. Изредка в кэше навсегда остаётся устаревшее значение. Что происходит и как правильно?"}]}</script>
+  <h1>После обновления строки приложение записывает новое значение в кэш. Изредка в кэше навсегда остаётся устаревшее значение. Что происходит и как правильно?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Кэширование и CDN</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему в кэше остаётся устаревшее значение?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Гонка: читатель прочитал старое из базы, писатель обновил базу и кэш, читатель записал <b>старое</b> поверх. Лечится <b>удалением ключа вместо перезаписи</b> плюс TTL и версиями.</p><ul><li>База и кэш меняются независимо — общего порядка нет</li><li>Удаление идемпотентно и не зависит от порядка</li><li>TTL ограничивает время жизни ошибки; версия в значении не даёт записать старое поверх нового</li></ul><p class="extra"><span>А ещё</span> Остаточная гонка удаления закрывается отложенным повторным удалением</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Последовательность такая: читатель промахнулся мимо кэша и прочитал строку из базы; в этот момент писатель обновил базу и записал новое значение в кэш; после этого читатель, наконец, записывает своё — устаревшее — значение поверх. База и кэш меняются независимо, общего порядка между ними нет, поэтому такая перестановка возможна всегда, просто окно мало и проявляется редко. Практическое правило: после изменения ключ удаляют, а не перезаписывают. Удаление идемпотентно, не зависит от порядка и не способно положить старое значение, а следующий читатель просто сходит в базу. Полностью гонку это не исключает, поэтому время жизни оставляют даже при явной инвалидации, ограничивая ущерб; для критичных данных ключ версионируют отметкой времени изменения или инвалидируют по журналу изменений базы, что происходит гарантированно после коммита. Вытеснение и формат сериализации к описанному симптому отношения не имеют, а считать это нормой нельзя: значение залипает до истечения времени жизни, а при бесконечном сроке — навсегда.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Пошаговый сценарий гонки.</li><li>Удаление вместо перезаписи.</li><li>TTL и версионирование как страховка.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Обновлять кэш записью нового значения и считать порядок операций гарантированным.</li><li>Задавать кэшу бесконечное время жизни, полагаясь только на явную инвалидацию.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Параллельный читатель успел прочитать старое значение из базы до обновления и записал его в кэш после записи писателя: порядок двух независимых операций не гарантирован. Надёжнее удалять ключ, а не перезаписывать, оставлять время жизни как страховку и версионировать ключ либо инвалидировать по журналу изменений базы</li><li class="no"><span class="mark">✗</span>Кэш потерял запись из-за вытеснения — нужно увеличить объём памяти</li><li class="no"><span class="mark">✗</span>Проблема в сериализации значения — нужно сменить формат на бинарный</li><li class="no"><span class="mark">✗</span>Так и должно быть при кэшировании: значение обновится при следующей записи</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Почему инвалидация через журнал изменений базы надёжнее вызова из кода приложения?</li><li>Как быть, если удаление ключа из кэша не удалось, а транзакция уже зафиксирована?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/caching/">Кэширование и CDN</a><p>Кэш как размен согласованности на задержку, hit rate и слои, стратегии чтения и записи, инвалидация и гонка с записью, stampede и лавина, вытеснение и горячие ключи, CDN и ключ кэша.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/cache-invalidation/">Почему инвалидацию кэша считают одной из самых сложных задач и что помогает на практике?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/caching-basics/">Зачем нужно кэширование и какие у него главные риски?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/race-condition/">Что такое состояние гонки?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"После обновления строки приложение записывает новое значение в кэш. Изредка в кэше навсегда остаётся устаревшее значение. Что происходит и как правильно?","acceptedAnswer":{"@type":"Answer","text":"Гонка: читатель прочитал старое из базы, писатель обновил базу и кэш, читатель записал старое поверх. Лечится удалением ключа вместо перезаписи плюс TTL и версиями. База и кэш меняются независимо — общего порядка нет Удаление идемпотентно и не зависит от порядка TTL ограничивает время жизни ошибки; версия в значении не даёт записать старое поверх нового Остаточная гонка удаления закрывается отложенным повторным удалением Последовательность такая: читатель промахнулся мимо кэша и прочитал строку из базы; в этот момент писатель обновил базу и записал новое значение в кэш; после этого читатель, наконец, записывает своё — устаревшее — значение поверх. База и кэш меняются независимо, общего порядка между ними нет, поэтому такая перестановка возможна всегда, просто окно мало и проявляется редко. Практическое правило: после изменения ключ удаляют, а не перезаписывают. Удаление идемпотентно, не зависит от порядка и не способно положить старое значение, а следующий читатель просто сходит в базу. Полностью гонку это не исключает, поэтому время жизни оставляют даже при явной инвалидации, ограничивая ущерб; для критичных данных ключ версионируют отметкой времени изменения или инвалидируют по журналу изменений базы, что происходит гарантированно после коммита. Вытеснение и формат сериализации к описанному симптому…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

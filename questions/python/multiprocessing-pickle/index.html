@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие ограничения есть у multiprocessing и чем fork отличается от spawn? — вопрос с собеседования</title>
+<meta name="description" content="Процессы не делят память: аргументы и результаты сериализуются pickle и копируются. Лямбды, локальные функции, открытые файлы и соединения не…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/multiprocessing-pickle/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/multiprocessing-pickle/">
+<meta property="og:title" content="Какие ограничения есть у multiprocessing и чем fork отличается от spawn? — вопрос с собеседования">
+<meta property="og:description" content="Процессы не делят память: аргументы и результаты сериализуются pickle и копируются. Лямбды, локальные функции, открытые файлы и соединения не…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Какие ограничения есть у multiprocessing и чем fork отличается от spawn?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Какие ограничения есть у multiprocessing и чем fork отличается от spawn?"}]}</script>
+  <h1>Какие ограничения есть у multiprocessing и чем fork отличается от spawn?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Конкурентность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему ProcessPoolExecutor не принимает лямбду?</li><li>Как процессы в Python обмениваются данными?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Процессы не делят память: аргументы и результаты <b>сериализуются pickle</b> и копируются. Лямбды, локальные функции, открытые файлы и соединения не сериализуются. <b>fork</b> копирует процесс родителя (быстро, но опасно с потоками), <b>spawn</b> запускает чистый интерпретатор и импортирует модуль заново (нужна защита <code>if __name__ == &quot;__main__&quot;</code>).</p><ul><li>По умолчанию: Linux — fork (с 3.14 — forkserver), macOS и Windows — spawn</li><li>Общие данные — Queue, Pipe, Manager, shared_memory</li><li>Большие данные гонять через pickle дорого — передавать пути или использовать shared_memory</li></ul><p class="extra"><span>А ещё</span> fork после запуска потоков может унаследовать захваченную блокировку и зависнуть</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Почему pickle.</b> Процесс — отдельное адресное пространство. Чтобы передать задачу, пул сериализует функцию (по имени модуля и функции) и аргументы, отправляет по каналу, а результат — обратно. Поэтому:</p>
+<ul><li>функция должна импортироваться по имени — не лямбда и не вложенная;</li><li>аргументы — сериализуемые (не сокеты, не соединения с БД, не генераторы);</li><li>каждое копирование стоит времени: мелкие задачи с большими данными выполняются медленнее, чем последовательно.</li></ul>
+<p><b>Методы запуска:</b></p>
+<ul><li><b>fork</b> — копия родителя с его памятью (copy-on-write): быстрый старт, глобальные данные доступны. Опасен, если в родителе уже были потоки: в ребёнке остаётся только один поток, а блокировки, которые держали другие, — захваченными навсегда.</li><li><b>spawn</b> — новый интерпретатор, модуль импортируется заново. Медленнее, зато предсказуемо. Код запуска — под <code>if __name__ == &quot;__main__&quot;:</code>, иначе дети рекурсивно запускают пул.</li><li><b>forkserver</b> — компромисс: форк от чистого серверного процесса.</li></ul>
+<p><b>Обмен данными:</b> <code>multiprocessing.Queue</code>, <code>Pipe</code>, <code>Manager</code> (прокси к объектам в процессе-сервере, медленно), <code>shared_memory</code> (Python 3.8) — общий буфер без копирования, удобно с NumPy.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Отсутствие общей памяти и роль pickle.</li><li>Ограничения на функции и аргументы.</li><li>fork, spawn и их риски.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Запуск пула без if __name__ == "__main__".</li><li>Передача огромных объектов в каждую задачу.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/concurrent-futures/">Как пользоваться concurrent.futures и чем ThreadPoolExecutor отличается от ProcessPoolExecutor?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/process-vs-thread/">Чем процесс отличается от потока?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/gil/">Что такое GIL?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие ограничения есть у multiprocessing и чем fork отличается от spawn?","acceptedAnswer":{"@type":"Answer","text":"Процессы не делят память: аргументы и результаты сериализуются pickle и копируются. Лямбды, локальные функции, открытые файлы и соединения не сериализуются. fork копирует процесс родителя (быстро, но опасно с потоками), spawn запускает чистый интерпретатор и импортирует модуль заново (нужна защита if __name__ == \"__main__\"). По умолчанию: Linux — fork (с 3.14 — forkserver), macOS и Windows — spawn Общие данные — Queue, Pipe, Manager, shared_memory Большие данные гонять через pickle дорого — передавать пути или использовать shared_memory fork после запуска потоков может унаследовать захваченную блокировку и зависнуть Почему pickle. Процесс — отдельное адресное пространство. Чтобы передать задачу, пул сериализует функцию (по имени модуля и функции) и аргументы, отправляет по каналу, а результат — обратно. Поэтому: - функция должна импортироваться по имени — не лямбда и не вложенная; - аргументы — сериализуемые (не сокеты, не соединения с БД, не генераторы); - каждое копирование стоит времени: мелкие задачи с большими данными выполняются медленнее, чем последовательно. Методы запуска: - fork — копия родителя с его памятью (copy-on-write): быстрый старт, глобальные данные доступны. Опасен, если в родителе уже были потоки: в ребёнке остаётся только один поток, а блокировки, которые держали другие, — захваченными навсегда. - spawn — новый интерпретатор, модуль импортируется заново. Медленнее, зато предсказуемо. Код запуска — под if __name__ == \"__main__\":, иначе дети рекурсивно запускают пул. -…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

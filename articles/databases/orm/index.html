@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORM, persistence context и N+1 — разбор для собеседования</title>
+<meta name="description" content="Что делает ORM, lazy/eager и proxy, механизм N+1, способы лечения и типичные грабли.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/databases/orm/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/databases/orm/">
+<meta property="og:title" content="ORM, persistence context и N+1 — разбор для собеседования">
+<meta property="og:description" content="Что делает ORM, lazy/eager и proxy, механизм N+1, способы лечения и типичные грабли.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>ORM, persistence context и N+1</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"ORM, persistence context и N+1"}]}</script>
+  <h1>ORM, persistence context и N+1</h1>
+  <p class="lead">Что делает ORM, lazy/eager и proxy, механизм N+1, способы лечения и типичные грабли.</p>
+  <article class="md"><h2>Что делает ORM</h2>
+<p>ORM (Hibernate/JPA) сопоставляет объекты со строками таблиц и генерирует SQL для типовых операций. В рамках транзакции работает persistence context (кэш первого уровня) с identity map: одна и та же строка — один объект, а изменения отслеживаются и выгружаются на flush (dirty checking).</p>
+<p>Цена удобства — потеря прямой видимости SQL: легко случайно породить дорогой сценарий, не заметив этого.</p>
+<h2>Lazy, eager и proxy</h2>
+<p>Связи бывают lazy и eager. По умолчанию в JPA коллекции (<code>@OneToMany</code>, <code>@ManyToMany</code>) ленивые, а <code>@ManyToOne</code> и <code>@OneToOne</code> — жадные: такая связь подгружается всегда, даже когда не нужна, и в списке сущностей тоже даёт N+1. Поэтому для связей «к одному» часто явно ставят <code>fetch = FetchType.LAZY</code>. Lazy-связь Hibernate отдаёт как proxy, а реальный запрос выполняется при первом обращении к данным.</p>
+<p>Если обратиться к lazy-связи уже вне транзакции/сессии, получите LazyInitializationException. Поэтому решение «что грузить» принимают на этапе запроса, а не глобальной аннотацией.</p>
+<h2>Откуда берётся N+1</h2>
+<p>N+1 возникает, когда один запрос получает список из N сущностей, а затем для каждой выполняется ещё один запрос за её связью — итого 1 + N запросов вместо одного-двух.</p>
+<p>Обнаруживают по SQL-логам (show_sql), p6spy или счётчику запросов в тестах. Симптом — рост числа запросов пропорционально размеру списка.</p>
+<pre class="lang-java"><code>// 1 запрос за заказами + по запросу на orders.getItems() каждой строки
+for (Order o : orderRepository.findAll()) {
+    total += o.getItems().size(); // lazy → N запросов
+}</code></pre>
+<figure><img src="/articles/assets/n-plus-one.webp" alt="Проблема N+1: один запрос-список плюс по одному запросу на каждую сущность против одного запроса с JOIN." loading="lazy"><figcaption>N+1: список + N отдельных запросов на сущности; JOIN решает ту же задачу одним запросом.</figcaption></figure>
+<h2>Как лечить</h2>
+<p>JOIN FETCH или <code>@EntityGraph</code> подгружают связь одним запросом. Batch fetching (<code>hibernate.default_batch_fetch_size</code>) грузит связи пачками (1 + N/размер_пачки). DTO-проекция тянет только нужные поля одним запросом без полной загрузки сущностей.</p>
+<p><code>@EntityGraph</code> vs JOIN FETCH — это одно и то же по эффекту (превращают lazy-связь в один JOIN), но разные по форме: JOIN FETCH пишется прямо в JPQL/HQL, а <code>@EntityGraph</code> задаётся декларативно (аннотацией над репозиторием/именованным графом) и накладывается поверх обычного метода, не переписывая запрос. EntityGraph удобнее, когда один и тот же запрос нужен с разной «жадностью» загрузки.</p>
+<p>Важная ловушка: JOIN FETCH коллекции вместе с пагинацией (<code>setMaxResults</code>/Pageable) Hibernate не может сделать на стороне БД — JOIN размножает строки, и чтобы отдать корректную «страницу сущностей», он тянет ВСЁ в память и режет там (в логах появляется предупреждение '<code>firstResult</code>/<code>maxResults</code> specified with collection fetch; applying in memory'). На больших таблицах это OOM. Решения: пагинировать по id отдельным запросом, а затем дозагружать связи; или грузить коллекцию через batch fetching/EntityGraph без JOIN.</p>
+<p>Выбор зависит от сценария: для отчётов чаще выгодны проекции, для навигации по графу — JOIN FETCH/EntityGraph.</p>
+<pre class="lang-java"><code>@Query(&quot;select o from Order o join fetch o.items where o.userId = :uid&quot;)
+List&lt;Order&gt; findWithItems(@Param(&quot;uid&quot;) Long uid);</code></pre>
+<h2>Жизненный цикл сущности</h2>
+<p>Половина «магии» Hibernate объясняется четырьмя состояниями сущности. Transient — объект создан через new, персистентный контекст о нём не знает. Managed (persistent) — привязан к контексту: за ним следят, изменения полей попадут в БД. Detached — контекст закрыт, объект жив, но за ним больше никто не следит. Removed — помечен на удаление.</p>
+<p>Отсюда вытекает dirty checking: у managed-сущности достаточно вызвать сеттер — никакого <code>save()</code> не нужно. На flush Hibernate сравнивает текущее состояние со снимком, сделанным при загрузке, и сам генерирует UPDATE. Обратная сторона: случайное изменение поля внутри транзакции молча уедет в БД.</p>
+<p>Flush происходит не когда попало: перед выполнением запроса, затрагивающего изменённые сущности, и на commit транзакции. Важно не путать flush (SQL отправлен в БД, но транзакция не завершена) с commit (изменения зафиксированы и видны другим).</p>
+<p>Кэш первого уровня (сам персистентный контекст) работает как identity map в границах транзакции: повторный find по тому же id не пойдёт в БД и вернёт ТОТ ЖЕ объект. Поэтому внутри одной транзакции сущности корректно сравнивать по ссылке, а вот equals/<code>hashCode</code> по изменяемым полям или по ещё не присвоенному id — источник трудноуловимых багов с коллекциями.</p>
+<p>Detached-объекты возвращают в контекст через merge — он не делает объект managed, а КОПИРУЕТ его состояние в управляемый экземпляр и возвращает уже его. Игнорировать возвращённое значение merge — классическая ошибка: изменения уйдут в никуда.</p>
+<pre class="lang-java"><code>@Transactional
+void renameUser(Long id, String name) {
+    User user = repository.findById(id).orElseThrow(); // managed
+    user.setName(name);   // dirty checking: UPDATE сгенерируется на flush
+}                          // save() вызывать не нужно</code></pre>
+<h2>Грабли</h2>
+<p>Не лечите N+1 глобальным EAGER — это переносит проблему в другие сценарии и утяжеляет запросы. Не делайте JOIN FETCH двух коллекций сразу — получите декартово произведение строк. Помните про LazyInitializationException вне сессии.</p>
+<p>Ещё три частые: отдавать сущности прямо из контроллера (сериализация тронет lazy-связи и породит запросы или исключение), писать equals/<code>hashCode</code> по сгенерированному id (до сохранения он null, после — объект «меняет» хеш внутри HashSet), и удалять по одной сущности в цикле там, где нужен один bulk-запрос.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>N+1 объясняйте механизмом, а не определением: один запрос вернул N сущностей, обращение к lazy-связи каждой из них выполняет ещё по запросу — итого 1 + N. Сразу скажите, как обнаруживаете проблему (show_sql, p6spy, счётчик запросов в тесте), это отличает практика от теоретика.</p>
+<p>Перечислите средства с их профилем: JOIN FETCH и <code>@EntityGraph</code> — одним запросом (одно и то же по эффекту, но EntityGraph декларативен и не переписывает запрос); batch fetching — пачками, 1 + N/размер; DTO-проекция — только нужные поля, лучший вариант для отчётов. И подчеркните: EAGER не решение.</p>
+<p>Сильный ход — назвать ловушку JOIN FETCH коллекции вместе с пагинацией: Hibernate не может сделать это на стороне БД, тянет всё в память и режет там (предупреждение <code>firstResult</code>/<code>maxResults</code> specified with collection fetch). Решение — пагинировать по id, а связи дозагружать отдельно.</p>
+<p>Если спросят про внутренности — разложите четыре состояния (transient/managed/detached/removed), объясните dirty checking через снимок при загрузке и разведите flush и commit. Завершите общим тезисом: ORM экономит рутину, но не освобождает от обязанности знать, какой именно SQL уходит в базу.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/databases/n-plus-one/">Что такое проблема N+1 запросов и как её решать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/lazy-initialization-exception/">Почему возникает LazyInitializationException в Hibernate и как его правильно лечить?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/persistence-context/">Что верно про persistence context (сессию) в JPA?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/dto-projection/">Почему для эндпоинта, отдающего список из тысяч записей, обычно предпочитают проекцию в DTO, а не загрузку сущностей?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/what-is-orm/">Что делает ORM?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/databases/indexes/">Индексы и планы запросов</a><p>Устройство B-tree, hash vs B-tree, составной и covering индекс, цена записи и когда индекс не используется.</p></li><li><a href="/articles/databases/jdbc/">JDBC и безопасные запросы</a><p>Connection/Statement/ResultSet, PreparedStatement против инъекций, ручные транзакции, ресурсы и пул соединений.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"ORM, persistence context и N+1","description":"Что делает ORM, lazy/eager и proxy, механизм N+1, способы лечения и типичные грабли.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/databases/orm/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

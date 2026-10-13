@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работает k-means и как выбрать число кластеров? — вопрос с собеседования</title>
+<meta name="description" content="K-means итеративно: расставить k центров, отнести каждую точку к ближайшему центру, пересчитать центры как средние своих точек — повторять до…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/kmeans-clustering/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/kmeans-clustering/">
+<meta property="og:title" content="Как работает k-means и как выбрать число кластеров? — вопрос с собеседования">
+<meta property="og:description" content="K-means итеративно: расставить k центров, отнести каждую точку к ближайшему центру, пересчитать центры как средние своих точек — повторять до…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как работает k-means и как выбрать число кластеров?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как работает k-means и как выбрать число кластеров?"}]}</script>
+  <h1>Как работает k-means и как выбрать число кластеров?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Модели машинного обучения</span><span class="chip">scikit-learn</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Какие алгоритмы кластеризации вы знаете?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>K-means</b> итеративно: расставить k центров, отнести каждую точку к ближайшему центру, пересчитать центры как средние своих точек — повторять до стабилизации. Число k выбирают <b>методом локтя</b>, <b>силуэтом</b> и, главное, по смыслу задачи.</p><ul><li>Чувствителен к масштабу признаков — масштабировать обязательно</li><li>Находит выпуклые кластеры примерно одного размера</li><li>Результат зависит от начальных центров — k-means++ и несколько запусков</li></ul><p class="extra"><span>А ещё</span> DBSCAN находит кластеры произвольной формы и выбросы; иерархическая кластеризация даёт дерево</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Алгоритм:</b></p>
+<ol><li>Выбрать k начальных центров (k-means++ — далеко друг от друга).</li><li>Каждую точку отнести к ближайшему центру.</li><li>Пересчитать центр каждого кластера как среднее его точек.</li><li>Повторять шаги 2–3, пока назначения не перестанут меняться.</li></ol>
+<p>Минимизируется сумма квадратов расстояний от точек до их центров (inertia).</p>
+<p><b>Выбор k:</b></p>
+<ul><li><b>метод локтя</b> — график inertia от k, ищем излом;</li><li><b>коэффициент силуэта</b> — насколько точка ближе к своему кластеру, чем к соседнему (от −1 до 1);</li><li><b>бизнес-смысл</b> — пять сегментов клиентов маркетинг может использовать, пятьдесят — нет.</li></ul>
+<p><b>Ограничения и альтернативы:</b></p>
+<ul><li>кластеры вытянутой формы и разной плотности — DBSCAN или HDBSCAN;</li><li>нужны вероятности принадлежности — гауссовы смеси (GMM);</li><li>нужна иерархия — агломеративная кластеризация.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Шаги алгоритма.</li><li>Способы выбора k.</li><li>Ограничения и альтернативы.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/ml-task-types/">Какие бывают задачи машинного обучения — обучение с учителем, без учителя, с подкреплением?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/feature-scaling-encoding/">Зачем масштабировать признаки и как кодировать категориальные признаки?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работает k-means и как выбрать число кластеров?","acceptedAnswer":{"@type":"Answer","text":"K-means итеративно: расставить k центров, отнести каждую точку к ближайшему центру, пересчитать центры как средние своих точек — повторять до стабилизации. Число k выбирают методом локтя, силуэтом и, главное, по смыслу задачи. Чувствителен к масштабу признаков — масштабировать обязательно Находит выпуклые кластеры примерно одного размера Результат зависит от начальных центров — k-means++ и несколько запусков DBSCAN находит кластеры произвольной формы и выбросы; иерархическая кластеризация даёт дерево Алгоритм: 1. Выбрать k начальных центров (k-means++ — далеко друг от друга). 2. Каждую точку отнести к ближайшему центру. 3. Пересчитать центр каждого кластера как среднее его точек. 4. Повторять шаги 2–3, пока назначения не перестанут меняться. Минимизируется сумма квадратов расстояний от точек до их центров (inertia). Выбор k: - метод локтя — график inertia от k, ищем излом; - коэффициент силуэта — насколько точка ближе к своему кластеру, чем к соседнему (от −1 до 1); - бизнес-смысл — пять сегментов клиентов маркетинг может использовать, пятьдесят — нет. Ограничения и альтернативы: - кластеры вытянутой формы и разной плотности — DBSCAN или HDBSCAN; - нужны вероятности принадлежности — гауссовы смеси (GMM); - нужна иерархия — агломеративная кластеризация."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

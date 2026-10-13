@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем ответы 401, 403 и 404 отличаются и что возвращать на запрос чужого ресурса? — вопрос с собеседования</title>
+<meta name="description" content="401 Unauthorized — личность не установлена: нет токена или он неверный. 403 Forbidden — личность известна, но прав нет. 404 Not Found — ресурс не…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/http-401-403-404/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/http-401-403-404/">
+<meta property="og:title" content="Чем ответы 401, 403 и 404 отличаются и что возвращать на запрос чужого ресурса? — вопрос с собеседования">
+<meta property="og:description" content="401 Unauthorized — личность не установлена: нет токена или он неверный. 403 Forbidden — личность известна, но прав нет. 404 Not Found — ресурс не…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Чем ответы 401, 403 и 404 отличаются и что возвращать на запрос чужого ресурса?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Чем ответы 401, 403 и 404 отличаются и что возвращать на запрос чужого ресурса?"}]}</script>
+  <h1>Чем ответы 401, 403 и 404 отличаются и что возвращать на запрос чужого ресурса?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Spring MVC и REST</span><span class="chip">Spring</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Когда возвращать 403, а когда 404?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>401 Unauthorized</b> — личность не установлена: нет токена или он неверный. <b>403 Forbidden</b> — личность известна, но прав нет. <b>404 Not Found</b> — ресурс не найден.</p><ul><li>401 сопровождается заголовком WWW-Authenticate — клиент должен войти</li><li>Чужой заказ — часто 404, чтобы не подтверждать существование ресурса</li><li>403 уместен, когда ресурс известен, а действие запрещено (админка)</li></ul><p class="extra"><span>А ещё</span> Название 401 историческое: по смыслу это «unauthenticated»</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>401</b> — запрос без учётных данных или с недействительными (просроченный токен). Сервер говорит: «я не знаю, кто вы». В ответе — <code>WWW-Authenticate</code> со схемой (<code>Bearer</code>). Клиент обновляет токен или отправляет пользователя на вход.</p>
+<p><b>403</b> — пользователь известен, но действие ему запрещено: обычный пользователь открывает <code>/admin</code>. Повторный вход не поможет.</p>
+<p><b>404</b> — ресурса по этому адресу нет.</p>
+<p><b>Чужие ресурсы.</b> <code>GET /orders/1002</code> от пользователя, которому заказ не принадлежит. Ответ 403 подтверждает, что заказ существует, — утечка информации (перебором можно узнать число заказов, существование аккаунтов). Поэтому для ресурсов, которые не должны быть видны, отвечают <b>404</b>, как будто их нет. Так делает GitHub для приватных репозиториев.</p>
+<p><b>В Spring Security:</b> неаутентифицированный запрос — <code>AuthenticationEntryPoint</code> → 401 (или редирект на форму входа); нет прав — <code>AccessDeniedHandler</code> → 403. Проверку владения удобно делать выборкой <code>findByIdAndOwnerId</code> — для чужого заказа она ничего не находит, и естественно получается 404.</p>
+<p><b>Смежные коды:</b> 400 — неверный запрос, 409 — конфликт состояния, 422 — бизнес-валидация, 429 — превышен лимит.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Различие трёх кодов.</li><li>Почему на чужой ресурс часто 404.</li><li>Как это делает Spring Security.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Отвечать 401, когда пользователь вошёл, но прав нет.</li><li>Отвечать 403 на чужой ресурс и раскрывать его существование.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>401 — не аутентифицирован, 403 — аутентифицирован, но нет прав, 404 — ресурс не найден; на чужой ресурс часто отвечают 404, чтобы не раскрывать его существование</li><li class="no"><span class="mark">✗</span>401 и 403 — синонимы</li><li class="no"><span class="mark">✗</span>На чужой ресурс всегда 401</li><li class="no"><span class="mark">✗</span>404 означает ошибку на сервере</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем 401 отличается от 403?</li><li>Когда возвращать 409 Conflict?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/web/">Spring MVC: DispatcherServlet и обработка запроса</a><p>Конвейер обработки запроса, @Controller против @RestController, маппинги, извлечение данных и контроль ответа.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/http-404-basic/">Что означает код ответа 404?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/system-design/idor-access-control/">Эндпоинт GET /orders/{id} проверяет, что пользователь аутентифицирован, и возвращает заказ по идентификатору. Что здесь не так?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/authentication-vs-authorization/">Чем аутентификация отличается от авторизации?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем ответы 401, 403 и 404 отличаются и что возвращать на запрос чужого ресурса?","acceptedAnswer":{"@type":"Answer","text":"401 Unauthorized — личность не установлена: нет токена или он неверный. 403 Forbidden — личность известна, но прав нет. 404 Not Found — ресурс не найден. 401 сопровождается заголовком WWW-Authenticate — клиент должен войти Чужой заказ — часто 404, чтобы не подтверждать существование ресурса 403 уместен, когда ресурс известен, а действие запрещено (админка) Название 401 историческое: по смыслу это «unauthenticated» 401 — запрос без учётных данных или с недействительными (просроченный токен). Сервер говорит: «я не знаю, кто вы». В ответе — WWW-Authenticate со схемой (Bearer). Клиент обновляет токен или отправляет пользователя на вход. 403 — пользователь известен, но действие ему запрещено: обычный пользователь открывает /admin. Повторный вход не поможет. 404 — ресурса по этому адресу нет. Чужие ресурсы. GET /orders/1002 от пользователя, которому заказ не принадлежит. Ответ 403 подтверждает, что заказ существует, — утечка информации (перебором можно узнать число заказов, существование аккаунтов). Поэтому для ресурсов, которые не должны быть видны, отвечают 404, как будто их нет. Так делает GitHub для приватных репозиториев. В Spring Security: неаутентифицированный запрос — AuthenticationEntryPoint → 401 (или редирект на форму входа); нет прав — AccessDeniedHandler → 403. Проверку владения удобно…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

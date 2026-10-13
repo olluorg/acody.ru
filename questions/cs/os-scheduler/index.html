@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как планировщик ОС решает, какой поток выполнять? — вопрос с собеседования</title>
+<meta name="description" content="Планировщик выдаёт потокам, готовым к работе, кванты времени на ядрах и вытесняет их по таймеру — так один поток не захватит процессор. Ждущие…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/os-scheduler/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/os-scheduler/">
+<meta property="og:title" content="Как планировщик ОС решает, какой поток выполнять? — вопрос с собеседования">
+<meta property="og:description" content="Планировщик выдаёт потокам, готовым к работе, кванты времени на ядрах и вытесняет их по таймеру — так один поток не захватит процессор. Ждущие…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Как планировщик ОС решает, какой поток выполнять?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Как планировщик ОС решает, какой поток выполнять?"}]}</script>
+  <h1>Как планировщик ОС решает, какой поток выполнять?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Операционные системы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое вытесняющая многозадачность?</li><li>Чем CPU-bound задача отличается от I/O-bound?</li><li>Что такое load average?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Планировщик выдаёт потокам, готовым к работе, кванты времени на ядрах и <b>вытесняет</b> их по таймеру — так один поток не захватит процессор.</p><ul><li>Ждущие ввода-вывода потоки не занимают процессор — они спят в очереди ожидания</li><li>В Linux — CFS/EEVDF: честно делит время с учётом nice-приоритета</li><li>I/O-bound задачи большую часть времени ждут, CPU-bound — считают</li></ul><p class="extra"><span>А ещё</span> Load average — средняя длина очереди готовых и ждущих диска потоков, сравнивать с числом ядер</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Состояния потока:</b> выполняется (на ядре), готов (ждёт своей очереди на процессор), ждёт (ввода-вывода, блокировки, таймера). Планировщик работает с готовыми.</p>
+<p><b>Вытесняющая многозадачность.</b> Таймер периодически прерывает выполнение, и ядро решает, оставить текущий поток или переключиться. Поток также уступает процессор сам, когда блокируется. Кооперативная многозадачность, где задача отдаёт управление только сама, осталась в пользовательских планировщиках — event loop в asyncio и Node.js: одна задача с бесконечным циклом без <code>await</code> повесит всё.</p>
+<p><b>Linux.</b> Долгое время работал CFS — «совершенно честный планировщик»: каждому потоку учитывается виртуальное время выполнения, и следующим идёт тот, кто получил меньше всего (структура — красно-чёрное дерево). С версии 6.6 его заменил EEVDF, сохранив идею честного деления. Приоритет задаётся <code>nice</code> от −20 до 19 — это вес при делении, а не жёсткий порядок. Для задач реального времени есть отдельные политики (<code>SCHED_FIFO</code>).</p>
+<p><b>CPU-bound и I/O-bound.</b> Вычислительная задача использует весь квант, и потоков больше, чем ядер, ей не нужно. Задача ввода-вывода почти всё время ждёт, поэтому потоков может быть больше ядер — или вообще один поток с event loop. Для пулов это даёт оценку: число потоков ≈ ядра × (1 + время ожидания / время вычисления).</p>
+<p><b>Load average</b> в <code>uptime</code> и <code>top</code> — экспоненциальные средние за 1, 5 и 15 минут числа потоков, которые выполняются или готовы выполняться (в Linux ещё и ждущие диска в состоянии D). Значение 8 на 8 ядрах — полная загрузка, 30 на 8 ядрах — очередь, задержки растут. Высокий load average при низкой загрузке CPU указывает на ожидание диска.</p>
+<p><b>Контейнеры.</b> Лимит CPU в Kubernetes реализован квотой CFS: при превышении квоты потоки замораживаются до следующего периода (throttling) — отсюда скачки задержки при «свободном» процессоре.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>$ uptime
+ 10:21:04 up 12 days, load average: 15.82, 14.10, 9.37
+$ nproc
+8
+# Очередь вдвое длиннее числа ядер и растёт — запросы ждут процессор.
+
+$ nice -n 10 ./batch-report      # фоновая задача получит меньшую долю CPU</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Состояния потока и что планирует планировщик.</li><li>Вытеснение по таймеру и добровольная уступка при ожидании.</li><li>Разница CPU-bound и I/O-bound и вывод для размера пулов.</li><li>Load average и сравнение с числом ядер.</li><li>Throttling в контейнерах — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать load average процентом загрузки CPU.</li><li>Думать, что nice даёт жёсткий порядок выполнения.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/context-switch/">Что такое переключение контекста и почему оно дорогое?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/process-vs-thread/">Чем процесс отличается от потока?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/highload/queueing-utilization/">Почему при загрузке сервера 90% время ответа растёт в разы, хотя запас ещё есть?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как планировщик ОС решает, какой поток выполнять?","acceptedAnswer":{"@type":"Answer","text":"Планировщик выдаёт потокам, готовым к работе, кванты времени на ядрах и вытесняет их по таймеру — так один поток не захватит процессор. Ждущие ввода-вывода потоки не занимают процессор — они спят в очереди ожидания В Linux — CFS/EEVDF: честно делит время с учётом nice-приоритета I/O-bound задачи большую часть времени ждут, CPU-bound — считают Load average — средняя длина очереди готовых и ждущих диска потоков, сравнивать с числом ядер Состояния потока: выполняется (на ядре), готов (ждёт своей очереди на процессор), ждёт (ввода-вывода, блокировки, таймера). Планировщик работает с готовыми. Вытесняющая многозадачность. Таймер периодически прерывает выполнение, и ядро решает, оставить текущий поток или переключиться. Поток также уступает процессор сам, когда блокируется. Кооперативная многозадачность, где задача отдаёт управление только сама, осталась в пользовательских планировщиках — event loop в asyncio и Node.js: одна задача с бесконечным циклом без await повесит всё. Linux. Долгое время работал CFS — «совершенно честный планировщик»: каждому потоку учитывается виртуальное время выполнения, и следующим идёт тот, кто получил меньше всего (структура — красно-чёрное дерево). С версии 6.6 его заменил EEVDF, сохранив идею честного деления. Приоритет задаётся nice от −20 до 19 — это вес при делении, а не жёсткий порядок…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

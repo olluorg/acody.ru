@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Транзакции, изоляция и блокировки — разбор для собеседования</title>
+<meta name="description" content="ACID по буквам, аномалии чтения, уровни изоляции, MVCC и оптимистичные/пессимистичные блокировки.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/databases/transactions/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/databases/transactions/">
+<meta property="og:title" content="Транзакции, изоляция и блокировки — разбор для собеседования">
+<meta property="og:description" content="ACID по буквам, аномалии чтения, уровни изоляции, MVCC и оптимистичные/пессимистичные блокировки.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>Транзакции, изоляция и блокировки</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"Транзакции, изоляция и блокировки"}]}</script>
+  <h1>Транзакции, изоляция и блокировки</h1>
+  <p class="lead">ACID по буквам, аномалии чтения, уровни изоляции, MVCC и оптимистичные/пессимистичные блокировки.</p>
+  <article class="md"><h2>ACID по буквам</h2>
+<p>Atomicity — «всё или ничего»: транзакция применяется целиком либо откатывается. Consistency — переход из одного валидного состояния в другое без нарушения инвариантов и ограничений. Isolation — параллельные транзакции влияют друг на друга контролируемо. Durability — после commit изменения переживут сбой (за счёт журнала/WAL).</p>
+<p>Частая путаница: Consistency из ACID (соблюдение ограничений одной БД) — это не eventual consistency из распределённых систем (репликации со временем сходятся).</p>
+<h2>Аномалии параллельного доступа</h2>
+<p>Dirty read — чтение незакоммиченных данных другой транзакции. Non-repeatable read — повторное чтение той же строки даёт другое значение, потому что между чтениями кто-то закоммитил UPDATE. Phantom read — повторный запрос по условию видит новый/исчезнувший набор строк (кто-то вставил/удалил подходящие).</p>
+<p>Уровни изоляции — это ровно про то, какие из этих аномалий разрешены.</p>
+<h2>Уровни изоляции</h2>
+<p>По стандарту SQL: READ UNCOMMITTED допускает все три аномалии; READ COMMITTED убирает dirty read; REPEATABLE READ убирает ещё и non-repeatable; и только SERIALIZABLE убирает все три, включая phantom.</p>
+<p>Чем выше изоляция, тем меньше аномалий, но выше цена: больше блокировок/конфликтов и ниже параллелизм.</p>
+<p>Любимая ловушка: «по стандарту» ≠ «в жизни». В PostgreSQL уровень REPEATABLE READ реализован как snapshot isolation и фактически не допускает и phantom (то есть строже стандарта), а READ UNCOMMITTED ведёт себя как READ COMMITTED (грязного чтения в PostgreSQL нет вообще). В Oracle уровней REPEATABLE READ и READ UNCOMMITTED просто нет — есть READ COMMITTED (дефолт) и SERIALIZABLE. Поэтому называйте и стандарт, и поведение конкретной СУБД.</p>
+<p>Стандартных аномалий не «ровно три». Есть ещё lost update (потерянное обновление: две транзакции читают значение, обновляют и затирают чужой результат — read-modify-write без блокировки/версии) и write skew (две транзакции читают общий набор, каждая по отдельности проходит проверку, а вместе нарушают инвариант). Lost update лечится SELECT ... FOR UPDATE или оптимистичной блокировкой по версии; write skew снимается только настоящей сериализуемостью (в PostgreSQL — SSI, Serializable Snapshot Isolation).</p>
+<figure><img src="/articles/assets/isolation-anomalies.webp" alt="Матрица уровней изоляции и аномалий: для каждого уровня (Read Uncommitted … Serializable) показано, какие аномалии (грязное, неповторяемое, фантомное чтение) возможны, а какие предотвращены." loading="lazy"><figcaption>Чем выше уровень изоляции, тем больше аномалий он предотвращает — ценой параллелизма.</figcaption></figure>
+<h2>MVCC: чтение без блокировок</h2>
+<p>Многие СУБД (PostgreSQL, InnoDB, Oracle) используют MVCC: вместо блокировки на чтение они хранят версии строк, и запрос видит согласованный снимок данных. Когда снимок берётся, зависит от уровня изоляции: на READ COMMITTED — заново для каждого запроса, на REPEATABLE READ — один раз на всю транзакцию.</p>
+<div class="widget-in"><script type="module" src="/widgets/isolation.js"></script><sotto-isolation theme="dark"></sotto-isolation></div>
+<p>Поэтому читатели не блокируют писателей и наоборот. Цена — накопление старых версий, которые нужно вычищать (vacuum/purge), и нюансы вроде gap-locks для предотвращения phantom в REPEATABLE READ у InnoDB.</p>
+<h2>Оптимистичные и пессимистичные блокировки</h2>
+<p>Пессимистичная блокировка захватывает строки заранее (SELECT … FOR UPDATE), и другие ждут. Подходит, когда конфликты часты и повтор операции дорог.</p>
+<p>Оптимистичная не блокирует, а проверяет версию при записи: если version изменился — конфликт, операция повторяется. Подходит при редких конфликтах. В JPA это поле <code>@Version</code>.</p>
+<pre class="lang-java"><code>// JPA optimistic locking
+@Entity
+class Account {
+    @Id Long id;
+    @Version long version; // проверяется и инкрементируется при UPDATE
+    long balance;
+}</code></pre>
+<h2>Deadlock</h2>
+<p>Deadlock возникает, когда транзакции захватывают ресурсы во ВСТРЕЧНОМ порядке: первая держит строку A и ждёт B, вторая держит B и ждёт A. Ждать они будут вечно, поэтому СУБД обнаруживает цикл ожидания и принудительно откатывает одну из транзакций (жертву) с ошибкой deadlock detected.</p>
+<p>Классический пример — перевод денег между счетами: два параллельных перевода 1→2 и 2→1 блокируют счета в разном порядке. Лечится не «побольше изоляции», а единым порядком захвата: всегда блокировать счета по возрастанию id, тогда цикла не возникнет.</p>
+<p>Остальные меры снижают вероятность, а не исключают её: короткие транзакции (меньше окно удержания блокировок), точечные блокировки вместо широких диапазонов, отсутствие пользовательского ввода и внешних HTTP-вызовов внутри транзакции. Поскольку deadlock в принципе возможен, приложение должно уметь ПОВТОРИТЬ отброшенную транзакцию — это нормальный штатный сценарий, а не сбой.</p>
+<pre class="lang-sql"><code>-- обе транзакции берут строки в одном порядке (по возрастанию id)
+begin;
+  select * from accounts where id in (:from, :to)
+  order by id for update;   -- порядок захвата предсказуем → цикла нет
+  update accounts set balance = balance - :amt where id = :from;
+  update accounts set balance = balance + :amt where id = :to;
+commit;</code></pre>
+<h2>Как отвечать на собеседовании</h2>
+<p>Не пересказывайте ACID по буквам без связок — сразу разведите две «C»: Consistency из ACID (соблюдение ограничений одной БД) и eventual consistency из распределённых систем. Это первое, что отличает подготовленного кандидата.</p>
+<p>Дальше ведите линию «аномалия → уровень изоляции»: dirty read снимается READ COMMITTED, non-repeatable — REPEATABLE READ, phantom — SERIALIZABLE. Затем добавьте то, что знают немногие: аномалий не три, есть ещё lost update (лечится FOR UPDATE или <code>@Version</code>) и write skew (снимается только настоящей сериализуемостью).</p>
+<p>Обязательно оговоритесь, что стандарт и реализация расходятся: в PostgreSQL REPEATABLE READ — это snapshot isolation, который строже стандарта, а READ UNCOMMITTED ведёт себя как READ COMMITTED. Такая оговорка показывает практический опыт.</p>
+<p>Про MVCC скажите суть в одной фразе: читатели не блокируют писателей, потому что транзакция видит снимок данных, — и назовите цену: старые версии нужно вычищать (vacuum), а долгие транзакции мешают этому и раздувают таблицы.</p>
+<p>Выбор блокировки объясняйте через частоту конфликтов: редкие — оптимистичная по версии с повтором операции, частые и дорогие для повтора — пессимистичная SELECT ... FOR UPDATE. Завершите deadlock'ом: единый порядок захвата строк плюс готовность приложения повторить откаченную транзакцию.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/databases/acid/">Что означает аббревиатура ACID?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/databases/isolation-phantom-reads/">Какой уровень изоляции транзакций по стандарту SQL гарантированно предотвращает phantom reads?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/read-anomalies/">Чем dirty read, non-repeatable read и phantom read отличаются друг от друга?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/optimistic-vs-pessimistic/">Чем отличается оптимистичная блокировка от пессимистичной?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/databases/sql-basics/">SQL: операторы, NULL и фильтрация</a><p>Группы команд, логический порядок SELECT, трёхзначная логика NULL, разница WHERE/HAVING и оконные функции — с ловушками, на которых валятся на собеседовании.</p></li><li><a href="/articles/databases/jdbc/">JDBC и безопасные запросы</a><p>Connection/Statement/ResultSet, PreparedStatement против инъекций, ручные транзакции, ресурсы и пул соединений.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Транзакции, изоляция и блокировки","description":"ACID по буквам, аномалии чтения, уровни изоляции, MVCC и оптимистичные/пессимистичные блокировки.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/databases/transactions/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

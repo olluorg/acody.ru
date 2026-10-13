@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое нормализация и когда оправдана денормализация? — вопрос с собеседования</title>
+<meta name="description" content="Нормализация — каждый факт хранится в одном месте: нет дублей, а значит нет аномалий обновления. Денормализация — сознательное дублирование ради…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/normalization/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/normalization/">
+<meta property="og:title" content="Что такое нормализация и когда оправдана денормализация? — вопрос с собеседования">
+<meta property="og:description" content="Нормализация — каждый факт хранится в одном месте: нет дублей, а значит нет аномалий обновления. Денормализация — сознательное дублирование ради…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Что такое нормализация и когда оправдана денормализация?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Что такое нормализация и когда оправдана денормализация?"}]}</script>
+  <h1>Что такое нормализация и когда оправдана денормализация?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Моделирование данных</span><span class="chip">SQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Зачем нормализовать базу данных?</li><li>Когда денормализация оправдана?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Нормализация</b> — каждый факт хранится в одном месте: нет дублей, а значит нет аномалий обновления. <b>Денормализация</b> — сознательное дублирование ради быстрого чтения.</p><ul><li>Аномалии без нормализации: обновили адрес в одной строке, в другой остался старый</li><li>Денормализуют, когда чтение доминирует и JOIN дороги: счётчики, витрины, модели чтения</li><li>Цена денормализации — синхронизация копий (триггеры, события, пересчёт)</li></ul><p class="extra"><span>А ещё</span> Начинают с нормализованной схемы, денормализуют точечно по измерениям</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Нормализация</b> — разбиение данных так, чтобы каждый факт хранился один раз. Если имя клиента записано в каждой строке заказа, то при смене имени нужно обновить тысячи строк, а пропущенная строка создаёт противоречие — <b>аномалия обновления</b>. Есть и аномалии вставки (нельзя завести клиента без заказа) и удаления (удалив последний заказ, теряем клиента). Нормальные формы (1НФ–3НФ, НФБК) формализуют правила.</p>
+<p><b>Плюсы:</b> целостность, компактность, простые изменения, гибкость для новых запросов.</p>
+<p><b>Денормализация</b> — дублирование ради чтения:</p>
+<ul><li>хранить <code>order.total</code>, а не считать сумму позиций при каждом показе;</li><li>счётчик комментариев в посте;</li><li>имя автора в документе поиска;</li><li>модели чтения в CQRS, витрины в аналитике, колоночные хранилища.</li></ul>
+<p><b>Когда оправдана:</b> чтение намного чаще записи, JOIN и агрегаты стали узким местом по измерениям, данные меняются редко или допустима задержка.</p>
+<p><b>Цена:</b> копии нужно синхронизировать — в той же транзакции, триггерами, событиями или периодическим пересчётом, и следить за расхождениями.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Цель нормализации и примеры аномалий.</li><li>Когда и зачем денормализуют, с примерами.</li><li>Цена денормализации и способы синхронизации.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Денормализовать заранее «для скорости» без измерений.</li><li>Хранить производные данные без механизма их обновления.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое 3NF простыми словами?</li><li>Как поддерживать согласованность денормализованных данных?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/data-modeling/">Моделирование данных и целостность</a><p>Ключи и constraints, нормальные формы простыми словами, осознанная денормализация и каскадные действия.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/databases/normal-forms/">Что требуют первые три нормальные формы?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/cqrs/">Что означает CQRS?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/row-vs-column/">Чем строковое хранение отличается от колоночного?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое нормализация и когда оправдана денормализация?","acceptedAnswer":{"@type":"Answer","text":"Нормализация — каждый факт хранится в одном месте: нет дублей, а значит нет аномалий обновления. Денормализация — сознательное дублирование ради быстрого чтения. Аномалии без нормализации: обновили адрес в одной строке, в другой остался старый Денормализуют, когда чтение доминирует и JOIN дороги: счётчики, витрины, модели чтения Цена денормализации — синхронизация копий (триггеры, события, пересчёт) Начинают с нормализованной схемы, денормализуют точечно по измерениям Нормализация — разбиение данных так, чтобы каждый факт хранился один раз. Если имя клиента записано в каждой строке заказа, то при смене имени нужно обновить тысячи строк, а пропущенная строка создаёт противоречие — аномалия обновления. Есть и аномалии вставки (нельзя завести клиента без заказа) и удаления (удалив последний заказ, теряем клиента). Нормальные формы (1НФ–3НФ, НФБК) формализуют правила. Плюсы: целостность, компактность, простые изменения, гибкость для новых запросов. Денормализация — дублирование ради чтения: - хранить order.total, а не считать сумму позиций при каждом показе; - счётчик комментариев в посте; - имя автора в документе поиска; - модели чтения в CQRS, витрины в аналитике, колоночные хранилища. Когда оправдана: чтение намного чаще записи, JOIN и агрегаты стали узким местом по измерениям, данные меняются редко или допустима задержка. Цена: копии нужно…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

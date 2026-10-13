@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что происходит, когда вы вводите адрес сайта в браузере? — вопрос с собеседования</title>
+<meta name="description" content="Браузер находит IP через DNS, устанавливает соединение (TCP, TLS для HTTPS), отправляет HTTP-запрос, сервер возвращает ответ, браузер отрисовывает…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/qa/client-server/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/qa/client-server/">
+<meta property="og:title" content="Что происходит, когда вы вводите адрес сайта в браузере? — вопрос с собеседования">
+<meta property="og:description" content="Браузер находит IP через DNS, устанавливает соединение (TCP, TLS для HTTPS), отправляет HTTP-запрос, сервер возвращает ответ, браузер отрисовывает…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/qa/">Тестирование (QA)</a> <span>/</span> <span>Что происходит, когда вы вводите адрес сайта в браузере?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Тестирование (QA)","item":"https://learn.getsotto.ru/questions/qa/"},{"@type":"ListItem","position":3,"name":"Что происходит, когда вы вводите адрес сайта в браузере?"}]}</script>
+  <h1>Что происходит, когда вы вводите адрес сайта в браузере?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Клиент-сервер и веб</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как устроена клиент-серверная архитектура?</li><li>Чем фронтенд отличается от бэкенда?</li><li>Что такое DNS?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Браузер <b>находит IP через DNS</b>, устанавливает <b>соединение (TCP, TLS для HTTPS)</b>, отправляет <b>HTTP-запрос</b>, сервер <b>возвращает ответ</b>, браузер <b>отрисовывает страницу</b> и догружает ресурсы.</p><ul><li>Клиент (браузер, приложение) показывает интерфейс, сервер хранит данные и логику</li><li>Фронтенд — то, что выполняется у клиента; бэкенд — на сервере</li></ul><p class="extra"><span>А ещё</span> Тестировщику важно понимать, на чьей стороне ошибка — это видно в DevTools</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>По шагам:</p>
+<ol><li><b>DNS.</b> Браузер узнаёт IP-адрес сервера по имени домена: сначала в своём кэше, затем у DNS-серверов.</li><li><b>Соединение.</b> Устанавливается TCP-соединение; для HTTPS — ещё и TLS-рукопожатие с проверкой сертификата и шифрованием.</li><li><b>HTTP-запрос.</b> Браузер отправляет запрос: метод (GET), путь, заголовки, cookies.</li><li><b>Обработка на сервере.</b> Веб-сервер передаёт запрос приложению, оно обращается к базе, другим сервисам и формирует ответ.</li><li><b>HTTP-ответ.</b> Код статуса (200, 404, 500), заголовки и тело — HTML, JSON, картинка.</li><li><b>Отрисовка.</b> Браузер разбирает HTML, загружает CSS, JavaScript и картинки отдельными запросами, выполняет скрипты, которые часто делают новые запросы к API.</li></ol>
+<p><b>Клиент-серверная архитектура</b> разделяет роли: клиент показывает интерфейс и отправляет запросы, сервер хранит данные и выполняет бизнес-логику. Фронтенд и бэкенд — части приложения на стороне клиента и сервера соответственно.</p>
+<p>Для тестировщика это основа локализации бага: если в DevTools запрос ушёл с верными данными, а сервер ответил 500 — ошибка на бэкенде; если ответ верный, а на экране неправильно — на фронтенде.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Цепочка: DNS, соединение, запрос, обработка, ответ, отрисовка.</li><li>Роли клиента и сервера.</li><li>Как это помогает понять, на чьей стороне баг.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Пропустить DNS или HTTPS.</li><li>Не понимать, что страница — это много запросов, а не один.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/qa/http-methods/">Какие HTTP-методы вы знаете? Чем GET отличается от POST?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/qa/http-status-codes/">Какие коды ответа HTTP вы знаете?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/qa/devtools/">Как вы используете DevTools при тестировании?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что происходит, когда вы вводите адрес сайта в браузере?","acceptedAnswer":{"@type":"Answer","text":"Браузер находит IP через DNS, устанавливает соединение (TCP, TLS для HTTPS), отправляет HTTP-запрос, сервер возвращает ответ, браузер отрисовывает страницу и догружает ресурсы. Клиент (браузер, приложение) показывает интерфейс, сервер хранит данные и логику Фронтенд — то, что выполняется у клиента; бэкенд — на сервере Тестировщику важно понимать, на чьей стороне ошибка — это видно в DevTools По шагам: 1. DNS. Браузер узнаёт IP-адрес сервера по имени домена: сначала в своём кэше, затем у DNS-серверов. 2. Соединение. Устанавливается TCP-соединение; для HTTPS — ещё и TLS-рукопожатие с проверкой сертификата и шифрованием. 3. HTTP-запрос. Браузер отправляет запрос: метод (GET), путь, заголовки, cookies. 4. Обработка на сервере. Веб-сервер передаёт запрос приложению, оно обращается к базе, другим сервисам и формирует ответ. 5. HTTP-ответ. Код статуса (200, 404, 500), заголовки и тело — HTML, JSON, картинка. 6. Отрисовка. Браузер разбирает HTML, загружает CSS, JavaScript и картинки отдельными запросами, выполняет скрипты, которые часто делают новые запросы к API. Клиент-серверная архитектура разделяет роли: клиент показывает интерфейс и отправляет запросы, сервер хранит данные и выполняет бизнес-логику. Фронтенд и бэкенд — части приложения на стороне клиента и сервера…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

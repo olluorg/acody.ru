@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kafka Producer — разбор для собеседования</title>
+<meta name="description" content="Запись и сериализация, выбор партиции, батчинг и сжатие, acks и долговечность, идемпотентный producer и транзакции.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/brokers/kafka-producer/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/brokers/kafka-producer/">
+<meta property="og:title" content="Kafka Producer — разбор для собеседования">
+<meta property="og:description" content="Запись и сериализация, выбор партиции, батчинг и сжатие, acks и долговечность, идемпотентный producer и транзакции.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#brokers">Брокеры сообщений</a> <span>/</span> <span>Kafka Producer</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/articles/#brokers"},{"@type":"ListItem","position":3,"name":"Kafka Producer"}]}</script>
+  <h1>Kafka Producer</h1>
+  <p class="lead">Запись и сериализация, выбор партиции, батчинг и сжатие, acks и долговечность, идемпотентный producer и транзакции.</p>
+  <article class="md"><h2>Отправка записи</h2>
+<p>Producer формирует ProducerRecord с key, value, headers и (опционально) timestamp. Key и value проходят через выбранные Serializer'ы — на JSON, Avro или Protobuf со schema registry; без согласованной сериализации consumer не прочитает данные.</p>
+<p>Внутри producer асинхронен: <code>send()</code> кладёт запись в внутренний accumulator, отдельный sender-thread пакует записи в батчи и шлёт брокерам. Метод возвращает <code>Future&lt;RecordMetadata&gt;</code> и поддерживает callback для асинхронной обработки результата.</p>
+<h2>Выбор партиции</h2>
+<p>С ключом — partitioner по умолчанию вычисляет <code>hash(key)</code> % <code>numPartitions</code>, поэтому одинаковые ключи идут в одну партицию (порядок per-ключ).</p>
+<p>Без ключа producer должен распределить по партициям равномерно. Современный «sticky partitioner» (с Kafka 2.4) выбирает партицию для целого батча, а не для каждого сообщения — это даёт лучший батчинг (меньше мелких отправок), не нарушая равномерность во времени. Можно подключить и custom partitioner для специфичного routing.</p>
+<h2>Батчинг и сжатие</h2>
+<p>Пропускная способность producer держится на батчинге. <code>batch.size</code> — максимальный размер партии в байтах. <code>linger.ms</code> — сколько ждать заполнения батча перед отправкой (0 = шлём сразу, маленькие батчи; чуть больше = больше throughput ценой задержки). <code>compression.type</code> (gzip/snappy/lz4/zstd) уменьшает сеть и диск ценой CPU; обычно берут lz4/zstd как баланс.</p>
+<p><code>buffer.memory</code> ограничивает общую память producer на буфер. Если брокер не успевает принимать и буфер заполняется, <code>send()</code> начинает блокироваться, а затем падает по timeout — это сигнал упереться в брокер/сеть.</p>
+<h2>Acks и долговечность</h2>
+<p>Параметр acks определяет, чего ждать producer перед подтверждением записи. acks=0 — fire-and-forget, возможны потери даже при сетевом сбое. acks=1 — ждать ACK от leader партиции (запись может потеряться, если leader упадёт ДО репликации). acks=all — ждать подтверждения от всех реплик в ISR (in-sync replicas); самая надёжная настройка.</p>
+<p>Связка с <code>min.insync.replicas</code> на стороне брокера: acks=all даёт настоящую долговечность только если <code>min.insync.replicas</code> ≥ 2 — иначе запись успешна, даже когда осталась лишь одна реплика, и её потеря убьёт сообщение. Стандартная боевая комбинация — <code>replication.factor</code>=3, <code>min.insync.replicas</code>=2, acks=all.</p>
+<h2>Retries и порядок</h2>
+<p>Producer повторяет отправку при ретраиваемых ошибках (retries, <code>delivery.timeout.ms</code>). Здесь возникает опасность дублей и нарушения порядка: если первый запрос ещё в пути и producer уже отправил следующий, при повторе порядок может перепутаться.</p>
+<p><code>max.in.flight.requests.per.connection</code> ограничивает число неподтверждённых запросов на соединение. С <code>enable.idempotence</code> сохранять порядок при retry безопасно даже при значениях до 5; без идемпотентности для строгого порядка приходится ставить 1.</p>
+<h2>Идемпотентный producer и транзакции</h2>
+<p><code>enable.idempotence</code>=true (по умолчанию в современных Kafka) присваивает producer'у уникальный PID и порядковый sequence number per partition. Брокер отбрасывает дубли при ретраях → нет дублей В РАМКАХ ОДНОЙ producer-сессии и партиции при сбоях клиента/сети. Это не сквозной exactly-once, а защита от собственных ретраев.</p>
+<p>Для atomic-записи в несколько партиций/тем сразу есть транзакции producer'а (<code>transactional.id</code>, <code>initTransactions</code>/<code>beginTransaction</code>/<code>commitTransaction</code>). На них построен паттерн consume-process-produce внутри Kafka — основа exactly-once в потоковой обработке.</p>
+<pre class="lang-java"><code>// типичный prod-набор для надёжной отправки
+props.put(&quot;acks&quot;, &quot;all&quot;);
+props.put(&quot;enable.idempotence&quot;, &quot;true&quot;);
+props.put(&quot;compression.type&quot;, &quot;lz4&quot;);
+props.put(&quot;linger.ms&quot;, &quot;10&quot;); // допускаем 10мс задержки ради батчинга</code></pre>
+<h2>Как отвечать на собеседовании</h2>
+<p>Разберите путь записи: send → accumulator → sender → батчи (<code>linger.ms</code>/<code>batch.size</code>/compression). Объясните выбор партиции с ключом (порядок per-ключ) и sticky-partitioner без ключа. Главное — acks и долговечность: acks=all + <code>min.insync.replicas</code>=2 + RF=3 как боевой дефолт. Назовите идемпотентного producer'а (PID+sequence → нет дублей при ретраях в одной сессии/партиции) и транзакции для atomic-многопартиционной записи; не путайте это с end-to-end exactly-once.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/brokers/producer-partitioner/">Как Kafka producer выбирает партицию для сообщения?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/producer-acks/">Что означают acks=0, acks=1 и acks=all у Kafka producer?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/idempotent-producer/">Что даёт идемпотентный Kafka producer (enable.idempotence=true)?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/retries-and-ordering/">Producer настроен с retries и несколькими запросами в полёте одновременно. Чем это грозит порядку сообщений и как решается?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/producer-basic/">Что делает producer в системе обмена сообщениями?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/brokers/kafka-core/">Kafka: topic, partition, offset</a><p>Распределённый append-only лог, партиция как единица масштаба и упорядоченности, ключ и порядок, retention и log compaction, replay.</p></li><li><a href="/articles/brokers/kafka-replication/">Kafka replication и отказоустойчивость</a><p>Leader/followers, ISR и lag, связка acks/min.insync, high watermark и видимость для consumer, выборы лидера и unclean election, rack awareness.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Kafka Producer","description":"Запись и сериализация, выбор партиции, батчинг и сжатие, acks и долговечность, идемпотентный producer и транзакции.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/brokers/kafka-producer/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

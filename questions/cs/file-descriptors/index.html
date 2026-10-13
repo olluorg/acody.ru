@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое файловый дескриптор? — вопрос с собеседования</title>
+<meta name="description" content="Файловый дескриптор — небольшое целое число, по которому процесс обращается к открытому ресурсу: файлу, сокету, каналу, устройству. 0, 1, 2 — stdin…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/file-descriptors/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/file-descriptors/">
+<meta property="og:title" content="Что такое файловый дескриптор? — вопрос с собеседования">
+<meta property="og:description" content="Файловый дескриптор — небольшое целое число, по которому процесс обращается к открытому ресурсу: файлу, сокету, каналу, устройству. 0, 1, 2 — stdin…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Что такое файловый дескриптор?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Что такое файловый дескриптор?"}]}</script>
+  <h1>Что такое файловый дескриптор?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Операционные системы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что означает ошибка Too many open files?</li><li>Почему в Unix «всё есть файл»?</li><li>Что такое stdin, stdout и stderr?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Файловый дескриптор</b> — небольшое целое число, по которому процесс обращается к открытому ресурсу: файлу, сокету, каналу, устройству.</p><ul><li>0, 1, 2 — stdin, stdout, stderr</li><li>Лимит на процесс (ulimit -n, часто 1024) — при утечке «Too many open files»</li><li>Сокеты тоже дескрипторы: каждое соединение тратит один</li></ul><p class="extra"><span>А ещё</span> Закрывать ресурсы: try-with-resources, with, defer</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Когда процесс открывает файл (<code>open</code>), ядро создаёт запись об открытом ресурсе и возвращает процессу индекс в его таблице — файловый дескриптор. Дальше все операции идут по номеру: <code>read(fd, ...)</code>, <code>write(fd, ...)</code>, <code>close(fd)</code>.</p>
+<p><b>«Всё есть файл».</b> Через тот же интерфейс в Unix работают сокеты, каналы (<code>|</code> в shell), терминалы, устройства, таймеры (<code>timerfd</code>), события (<code>eventfd</code>). Поэтому одним <code>epoll</code> можно ждать готовности и сетевых соединений, и каналов, а перенаправление <code>&gt;</code> в shell просто подменяет дескриптор 1.</p>
+<p><b>Стандартные:</b> 0 — stdin, 1 — stdout, 2 — stderr. <code>2&gt;&amp;1</code> — направить stderr туда же, куда stdout.</p>
+<p><b>Лимиты.</b> На процесс есть ограничение числа открытых дескрипторов — <code>ulimit -n</code>, по умолчанию часто 1024 (мягкий лимит). Для сервера с десятками тысяч соединений его поднимают (<code>LimitNOFILE</code> в systemd, <code>nofile</code> в limits.conf). Есть и общесистемный <code>fs.file-max</code>.</p>
+<p><b>Too many open files</b> (EMFILE) — обычно не «мало лимита», а <b>утечка</b>: файлы, сокеты или HTTP-соединения открываются и не закрываются. Ищут через <code>ls /proc/&lt;pid&gt;/fd | wc -l</code> и <code>lsof -p &lt;pid&gt;</code> — видно, чего накопилось. Лечение — закрывать ресурсы гарантированно: <code>try-with-resources</code> в Java, <code>with</code> в Python, <code>defer</code> в Go; переиспользовать HTTP-клиент с пулом вместо нового клиента на каждый запрос.</p>
+<p><b>Наследование.</b> После <code>fork</code> дочерний процесс получает копии дескрипторов; чтобы не утекали в запускаемые программы, их открывают с флагом <code>O_CLOEXEC</code>. Удалённый, но открытый файл продолжает занимать место на диске, пока дескриптор не закрыт — классическая загадка «диск полон, а файлов нет» с лог-файлом, который удалили у работающего процесса.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>$ ulimit -n
+1024
+$ ls /proc/$(pgrep -f app.jar)/fd | wc -l
+1019
+$ lsof -p $(pgrep -f app.jar) | awk &#x27;{print $5}&#x27; | sort | uniq -c
+    12 REG
+   987 IPv4      # сокеты не закрываются — утечка соединений</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Дескриптор — номер открытого ресурса в таблице процесса.</li><li>Сокеты и каналы — тоже дескрипторы.</li><li>0, 1, 2 и перенаправление.</li><li>Too many open files: лимит, утечки, диагностика через /proc и lsof.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Просто поднимать лимит, не поискав утечку.</li><li>Думать, что удалённый файл сразу освобождает место.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/c10k-event-loop/">Как один сервер держит сотни тысяч одновременных соединений?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/syscalls/">Что такое системный вызов и чем режим ядра отличается от пользовательского?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое файловый дескриптор?","acceptedAnswer":{"@type":"Answer","text":"Файловый дескриптор — небольшое целое число, по которому процесс обращается к открытому ресурсу: файлу, сокету, каналу, устройству. 0, 1, 2 — stdin, stdout, stderr Лимит на процесс (ulimit -n, часто 1024) — при утечке «Too many open files» Сокеты тоже дескрипторы: каждое соединение тратит один Закрывать ресурсы: try-with-resources, with, defer Когда процесс открывает файл (open), ядро создаёт запись об открытом ресурсе и возвращает процессу индекс в его таблице — файловый дескриптор. Дальше все операции идут по номеру: read(fd, ...), write(fd, ...), close(fd). «Всё есть файл». Через тот же интерфейс в Unix работают сокеты, каналы (| в shell), терминалы, устройства, таймеры (timerfd), события (eventfd). Поэтому одним epoll можно ждать готовности и сетевых соединений, и каналов, а перенаправление > в shell просто подменяет дескриптор 1. Стандартные: 0 — stdin, 1 — stdout, 2 — stderr. 2>&1 — направить stderr туда же, куда stdout. Лимиты. На процесс есть ограничение числа открытых дескрипторов — ulimit -n, по умолчанию часто 1024 (мягкий лимит). Для сервера с десятками тысяч соединений его поднимают (LimitNOFILE в systemd, nofile в limits.conf). Есть и общесистемный fs.file-max. Too many open files (EMFILE) — обычно не «мало…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

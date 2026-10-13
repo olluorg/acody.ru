@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Аутентификация: JWT, OAuth2/OIDC и method security — разбор для собеседования</title>
+<meta name="description" content="Структура и валидация JWT, проблема отзыва, роли OAuth2 и authorization code flow, OIDC, и авторизация на уровне методов.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/spring/security-auth/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/spring/security-auth/">
+<meta property="og:title" content="Аутентификация: JWT, OAuth2/OIDC и method security — разбор для собеседования">
+<meta property="og:description" content="Структура и валидация JWT, проблема отзыва, роли OAuth2 и authorization code flow, OIDC, и авторизация на уровне методов.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#spring">Spring</a> <span>/</span> <span>Аутентификация: JWT, OAuth2/OIDC и method security</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/articles/#spring"},{"@type":"ListItem","position":3,"name":"Аутентификация: JWT, OAuth2/OIDC и method security"}]}</script>
+  <h1>Аутентификация: JWT, OAuth2/OIDC и method security</h1>
+  <p class="lead">Структура и валидация JWT, проблема отзыва, роли OAuth2 и authorization code flow, OIDC, и авторизация на уровне методов.</p>
+  <article class="md"><h2>JWT: структура и валидация</h2>
+<p>JWT — самодостаточный токен из трёх частей через точку: <code>header.payload.signature</code> (каждая — base64url). В payload лежат claims (sub, iss, aud, exp, роли), а signature — подпись (HMAC на секрете или RSA/EC на паре ключей).</p>
+<p>Resource server (ваше API) проверяет подпись, issuer (iss), audience (aud) и срок (exp), а затем маппит claims в authorities. Важно: payload ПОДПИСАН, но НЕ зашифрован — его может прочитать любой. Поэтому секреты в JWT не кладут.</p>
+<p>Классическая атака — подмена алгоритма в header. alg:none: злоумышленник ставит заголовок "alg":"none" и шлёт токен без подписи; наивная библиотека «проверяет» подпись none и принимает токен. Algorithm confusion: токен, который сервер ждёт подписанным RSA (RS256, проверка публичным ключом), злоумышленник переподписывает HMAC (HS256), используя публичный RSA-ключ как HMAC-секрет. Защита одна: сервер должен жёстко фиксировать ожидаемый алгоритм и не доверять полю alg из токена. В Spring Security это закрыто из коробки (NimbusJwtDecoder с заданным алгоритмом) — главное не отключать и не «чинить» проверку вручную.</p>
+<h2>Отзыв и refresh</h2>
+<p>Цена stateless-самодостаточности: выданный JWT нельзя «отозвать» до истечения — сервер его не хранит и не отслеживает. Если токен украли, он валиден до exp.</p>
+<p>Поэтому на практике используют короткоживущий access-токен (минуты) плюс долгоживущий refresh-токен, который хранится и может быть отозван на сервере; access обновляют по refresh. Для немедленного отзыва ведут blacklist/версионирование — это уже добавляет состояние, размывая «чистый stateless».</p>
+<h2>OAuth2: роли и flow</h2>
+<p>OAuth2 — протокол делегированного доступа с тремя ролями: authorization server выдаёт токены, resource server защищает API и проверяет токены (это типичная роль Spring-приложения, oauth2ResourceServer), client получает токен от имени пользователя.</p>
+<p>Базовый сценарий — authorization code flow: пользователь логинится у authorization server, приложение получает короткоживущий code, меняет его на токены на бэкенде. Так пароль пользователя не проходит через ваше приложение.</p>
+<figure><img src="/articles/assets/oauth2-flow.webp" alt="Поток OAuth2 между клиентом, сервером авторизации и ресурс-сервером: запрос авторизации, согласие пользователя, код авторизации, обмен кода на токен, доступ к ресурсу по access-токену." loading="lazy"><figcaption>OAuth2 authorization code flow: код авторизации обменивается на access-токен, с которым клиент идёт к ресурс-серверу.</figcaption></figure>
+<h2>OIDC</h2>
+<p>OpenID Connect (OIDC) — слой identity поверх OAuth2. Если чистый OAuth2 — про ДОСТУП (authorization), то OIDC добавляет id_token (тоже JWT) с информацией о пользователе и нужен для ЛОГИНА (authentication) через внешнего провайдера (Google, Keycloak, Okta).</p>
+<p>Различайте: access_token — для вызова API, id_token — чтобы узнать, кто вошёл. Spring поддерживает обе роли (oauth2Login для клиента, oauth2ResourceServer для API).</p>
+<h2>Method security</h2>
+<p>Кроме авторизации по URL, права проверяют на уровне методов: <code>@EnableMethodSecurity</code> включает <code>@PreAuthorize</code>/<code>@PostAuthorize</code> (с выражениями SpEL) и <code>@Secured</code>. Это полезно, когда один сервисный метод вызывается из разных точек входа (REST, очередь, шедулер) — защита в одном месте.</p>
+<p>Method security работает через AOP-прокси, поэтому наследует ту же ловушку self-invocation (вызов через this мимо прокси не проверяется). И не ограничивайтесь ролями — часто нужна проверка владения объектом (ownership).</p>
+<pre class="lang-java"><code>@PreAuthorize(&quot;hasAuthority(&#x27;ORDER_READ&#x27;) and @acl.canReadOrder(#id)&quot;) // роль + ownership
+OrderDto getOrder(long id) { /* ... */ }</code></pre>
+<h2>Как отвечать на собеседовании</h2>
+<p>Опишите JWT (<code>header.payload.signature</code>, подписан но не зашифрован → без секретов; сервер проверяет подпись/iss/aud/exp) и главную проблему — отзыв (короткий access + refresh). Различите роли OAuth2 (resource server/client/authorization server) и authorization code flow, и OIDC как identity-слой (id_token, логин) против OAuth2 (доступ). Завершите method security через AOP (<code>@PreAuthorize</code>, self-invocation, ownership, а не только роли).</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/spring/jwt-vs-oauth2-oidc/">Чем JWT отличается от OAuth2/OIDC?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/preauthorize/">Для чего нужна @PreAuthorize в Spring Security?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/hasrole-vs-hasauthority/">У пользователя есть authority &quot;ROLE_ADMIN&quot;. Какое выражение в @PreAuthorize сработает?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/auth-code-pkce/">Почему для веб- и мобильных клиентов рекомендуют authorization code flow с PKCE, а implicit flow считают устаревшим?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/jwt-parts/">Из каких частей состоит JWT?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/spring/spring-security-deep/">Spring Security: фильтр-цепочка и авторизация</a><p>SecurityFilterChain, аутентификация (UserDetailsService/PasswordEncoder), SecurityContext, авторизация запросов и CSRF/CORS/сессии.</p></li><li><a href="/articles/spring/http-security/">HTTP, cookies и сессии</a><p>Семантика HTTP-методов и кэширование, cookies и их флаги безопасности, stateful против stateless сессий, HTTPS и граница authn/authz.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Аутентификация: JWT, OAuth2/OIDC и method security","description":"Структура и валидация JWT, проблема отзыва, роли OAuth2 и authorization code flow, OIDC, и авторизация на уровне методов.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/spring/security-auth/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

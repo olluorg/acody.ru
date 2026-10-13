@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему удвоение числа серверов не удваивает пропускную способность? — вопрос с собеседования</title>
+<meta name="description" content="Масштабируется только параллельная часть работы. Закон Амдала: если 5% работы последовательны, ускорение не превысит 20× при любом числе узлов. А…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/amdahl-scalability/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/amdahl-scalability/">
+<meta property="og:title" content="Почему удвоение числа серверов не удваивает пропускную способность? — вопрос с собеседования">
+<meta property="og:description" content="Масштабируется только параллельная часть работы. Закон Амдала: если 5% работы последовательны, ускорение не превысит 20× при любом числе узлов. А…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Почему удвоение числа серверов не удваивает пропускную способность?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Почему удвоение числа серверов не удваивает пропускную способность?"}]}</script>
+  <h1>Почему удвоение числа серверов не удваивает пропускную способность?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Задержка, пропускная способность и очереди</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое закон Амдала?</li><li>Что ограничивает горизонтальное масштабирование?</li><li>Что такое universal scalability law?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Масштабируется только параллельная часть работы. <b>Закон Амдала</b>: если 5% работы последовательны, ускорение не превысит 20× при любом числе узлов. А координация между узлами (блокировки, согласование) может даже <b>снижать</b> пропускную способность после некоторого предела.</p><ul><li>Общие узкие места: одна база, одна блокировка, один лидер, общий счётчик</li><li>Universal Scalability Law: к последовательной части добавляется цена согласования, растущая как N²</li><li>Решение — убрать общее: шардирование, локальные кэши, асинхронность, разделение данных</li></ul><p class="extra"><span>А ещё</span> Перед масштабированием найти, во что упираемся: CPU, база, сеть, блокировка</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Закон Амдала.</b> Пусть доля p работы распараллеливается, а 1 − p — нет. Ускорение на N узлах: S(N) = 1 / ((1 − p) + p / N). При N → ∞ предел 1 / (1 − p). Даже 95% параллельной работы дают максимум 20×.</p>
+<p>В сервисах «последовательная часть» — это всё, что упирается в единственный ресурс:</p>
+<ul><li>одна основная база или один её мастер для записи;</li><li>глобальная блокировка или счётчик (<code>SELECT ... FOR UPDATE</code> по одной строке, sequence, распределённая блокировка);</li><li>единственный лидер в кластере, единственный потребитель партиции;</li><li>общий кэш или очередь, у которых предел по сети или CPU.</li></ul>
+<p><b>Universal Scalability Law</b> (Нил Гюнтер) добавляет к последовательной части <b>когерентность</b> — цену согласования узлов друг с другом: C(N) = N / (1 + α(N − 1) + βN(N − 1)). Когда β &gt; 0, у кривой есть максимум: после него добавление узлов уменьшает пропускную способность. Так ведут себя системы, где каждый узел общается с каждым: синхронная инвалидация кэшей, распределённые блокировки, широковещательные протоколы.</p>
+<p><b>Как это выглядит на практике</b> — добавили серверов приложений, а RPS не вырос, задержка не упала: значит, узкое место не в них. Пул соединений к базе занят, база упирается в CPU или в блокировки на горячих строках.</p>
+<p><b>Что делать:</b></p>
+<ul><li><b>измерить</b> — найти ресурс с очередью (USE: utilization, saturation, errors для каждого ресурса);</li><li><b>уменьшить последовательную часть</b> — шардировать данные, чтобы записи шли в разные узлы; разнести горячие счётчики (шардированные счётчики, агрегирование); заменить синхронное согласование на асинхронное;</li><li><b>уменьшить координацию</b> — локальные решения без кворума там, где это допустимо; пакетирование; кэши с TTL вместо синхронной инвалидации;</li><li><b>читать с реплик</b>, а писать в шарды — разные узкие места для чтения и записи.</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>Обработка заказа: 40 мс параллелится по серверам, 2 мс — UPDATE счётчика
+остатка под блокировкой одной строки.
+p = 40 / 42 ≈ 0,952 → предел ускорения ≈ 21×.
+Больше ~500 заказов/с на один товар не пропустить никаким числом серверов —
+пока остаток одного товара обновляется под одной блокировкой.</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Формула или смысл закона Амдала и предел ускорения.</li><li>Примеры последовательной части в реальных системах.</li><li>Цена координации, падение после максимума (USL) — для senior.</li><li>Как искать узкое место и как уменьшать общую часть.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что stateless-сервис масштабируется линейно бесконечно.</li><li>Масштабировать то, что не является узким местом.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/queueing-utilization/">Почему при загрузке сервера 90% время ответа растёт в разы, хотя запас ещё есть?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/more-instances-no-gain/">Сервис работает на двадцати инстансах. Добавление ещё десяти не уменьшает время ответа. Как вы будете искать причину и что предпримете?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/scale-the-bottleneck/">Сервер приложений загружен на 30% по CPU, но задержки растут, а пул соединений к базе занят полностью. Что даст добавление ещё нескольких серверов приложений?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему удвоение числа серверов не удваивает пропускную способность?","acceptedAnswer":{"@type":"Answer","text":"Масштабируется только параллельная часть работы. Закон Амдала: если 5% работы последовательны, ускорение не превысит 20× при любом числе узлов. А координация между узлами (блокировки, согласование) может даже снижать пропускную способность после некоторого предела. Общие узкие места: одна база, одна блокировка, один лидер, общий счётчик Universal Scalability Law: к последовательной части добавляется цена согласования, растущая как N² Решение — убрать общее: шардирование, локальные кэши, асинхронность, разделение данных Перед масштабированием найти, во что упираемся: CPU, база, сеть, блокировка Закон Амдала. Пусть доля p работы распараллеливается, а 1 − p — нет. Ускорение на N узлах: S(N) = 1 / ((1 − p) + p / N). При N → ∞ предел 1 / (1 − p). Даже 95% параллельной работы дают максимум 20×. В сервисах «последовательная часть» — это всё, что упирается в единственный ресурс: - одна основная база или один её мастер для записи; - глобальная блокировка или счётчик (SELECT ... FOR UPDATE по одной строке, sequence, распределённая блокировка); - единственный лидер в кластере, единственный потребитель партиции; - общий кэш или очередь, у которых предел по сети или CPU. Universal Scalability Law (Нил Гюнтер) добавляет к последовательной части когерентность — цену согласования узлов друг с другом: C(N) = N / (1 + α(N − 1) + βN(N − 1)). Когда β > 0, у кривой есть максимум: после него добавление узлов уменьшает пропускную способность. Так ведут себя системы, где каждый узел общается с…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

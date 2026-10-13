@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kafka — карта «Backend-разработчик»</title>
+<meta name="description" content="Топики, партиции, смещения, группы потребителей, репликация и эксплуатация.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/backend/kafka/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/backend/kafka/">
+<meta property="og:title" content="Kafka — карта «Backend-разработчик»">
+<meta property="og:description" content="Топики, партиции, смещения, группы потребителей, репликация и эксплуатация.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/#messaging">Backend-разработчик</a> <span>/</span> <a href="/roadmap/backend/messaging/">Брокеры сообщений</a> <span>/</span> <span>Kafka</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://learn.getsotto.ru/roadmap/backend/#messaging"},{"@type":"ListItem","position":3,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/roadmap/backend/messaging/"},{"@type":"ListItem","position":4,"name":"Kafka"}]}</script>
+  <h1>Kafka</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-middle">с Middle</span></div>
+  <p class="lead">Топики, партиции, смещения, группы потребителей, репликация и эксплуатация.</p>
+  <article class="md"><h3>Что важно знать</h3>
+<ul><li><b>Лог</b> вместо очереди: сообщения хранятся заданное время, потребители читают со своего смещения и могут перечитать.</li><li><b>Партиция</b> — единица параллелизма и порядка; ключ определяет партицию.</li><li><b>Группа потребителей</b>: каждая партиция — одному потребителю группы.</li><li><b>Продюсер</b>: <code>acks=all</code> и идемпотентность против потерь и дублей.</li><li><b>Коммит смещений</b> после обработки — at-least-once.</li><li><b>Репликация</b>: лидер и реплики, ISR, <code>min.insync.replicas</code>.</li><li>Kafka 4.0 работает без ZooKeeper (KRaft).</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Middle <small>≈ 12 ч</small></h3><ul><li>Объясняет топики, партиции, смещения и группы потребителей</li><li>Настраивает продюсер (acks, идемпотентность) и потребитель (коммит смещений) под нужные гарантии</li><li>Объясняет порядок сообщений в пределах партиции и выбор ключа</li></ul><p class="rm-practice"><b>Практика.</b> Поднять Kafka в Docker, сделать продюсер и группу из трёх потребителей, проверить перебалансировку и повторную обработку при падении.</p></div><div class="rm-grade"><h3>Senior <small>≈ 8 ч</small></h3><ul><li>Рассчитывает число партиций и следит за отставанием потребителей</li><li>Объясняет репликацию, ISR и поведение при отказе брокера</li></ul><p class="rm-practice"><b>Практика.</b> Провести нагрузочный тест с отказом брокера и измерить потери и дубли при разных настройках acks и min.insync.replicas.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/brokers/topic-partition-offset/">Что такое topic, partition и offset в Kafka?</a> <span class="lvl lvl-junior">Junior</span><p>Топик — именованный поток сообщений. Партиция — упорядоченный журнал, часть топика. Offset — номер сообщения внутри партиции.</p></li><li><a href="/questions/brokers/consumer-group-scaling/">Как consumer group в Kafka масштабирует потребление?</a> <span class="lvl lvl-middle">Middle</span><p>Партиции топика делятся между участниками группы: каждая партиция в группе читается ровно одним потребителем. Добавили потребителя — партиции перераспределились.</p></li><li><a href="/questions/brokers/more-consumers-than-partitions/">Что произойдёт, если потребителей в consumer group больше, чем партиций в топике?</a> <span class="lvl lvl-senior">Senior</span><p>Лишние потребители простаивают: одна партиция в группе читается только одним потребителем, поэтому параллелизм группы не больше числа партиций.</p></li><li><a href="/questions/brokers/offset-basic/">Что такое offset в Kafka?</a> <span class="lvl lvl-junior">Junior</span><p>Offset — порядковый номер записи в партиции. По нему потребитель знает, что уже прочитал: группа фиксирует offset в служебном топике __consumer_offsets.</p></li><li><a href="/questions/brokers/kafka-ordering/">Какая гарантия порядка в Kafka является базовой?</a> <span class="lvl lvl-middle">Middle</span><p>Kafka гарантирует порядок только внутри партиции. Чтобы события одного заказа шли по порядку, у них должен быть одинаковый ключ (order_id) — тогда они попадут в одну партицию.</p></li><li><a href="/questions/brokers/producer-acks/">Что означают acks=0, acks=1 и acks=all у Kafka producer?</a> <span class="lvl lvl-senior">Senior</span><p>acks=0 — не ждём подтверждения: максимум скорости, потери возможны. acks=1 — ждём запись лидером: потеря при падении лидера до репликации. acks=all — ждём все синхронные реплики…</p></li></ul></section><section class="block"><h2>Разборы темы</h2><ul class="links"><li><a href="/articles/brokers/kafka-consumer/">Kafka Consumer и consumer group</a><p>Группа и распределение партиций, poll-цикл, heartbeat и таймауты, модели commit offset, ребаланс и роль идемпотентности.</p></li><li><a href="/articles/brokers/kafka-core/">Kafka: topic, partition, offset</a><p>Распределённый append-only лог, партиция как единица масштаба и упорядоченности, ключ и порядок, retention и log compaction, replay.</p></li><li><a href="/articles/brokers/kafka-ecosystem/">Kafka API и экосистема</a><p>Клиентские API, Kafka Connect и Debezium, Streams и stream-processing, ksqlDB, Schema Registry и MirrorMaker для multi-DC.</p></li><li><a href="/articles/brokers/kafka-operations/">Kafka в эксплуатации</a><p>Consumer lag и его причины, ребаланс и безопасный commit, poison-сообщения, ZooKeeper → KRaft, schema evolution, изменения partitions и ключевые метрики.</p></li><li><a href="/articles/brokers/kafka-producer/">Kafka Producer</a><p>Запись и сериализация, выбор партиции, батчинг и сжатие, acks и долговечность, идемпотентный producer и транзакции.</p></li><li><a href="/articles/brokers/kafka-replication/">Kafka replication и отказоустойчивость</a><p>Leader/followers, ISR и lag, связка acks/min.insync, high watermark и видимость для consumer, выборы лидера и unclean election, rack awareness.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/backend/messaging-basics/">← Очереди, pub/sub и гарантии доставки</a><a class="next" href="/roadmap/backend/rabbitmq/">RabbitMQ →</a></nav>
+  <p class="rm-back"><a href="/roadmap/backend/#messaging">← Вся карта «Backend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Kafka","description":"Топики, партиции, смещения, группы потребителей, репликация и эксплуатация.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/backend/kafka/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

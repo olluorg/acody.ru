@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Браузерные API — карта «Frontend-разработчик»</title>
+<meta name="description" content="Хранилища, Web Workers, Service Worker и PWA, Intersection Observer и другие возможности платформы.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/frontend/web-apis/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/frontend/web-apis/">
+<meta property="og:title" content="Браузерные API — карта «Frontend-разработчик»">
+<meta property="og:description" content="Хранилища, Web Workers, Service Worker и PWA, Intersection Observer и другие возможности платформы.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/frontend/#web-apis">Frontend-разработчик</a> <span>/</span> <span>Браузерные API</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Frontend-разработчик","item":"https://learn.getsotto.ru/roadmap/frontend/#web-apis"},{"@type":"ListItem","position":3,"name":"Браузерные API"}]}</script>
+  <h1>Браузерные API</h1>
+  <div class="chips"><span class="rm-kind k-optional">Полезно знать</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Хранилища, Web Workers, Service Worker и PWA, Intersection Observer и другие возможности платформы.</p>
+  <article class="md"><p>Браузер умеет гораздо больше, чем показывать страницы.</p>
+<div class="table"><table><thead><tr><th>API</th><th>для чего</th></tr></thead><tbody><tr><td><code>localStorage</code>, <code>sessionStorage</code></td><td>маленькие данные строками, синхронно</td></tr><tr><td>IndexedDB</td><td>большие структурированные данные, офлайн</td></tr><tr><td>Cookies</td><td>маленькие данные, уходят на сервер с каждым запросом</td></tr><tr><td>Web Workers</td><td>вычисления в отдельном потоке</td></tr><tr><td>Service Worker</td><td>перехват запросов, офлайн-режим, push-уведомления</td></tr><tr><td>Intersection Observer</td><td>элемент появился в видимой области: ленивая загрузка, бесконечная лента</td></tr><tr><td>ResizeObserver</td><td>изменился размер элемента</td></tr><tr><td>History API</td><td>маршрутизация в SPA</td></tr><tr><td>Clipboard, Notifications, Geolocation</td><td>доступ к возможностям устройства с разрешения пользователя</td></tr></tbody></table></div>
+<p><b>PWA</b> — веб-приложение с манифестом и Service Worker: устанавливается на домашний экран, работает офлайн. Для многих задач заменяет отдельное мобильное приложение.</p></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 3 ч</small></h3><ul><li>Использует localStorage и sessionStorage и понимает их ограничения</li></ul><p class="rm-practice"><b>Практика.</b> Сохранять черновик формы в localStorage с обработкой ошибок доступа.</p></div><div class="rm-grade"><h3>Middle <small>≈ 6 ч</small></h3><ul><li>Использует Intersection Observer для ленивой загрузки и бесконечной ленты</li><li>Выносит тяжёлые вычисления в Web Worker</li><li>Объясняет Service Worker и делает простое офлайн-кэширование</li></ul><p class="rm-practice"><b>Практика.</b> Сделать бесконечную ленту на Intersection Observer и офлайн-режим страницы на Service Worker.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/qa/cookies-storage/">Что такое cookies? Чем они отличаются от localStorage и sessionStorage?</a> <span class="lvl lvl-junior">Junior</span><p>Cookies — небольшие данные, которые браузер отправляет на сервер с каждым запросом (сессия, настройки); localStorage и sessionStorage — хранилища, доступные только скриптам…</p></li></ul></section><section class="block"><h2>Документация</h2><ul class="links"><li><a href="https://developer.mozilla.org/ru/docs/Web/API" rel="noopener" target="_blank">MDN: Web API ↗</a></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/frontend/api-integration/">← Работа с API — REST, GraphQL, WebSocket</a><a class="next" href="/roadmap/frontend/delivery/">Выкатка и эксплуатация →</a></nav>
+  <p class="rm-back"><a href="/roadmap/frontend/#web-apis">← Вся карта «Frontend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Браузерные API","description":"Хранилища, Web Workers, Service Worker и PWA, Intersection Observer и другие возможности платформы.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/frontend/web-apis/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

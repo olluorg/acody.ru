@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие проблемы бывают с Redis под высокой нагрузкой? — вопрос с собеседования</title>
+<meta name="description" content="Команды Redis выполняются в одном потоке — одна медленная команда (KEYS, большой HGETALL, долгий Lua) задерживает всех. Отсюда главные правила: не…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/redis-at-scale/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/redis-at-scale/">
+<meta property="og:title" content="Какие проблемы бывают с Redis под высокой нагрузкой? — вопрос с собеседования">
+<meta property="og:description" content="Команды Redis выполняются в одном потоке — одна медленная команда (KEYS, большой HGETALL, долгий Lua) задерживает всех. Отсюда главные правила: не…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Какие проблемы бывают с Redis под высокой нагрузкой?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Какие проблемы бывают с Redis под высокой нагрузкой?"}]}</script>
+  <h1>Какие проблемы бывают с Redis под высокой нагрузкой?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Кэши под нагрузкой</span><span class="chip">Redis</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему Redis однопоточный и чем это опасно?</li><li>Что такое большие ключи в Redis?</li><li>Как масштабировать Redis?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Команды Redis выполняются в <b>одном потоке</b> — одна медленная команда (KEYS, большой HGETALL, долгий Lua) задерживает всех. Отсюда главные правила: не трогать большие структуры целиком, избегать O(N) команд, держать ключи маленькими.</p><ul><li>Большие ключи: хэш на миллион полей — медленные операции, перекос памяти, долгое удаление (UNLINK вместо DEL)</li><li>Горячие ключи упираются в один поток одного шарда</li><li>Масштабирование: реплики для чтения, Redis Cluster — 16384 слота по узлам</li></ul><p class="extra"><span>А ещё</span> Персистентность: RDB-снимок через fork (память ×2 при записи), AOF с fsync раз в секунду</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Модель выполнения.</b> Сетевой ввод-вывод в Redis 6+ может идти в нескольких потоках, но сами команды исполняются последовательно в одном. Поэтому Redis быстрый (нет блокировок) — и поэтому одна долгая команда останавливает всех клиентов.</p>
+<p><b>Опасные команды и шаблоны:</b></p>
+<ul><li><code>KEYS *</code> — полный перебор; вместо неё <code>SCAN</code> с курсором;</li><li><code>HGETALL</code>, <code>SMEMBERS</code>, <code>LRANGE 0 -1</code>, <code>ZRANGE</code> по большим структурам — O(N); читать порциями <code>HSCAN</code>, <code>SSCAN</code>;</li><li><code>DEL</code> большого ключа — освобождение памяти синхронно; <code>UNLINK</code> освобождает в фоне;</li><li>долгие Lua-скрипты и <code>MULTI</code> с тяжёлыми командами;</li><li><code>FLUSHALL</code> без <code>ASYNC</code>.</li></ul>
+<p>Ищут через <code>SLOWLOG</code>, <code>LATENCY DOCTOR</code>, <code>--bigkeys</code>, <code>--hotkeys</code> (при LFU-политике), <code>MEMORY USAGE</code>.</p>
+<p><b>Большие ключи</b> — один хэш, список или множество на сотни мегабайт: медленные операции, неравномерная память в кластере (ключ не делится между узлами), долгая репликация и миграция слота. Решение — разбивать: <code>cart:{user}:items</code> вместо одного гигантского хэша на всех, бакеты по хешу поля.</p>
+<p><b>Масштабирование:</b></p>
+<ul><li><b>реплики</b> — чтение с реплик (асинхронные — могут отставать), Sentinel для автоматического переключения;</li><li><b>Redis Cluster</b> — ключи распределены по 16384 слотам (CRC16 ключа), слоты — по узлам. Многоключевые команды и транзакции — только в пределах слота: хеш-теги <code>{user:42}:cart</code> и <code>{user:42}:profile</code> кладут ключи пользователя в один слот. Клиент знает карту слотов и получает <code>MOVED</code> при переезде;</li><li>клиентский шардинг consistent hashing — старая альтернатива.</li></ul>
+<p><b>Память и вытеснение:</b> <code>maxmemory</code> и политика (<code>allkeys-lru</code>, <code>allkeys-lfu</code>, <code>volatile-ttl</code>); без лимита Redis съест память и попадёт под OOM killer. Фрагментация — <code>activedefrag</code>.</p>
+<p><b>Персистентность:</b></p>
+<ul><li><b>RDB</b> — снимок через <code>fork</code>: copy-on-write, при активной записи память может почти удвоиться, а fork большого процесса — задержка в десятки миллисекунд;</li><li><b>AOF</b> — журнал команд, <code>appendfsync everysec</code> — потеря до секунды;</li><li>для чистого кэша персистентность часто выключают, для хранилища сессий и очередей — включают.</li></ul>
+<p><b>Ещё:</b> пул соединений и pipelining для пачек команд; таймауты на клиенте; не использовать Redis как основную базу для данных, которые нельзя потерять, без понимания гарантий репликации (асинхронная — подтверждённая запись может исчезнуть при переключении).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>redis-cli --bigkeys
+  Biggest hash found &#x27;sessions&#x27; has 2 418 309 fields      ← все сессии в одном ключе
+redis-cli SLOWLOG GET 3
+  1) HGETALL sessions — 1 820 ms                          ← все клиенты ждали почти 2 секунды
+Решение: session:{id} отдельными ключами с TTL; HSCAN вместо HGETALL; UNLINK для удаления.</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Однопоточное исполнение команд и его последствия.</li><li>Опасные O(N) команды и большие ключи, как находить и чинить.</li><li>Масштабирование: реплики, Cluster со слотами и хеш-тегами.</li><li>Память, вытеснение и персистентность (fork, AOF).</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Использовать <code>KEYS</code> в продакшене.</li><li>Хранить всё в одном большом хэше «для удобства».</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/hot-keys/">Что делать с горячими ключами, на которые приходится непропорционально большая нагрузка?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/cache-hit-ratio/">Как оценить, насколько кэш разгружает базу, и что будет, если он упадёт?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/lru-lfu/">Как устроен LRU-кэш и какие ещё бывают политики вытеснения?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/consistent-hashing/">Как работает consistent hashing и зачем нужны виртуальные узлы?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие проблемы бывают с Redis под высокой нагрузкой?","acceptedAnswer":{"@type":"Answer","text":"Команды Redis выполняются в одном потоке — одна медленная команда (KEYS, большой HGETALL, долгий Lua) задерживает всех. Отсюда главные правила: не трогать большие структуры целиком, избегать O(N) команд, держать ключи маленькими. Большие ключи: хэш на миллион полей — медленные операции, перекос памяти, долгое удаление (UNLINK вместо DEL) Горячие ключи упираются в один поток одного шарда Масштабирование: реплики для чтения, Redis Cluster — 16384 слота по узлам Персистентность: RDB-снимок через fork (память ×2 при записи), AOF с fsync раз в секунду Модель выполнения. Сетевой ввод-вывод в Redis 6+ может идти в нескольких потоках, но сами команды исполняются последовательно в одном. Поэтому Redis быстрый (нет блокировок) — и поэтому одна долгая команда останавливает всех клиентов. Опасные команды и шаблоны: - KEYS — полный перебор; вместо неё SCAN с курсором; - HGETALL, SMEMBERS, LRANGE 0 -1, ZRANGE по большим структурам — O(N); читать порциями HSCAN, SSCAN; - DEL большого ключа — освобождение памяти синхронно; UNLINK освобождает в фоне; - долгие Lua-скрипты и MULTI с тяжёлыми командами; - FLUSHALL без ASYNC. Ищут через SLOWLOG, LATENCY DOCTOR, --bigkeys, --hotkeys (при LFU-политике), MEMORY USAGE. Большие ключи — один хэш, список или множество на сотни мегабайт: медленные операции, неравномерная память в кластере (ключ не делится между узлами), долгая репликация и миграция слота. Решение — разбивать: cart:{user}:items вместо одного…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

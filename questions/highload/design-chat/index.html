@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Спроектируйте мессенджер с личными и групповыми чатами. — вопрос с собеседования</title>
+<meta name="description" content="Клиенты держат постоянное соединение (WebSocket) с шлюзами; сообщение пишется в хранилище, шардированное по chat_id, получает порядковый номер в чате…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/design-chat/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/design-chat/">
+<meta property="og:title" content="Спроектируйте мессенджер с личными и групповыми чатами. — вопрос с собеседования">
+<meta property="og:description" content="Клиенты держат постоянное соединение (WebSocket) с шлюзами; сообщение пишется в хранилище, шардированное по chat_id, получает порядковый номер в чате…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Спроектируйте мессенджер с личными и групповыми чатами.</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Спроектируйте мессенджер с личными и групповыми чатами."}]}</script>
+  <h1>Спроектируйте мессенджер с личными и групповыми чатами.</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Задачи на проектирование</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как доставлять сообщения в реальном времени миллионам пользователей?</li><li>Как хранить историю переписки?</li><li>Как гарантировать порядок сообщений в чате?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Клиенты держат <b>постоянное соединение</b> (WebSocket) с шлюзами; сообщение пишется в <b>хранилище, шардированное по chat_id</b>, получает порядковый номер в чате и доставляется онлайн-участникам через шлюзы, офлайн — пушем.</p><ul><li>Порядок — номер сообщения внутри чата (последовательность на шард чата), а не время клиента</li><li>Идемпотентность отправки: клиентский id сообщения, повтор не создаёт дубль</li><li>Синхронизация после офлайна: «дай всё после номера N» по каждому чату</li></ul><p class="extra"><span>А ещё</span> Реестр «пользователь → шлюз» в Redis; большие группы — отдельная стратегия рассылки</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Требования:</b> личные и групповые чаты (до тысяч участников), доставка онлайн за доли секунды, история, статусы «доставлено/прочитано», работа с нескольких устройств, офлайн и пуш-уведомления. Оценка: 50 млн активных в день, 40 сообщений на пользователя — 2 млрд в день (~25 000/с, пик ×3), 10 млн одновременных соединений.</p>
+<p><b>Соединения.</b> Клиенты держат WebSocket (или MQTT) со шлюзами — тонкими сервисами на event loop, по сотне тысяч соединений на узел. Шлюз регистрирует в Redis «пользователь/устройство → шлюз». Балансировщик L4, переподключение с отсрочкой и джиттером при выкатке шлюзов.</p>
+<p><b>Отправка:</b></p>
+<ol><li>клиент шлёт сообщение с <b>client_msg_id</b> (UUID) — для идемпотентности повторов;</li><li>сервис сообщений проверяет права, назначает <b>номер в чате</b> (монотонный счётчик на чат — в шарде чата) и пишет в хранилище;</li><li>подтверждение отправителю с номером;</li><li>событие «новое сообщение» уходит в шину, сервис доставки находит шлюзы участников и отправляет; офлайн-устройствам — пуш (FCM/APNs).</li></ol>
+<p><b>Хранилище истории:</b> запросы «последние N сообщений чата» и «после номера X» → wide-column (Cassandra, ScyllaDB) с ключом партиции chat_id (и бакетом по времени для очень больших чатов) и сортировкой по номеру; или шардированный PostgreSQL по chat_id. Медиа — в объектном хранилище, в сообщении — ссылка.</p>
+<p><b>Порядок.</b> Время клиента ненадёжно, время серверов расходится. Порядок внутри чата задаёт номер, выданный одним местом (лидер шарда чата). Между чатами порядок не нужен. Клиент показывает по номеру и дозапрашивает пропуски.</p>
+<p><b>Доставка и синхронизация.</b> Каждое устройство помнит последний полученный номер по каждому чату (или глобальный курсор «ящика» пользователя). После переподключения — «отдай всё новее курсора». Доставка онлайн — at-least-once с дедупликацией на клиенте по номеру.</p>
+<p><b>Групповые чаты:</b> до сотен участников — рассылка по участникам; для тысяч и каналов — не раскладывать в «ящики» каждого, а читать из чата (как fan-out on read в ленте), уведомлять только онлайн.</p>
+<p><b>Статусы</b> «доставлено/прочитано» — курсоры на участника и чат (последний прочитанный номер), обновляются пачками, не на каждое сообщение.</p>
+<p><b>Ещё:</b> сквозное шифрование меняет архитектуру (сервер не видит содержимое — поиск и модерация на клиенте), поиск по истории — отдельный индекс, лимиты на спам, хранение по закону.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>send(chat=777, client_msg_id=a1b2, text=&quot;привет&quot;)
+→ сервис сообщений (шард по chat 777): seq = 10 452 → INSERT messages(777, 10452, ...)
+→ ack отправителю {seq: 10452}
+→ Kafka &quot;chat-events&quot; → доставка: Redis route:user:42 → gateway-17 → WebSocket push
+Офлайн-устройство при входе: GET /sync?chat=777&amp;after=10431 → 21 сообщение</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Постоянные соединения и шлюзы с реестром маршрутов.</li><li>Путь сообщения: идемпотентность, номер в чате, запись, доставка, пуш.</li><li>Хранилище истории, ключ партиции и запросы.</li><li>Порядок через номер в чате, синхронизация по курсору.</li><li>Разные стратегии для больших групп, статусы прочтения.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Упорядочивать сообщения по времени клиента.</li><li>Хранить всю историю в одной таблице без ключа партиции по чату.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/c10k-event-loop/">Как один сервер держит сотни тысяч одновременных соединений?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/sharding-strategies/">Как выбрать ключ и стратегию шардирования?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/design-unique-id/">Как генерировать уникальные идентификаторы в распределённой системе?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/idempotency-key/">Клиент отправил POST для создания заказа, не дождался ответа из-за таймаута и повторил запрос. Как правильно не допустить второго заказа?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Спроектируйте мессенджер с личными и групповыми чатами.","acceptedAnswer":{"@type":"Answer","text":"Клиенты держат постоянное соединение (WebSocket) с шлюзами; сообщение пишется в хранилище, шардированное по chat_id, получает порядковый номер в чате и доставляется онлайн-участникам через шлюзы, офлайн — пушем. Порядок — номер сообщения внутри чата (последовательность на шард чата), а не время клиента Идемпотентность отправки: клиентский id сообщения, повтор не создаёт дубль Синхронизация после офлайна: «дай всё после номера N» по каждому чату Реестр «пользователь → шлюз» в Redis; большие группы — отдельная стратегия рассылки Требования: личные и групповые чаты (до тысяч участников), доставка онлайн за доли секунды, история, статусы «доставлено/прочитано», работа с нескольких устройств, офлайн и пуш-уведомления. Оценка: 50 млн активных в день, 40 сообщений на пользователя — 2 млрд в день (~25 000/с, пик ×3), 10 млн одновременных соединений. Соединения. Клиенты держат WebSocket (или MQTT) со шлюзами — тонкими сервисами на event loop, по сотне тысяч соединений на узел. Шлюз регистрирует в Redis «пользователь/устройство → шлюз». Балансировщик L4, переподключение с отсрочкой и джиттером при выкатке шлюзов. Отправка: 1. клиент шлёт сообщение с client_msg_id (UUID) — для идемпотентности повторов; 2. сервис сообщений проверяет права, назначает номер в чате (монотонный счётчик на чат — в шарде чата) и пишет в хранилище; 3. подтверждение отправителю с номером; 4. событие «новое сообщение» уходит в шину, сервис…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

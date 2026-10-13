@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как посчитать воронку конверсии на SQL? — вопрос с собеседования</title>
+<meta name="description" content="Для каждого пользователя определить, дошёл ли он до каждого шага в правильном порядке (время шага не раньше предыдущего) и в пределах окна (например…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/funnel-sql/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/funnel-sql/">
+<meta property="og:title" content="Как посчитать воронку конверсии на SQL? — вопрос с собеседования">
+<meta property="og:description" content="Для каждого пользователя определить, дошёл ли он до каждого шага в правильном порядке (время шага не раньше предыдущего) и в пределах окна (например…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Как посчитать воронку конверсии на SQL?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Как посчитать воронку конверсии на SQL?"}]}</script>
+  <h1>Как посчитать воронку конверсии на SQL?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">SQL для аналитика</span><span class="chip">SQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как посчитать конверсию из просмотра в покупку?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Для каждого пользователя определить, дошёл ли он до каждого шага <b>в правильном порядке</b> (время шага не раньше предыдущего) и <b>в пределах окна</b> (например, 7 дней от первого шага), затем посчитать число пользователей на каждом шаге и доли от первого и от предыдущего шага.</p><ul><li>Простой подсчёт «сколько было событий каждого типа» — не воронка: порядок и принадлежность одному пользователю не учтены</li><li>Конверсию считают по пользователям или по сессиям — определяют заранее</li><li>В ClickHouse есть windowFunnel, в продуктовой аналитике — готовые отчёты</li></ul><p class="extra"><span>А ещё</span> Знаменатель: все, кто начал воронку, а не все пользователи</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Упрощение в примере:</b> берётся первое событие каждого шага. Для точной воронки по сессиям или с повторными попытками нужен поиск последовательности (сначала просмотр, потом корзина после этого просмотра) — оконными функциями или специализированными функциями хранилища.</p>
+<p><b>Решения, которые нужно оговорить:</b></p>
+<ul><li>строгий порядок шагов или любой;</li><li>окно конверсии (час, день, неделя);</li><li>единица — пользователь, сессия или заказ;</li><li>что делать с пользователями, начавшими в конце периода (ещё не успели сконвертироваться).</li></ul>
+<p><b>Интерпретация:</b> самое большое падение между шагами — кандидат для исследования, но сначала проверяют трекинг: «потерянный» шаг часто означает неотправленное событие, а не реальный отток.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-sql"><code>WITH steps AS (
+  SELECT user_id,
+    MIN(event_time) FILTER (WHERE event = &#x27;view_item&#x27;)   AS t_view,
+    MIN(event_time) FILTER (WHERE event = &#x27;add_to_cart&#x27;) AS t_cart,
+    MIN(event_time) FILTER (WHERE event = &#x27;purchase&#x27;)    AS t_buy
+  FROM events
+  WHERE event_time &gt;= DATE &#x27;2026-09-01&#x27;
+  GROUP BY user_id
+)
+SELECT
+  COUNT(t_view) AS viewed,
+  COUNT(*) FILTER (WHERE t_cart &gt;= t_view AND t_cart &lt; t_view + INTERVAL &#x27;7 day&#x27;) AS carted,
+  COUNT(*) FILTER (WHERE t_buy &gt;= t_cart AND t_cart &gt;= t_view
+                     AND t_buy &lt; t_view + INTERVAL &#x27;7 day&#x27;) AS bought
+FROM steps;</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Порядок шагов и окно конверсии.</li><li>Подсчёт по пользователям и доли.</li><li>Проверка корректности трекинга.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/funnel-analysis/">Как анализировать воронку и искать, где теряются пользователи?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/window-functions/">Что такое оконные функции в SQL и чем они отличаются от GROUP BY?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как посчитать воронку конверсии на SQL?","acceptedAnswer":{"@type":"Answer","text":"Для каждого пользователя определить, дошёл ли он до каждого шага в правильном порядке (время шага не раньше предыдущего) и в пределах окна (например, 7 дней от первого шага), затем посчитать число пользователей на каждом шаге и доли от первого и от предыдущего шага. Простой подсчёт «сколько было событий каждого типа» — не воронка: порядок и принадлежность одному пользователю не учтены Конверсию считают по пользователям или по сессиям — определяют заранее В ClickHouse есть windowFunnel, в продуктовой аналитике — готовые отчёты Знаменатель: все, кто начал воронку, а не все пользователи Упрощение в примере: берётся первое событие каждого шага. Для точной воронки по сессиям или с повторными попытками нужен поиск последовательности (сначала просмотр, потом корзина после этого просмотра) — оконными функциями или специализированными функциями хранилища. Решения, которые нужно оговорить: - строгий порядок шагов или любой; - окно конверсии (час, день, неделя); - единица — пользователь, сессия или заказ; - что делать с пользователями, начавшими в конце периода (ещё не успели сконвертироваться). Интерпретация: самое большое падение между шагами — кандидат для исследования, но сначала проверяют трекинг: «потерянный» шаг часто означает неотправленное событие, а не реальный отток."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

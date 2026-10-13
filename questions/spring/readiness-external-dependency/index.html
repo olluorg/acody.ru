@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сервис зависит от внешнего платёжного API. Стоит ли включать проверку его доступности в readiness-пробу? — вопрос с собеседования</title>
+<meta name="description" content="Нет: readiness отражает готовность самого пода. Если внешний API упал, все поды станут неготовыми, сервис пропадёт целиком — даже функции, не…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/readiness-external-dependency/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/readiness-external-dependency/">
+<meta property="og:title" content="Сервис зависит от внешнего платёжного API. Стоит ли включать проверку его доступности в readiness-пробу? — вопрос с собеседования">
+<meta property="og:description" content="Нет: readiness отражает готовность самого пода. Если внешний API упал, все поды станут неготовыми, сервис пропадёт целиком — даже функции, не…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Сервис зависит от внешнего платёжного API. Стоит ли включать проверку его доступности в readiness-пробу?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Сервис зависит от внешнего платёжного API. Стоит ли включать проверку его доступности в readiness-пробу?"}]}</script>
+  <h1>Сервис зависит от внешнего платёжного API. Стоит ли включать проверку его доступности в readiness-пробу?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Spring Boot и Actuator</span><span class="chip">Spring Boot</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Включать ли внешний API в health-проверку?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Нет</b>: readiness отражает готовность <b>самого пода</b>. Если внешний API упал, все поды станут неготовыми, сервис пропадёт целиком — даже функции, не связанные с оплатой.</p><ul><li>Внешнюю зависимость защищают таймаутом, circuit breaker и деградацией</li><li>В readiness — только то, без чего под не может обслужить ничего</li><li>Состояние зависимостей — в отдельной группе health для мониторинга</li></ul><p class="extra"><span>А ещё</span> Тем более не в liveness — будут бесконечные перезапуски</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Логика такая: readiness управляет тем, идёт ли на под трафик. Если в неё включить внешнюю зависимость, то при её падении все поды одновременно объявят себя неготовыми — балансировщик уберёт их из ротации, и даже те запросы, которым платёжный API не нужен, перестанут обслуживаться. Полный отказ вместо частичной деградации. Правильный подход: в readiness — только то, без чего под не может работать вообще (например, инициализация и собственная база), а состояние внешних зависимостей выносят в отдельный health group для наблюдения и защищают circuit breaker с деградацией. Тем более нельзя ставить внешние проверки в liveness — там это приведёт к бесконечным перезапускам контейнера.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Ответ и каскадный эффект.</li><li>Что включать в readiness.</li><li>Как защищаться от внешней зависимости.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Включать все зависимости в readiness «для полноты картины».</li><li>Проверять внешние сервисы в liveness и получать циклические рестарты.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Обычно нет: недоступность чужого сервиса выведет ваши поды из ротации и превратит частичный сбой в полный отказ</li><li class="no"><span class="mark">✗</span>Да, обязательно: readiness должна отражать работоспособность всех зависимостей</li><li class="no"><span class="mark">✗</span>Да, но только если внешний API отвечает быстрее 100 мс</li><li class="no"><span class="mark">✗</span>Разницы нет — readiness и liveness проверяют одно и то же</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как настроить отдельную health group для наблюдения?</li><li>Что произойдёт при добавлении внешней проверки в liveness?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/actuator/">Actuator и наблюдаемость</a><p>Production-эндпоинты, health-проверки и probes, метрики через Micrometer, трассировка и безопасность эндпоинтов.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/liveness-vs-readiness/">Чем liveness probe отличается от readiness probe?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/health-checks/">Как балансировщик понимает, что экземпляр сервиса нездоров?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Сервис зависит от внешнего платёжного API. Стоит ли включать проверку его доступности в readiness-пробу?","acceptedAnswer":{"@type":"Answer","text":"Нет: readiness отражает готовность самого пода. Если внешний API упал, все поды станут неготовыми, сервис пропадёт целиком — даже функции, не связанные с оплатой. Внешнюю зависимость защищают таймаутом, circuit breaker и деградацией В readiness — только то, без чего под не может обслужить ничего Состояние зависимостей — в отдельной группе health для мониторинга Тем более не в liveness — будут бесконечные перезапуски Логика такая: readiness управляет тем, идёт ли на под трафик. Если в неё включить внешнюю зависимость, то при её падении все поды одновременно объявят себя неготовыми — балансировщик уберёт их из ротации, и даже те запросы, которым платёжный API не нужен, перестанут обслуживаться. Полный отказ вместо частичной деградации. Правильный подход: в readiness — только то, без чего под не может работать вообще (например, инициализация и собственная база), а состояние внешних зависимостей выносят в отдельный health group для наблюдения и защищают circuit breaker с деградацией. Тем более нельзя ставить внешние проверки в liveness — там это приведёт к бесконечным перезапускам контейнера."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

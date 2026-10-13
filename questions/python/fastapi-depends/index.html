@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как устроено внедрение зависимостей в FastAPI? — вопрос с собеседования</title>
+<meta name="description" content="Depends(func) — FastAPI вызывает func перед обработчиком и передаёт результат в параметр. Зависимости образуют граф, результат кэшируется в пределах…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/fastapi-depends/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/fastapi-depends/">
+<meta property="og:title" content="Как устроено внедрение зависимостей в FastAPI? — вопрос с собеседования">
+<meta property="og:description" content="Depends(func) — FastAPI вызывает func перед обработчиком и передаёт результат в параметр. Зависимости образуют граф, результат кэшируется в пределах…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Как устроено внедрение зависимостей в FastAPI?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Как устроено внедрение зависимостей в FastAPI?"}]}</script>
+  <h1>Как устроено внедрение зависимостей в FastAPI?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Веб-фреймворки</span><span class="chip">FastAPI</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что делает Depends в FastAPI?</li><li>Как в FastAPI получить сессию БД на запрос?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Depends(func)</b> — FastAPI вызывает func перед обработчиком и передаёт результат в параметр. Зависимости образуют <b>граф</b>, результат <b>кэшируется в пределах запроса</b>, зависимость с <b>yield</b> выполняет очистку после ответа (сессия БД, транзакция). В тестах их подменяют через <b>app.dependency_overrides</b>.</p><ul><li>Параметры зависимости сами берутся из запроса: заголовки, query, тело</li><li>Зависимость на роутер или приложение — для авторизации на группу маршрутов</li><li>Annotated[Session, Depends(get_session)] — переиспользуемый тип</li></ul><p class="extra"><span>А ещё</span> Похоже на фикстуры pytest: та же идея внедрения по объявлению</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Как работает.</b> При старте FastAPI анализирует сигнатуры обработчиков и зависимостей и строит граф. На каждый запрос он вычисляет зависимости, извлекая их собственные параметры из запроса, и передаёт результаты дальше. Одна и та же зависимость в графе вычисляется один раз за запрос (<code>use_cache=True</code>).</p>
+<p><b>yield-зависимости</b> — как контекстный менеджер: код до yield — перед обработчиком, после — после ответа. Удобно для сессий и транзакций.</p>
+<p><b>Тесты:</b></p>
+<pre class="lang-python"><code>app.dependency_overrides[get_session] = lambda: test_session</code></pre>
+<p><b>Отличие от Spring:</b> нет контейнера с синглтонами и сканированием — зависимости это функции, жизненный цикл по умолчанию — запрос. Долгоживущие объекты (пул соединений, клиенты) создают в lifespan приложения.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>from typing import Annotated
+from fastapi import Depends, FastAPI
+
+def get_session():
+    session = SessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
+
+SessionDep = Annotated[Session, Depends(get_session)]
+
+def current_user(token: str = Header(), session: SessionDep = ...):
+    return auth(session, token)
+
+@app.get(&quot;/orders&quot;)
+def orders(user: Annotated[User, Depends(current_user)], session: SessionDep):
+    return session.query(Order).filter_by(owner=user.id).all()</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механика Depends и граф.</li><li>Кэш в пределах запроса и yield для очистки.</li><li>Подмена в тестах.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/wsgi-asgi/">Чем WSGI отличается от ASGI?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/pytest-fixtures/">Как работают фикстуры pytest и что такое их scope?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/ioc-vs-di/">Как соотносятся IoC и DI в Spring?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как устроено внедрение зависимостей в FastAPI?","acceptedAnswer":{"@type":"Answer","text":"Depends(func) — FastAPI вызывает func перед обработчиком и передаёт результат в параметр. Зависимости образуют граф, результат кэшируется в пределах запроса, зависимость с yield выполняет очистку после ответа (сессия БД, транзакция). В тестах их подменяют через app.dependency_overrides. Параметры зависимости сами берутся из запроса: заголовки, query, тело Зависимость на роутер или приложение — для авторизации на группу маршрутов Annotated[Session, Depends(get_session)] — переиспользуемый тип Похоже на фикстуры pytest: та же идея внедрения по объявлению Как работает. При старте FastAPI анализирует сигнатуры обработчиков и зависимостей и строит граф. На каждый запрос он вычисляет зависимости, извлекая их собственные параметры из запроса, и передаёт результаты дальше. Одна и та же зависимость в графе вычисляется один раз за запрос (use_cache=True). yield-зависимости — как контекстный менеджер: код до yield — перед обработчиком, после — после ответа. Удобно для сессий и транзакций. Тесты: Отличие от Spring: нет контейнера с синглтонами и сканированием — зависимости это функции, жизненный цикл по умолчанию — запрос. Долгоживущие объекты (пул соединений, клиенты) создают в lifespan приложения."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

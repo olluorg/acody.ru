@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>volatile, атомарность и CAS — разбор для собеседования</title>
+<meta name="description" content="Разница видимости и атомарности, atomic-классы, compare-and-swap и ABA, контеншн и LongAdder.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/atomics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/atomics/">
+<meta property="og:title" content="volatile, атомарность и CAS — разбор для собеседования">
+<meta property="og:description" content="Разница видимости и атомарности, atomic-классы, compare-and-swap и ABA, контеншн и LongAdder.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>volatile, атомарность и CAS</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"volatile, атомарность и CAS"}]}</script>
+  <h1>volatile, атомарность и CAS</h1>
+  <p class="lead">Разница видимости и атомарности, atomic-классы, compare-and-swap и ABA, контеншн и LongAdder.</p>
+  <article class="md"><h2>volatile решает не всё</h2>
+<p>volatile даёт видимость и запрет переупорядочивания (детали — в уроке про JMM), но НЕ делает составные операции атомарными. Классический пример: volatile int n; n++ — это read-modify-write из трёх шагов, и два потока легко затрут инкремент друг друга.</p>
+<p>Идеальные кейсы volatile — одиночная запись/чтение флага или ссылки (флаг остановки, публикация готового объекта), а также volatile-поле в double-checked locking.</p>
+<h2>Атомарные классы</h2>
+<p>Для атомарных счётчиков и ссылок без блокировок есть пакет <code>java.util.concurrent.atomic</code>: AtomicInteger, AtomicLong, AtomicReference, AtomicBoolean. Их операции (<code>incrementAndGet</code>, <code>getAndAdd</code>, <code>compareAndSet</code>, <code>updateAndGet</code>) атомарны и потокобезопасны.</p>
+<p>Это часто дешевле synchronized для простых операций, потому что не блокирует поток, а повторяет попытку.</p>
+<pre class="lang-java"><code>AtomicInteger counter = new AtomicInteger();
+counter.incrementAndGet();              // атомарно, без блокировки
+counter.updateAndGet(v -&gt; Math.min(v + 1, MAX));</code></pre>
+<h2>CAS изнутри</h2>
+<p>Atomic-классы построены на CAS (compare-and-swap) — атомарной инструкции процессора «если значение равно ожидаемому, заменить на новое, иначе ничего». Алгоритм оптимистичен: прочитать текущее, вычислить новое, попытаться CAS; при неудаче (кто-то опередил) повторить цикл.</p>
+<p>Так строят lock-free структуры: прогресс есть всегда без блокировок и без deadlock. Минусы — busy-retry под высокой конкуренцией и ABA-проблема: значение успело смениться A→B→A, CAS этого не заметит. Где это важно, используют AtomicStampedReference (значение + версия).</p>
+<h2>Контеншн и LongAdder</h2>
+<p>При высокой конкуренции один CAS-счётчик становится узким местом: потоки постоянно мешают друг другу и крутят retry-цикл, плюс кэш-линия с переменной «пинается» между ядрами (cache-line contention).</p>
+<p>LongAdder решает это, разбивая счётчик на несколько ячеек (по потокам/полосам): потоки инкрементируют разные ячейки, а <code>sum()</code> складывает их. Для счётчиков с интенсивной записью LongAdder заметно быстрее AtomicLong; если же чаще читают точное значение — AtomicLong проще.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Чётко разделите видимость (volatile) и атомарность (n++ небезопасно даже с volatile). Объясните CAS как оптимистичный lock-free цикл, назовите ABA и AtomicStampedReference, и скажите, когда брать LongAdder вместо AtomicLong (write-heavy счётчики, cache-line contention).</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/volatile/">Что гарантирует ключевое слово volatile для переменной?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/volatile-vs-synchronized/">Чем volatile отличается от synchronized?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/aba-problem/">Что такое ABA-проблема в алгоритмах на CAS?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/longadder-vs-atomiclong/">Чем LongAdder выигрывает у AtomicLong при высокой конкуренции и в чём его ограничение?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/atomicinteger/">Что делает класс AtomicInteger?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/atomicinteger-cas/">Два потока одновременно вызывают incrementAndGet() у одного AtomicInteger. Что при этом происходит внутри и почему ни один инкремент не теряется?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/jmm/">Java Memory Model: happens-before и volatile</a><p>Зачем нужна модель памяти, видимость и переупорядочивание, отношение happens-before, семантика volatile и final, гонки данных.</p></li><li><a href="/articles/java/synchronized/">synchronized, мониторы и wait/notify</a><p>Взаимное исключение и видимость через монитор, reentrancy, guarded blocks с wait/notify и причины deadlock.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"volatile, атомарность и CAS","description":"Разница видимости и атомарности, atomic-классы, compare-and-swap и ABA, контеншн и LongAdder.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/atomics/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

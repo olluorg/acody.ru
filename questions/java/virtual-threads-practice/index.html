@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что верно про практическое применение виртуальных потоков? — вопрос с собеседования</title>
+<meta name="description" content="Не пулить (поток на задачу), применять для блокирующего ввода-вывода, помнить, что ThreadLocal на миллионах потоков дорог, и ограничивать доступ к…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/virtual-threads-practice/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/virtual-threads-practice/">
+<meta property="og:title" content="Что верно про практическое применение виртуальных потоков? — вопрос с собеседования">
+<meta property="og:description" content="Не пулить (поток на задачу), применять для блокирующего ввода-вывода, помнить, что ThreadLocal на миллионах потоков дорог, и ограничивать доступ к…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что верно про практическое применение виртуальных потоков?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что верно про практическое применение виртуальных потоков?"}]}</script>
+  <h1>Что верно про практическое применение виртуальных потоков?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Многопоточность</span><span class="chip ver">Java &gt;=21</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Не пулить</b> (поток на задачу), применять для <b>блокирующего ввода-вывода</b>, помнить, что <b>ThreadLocal</b> на миллионах потоков дорог, и <b>ограничивать доступ к внешним ресурсам</b> семафором — пул соединений к БД от виртуальных потоков не вырастет.</p><ul><li>Для CPU-bound выигрыша нет</li><li>Executors.newVirtualThreadPerTaskExecutor()</li><li>Spring Boot 3.2+: spring.threads.virtual.enabled=true</li></ul><p class="extra"><span>А ещё</span> Ожидание на synchronized до JDK 24 закрепляло несущий поток</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Смысл виртуальных потоков в том, что блокировка перестаёт быть дорогой: поток отцепляется от несущего платформенного и не удерживает его. Отсюда: пул виртуальных потоков — антипаттерн, задача получает свой поток. Для вычислительных задач выигрыша нет — там по-прежнему упираются в ядра, и уместен обычный пул или Fork/Join. Важное предупреждение про масштаб: миллион потоков с ThreadLocal — это миллион копий значения. И отдельно стоит сказать вслух, что снятие ограничения на число потоков лишь передвигает узкое место дальше — в пул соединений к базе или в лимиты внешнего API, которые от этого шире не становятся.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Модель «поток на задачу».</li><li>Где выигрыш и где нет.</li><li>ThreadLocal и ограничение ресурсов.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Заворачивать виртуальные потоки в пул «по привычке».</li><li>Ожидать ускорения CPU-bound кода.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Несколько верных вариантов. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Их не пулят: виртуальный поток дёшев, создаётся под задачу и выбрасывается</li><li class="ok"><span class="mark">✓</span>Выигрыш дают IO-bound нагрузки; для CPU-bound задач они не ускоряют ничего</li><li class="ok"><span class="mark">✓</span>ThreadLocal при миллионах потоков перестаёт быть дешёвым и требует пересмотра</li><li class="no"><span class="mark">✗</span>Они увеличивают пропускную способность внешних систем, к которым обращается сервис</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое pinning и когда он ещё возможен?</li><li>Как structured concurrency меняет работу с группами задач?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/virtual-threads/">Виртуальные потоки (Project Loom)</a><p>Лёгкие потоки JVM, монтирование на carrier, когда их применять, почему не пулят и проблема pinning.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/virtual-threads/">Чем виртуальный поток отличается от обычного платформенного?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/virtual-thread-pinning/">Что такое pinning виртуального потока и в каких случаях он всё ещё возможен в актуальных версиях Java?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/virtual-thread-unmount/">Что происходит с виртуальным потоком, когда он выполняет блокирующий сетевой вызов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/threadlocal-in-pool/">В чём опасность ThreadLocal в пуле потоков?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что верно про практическое применение виртуальных потоков?","acceptedAnswer":{"@type":"Answer","text":"Не пулить (поток на задачу), применять для блокирующего ввода-вывода, помнить, что ThreadLocal на миллионах потоков дорог, и ограничивать доступ к внешним ресурсам семафором — пул соединений к БД от виртуальных потоков не вырастет. Для CPU-bound выигрыша нет Executors.newVirtualThreadPerTaskExecutor() Spring Boot 3.2+: spring.threads.virtual.enabled=true Ожидание на synchronized до JDK 24 закрепляло несущий поток Смысл виртуальных потоков в том, что блокировка перестаёт быть дорогой: поток отцепляется от несущего платформенного и не удерживает его. Отсюда: пул виртуальных потоков — антипаттерн, задача получает свой поток. Для вычислительных задач выигрыша нет — там по-прежнему упираются в ядра, и уместен обычный пул или Fork/Join. Важное предупреждение про масштаб: миллион потоков с ThreadLocal — это миллион копий значения. И отдельно стоит сказать вслух, что снятие ограничения на число потоков лишь передвигает узкое место дальше — в пул соединений к базе или в лимиты внешнего API, которые от этого шире не становятся."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

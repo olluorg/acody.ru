@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое алгоритм A* и чем он лучше Дейкстры? — вопрос с собеседования</title>
+<meta name="description" content="A — Дейкстра с подсказкой направления: вершины выбираются по f = g + h, где g — пройденное расстояние, h — оценка остатка до цели. Если h никогда не…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/a-star/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/a-star/">
+<meta property="og:title" content="Что такое алгоритм A* и чем он лучше Дейкстры? — вопрос с собеседования">
+<meta property="og:description" content="A — Дейкстра с подсказкой направления: вершины выбираются по f = g + h, где g — пройденное расстояние, h — оценка остатка до цели. Если h никогда не…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Что такое алгоритм A* и чем он лучше Дейкстры?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Что такое алгоритм A* и чем он лучше Дейкстры?"}]}</script>
+  <h1>Что такое алгоритм A* и чем он лучше Дейкстры?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Графы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое эвристика в поиске пути?</li><li>Как в играх ищут путь на карте?</li><li>Что такое допустимая эвристика?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">A* — Дейкстра с <b>подсказкой направления</b>: вершины выбираются по <b>f = g + h</b>, где g — пройденное расстояние, h — <b>оценка остатка до цели</b>.</p><ul><li>Если h никогда не переоценивает расстояние (допустимая), найденный путь — кратчайший</li><li>Чем точнее h, тем меньше вершин посещается; h = 0 — это обычная Дейкстра</li></ul><p class="extra"><span>А ещё</span> На сетке: манхэттенское расстояние (4 направления), евклидово или октильное (8)</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Поиск пути на сетке: BFS, DFS, Дейкстра, A*, жадный</p><script type="module" src="/widgets/pathfinding.js"></script><sotto-pathfinding theme="dark"></sotto-pathfinding></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Дейкстра расширяет поиск во все стороны одинаково — «кругом» от старта. Если цель одна и известно, где она, это расточительно. A* добавляет <b>эвристику</b> h(v) — оценку расстояния от вершины до цели — и выбирает из очереди вершину с наименьшим <code>f(v) = g(v) + h(v)</code>. Поиск вытягивается в сторону цели.</p>
+<p><b>Свойства эвристики:</b></p>
+<ul><li><b>допустимая</b> — никогда не переоценивает реальное оставшееся расстояние. Тогда A* гарантированно находит кратчайший путь;</li><li><b>согласованная</b> (монотонная) — для любого ребра <code>h(v) ≤ w(v, u) + h(u)</code>. Тогда каждую вершину достаточно обработать один раз;</li><li><b>h = 0</b> — A* превращается в Дейкстру;</li><li><b>переоценивающая</b> эвристика ускоряет поиск, но путь может оказаться не кратчайшим — иногда это сознательный выбор в играх.</li></ul>
+<p><b>Эвристики на сетке:</b></p>
+<ul><li>4 направления движения — манхэттенское расстояние <code>|dx| + |dy|</code>;</li><li>8 направлений — октильное или чебышёвское;</li><li>свободное движение — евклидово расстояние.</li></ul>
+<p>Применения: навигация в играх и роботах, маршруты на картах (с дополнительными ускорениями вроде иерархий дорог), решение головоломок.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import heapq
+
+def a_star(grid, start, goal):
+    h = lambda p: abs(p[0] - goal[0]) + abs(p[1] - goal[1])   # манхэттен
+    g = {start: 0}
+    parent = {start: None}
+    heap = [(h(start), start)]
+    while heap:
+        _, v = heapq.heappop(heap)
+        if v == goal:
+            break
+        for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            u = (v[0] + dr, v[1] + dc)
+            if 0 &lt;= u[0] &lt; len(grid) and 0 &lt;= u[1] &lt; len(grid[0]) and grid[u[0]][u[1]] != &quot;#&quot;:
+                if g[v] + 1 &lt; g.get(u, float(&quot;inf&quot;)):
+                    g[u], parent[u] = g[v] + 1, v
+                    heapq.heappush(heap, (g[u] + h(u), u))
+    return g.get(goal)</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Формула f = g + h и роль эвристики.</li><li>Допустимость как условие кратчайшего пути.</li><li>Связь с Дейкстрой (h = 0).</li><li>Примеры эвристик для сетки.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Использовать переоценивающую эвристику и ждать кратчайший путь.</li><li>Брать евклидово расстояние на сетке с 4 направлениями — допустимо, но медленнее манхэттенского.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/dijkstra/">Как работает алгоритм Дейкстры?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/bfs-dfs/">Чем обход в ширину (BFS) отличается от обхода в глубину (DFS)?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое алгоритм A* и чем он лучше Дейкстры?","acceptedAnswer":{"@type":"Answer","text":"A — Дейкстра с подсказкой направления: вершины выбираются по f = g + h, где g — пройденное расстояние, h — оценка остатка до цели. Если h никогда не переоценивает расстояние (допустимая), найденный путь — кратчайший Чем точнее h, тем меньше вершин посещается; h = 0 — это обычная Дейкстра На сетке: манхэттенское расстояние (4 направления), евклидово или октильное (8) Дейкстра расширяет поиск во все стороны одинаково — «кругом» от старта. Если цель одна и известно, где она, это расточительно. A добавляет эвристику h(v) — оценку расстояния от вершины до цели — и выбирает из очереди вершину с наименьшим f(v) = g(v) + h(v). Поиск вытягивается в сторону цели. Свойства эвристики: - допустимая — никогда не переоценивает реальное оставшееся расстояние. Тогда A гарантированно находит кратчайший путь; - согласованная (монотонная) — для любого ребра h(v) ≤ w(v, u) + h(u). Тогда каждую вершину достаточно обработать один раз; - h = 0 — A превращается в Дейкстру; - переоценивающая эвристика ускоряет поиск, но путь может оказаться не кратчайшим — иногда это сознательный выбор в играх. Эвристики на сетке: - 4 направления движения — манхэттенское расстояние |dx| + |dy|; - 8 направлений — октильное или чебышёвское; - свободное движение — евклидово расстояние…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

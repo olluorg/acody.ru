@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое множество (set) и когда его использовать? — вопрос с собеседования</title>
+<meta name="description" content="set — неупорядоченный набор уникальных хешируемых элементов на хеш-таблице. Проверка x in s в среднем O(1), у списка — O(n) Операции множеств: |…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/set/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/set/">
+<meta property="og:title" content="Что такое множество (set) и когда его использовать? — вопрос с собеседования">
+<meta property="og:description" content="set — неупорядоченный набор уникальных хешируемых элементов на хеш-таблице. Проверка x in s в среднем O(1), у списка — O(n) Операции множеств: |…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Что такое множество (set) и когда его использовать?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Что такое множество (set) и когда его использовать?"}]}</script>
+  <h1>Что такое множество (set) и когда его использовать?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Коллекции</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем set отличается от списка?</li><li>Как быстро убрать дубликаты из списка?</li><li>Что такое frozenset?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><code>set</code> — неупорядоченный набор <b>уникальных</b> хешируемых элементов на хеш-таблице.</p><ul><li>Проверка <code>x in s</code> в среднем O(1), у списка — O(n)</li><li>Операции множеств: <code>|</code> объединение, <code>&amp;</code> пересечение, <code>-</code> разность, <code>^</code> симметрическая разность</li></ul><p class="extra"><span>А ещё</span> <code>frozenset</code> — неизменяемая версия, его можно класть в set и делать ключом dict</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Множество устроено как словарь без значений: элементы хранятся в хеш-таблице. Отсюда свойства:</p>
+<ul><li>элементы уникальны — повторное добавление ничего не меняет;</li><li>элементы должны быть хешируемыми (список в множество положить нельзя);</li><li>порядок не гарантирован — в отличие от <code>dict</code>, множество порядок вставки не сохраняет;</li><li>проверка принадлежности, добавление и удаление — в среднем O(1).</li></ul>
+<p>Когда использовать:</p>
+<ul><li><b>частые проверки «есть ли элемент»</b> — например, отфильтровать миллион записей по списку запрещённых id: с <code>set</code> это O(1) на проверку, со списком — O(n);</li><li><b>убрать дубликаты</b>: <code>set(items)</code>. Если нужен исходный порядок — <code>list(dict.fromkeys(items))</code>;</li><li><b>сравнение наборов</b>: что есть в обоих списках, чего не хватает.</li></ul>
+<p><code>frozenset</code> — неизменяемое множество: хешируется, может быть элементом другого множества или ключом словаря.</p>
+<p>Пустое множество создаётся только как <code>set()</code>: запись <code>{}</code> — пустой словарь.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>banned = {3, 7, 42}
+users = [1, 3, 5, 42]
+allowed = [u for u in users if u not in banned]   # O(1) на проверку
+
+a, b = {1, 2, 3}, {2, 3, 4}
+a | b   # {1, 2, 3, 4}
+a &amp; b   # {2, 3}
+a - b   # {1}
+
+items = [&quot;b&quot;, &quot;a&quot;, &quot;b&quot;]
+list(dict.fromkeys(items))   # [&#x27;b&#x27;, &#x27;a&#x27;] — без дубликатов, порядок сохранён</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Уникальность и хеш-таблица под капотом.</li><li>Сложность проверки <code>in</code> по сравнению со списком.</li><li>Практический случай: фильтрация, удаление дубликатов.</li><li><code>frozenset</code> и запись пустого множества <code>set()</code>.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li><code>{}</code> вместо <code>set()</code> для пустого множества.</li><li>Рассчитывать на порядок элементов во множестве.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/dict-how-it-works/">Как устроен словарь в Python?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/complexity-list-dict/">Какая сложность у основных операций со списком, словарём и множеством?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/list-vs-tuple/">Чем список отличается от кортежа?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое множество (set) и когда его использовать?","acceptedAnswer":{"@type":"Answer","text":"set — неупорядоченный набор уникальных хешируемых элементов на хеш-таблице. Проверка x in s в среднем O(1), у списка — O(n) Операции множеств: | объединение, & пересечение, - разность, ^ симметрическая разность frozenset — неизменяемая версия, его можно класть в set и делать ключом dict Множество устроено как словарь без значений: элементы хранятся в хеш-таблице. Отсюда свойства: - элементы уникальны — повторное добавление ничего не меняет; - элементы должны быть хешируемыми (список в множество положить нельзя); - порядок не гарантирован — в отличие от dict, множество порядок вставки не сохраняет; - проверка принадлежности, добавление и удаление — в среднем O(1). Когда использовать: - частые проверки «есть ли элемент» — например, отфильтровать миллион записей по списку запрещённых id: с set это O(1) на проверку, со списком — O(n); - убрать дубликаты: set(items). Если нужен исходный порядок — list(dict.fromkeys(items)); - сравнение наборов: что есть в обоих списках, чего не хватает. frozenset — неизменяемое множество: хешируется, может быть элементом другого множества или ключом словаря. Пустое множество создаётся только как set(): запись {} — пустой словарь."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

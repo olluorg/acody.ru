@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем REST отличается от SOAP? — вопрос с собеседования</title>
+<meta name="description" content="REST — архитектурный стиль поверх HTTP: ресурсы, методы, обычно JSON, кэширование, простота. SOAP — протокол обмена XML-сообщениями со строгим…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/rest-vs-soap/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/rest-vs-soap/">
+<meta property="og:title" content="Чем REST отличается от SOAP? — вопрос с собеседования">
+<meta property="og:description" content="REST — архитектурный стиль поверх HTTP: ресурсы, методы, обычно JSON, кэширование, простота. SOAP — протокол обмена XML-сообщениями со строгим…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Чем REST отличается от SOAP?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Чем REST отличается от SOAP?"}]}</script>
+  <h1>Чем REST отличается от SOAP?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Spring MVC и REST</span><span class="chip">Spring</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Где ещё используют SOAP?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>REST</b> — архитектурный стиль поверх HTTP: ресурсы, методы, обычно JSON, кэширование, простота. <b>SOAP</b> — протокол обмена XML-сообщениями со строгим контрактом WSDL, стандартами безопасности и транзакций (WS-*).</p><ul><li>SOAP жив в банках, госсистемах, страховании и интеграциях с крупными legacy-системами</li><li>Внутри компании между сервисами сейчас чаще REST или gRPC</li><li>В Java SOAP — Spring Web Services, JAX-WS; генерация клиентов из WSDL</li></ul><p class="extra"><span>А ещё</span> gRPC — строгий контракт (protobuf) и скорость без тяжести SOAP</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>REST:</b> ресурсы адресуются URL, действия — методами HTTP, формат любой (обычно JSON), используются коды ответа и кэширование HTTP. Контракт — OpenAPI, но не обязателен. Просто вызвать из браузера и curl.</p>
+<p><b>SOAP:</b> конверт XML с заголовком и телом, отправляется обычно через HTTP POST на один адрес; операция определяется содержимым. Контракт — WSDL с XSD-схемами: клиенты генерируются автоматически. Стандарты WS-Security (подпись и шифрование сообщений), WS-ReliableMessaging, WS-AtomicTransaction. Минусы — многословность, сложность, слабая поддержка кэширования.</p>
+<p><b>Где встречается SOAP:</b> банковские и платёжные шлюзы, СМЭВ и госинтеграции, страхование, телеком, SAP и другие enterprise-системы. На собеседовании важно уметь сгенерировать клиент по WSDL (<code>jaxws-maven-plugin</code>, <code>wsimport</code>) и работать с подписью сообщений.</p>
+<p><b>gRPC</b> — современная альтернатива для внутренних вызовов: строгий контракт в protobuf, бинарный формат, HTTP/2, потоковая передача, генерация клиентов.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Стиль против протокола, JSON против XML.</li><li>WSDL, WS-* стандарты.</li><li>Где SOAP используется сейчас.</li><li>gRPC как альтернатива.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать SOAP полностью мёртвым — в интеграциях с банками и госсистемами он повсюду.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>REST — архитектурный стиль над HTTP (ресурсы и глаголы, гибкие форматы); SOAP — строгий XML-протокол с контрактом (WSDL)</li><li class="no"><span class="mark">✗</span>SOAP легче и без схемы, REST строго типизирован</li><li class="no"><span class="mark">✗</span>Это одно и то же</li><li class="no"><span class="mark">✗</span>REST работает только с XML</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что делает Spring HATEOAS?</li><li>Когда SOAP всё ещё оправдан?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/rest-api/">REST API: статусы, согласование и семантика</a><p>Ресурсы и HTTP-глаголы, статус-коды как контракт, content negotiation и message converters, идемпотентность и версионирование.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/rest-meaning/">Что означает буква R в аббревиатуре REST применительно к проектированию API?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/system-design/sync-call-vs-event/">Какой вопрос лучше всего определяет выбор между синхронным вызовом и событием через брокер?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем REST отличается от SOAP?","acceptedAnswer":{"@type":"Answer","text":"REST — архитектурный стиль поверх HTTP: ресурсы, методы, обычно JSON, кэширование, простота. SOAP — протокол обмена XML-сообщениями со строгим контрактом WSDL, стандартами безопасности и транзакций (WS-). SOAP жив в банках, госсистемах, страховании и интеграциях с крупными legacy-системами Внутри компании между сервисами сейчас чаще REST или gRPC В Java SOAP — Spring Web Services, JAX-WS; генерация клиентов из WSDL gRPC — строгий контракт (protobuf) и скорость без тяжести SOAP REST: ресурсы адресуются URL, действия — методами HTTP, формат любой (обычно JSON), используются коды ответа и кэширование HTTP. Контракт — OpenAPI, но не обязателен. Просто вызвать из браузера и curl. SOAP: конверт XML с заголовком и телом, отправляется обычно через HTTP POST на один адрес; операция определяется содержимым. Контракт — WSDL с XSD-схемами: клиенты генерируются автоматически. Стандарты WS-Security (подпись и шифрование сообщений), WS-ReliableMessaging, WS-AtomicTransaction. Минусы — многословность, сложность, слабая поддержка кэширования. Где встречается SOAP: банковские и платёжные шлюзы, СМЭВ и госинтеграции, страхование, телеком, SAP и другие enterprise-системы. На собеседовании важно уметь сгенерировать клиент по WSDL (jaxws-maven-plugin, wsimport) и работать с подписью сообщений. gRPC — современная альтернатива для внутренних вызовов: строгий контракт в protobuf…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

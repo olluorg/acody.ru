@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>В каких состояниях бывает circuit breaker и как он между ними переходит? — вопрос с собеседования</title>
+<meta name="description" content="Закрыт — вызовы идут, ошибки считаются; порог превышен — открыт: вызовы сразу отклоняются; после паузы — полуоткрыт: несколько пробных вызовов…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/circuit-breaker-states/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/circuit-breaker-states/">
+<meta property="og:title" content="В каких состояниях бывает circuit breaker и как он между ними переходит? — вопрос с собеседования">
+<meta property="og:description" content="Закрыт — вызовы идут, ошибки считаются; порог превышен — открыт: вызовы сразу отклоняются; после паузы — полуоткрыт: несколько пробных вызовов…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>В каких состояниях бывает circuit breaker и как он между ними переходит?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"В каких состояниях бывает circuit breaker и как он между ними переходит?"}]}</script>
+  <h1>В каких состояниях бывает circuit breaker и как он между ними переходит?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Надёжность и идемпотентность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как работает circuit breaker?</li><li>Зачем полуоткрытое состояние?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Закрыт</b> — вызовы идут, ошибки считаются; порог превышен — <b>открыт</b>: вызовы сразу отклоняются; после паузы — <b>полуоткрыт</b>: несколько пробных вызовов решают, закрыться или снова открыться.</p><ul><li>Смысл — не держать потоки на заведомо упавшей зависимости и дать ей восстановиться</li><li>Полуоткрытое состояние не обрушивает едва поднявшийся сервис полным трафиком</li><li>Порог — по доле ошибок в окне с минимальным числом вызовов, медленные вызовы тоже считаются</li></ul><p class="extra"><span>А ещё</span> Вместе с таймаутами, bulkhead и запасным ответом</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Смысл предохранителя в том, чтобы перестать долбить упавшую зависимость: вместо тысяч запросов, висящих на таймаутах и удерживающих потоки, вызовы отклоняются мгновенно, а вызывающий получает быстрый отказ или заранее подготовленную деградацию. Полуоткрытое состояние — важная деталь: после паузы пропускается ограниченное число пробных запросов, и полный трафик возвращается только при их успехе, иначе едва поднявшийся сервис снова упал бы под нагрузкой. При настройке важно, чтобы порог считался по доле ошибок на достаточном объёме вызовов, а не по абсолютному числу, иначе на малом трафике предохранитель будет срабатывать случайно. И обязательно продумывают поведение при открытом состоянии — заглушка, устаревшие данные из кэша или явная ошибка.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Три состояния и переходы между ними.</li><li>Зачем нужен: быстрый отказ и защита ресурсов.</li><li>Роль полуоткрытого состояния и настройка порога.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Открывать предохранитель по абсолютному числу ошибок без учёта объёма.</li><li>Не предусмотреть поведение приложения при открытом предохранителе.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Закрыт (пропускает, считает ошибки) → открыт при превышении порога (мгновенно отклоняет) → через таймаут полуоткрыт (пробует часть запросов) → закрыт при успехе или снова открыт при неудаче</li><li class="no"><span class="mark">✗</span>Открыт и закрыт — всего два состояния, промежуточного нет</li><li class="no"><span class="mark">✗</span>Активен, приостановлен и выключен</li><li class="no"><span class="mark">✗</span>Он не имеет состояний и просто ограничивает частоту запросов</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как выбрать порог и длительность паузы?</li><li>Как предохранитель сочетается с повторами и таймаутами?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/reliability/">Надёжность и идемпотентность</a><p>Управляемая деградация вместо каскада, таймауты и бюджет времени запроса, безопасные ретраи и их мультипликация, идемпотентность как фундамент, предохранитель, отсеки и сброс нагрузки, transactional outbox вместо 2PC.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/slow-dependency-cascade/">Внешний платёжный провайдер начал отвечать за 30 секунд вместо 200 миллисекунд. Через минуту сервис перестал отвечать вообще, включая страницы, не связанные с оплатой. Что произошло?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/timeouts-retries/">Как правильно настраивать таймауты и повторы запросов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/load-shedding/">Как сервису пережить нагрузку выше его возможностей?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"В каких состояниях бывает circuit breaker и как он между ними переходит?","acceptedAnswer":{"@type":"Answer","text":"Закрыт — вызовы идут, ошибки считаются; порог превышен — открыт: вызовы сразу отклоняются; после паузы — полуоткрыт: несколько пробных вызовов решают, закрыться или снова открыться. Смысл — не держать потоки на заведомо упавшей зависимости и дать ей восстановиться Полуоткрытое состояние не обрушивает едва поднявшийся сервис полным трафиком Порог — по доле ошибок в окне с минимальным числом вызовов, медленные вызовы тоже считаются Вместе с таймаутами, bulkhead и запасным ответом Смысл предохранителя в том, чтобы перестать долбить упавшую зависимость: вместо тысяч запросов, висящих на таймаутах и удерживающих потоки, вызовы отклоняются мгновенно, а вызывающий получает быстрый отказ или заранее подготовленную деградацию. Полуоткрытое состояние — важная деталь: после паузы пропускается ограниченное число пробных запросов, и полный трафик возвращается только при их успехе, иначе едва поднявшийся сервис снова упал бы под нагрузкой. При настройке важно, чтобы порог считался по доле ошибок на достаточном объёме вызовов, а не по абсолютному числу, иначе на малом трафике предохранитель будет срабатывать случайно. И обязательно продумывают поведение при открытом состоянии — заглушка, устаревшие данные из кэша или явная ошибка."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

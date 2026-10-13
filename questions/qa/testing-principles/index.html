@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие принципы тестирования вы знаете? — вопрос с собеседования</title>
+<meta name="description" content="Семь классических принципов: тестирование показывает наличие дефектов, исчерпывающее невозможно, раннее — дешевле, дефекты скапливаются, парадокс…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/qa/testing-principles/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/qa/testing-principles/">
+<meta property="og:title" content="Какие принципы тестирования вы знаете? — вопрос с собеседования">
+<meta property="og:description" content="Семь классических принципов: тестирование показывает наличие дефектов, исчерпывающее невозможно, раннее — дешевле, дефекты скапливаются, парадокс…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/qa/">Тестирование (QA)</a> <span>/</span> <span>Какие принципы тестирования вы знаете?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Тестирование (QA)","item":"https://learn.getsotto.ru/questions/qa/"},{"@type":"ListItem","position":3,"name":"Какие принципы тестирования вы знаете?"}]}</script>
+  <h1>Какие принципы тестирования вы знаете?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Основы тестирования</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Назовите семь принципов тестирования</li><li>Что такое парадокс пестицида?</li><li>Почему нельзя протестировать всё?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Семь классических принципов: тестирование <b>показывает наличие</b> дефектов, <b>исчерпывающее</b> невозможно, <b>раннее</b> — дешевле, дефекты <b>скапливаются</b>, <b>парадокс пестицида</b>, тестирование <b>зависит от контекста</b>, <b>заблуждение об отсутствии ошибок</b>.</p><ul><li>Из «исчерпывающее невозможно» следует тест-дизайн: проверяем выборочно и с умом</li></ul><p class="extra"><span>А ещё</span> Покажите хотя бы 3–4 принципа на примерах, а не списком</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Принципы описаны в программе ISTQB и часто звучат на собеседованиях junior.</p>
+<ol><li><b>Тестирование показывает наличие дефектов</b>, но не доказывает их отсутствие.</li><li><b>Исчерпывающее тестирование невозможно.</b> Комбинаций входных данных слишком много, поэтому выбираем проверки по рискам и техникам тест-дизайна.</li><li><b>Раннее тестирование экономит время и деньги.</b> Ошибку в требованиях исправить дешевле, чем в коде, а в коде — дешевле, чем в продакшене (shift-left).</li><li><b>Скопление дефектов.</b> Большинство ошибок обычно сосредоточено в небольшом числе модулей — сложных или часто меняющихся.</li><li><b>Парадокс пестицида.</b> Если повторять одни и те же тесты, они перестают находить новые дефекты — тесты нужно обновлять и дополнять.</li><li><b>Тестирование зависит от контекста.</b> Банковское приложение и игру тестируют по-разному: разные риски, требования, глубина.</li><li><b>Заблуждение об отсутствии ошибок.</b> Продукт без найденных дефектов может быть бесполезен, если не решает задачу пользователя.</li></ol></div></section><section class="block"><h2>Пример</h2><div class="md"><p>Парадокс пестицида: регрессионный набор из 200 тест-кейсов год не находит ошибок, а пользователи жалуются на баги в новых сценариях оплаты. Решение — добавить проверки новых сценариев и периодически проводить исследовательское тестирование.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Знание большинства принципов.</li><li>Объяснение на примерах, а не заученный список.</li><li>Связь принципов с практикой: выбор проверок, раннее участие, обновление тестов.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Перечислить названия без понимания смысла.</li><li>Путать «скопление дефектов» и «парадокс пестицида».</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/qa/equivalence-partitioning/">Что такое классы эквивалентности?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/qa/exploratory-testing/">Что такое исследовательское тестирование?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/qa/what-is-testing/">Что такое тестирование и зачем оно нужно?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие принципы тестирования вы знаете?","acceptedAnswer":{"@type":"Answer","text":"Семь классических принципов: тестирование показывает наличие дефектов, исчерпывающее невозможно, раннее — дешевле, дефекты скапливаются, парадокс пестицида, тестирование зависит от контекста, заблуждение об отсутствии ошибок. Из «исчерпывающее невозможно» следует тест-дизайн: проверяем выборочно и с умом Покажите хотя бы 3–4 принципа на примерах, а не списком Принципы описаны в программе ISTQB и часто звучат на собеседованиях junior. 1. Тестирование показывает наличие дефектов, но не доказывает их отсутствие. 2. Исчерпывающее тестирование невозможно. Комбинаций входных данных слишком много, поэтому выбираем проверки по рискам и техникам тест-дизайна. 3. Раннее тестирование экономит время и деньги. Ошибку в требованиях исправить дешевле, чем в коде, а в коде — дешевле, чем в продакшене (shift-left). 4. Скопление дефектов. Большинство ошибок обычно сосредоточено в небольшом числе модулей — сложных или часто меняющихся. 5. Парадокс пестицида. Если повторять одни и те же тесты, они перестают находить новые дефекты — тесты нужно обновлять и дополнять. 6. Тестирование зависит от контекста. Банковское приложение и игру тестируют по-разному: разные риски, требования, глубина. 7. Заблуждение об отсутствии ошибок. Продукт без найденных дефектов может…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

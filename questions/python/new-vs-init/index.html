@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем __new__ отличается от __init__? — вопрос с собеседования</title>
+<meta name="description" content="__new__ — статический метод, создаёт и возвращает экземпляр (вызывается первым). __init__ — инициализирует уже созданный объект и ничего не…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/new-vs-init/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/new-vs-init/">
+<meta property="og:title" content="Чем __new__ отличается от __init__? — вопрос с собеседования">
+<meta property="og:description" content="__new__ — статический метод, создаёт и возвращает экземпляр (вызывается первым). __init__ — инициализирует уже созданный объект и ничего не…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Чем __new__ отличается от __init__?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Чем __new__ отличается от __init__?"}]}</script>
+  <h1>Чем __new__ отличается от __init__?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">ООП</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Когда переопределяют __new__?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>__new__</b> — статический метод, <b>создаёт и возвращает</b> экземпляр (вызывается первым). <b>__init__</b> — <b>инициализирует</b> уже созданный объект и ничего не возвращает. __new__ переопределяют редко: подклассы <b>неизменяемых типов</b> (int, str, tuple), <b>синглтоны и кэши</b> экземпляров, метаклассы.</p><ul><li>Если __new__ вернул объект не своего класса, __init__ не вызывается</li><li>Неизменяемый объект нельзя изменить в __init__ — значение задаётся в __new__</li><li>Вызов: cls.__new__(cls, ...), затем obj.__init__(...)</li></ul><p class="extra"><span>А ещё</span> Для синглтона проще модуль или функция с lru_cache</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>**Последовательность <code>Cls(args)</code>:** метакласс вызывает <code>Cls.__new__(Cls, *args)</code> — он выделяет объект (обычно через <code>super().__new__(cls)</code>) и возвращает его; если результат — экземпляр <code>Cls</code>, вызывается <code>obj.__init__(*args)</code>.</p>
+<p><b>Зачем __new__:</b></p>
+<ul><li><b>неизменяемые типы</b> — значение int, str, tuple задаётся при создании; в <code>__init__</code> его уже не поменять;</li><li><b>контроль создания</b> — вернуть существующий экземпляр (кэш, синглтон), объект подкласса (фабрика);</li><li><b>метаклассы</b> — <code>__new__</code> метакласса создаёт класс.</li></ul>
+<p><b>Ловушка синглтона через __new__:</b> даже если <code>__new__</code> возвращает тот же объект, <code>__init__</code> вызывается при каждом <code>Cls()</code> и сбрасывает состояние. Для синглтона в Python обычно достаточно модуля — он импортируется один раз.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>class Celsius(float):
+    def __new__(cls, value):
+        if value &lt; -273.15:
+            raise ValueError(&quot;ниже абсолютного нуля&quot;)
+        return super().__new__(cls, value)
+
+t = Celsius(21.5)   # __init__ float тут не помог бы: значение уже задано</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Создание против инициализации.</li><li>Когда нужен __new__.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/class-self-init/">Что такое self и __init__ в классе?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/metaclasses/">Что такое метакласс и когда он действительно нужен?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем __new__ отличается от __init__?","acceptedAnswer":{"@type":"Answer","text":"__new__ — статический метод, создаёт и возвращает экземпляр (вызывается первым). __init__ — инициализирует уже созданный объект и ничего не возвращает. __new__ переопределяют редко: подклассы неизменяемых типов (int, str, tuple), синглтоны и кэши экземпляров, метаклассы. Если __new__ вернул объект не своего класса, __init__ не вызывается Неизменяемый объект нельзя изменить в __init__ — значение задаётся в __new__ Вызов: cls.__new__(cls, ...), затем obj.__init__(...) Для синглтона проще модуль или функция с lru_cache Последовательность Cls(args): метакласс вызывает Cls.__new__(Cls, args) — он выделяет объект (обычно через super().__new__(cls)) и возвращает его; если результат — экземпляр Cls, вызывается obj.__init__(args). Зачем __new__: - неизменяемые типы — значение int, str, tuple задаётся при создании; в __init__ его уже не поменять; - контроль создания — вернуть существующий экземпляр (кэш, синглтон), объект подкласса (фабрика); - метаклассы — __new__ метакласса создаёт класс. Ловушка синглтона через __new__: даже если __new__ возвращает тот же объект, __init__ вызывается при каждом Cls() и сбрасывает состояние. Для синглтона в Python обычно достаточно модуля — он импортируется один раз."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

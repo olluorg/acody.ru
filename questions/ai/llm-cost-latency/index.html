@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как снизить стоимость и задержку приложения на LLM? — вопрос с собеседования</title>
+<meta name="description" content="Платим и ждём за токены: меньше входа и выхода, модель по задаче, кэш, стриминг и параллельность. Задержка = время до первого токена + скорость…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/llm-cost-latency/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/llm-cost-latency/">
+<meta property="og:title" content="Как снизить стоимость и задержку приложения на LLM? — вопрос с собеседования">
+<meta property="og:description" content="Платим и ждём за токены: меньше входа и выхода, модель по задаче, кэш, стриминг и параллельность. Задержка = время до первого токена + скорость…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как снизить стоимость и задержку приложения на LLM?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как снизить стоимость и задержку приложения на LLM?"}]}</script>
+  <h1>Как снизить стоимость и задержку приложения на LLM?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">LLM в продакшене</span><span class="chip">API языковых моделей</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему LLM отвечает медленно?</li><li>Что такое кэширование промпта?</li><li>Что такое время до первого токена?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Платим и ждём <b>за токены</b>: меньше входа и выхода, <b>модель по задаче</b>, <b>кэш</b>, <b>стриминг</b> и параллельность.</p><ul><li>Задержка = время до первого токена + скорость генерации × длина ответа</li><li>Кэширование неизменного начала промпта, кэш готовых ответов, маленькая модель для простых запросов</li></ul><p class="extra"><span>А ещё</span> Любую оптимизацию проверять на наборе: экономия не должна ронять качество</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Из чего складывается.</b> Стоимость — входные и выходные токены (выходные обычно дороже). Задержка — время до первого токена (растёт с длиной входа и загрузкой провайдера) плюс время генерации, пропорциональное длине ответа.</p>
+<p><b>Как снижать:</b></p>
+<ul><li><b>короче вход</b> — убрать лишнее из промпта, сжимать историю, давать меньше, но точнее фрагменты RAG;</li><li><b>короче выход</b> — ограничить длину, просить формат без «воды»; длинный ответ — главный источник задержки;</li><li><b>модель по задаче</b> — простые запросы (классификация, извлечение) — маленькой быстрой моделью, сложные — большой; маршрутизация между ними;</li><li><b>кэширование промпта</b> — многие провайдеры кэшируют неизменное начало промпта (системный текст, документы), и повторные запросы дешевле и быстрее; поэтому неизменное ставят в начало;</li><li><b>кэш ответов</b> — на одинаковые или очень похожие запросы;</li><li><b>стриминг</b> — показывать ответ по мере генерации: пользователь видит результат почти сразу;</li><li><b>параллельность</b> — независимые запросы выполнять одновременно; можно запустить несколько моделей и взять первый хороший ответ;</li><li><b>пакетная обработка</b> — для фоновых задач дешевле, если не нужна мгновенность.</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><p>Ассистент в звонке: первые слова подсказки нужны за 1–2 секунды. Помогают короткий ответ в 3–5 строк, стриминг, быстрая модель для первого ответа, неизменный системный промпт в начале для кэширования и запуск запроса сразу по концу вопроса.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Из чего состоят стоимость и задержка.</li><li>Конкретные приёмы: длина, модель, кэш, стриминг, параллельность.</li><li>Контроль качества при оптимизации.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Думать только о стоимости входа и забывать про длину ответа.</li><li>Переходить на дешёвую модель без проверки качества.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/ai/llm-evaluation/">Как оценивать качество ответов LLM?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/tokens-context-window/">Что такое токены и контекстное окно LLM?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как снизить стоимость и задержку приложения на LLM?","acceptedAnswer":{"@type":"Answer","text":"Платим и ждём за токены: меньше входа и выхода, модель по задаче, кэш, стриминг и параллельность. Задержка = время до первого токена + скорость генерации × длина ответа Кэширование неизменного начала промпта, кэш готовых ответов, маленькая модель для простых запросов Любую оптимизацию проверять на наборе: экономия не должна ронять качество Из чего складывается. Стоимость — входные и выходные токены (выходные обычно дороже). Задержка — время до первого токена (растёт с длиной входа и загрузкой провайдера) плюс время генерации, пропорциональное длине ответа. Как снижать: - короче вход — убрать лишнее из промпта, сжимать историю, давать меньше, но точнее фрагменты RAG; - короче выход — ограничить длину, просить формат без «воды»; длинный ответ — главный источник задержки; - модель по задаче — простые запросы (классификация, извлечение) — маленькой быстрой моделью, сложные — большой; маршрутизация между ними; - кэширование промпта — многие провайдеры кэшируют неизменное начало промпта (системный текст, документы), и повторные запросы дешевле и быстрее; поэтому неизменное ставят в начало; - кэш ответов — на одинаковые или очень похожие запросы; - стриминг — показывать ответ по мере генерации: пользователь видит результат почти…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

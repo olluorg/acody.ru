@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем вызов start() у потока отличается от прямого вызова run()? — вопрос с собеседования</title>
+<meta name="description" content="start() создаёт новый поток, и уже он вызывает run(); прямой run() выполняется в текущем потоке, как обычный метод. Повторный start() →…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/thread-start-vs-run/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/thread-start-vs-run/">
+<meta property="og:title" content="Чем вызов start() у потока отличается от прямого вызова run()? — вопрос с собеседования">
+<meta property="og:description" content="start() создаёт новый поток, и уже он вызывает run(); прямой run() выполняется в текущем потоке, как обычный метод. Повторный start() →…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Чем вызов start() у потока отличается от прямого вызова run()?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Чем вызов start() у потока отличается от прямого вызова run()?"}]}</script>
+  <h1>Чем вызов start() у потока отличается от прямого вызова run()?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Многопоточность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как создать поток в Java?</li><li>Можно ли вызвать start() у потока дважды?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>start()</b> создаёт новый поток, и уже он вызывает run(); <b>прямой run()</b> выполняется в текущем потоке, как обычный метод.</p><ul><li>Повторный start() → IllegalThreadStateException: поток одноразовый</li><li>Способы: Thread с Runnable, ExecutorService, виртуальные потоки</li></ul><p class="extra"><span>А ещё</span> В современном коде потоки руками почти не создают — задачи отдают в пул</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><code>Thread.start()</code> просит JVM создать новый поток выполнения; в нём будет вызван метод <code>run()</code>. Сам <code>start()</code> сразу возвращает управление, и теперь код работает параллельно.</p>
+<p>Если вызвать <code>run()</code> напрямую, никакого нового потока не появится: метод выполнится в текущем потоке, как любой другой. Это классическая ошибка — код выглядит многопоточным, но работает последовательно, и заметно это только по производительности или по имени потока в логах.</p>
+<p>Объект <code>Thread</code> одноразовый: повторный <code>start()</code> бросит <code>IllegalThreadStateException</code>, даже если поток уже завершился.</p>
+<p>Способы запустить задачу:</p>
+<ul><li><code>new Thread(runnable).start()</code> — вручную, для учебных примеров;</li><li><code>ExecutorService</code> — пул потоков, основной вариант в приложениях;</li><li><code>Thread.ofVirtual().start(...)</code> или <code>Executors.newVirtualThreadPerTaskExecutor()</code> — виртуальные потоки (Java 21).</li></ul>
+<p>Наследоваться от <code>Thread</code> обычно не стоит — лучше передавать <code>Runnable</code> или <code>Callable</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>Runnable task = () -&gt; System.out.println(Thread.currentThread().getName());
+task.run();                 // main
+new Thread(task).start();   // Thread-0</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>start() создаёт поток, run() — обычный вызов.</li><li>Одноразовость объекта Thread.</li><li>Современные способы: пулы и виртуальные потоки.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Вызывать run() напрямую и считать, что работа идёт параллельно.</li><li>Пытаться повторно запустить завершившийся поток.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>start() создаёт новый поток выполнения; run() просто выполняет метод в текущем потоке, как обычный вызов</li><li class="no"><span class="mark">✗</span>Разницы нет, это синонимы</li><li class="no"><span class="mark">✗</span>run() создаёт поток, а start() лишь помечает его готовым</li><li class="no"><span class="mark">✗</span>start() выполняет метод синхронно и дожидается результата</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Почему объект потока нельзя запустить дважды?</li><li>Зачем задачи обычно отдают в пул, а не создают потоки вручную?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/threads/">Потоки: создание, состояния и отмена</a><p>Thread и Runnable, стоимость платформенных потоков, состояния жизненного цикла, кооперативное прерывание и daemon-потоки.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/daemon-threads/">Что верно про daemon-потоки?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/thread-interrupt/">Что верно про прерывание потока через interrupt()?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/thread-states/">Поток пытается войти в synchronized-блок, занятый другим потоком. В каком состоянии он находится?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем вызов start() у потока отличается от прямого вызова run()?","acceptedAnswer":{"@type":"Answer","text":"start() создаёт новый поток, и уже он вызывает run(); прямой run() выполняется в текущем потоке, как обычный метод. Повторный start() → IllegalThreadStateException: поток одноразовый Способы: Thread с Runnable, ExecutorService, виртуальные потоки В современном коде потоки руками почти не создают — задачи отдают в пул Thread.start() просит JVM создать новый поток выполнения; в нём будет вызван метод run(). Сам start() сразу возвращает управление, и теперь код работает параллельно. Если вызвать run() напрямую, никакого нового потока не появится: метод выполнится в текущем потоке, как любой другой. Это классическая ошибка — код выглядит многопоточным, но работает последовательно, и заметно это только по производительности или по имени потока в логах. Объект Thread одноразовый: повторный start() бросит IllegalThreadStateException, даже если поток уже завершился. Способы запустить задачу: - new Thread(runnable).start() — вручную, для учебных примеров; - ExecutorService — пул потоков, основной вариант в приложениях; - Thread.ofVirtual().start(...) или Executors.newVirtualThreadPerTaskExecutor() — виртуальные потоки (Java 21). Наследоваться от Thread обычно не стоит — лучше передавать Runnable или Callable."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

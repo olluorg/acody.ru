@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Колоночные БД: wide-column и аналитические — разбор для собеседования</title>
+<meta name="description" content="Разница между wide-column (Cassandra) и column-oriented OLAP (ClickHouse), partition/clustering keys, LSM-дерево и зачем хранить по колонкам.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/databases/wide-column-db/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/databases/wide-column-db/">
+<meta property="og:title" content="Колоночные БД: wide-column и аналитические — разбор для собеседования">
+<meta property="og:description" content="Разница между wide-column (Cassandra) и column-oriented OLAP (ClickHouse), partition/clustering keys, LSM-дерево и зачем хранить по колонкам.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>Колоночные БД: wide-column и аналитические</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"Колоночные БД: wide-column и аналитические"}]}</script>
+  <h1>Колоночные БД: wide-column и аналитические</h1>
+  <p class="lead">Разница между wide-column (Cassandra) и column-oriented OLAP (ClickHouse), partition/clustering keys, LSM-дерево и зачем хранить по колонкам.</p>
+  <article class="md"><h2>Два разных «колоночных»</h2>
+<p>Термин «колоночная БД» путает, потому что обозначает две разные вещи. Wide-column (Cassandra, HBase) — это NoSQL для огромной записи и запросов по ключу. Column-oriented / columnar (ClickHouse, Redshift, Parquet) — это аналитические (OLAP) хранилища, где данные физически лежат по колонкам.</p>
+<p>Их объединяет слово «колонка», но задачи противоположны: одно — про распределённую транзакционную запись, другое — про сканирующую аналитику. На собеседовании важно их не смешивать.</p>
+<h2>Wide-column: модель Cassandra</h2>
+<p>В Cassandra данные раскладывают строго под запросы. Первичный ключ состоит из partition key (определяет узел/партицию) и clustering columns (определяют порядок строк внутри партиции).</p>
+<p>Запросы эффективны только по этому ключу: «дайте сообщения чата X по времени» прекрасно, а «найдите по произвольному полю» — нет. Поэтому в Cassandra нормально дублировать данные в несколько таблиц, по одной на паттерн запроса (query-first modeling).</p>
+<pre class="lang-sql"><code>-- партиция = chat_id, внутри упорядочено по времени
+CREATE TABLE messages (
+  chat_id uuid,
+  sent_at timestamp,
+  author text,
+  body text,
+  PRIMARY KEY ((chat_id), sent_at)
+) WITH CLUSTERING ORDER BY (sent_at DESC);</code></pre>
+<h2>Write path: LSM-дерево</h2>
+<p>Cassandra оптимизирована под запись благодаря LSM-tree (log-structured merge). Запись идёт в commit log и в memtable (в памяти), а затем сбрасывается на диск неизменяемыми SSTable. Это превращает случайную запись в последовательную — отсюда высокий throughput.</p>
+<p>Цена — чтение может задеть несколько SSTable, а фоновый процесс compaction периодически сливает их. Удаления реализуются tombstone-маркерами, обилие которых может замедлять чтение.</p>
+<div class="widget-in"><script type="module" src="/widgets/lsm-tree.js"></script><sotto-lsm-tree theme="dark"></sotto-lsm-tree></div>
+<h2>Ошибки моделирования в Cassandra</h2>
+<p>Почти все проблемы с Cassandra — это последствия неудачно выбранного partition key. Три классических симптома стоит знать наизусть.</p>
+<p>Слишком широкая партиция: ключ выбран так, что в одну партицию попадают миллионы строк (например, партиция по дате без разбиения). Партиция целиком живёт на одном узле, и чтение с записью упираются в него, а compaction становится дорогим. Лечится добавлением в partition key ещё одного измерения — bucket'а (дата + номер корзины).</p>
+<p>Горячая партиция: ключ формально узкий, но обращения сосредоточены в одной точке (все события одного крупного клиента). Проблема та же — перекос нагрузки на узел, а не на кластер.</p>
+<p>И запрос не по ключу. Cassandra честно отказывается выполнять такой запрос, а подсказка ALLOW FILTERING заставляет её просканировать весь кластер — на проде это способ уронить его целиком. Вторичные индексы (secondary index) выглядят спасением, но работают плохо на высокой кардинальности и на больших кластерах, потому что запрос всё равно идёт на все узлы. Штатный путь — не индекс, а ещё одна таблица под этот паттерн запроса.</p>
+<p>Отсюда и главный сдвиг мышления: дублирование данных здесь не ошибка нормализации, а осознанный приём. Запись дёшева, дисковое место дёшево, а вот запрос не по ключу невозможен — поэтому одну и ту же сущность спокойно пишут в несколько таблиц, по одной на сценарий чтения.</p>
+<pre class="lang-sql"><code>-- та же сущность во второй таблице — под другой паттерн чтения
+CREATE TABLE messages_by_author (
+  author  text,
+  sent_at timestamp,
+  chat_id uuid,
+  body    text,
+  PRIMARY KEY ((author), sent_at)
+) WITH CLUSTERING ORDER BY (sent_at DESC);
+
+-- широкая партиция разбивается bucket&#x27;ом, чтобы не жить на одном узле
+CREATE TABLE events_by_day (
+  day     date,
+  bucket  int,          -- 0..N: разносим нагрузку по узлам
+  ts      timestamp,
+  payload text,
+  PRIMARY KEY ((day, bucket), ts)
+);</code></pre>
+<h2>Column-oriented OLAP</h2>
+<p>Аналитические колоночные БД хранят каждую колонку отдельно. Для запросов вида «<code>sum(amount)</code> по миллиарду строк за месяц» это идеально: читаются только нужные колонки, а не целые строки.</p>
+<p>Однородность колонки даёт сильное сжатие (RLE, dictionary, delta) и векторизованную обработку. Платят за это медленными точечными вставками/обновлениями — поэтому OLAP-стор не годится для транзакционной нагрузки (OLTP).</p>
+<h2>OLTP против OLAP</h2>
+<p>OLTP (строковые БД, Postgres/Cassandra) — много мелких операций над отдельными записями. OLAP (колоночные, ClickHouse) — тяжёлые сканирующие агрегаты по огромным наборам.</p>
+<p>Типовая архитектура: транзакции живут в OLTP, а аналитику периодически выгружают в OLAP через ETL/CDC. Пытаться делать тяжёлую аналитику прямо на боевой OLTP-базе — частая причина деградации.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Сильный ответ: сразу разведите wide-column (query-first, partition+clustering keys, LSM, запись) и columnar OLAP (хранение по колонкам, сжатие, сканирующая аналитика), и привяжите выбор к OLTP/OLAP-профилю нагрузки.</p>
+<p>Начните именно с этого разведения — оно само по себе показывает уровень, потому что «колоночными» называют две системы с противоположными задачами. Cassandra — про распределённую запись и чтение по ключу, ClickHouse — про сканирующую аналитику.</p>
+<p>Про Cassandra объясняйте ключ по частям: partition key определяет, на каком узле лежат данные, clustering columns — порядок строк внутри партиции. Из этого выводится всё остальное: запросы эффективны только по ключу, поэтому моделируют от запросов и спокойно дублируют данные в несколько таблиц.</p>
+<p>Назовите LSM-дерево и главное следствие: запись идёт в commit log и memtable, затем сбрасывается неизменяемыми SSTable — случайная запись превращается в последовательную, отсюда высокий throughput. И честно назовите цену: чтение задевает несколько SSTable, нужен compaction, а tombstone'ы от удалений замедляют чтение.</p>
+<p>Про OLAP отвечайте механизмом: колонки лежат отдельно, поэтому агрегат по одной колонке не читает остальные, а однородные данные в колонке сжимаются в разы (RLE, dictionary, delta) и обрабатываются векторизованно. Цена — дорогие точечные вставки и обновления, то есть OLTP-нагрузка противопоказана.</p>
+<p>Завершите архитектурным выводом: транзакции живут в OLTP-базе, аналитику выгружают в OLAP через ETL или CDC, а тяжёлые отчёты прямо на боевой базе — типичная причина деградации прода.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/databases/cassandra-primary-key/">Из чего состоит первичный ключ в Cassandra?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/lsm-write-path/">Как устроен путь записи в LSM-дереве, лежащем в основе Cassandra и подобных хранилищ?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/databases/cassandra-denormalization/">Почему в Cassandra нормально хранить одни и те же данные в нескольких таблицах?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/columnar-analytics/">Почему колоночное хранение выигрывает у строчного в аналитических нагрузках?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/oltp-vs-olap/">Чем нагрузка OLAP отличается от OLTP?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/databases/nosql-overview/">NoSQL: семейства и когда их выбирать</a><p>Почему появился NoSQL, моделирование от access patterns, четыре семейства хранилищ, BASE против ACID и горизонтальное масштабирование.</p></li><li><a href="/articles/databases/indexes/">Индексы и планы запросов</a><p>Устройство B-tree, hash vs B-tree, составной и covering индекс, цена записи и когда индекс не используется.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Колоночные БД: wide-column и аналитические","description":"Разница между wide-column (Cassandra) и column-oriented OLAP (ClickHouse), partition/clustering keys, LSM-дерево и зачем хранить по колонкам.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/databases/wide-column-db/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

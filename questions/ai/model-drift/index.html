@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое дрейф данных и концепта и как его отслеживать? — вопрос с собеседования</title>
+<meta name="description" content="Data drift — меняется распределение входных признаков (пришли новые пользователи, изменился продукт). Concept drift — меняется сама зависимость…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/model-drift/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/model-drift/">
+<meta property="og:title" content="Что такое дрейф данных и концепта и как его отслеживать? — вопрос с собеседования">
+<meta property="og:description" content="Data drift — меняется распределение входных признаков (пришли новые пользователи, изменился продукт). Concept drift — меняется сама зависимость…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Что такое дрейф данных и концепта и как его отслеживать?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Что такое дрейф данных и концепта и как его отслеживать?"}]}</script>
+  <h1>Что такое дрейф данных и концепта и как его отслеживать?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">MLOps и модели в продакшене</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему качество модели падает со временем?</li><li>Что такое data drift и concept drift?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Data drift</b> — меняется распределение входных признаков (пришли новые пользователи, изменился продукт). <b>Concept drift</b> — меняется сама зависимость «признаки → ответ» (мошенники сменили схему, после изменения цен поменялось поведение). Оба снижают качество; concept drift опаснее, потому что входные данные могут выглядеть как раньше.</p><ul><li>Если метки приходят быстро — следят за метрикой качества напрямую</li><li>Если метки запаздывают — за распределениями признаков и прогнозов (PSI, тест Колмогорова-Смирнова)</li><li>Реакция: расследование, переобучение на свежих данных, иногда пересмотр признаков</li></ul><p class="extra"><span>А ещё</span> Сломанный конвейер данных (null вместо значений) выглядит как дрейф — сначала проверяют данные</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Что отслеживать:</b></p>
+<ul><li><b>качество</b> — когда известны правильные ответы (доставлен ли заказ вовремя, вернул ли клиент кредит), иногда с задержкой в недели;</li><li><b>распределения признаков</b> — сравнение текущего окна с обучающими данными: PSI (population stability index), KS-тест, доля пропусков и новых категорий;</li><li><b>распределение прогнозов</b> — резкое смещение доли положительных прогнозов — ранний сигнал;</li><li><b>бизнес-метрики</b> — конверсия, доля одобрений, потери.</li></ul>
+<p><b>Причины падения качества:</b></p>
+<ul><li>реальный дрейф: сезонность, новые сегменты, изменение продукта и рынка;</li><li>поломка данных: изменился формат в источнике, упал конвейер, поменялись единицы измерения;</li><li>обратная связь: модель сама влияет на данные, на которых потом обучается (рекомендации, антифрод).</li></ul>
+<p><b>Реакция:</b> алерты по порогам, расследование причин, переобучение по расписанию или по сигналу, оценка новой модели против текущей перед заменой.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Различие data drift и concept drift.</li><li>Что мониторить при быстрых и запаздывающих метках.</li><li>Поломки данных и обратная связь.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/mlops-lifecycle/">Что такое MLOps и как модель попадает в продакшен?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/data-leakage/">Что такое утечка данных (data leakage) в машинном обучении?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-observability/">Как наблюдать за LLM-приложением в продакшене?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое дрейф данных и концепта и как его отслеживать?","acceptedAnswer":{"@type":"Answer","text":"Data drift — меняется распределение входных признаков (пришли новые пользователи, изменился продукт). Concept drift — меняется сама зависимость «признаки → ответ» (мошенники сменили схему, после изменения цен поменялось поведение). Оба снижают качество; concept drift опаснее, потому что входные данные могут выглядеть как раньше. Если метки приходят быстро — следят за метрикой качества напрямую Если метки запаздывают — за распределениями признаков и прогнозов (PSI, тест Колмогорова-Смирнова) Реакция: расследование, переобучение на свежих данных, иногда пересмотр признаков Сломанный конвейер данных (null вместо значений) выглядит как дрейф — сначала проверяют данные Что отслеживать: - качество — когда известны правильные ответы (доставлен ли заказ вовремя, вернул ли клиент кредит), иногда с задержкой в недели; - распределения признаков — сравнение текущего окна с обучающими данными: PSI (population stability index), KS-тест, доля пропусков и новых категорий; - распределение прогнозов — резкое смещение доли положительных прогнозов — ранний сигнал; - бизнес-метрики — конверсия, доля одобрений, потери. Причины падения качества: - реальный дрейф: сезонность, новые сегменты, изменение продукта и рынка; - поломка данных: изменился формат в источнике, упал конвейер, поменялись единицы измерения; - обратная связь: модель сама влияет на данные, на которых потом обучается (рекомендации, антифрод). Реакция: алерты по порогам, расследование причин, переобучение по расписанию или по сигналу, оценка новой модели против текущей перед заменой."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

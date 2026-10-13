@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Раскладка — Flexbox, Grid, позиционирование — карта «Frontend-разработчик»</title>
+<meta name="description" content="Как расставить элементы на странице — одномерный Flexbox, двумерный Grid и position.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/frontend/css-layout/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/frontend/css-layout/">
+<meta property="og:title" content="Раскладка — Flexbox, Grid, позиционирование — карта «Frontend-разработчик»">
+<meta property="og:description" content="Как расставить элементы на странице — одномерный Flexbox, двумерный Grid и position.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/frontend/#css">Frontend-разработчик</a> <span>/</span> <a href="/roadmap/frontend/css/">CSS</a> <span>/</span> <span>Раскладка — Flexbox, Grid, позиционирование</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Frontend-разработчик","item":"https://learn.getsotto.ru/roadmap/frontend/#css"},{"@type":"ListItem","position":3,"name":"CSS","item":"https://learn.getsotto.ru/roadmap/frontend/css/"},{"@type":"ListItem","position":4,"name":"Раскладка — Flexbox, Grid, позиционирование"}]}</script>
+  <h1>Раскладка — Flexbox, Grid, позиционирование</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Как расставить элементы на странице — одномерный Flexbox, двумерный Grid и position.</p>
+  <article class="md"><p><b>Flexbox</b> — раскладка по одной оси: строка кнопок, шапка, выравнивание по центру. <b>Grid</b> — по двум осям: сетка карточек, каркас страницы.</p>
+<pre class="lang-css"><code>.toolbar { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+.cards   { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }</code></pre>
+<h3>Что важно знать</h3>
+<ul><li>Flex: главная и поперечная оси, <code>flex: 1</code> (grow, shrink, basis), <code>flex-wrap</code>, почему элемент «не сжимается» (<code>min-width: auto</code> — лечится <code>min-width: 0</code>).</li><li>Grid: <code>fr</code>, <code>repeat</code>, <code>minmax</code>, <code>auto-fill</code> против <code>auto-fit</code>, именованные области <code>grid-template-areas</code>.</li><li><code>gap</code> работает и во Flexbox, и в Grid — отступы между элементами без margin.</li><li><b>position</b>: <code>relative</code> — сдвиг и точка отсчёта для потомков, <code>absolute</code> — от ближайшего позиционированного предка, <code>fixed</code> — от окна, <code>sticky</code> — прилипает при прокрутке внутри родителя.</li><li><code>z-index</code> работает внутри <b>контекста наложения</b>; новый контекст создают <code>position</code> с <code>z-index</code>, <code>opacity &lt; 1</code>, <code>transform</code>.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 10 ч</small></h3><ul><li>Строит раскладки на Flexbox и Grid и выбирает подходящий инструмент</li><li>Использует position relative, absolute, fixed и sticky по назначению</li></ul><p class="rm-practice"><b>Практика.</b> Сверстать по макету страницу каталога — шапка, сетка карточек на Grid, фильтры на Flexbox, липкая панель.</p></div><div class="rm-grade"><h3>Middle <small>≈ 4 ч</small></h3><ul><li>Объясняет контекст наложения и решает проблемы z-index</li><li>Решает проблему «элемент не сжимается» и переполнение во flex-контейнере</li></ul><p class="rm-practice"><b>Практика.</b> Разобрать и исправить 5 сломанных раскладок с проблемами z-index, переполнения и сжатия.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/frontend/flex-vs-grid/">Чем Flexbox отличается от Grid и когда что использовать?</a> <span class="lvl lvl-junior">Junior</span><p>Flexbox — одномерная раскладка: элементы в строку или столбец, распределение места и выравнивание вдоль оси; размеры идут от содержимого. Grid — двумерная: строки и столбцы…</p></li><li><a href="/questions/frontend/css-position/">Чем отличаются значения position — static, relative, absolute, fixed, sticky?</a> <span class="lvl lvl-junior">Junior</span><p>static — обычный поток. relative — остаётся в потоке, сдвигается относительно своего места и становится опорой для absolute-детей. absolute — выпадает из потока, позиционируется…</p></li></ul></section><section class="block"><h2>Документация</h2><ul class="links"><li><a href="https://css-tricks.com/snippets/css/a-guide-to-flexbox/" rel="noopener" target="_blank">CSS-Tricks: гид по Flexbox ↗</a></li><li><a href="https://css-tricks.com/snippets/css/complete-guide-grid/" rel="noopener" target="_blank">CSS-Tricks: гид по Grid ↗</a></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/frontend/css-cascade/">← Каскад, специфичность и блочная модель</a><a class="next" href="/roadmap/frontend/responsive/">Адаптивная вёрстка →</a></nav>
+  <p class="rm-back"><a href="/roadmap/frontend/#css">← Вся карта «Frontend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Раскладка — Flexbox, Grid, позиционирование","description":"Как расставить элементы на странице — одномерный Flexbox, двумерный Grid и position.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/frontend/css-layout/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

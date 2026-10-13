@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем асинхронность отличается от многопоточности? — вопрос с собеседования</title>
+<meta name="description" content="Многопоточность — несколько потоков ОС, их переключает ядро. Асинхронность — одна (или немного) нить выполнения переключается между задачами сама, в…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/async-vs-threads/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/async-vs-threads/">
+<meta property="og:title" content="Чем асинхронность отличается от многопоточности? — вопрос с собеседования">
+<meta property="og:description" content="Многопоточность — несколько потоков ОС, их переключает ядро. Асинхронность — одна (или немного) нить выполнения переключается между задачами сама, в…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Чем асинхронность отличается от многопоточности?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Чем асинхронность отличается от многопоточности?"}]}</script>
+  <h1>Чем асинхронность отличается от многопоточности?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Конкурентность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как работает event loop?</li><li>Когда использовать asyncio, а когда потоки?</li><li>Что такое корутины и виртуальные потоки?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Многопоточность</b> — несколько потоков ОС, их переключает ядро. <b>Асинхронность</b> — одна (или немного) нить выполнения переключается между задачами сама, в точках ожидания (<code>await</code>).</p><ul><li>Асинхронность выгодна для большого числа ожидающих операций: сеть, база</li><li>Для вычислений не помогает — один event loop занят, все ждут</li><li>Блокирующий вызов внутри async-кода останавливает весь цикл</li></ul><p class="extra"><span>А ещё</span> Виртуальные потоки (Java 21), горутины (Go) — дешёвые потоки с асинхронностью под капотом</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Конкурентность и параллелизм.</b> Конкурентность — способность вести много задач, чередуя их; параллелизм — реально выполнять их одновременно на нескольких ядрах. Асинхронность даёт конкурентность, потоки — и то, и другое (кроме Python с GIL).</p>
+<p><b>Потоки.</b> Каждый поток — отдельный стек и сущность ядра. Пока поток ждёт сеть, ядро отдаёт процессор другому. Модель простая: код пишется последовательно. Ограничение — цена: память на стек, переключения через ядро. Тысячи потоков — нормально, сотни тысяч — уже нет.</p>
+<p><b>Event loop.</b> Один поток крутит цикл: спросить у ОС, какие сокеты готовы (<code>epoll</code>, <code>kqueue</code>), и продолжить задачи, которые их ждали. Задача выполняется до точки ожидания (<code>await</code>), там сама отдаёт управление — <b>кооперативная</b> многозадачность. Ожидающая задача — это небольшой объект в памяти, а не поток, поэтому их могут быть сотни тысяч. Так работают Node.js, nginx, asyncio в Python, Netty и WebFlux.</p>
+<p><b>Цена асинхронности:</b></p>
+<ul><li><b>заразность</b> — <code>async</code> функцию можно вызвать только из <code>async</code>; код делится на два «цвета»;</li><li><b>блокирующий вызов</b> (синхронный драйвер базы, <code>time.sleep</code>, <code>requests.get</code>, тяжёлый цикл) останавливает весь event loop и все задачи. Такие вызовы выносят в пул потоков (<code>run_in_executor</code>);</li><li>сложнее отладка и стектрейсы, нужно следить за отменой и таймаутами.</li></ul>
+<p><b>Когда что:</b></p>
+<ul><li>много одновременных соединений, в основном ожидание — асинхронность (шлюзы, чаты, вебсокеты, прокси, скрейпинг);</li><li>вычисления — процессы или потоки по числу ядер;</li><li>обычный CRUD-сервис на сотни RPS — потоки проще и достаточно.</li></ul>
+<p><b>Лучшее из двух миров.</b> Горутины в Go и виртуальные потоки Java 21: код пишется как обычный блокирующий, а рантайм при ожидании снимает лёгкий поток с потока ОС и ставит другой. Миллионы таких потоков возможны. Ограничения: в Java долго была проблема «прилипания» (pinning) при <code>synchronized</code>, исправленная в Java 24; и ресурсы вроде пула соединений к базе по-прежнему нужно ограничивать.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import asyncio, time
+
+async def fetch(i):
+    await asyncio.sleep(1)          # ожидание отдаёт управление циклу
+    return i
+
+async def main():
+    t = time.perf_counter()
+    await asyncio.gather(*(fetch(i) for i in range(1000)))
+    print(time.perf_counter() - t)  # ~1 с для 1000 «запросов» в одном потоке
+
+asyncio.run(main())
+# time.sleep(1) вместо await asyncio.sleep(1) — 1000 секунд: цикл заблокирован</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Кто переключает: ядро (потоки) против самой программы (event loop).</li><li>Для чего асинхронность хороша и для чего нет.</li><li>Опасность блокирующих вызовов в async-коде.</li><li>Виртуальные потоки и горутины как компромисс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Асинхронный код выполняется параллельно» — в одном event loop нет.</li><li>Вызывать синхронный HTTP-клиент или драйвер базы внутри async-функции.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/c10k-event-loop/">Как один сервер держит сотни тысяч одновременных соединений?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/thread-pool/">Зачем нужен пул потоков и как выбрать его размер?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/context-switch/">Что такое переключение контекста и почему оно дорогое?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/async-await/">Как работают async и await?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/threading-multiprocessing-asyncio/">Чем отличаются threading, multiprocessing и asyncio?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем асинхронность отличается от многопоточности?","acceptedAnswer":{"@type":"Answer","text":"Многопоточность — несколько потоков ОС, их переключает ядро. Асинхронность — одна (или немного) нить выполнения переключается между задачами сама, в точках ожидания (await). Асинхронность выгодна для большого числа ожидающих операций: сеть, база Для вычислений не помогает — один event loop занят, все ждут Блокирующий вызов внутри async-кода останавливает весь цикл Виртуальные потоки (Java 21), горутины (Go) — дешёвые потоки с асинхронностью под капотом Конкурентность и параллелизм. Конкурентность — способность вести много задач, чередуя их; параллелизм — реально выполнять их одновременно на нескольких ядрах. Асинхронность даёт конкурентность, потоки — и то, и другое (кроме Python с GIL). Потоки. Каждый поток — отдельный стек и сущность ядра. Пока поток ждёт сеть, ядро отдаёт процессор другому. Модель простая: код пишется последовательно. Ограничение — цена: память на стек, переключения через ядро. Тысячи потоков — нормально, сотни тысяч — уже нет. Event loop. Один поток крутит цикл: спросить у ОС, какие сокеты готовы (epoll, kqueue), и продолжить задачи, которые их ждали. Задача выполняется до точки ожидания (await), там сама отдаёт управление — кооперативная многозадачность. Ожидающая задача — это небольшой объект в памяти, а не поток, поэтому их могут быть сотни тысяч. Так работают Node.js, nginx, asyncio в Python, Netty и WebFlux…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

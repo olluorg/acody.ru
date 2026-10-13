@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Подготовка данных и разбиение на фрагменты — карта «ИИ-инженер»</title>
+<meta name="description" content="Извлечение текста из документов, очистка, чанкинг и метаданные.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/ai-engineer/rag-indexing/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/ai-engineer/rag-indexing/">
+<meta property="og:title" content="Подготовка данных и разбиение на фрагменты — карта «ИИ-инженер»">
+<meta property="og:description" content="Извлечение текста из документов, очистка, чанкинг и метаданные.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/ai-engineer/#rag">ИИ-инженер</a> <span>/</span> <a href="/roadmap/ai-engineer/rag/">RAG</a> <span>/</span> <span>Подготовка данных и разбиение на фрагменты</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"ИИ-инженер","item":"https://learn.getsotto.ru/roadmap/ai-engineer/#rag"},{"@type":"ListItem","position":3,"name":"RAG","item":"https://learn.getsotto.ru/roadmap/ai-engineer/rag/"},{"@type":"ListItem","position":4,"name":"Подготовка данных и разбиение на фрагменты"}]}</script>
+  <h1>Подготовка данных и разбиение на фрагменты</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Извлечение текста из документов, очистка, чанкинг и метаданные.</p>
+  <article class="md"><p>Качество RAG определяется на этапе индексации: модель не ответит по фрагменту, который потерял смысл при разбиении или вообще не извлёкся из PDF.</p>
+<h3>Что важно знать</h3>
+<ul><li><b>Извлечение</b>: PDF, сканы, таблицы, презентации — отдельная задача; таблицы и структура часто теряются.</li><li><b>Разбиение</b>: по структуре документа (заголовки, абзацы) лучше, чем по фиксированному числу символов; перекрытие соседних фрагментов.</li><li><b>Размер фрагмента</b> — компромисс: маленький точнее находится, но теряет контекст; большой наоборот. Подбирают на своих данных.</li><li><b>Метаданные</b>: источник, раздел, дата, права доступа — для фильтров и ссылок в ответе.</li><li><b>Контекст фрагмента</b>: заголовок документа и раздела в тексте фрагмента заметно улучшает поиск.</li><li><b>Обновления</b>: инкрементальная переиндексация изменённых документов.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 8 ч</small></h3><ul><li>Извлекает текст из PDF и HTML, разбивает на фрагменты с перекрытием и сохраняет метаданные</li></ul><p class="rm-practice"><b>Практика.</b> Проиндексировать 50 документов разного формата и вручную проверить 20 случайных фрагментов на потерю смысла.</p></div><div class="rm-grade"><h3>Middle <small>≈ 8 ч</small></h3><ul><li>Разбивает документы по структуре и добавляет к фрагментам контекст заголовков</li><li>Подбирает размер фрагмента по метрикам поиска на своих данных</li><li>Настраивает инкрементальную переиндексацию изменённых документов</li></ul><p class="rm-practice"><b>Практика.</b> Сравнить 3 стратегии разбиения по recall@5 на наборе из 100 вопросов и выбрать лучшую.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/ai/chunking/">Как разбивать документы на фрагменты для RAG?</a> <span class="lvl lvl-middle">Middle</span><p>Фрагмент должен быть самодостаточным по смыслу и достаточно коротким, чтобы точно находиться поиском; режут по структуре документа, а не по символам.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/ai-engineer/rag/">← RAG</a><a class="next" href="/roadmap/ai-engineer/rag-quality/">Качество RAG →</a></nav>
+  <p class="rm-back"><a href="/roadmap/ai-engineer/#rag">← Вся карта «ИИ-инженер»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Подготовка данных и разбиение на фрагменты","description":"Извлечение текста из документов, очистка, чанкинг и метаданные.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/ai-engineer/rag-indexing/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

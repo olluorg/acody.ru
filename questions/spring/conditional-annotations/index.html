@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зачем нужны @Conditional и ConditionalOn... аннотации в Spring Boot? — вопрос с собеседования</title>
+<meta name="description" content="@Conditional создаёт бин или конфигурацию только при выполнении условия. На этом построена вся автоконфигурация Spring Boot: @ConditionalOnClass…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/conditional-annotations/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/conditional-annotations/">
+<meta property="og:title" content="Зачем нужны @Conditional и ConditionalOn... аннотации в Spring Boot? — вопрос с собеседования">
+<meta property="og:description" content="@Conditional создаёт бин или конфигурацию только при выполнении условия. На этом построена вся автоконфигурация Spring Boot: @ConditionalOnClass…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Зачем нужны @Conditional и ConditionalOn... аннотации в Spring Boot?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Зачем нужны @Conditional и ConditionalOn... аннотации в Spring Boot?"}]}</script>
+  <h1>Зачем нужны @Conditional и ConditionalOn... аннотации в Spring Boot?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Spring Boot и Actuator</span><span class="chip">Spring Boot</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как сделать бин, который создаётся только при условии?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><code>@Conditional</code> создаёт бин или конфигурацию <b>только при выполнении условия</b>. На этом построена вся автоконфигурация Spring Boot: <code>@ConditionalOnClass</code>, <code>@ConditionalOnMissingBean</code>, <code>@ConditionalOnProperty</code>, <code>@ConditionalOnBean</code>.</p><ul><li>OnMissingBean — «по умолчанию, если пользователь не задал свой»</li><li>OnProperty — включение функции флагом в настройках</li><li>Условия на OnBean зависят от порядка обработки — использовать в автоконфигурациях с @AutoConfiguration(after=…)</li></ul><p class="extra"><span>А ещё</span> @Profile — частный случай условия</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Базовый механизм:</b> <code>@Conditional(MyCondition.class)</code> и класс, реализующий <code>Condition.matches(context, metadata)</code>. Если <code>false</code>, бин или вся <code>@Configuration</code> не регистрируются.</p>
+<p><b>Готовые условия Spring Boot:</b></p>
+<ul><li><code>@ConditionalOnClass</code> / <code>OnMissingClass</code> — есть ли класс на classpath (библиотека подключена);</li><li><code>@ConditionalOnBean</code> / <code>@ConditionalOnMissingBean</code> — есть ли бин такого типа; второе — основа переопределения: «создам ObjectMapper, только если вы не создали свой»;</li><li><code>@ConditionalOnProperty(name = &quot;features.reports.enabled&quot;, havingValue = &quot;true&quot;)</code> — включение по настройке;</li><li><code>@ConditionalOnWebApplication</code>, <code>@ConditionalOnResource</code>, <code>@ConditionalOnExpression</code>, <code>@ConditionalOnJava</code>, <code>@ConditionalOnCloudPlatform</code>.</li></ul>
+<p>**Подводный камень <code>OnBean</code>:** условие проверяется в момент обработки конфигурации. Если нужный бин регистрируется позже, условие не сработает. Поэтому в пользовательских <code>@Configuration</code> его избегают, а в автоконфигурациях задают порядок (<code>@AutoConfiguration(after = DataSourceAutoConfiguration.class)</code>).</p>
+<p><b>Отладка:</b> отчёт условий — <code>--debug</code> или <code>/actuator/conditions</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>@Configuration
+class ReportsConfig {
+    @Bean
+    @ConditionalOnProperty(prefix = &quot;features.reports&quot;, name = &quot;enabled&quot;, havingValue = &quot;true&quot;)
+    ReportScheduler reportScheduler() { return new ReportScheduler(); }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механизм @Conditional.</li><li>Готовые условия Spring Boot и их роль в автоконфигурации.</li><li>Подводный камень OnBean и порядок.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Использовать @ConditionalOnBean в обычной конфигурации и удивляться, что бин не создаётся.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что делает @ConditionalOnMissingBean?</li><li>Как посмотреть condition evaluation report?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/boot/">Spring Boot: автоконфигурация и starters</a><p>@SpringBootApplication и starters, механизм автоконфигурации по условиям, переопределение через @ConditionalOnMissingBean, внешняя конфигурация и её приоритеты.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/boot-autoconfiguration/">Как работает автоконфигурация Spring Boot?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/spring-profiles/">Зачем нужны Spring profiles?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Зачем нужны @Conditional и ConditionalOn... аннотации в Spring Boot?","acceptedAnswer":{"@type":"Answer","text":"@Conditional создаёт бин или конфигурацию только при выполнении условия. На этом построена вся автоконфигурация Spring Boot: @ConditionalOnClass, @ConditionalOnMissingBean, @ConditionalOnProperty, @ConditionalOnBean. OnMissingBean — «по умолчанию, если пользователь не задал свой» OnProperty — включение функции флагом в настройках Условия на OnBean зависят от порядка обработки — использовать в автоконфигурациях с @AutoConfiguration(after=…) @Profile — частный случай условия Базовый механизм: @Conditional(MyCondition.class) и класс, реализующий Condition.matches(context, metadata). Если false, бин или вся @Configuration не регистрируются. Готовые условия Spring Boot: - @ConditionalOnClass / OnMissingClass — есть ли класс на classpath (библиотека подключена); - @ConditionalOnBean / @ConditionalOnMissingBean — есть ли бин такого типа; второе — основа переопределения: «создам ObjectMapper, только если вы не создали свой»; - @ConditionalOnProperty(name = \"features.reports.enabled\", havingValue = \"true\") — включение по настройке; - @ConditionalOnWebApplication, @ConditionalOnResource, @ConditionalOnExpression, @ConditionalOnJava, @ConditionalOnCloudPlatform. Подводный камень OnBean: условие проверяется в момент обработки конфигурации. Если нужный бин регистрируется позже, условие не сработает. Поэтому в пользовательских @Configuration его избегают, а в…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

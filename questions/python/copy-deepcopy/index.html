@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем поверхностная копия отличается от глубокой? — вопрос с собеседования</title>
+<meta name="description" content="Поверхностная копия создаёт новый контейнер со старыми элементами, глубокая — копирует всё рекурсивно. Поверхностная: copy.copy(x), x[:], list(x)…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/copy-deepcopy/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/copy-deepcopy/">
+<meta property="og:title" content="Чем поверхностная копия отличается от глубокой? — вопрос с собеседования">
+<meta property="og:description" content="Поверхностная копия создаёт новый контейнер со старыми элементами, глубокая — копирует всё рекурсивно. Поверхностная: copy.copy(x), x[:], list(x)…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Чем поверхностная копия отличается от глубокой?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Чем поверхностная копия отличается от глубокой?"}]}</script>
+  <h1>Чем поверхностная копия отличается от глубокой?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Память и копирование</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>В чём разница между copy и deepcopy?</li><li>Как правильно скопировать вложенный список?</li><li>Почему изменение копии меняет оригинал?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Поверхностная копия создаёт <b>новый контейнер со старыми элементами</b>, глубокая — копирует <b>всё рекурсивно</b>.</p><ul><li>Поверхностная: <code>copy.copy(x)</code>, <code>x[:]</code>, <code>list(x)</code>, <code>dict(x)</code>, <code>x.copy()</code></li><li>Глубокая: <code>copy.deepcopy(x)</code> — вложенные объекты тоже новые</li></ul><p class="extra"><span>А ещё</span> Присваивание <code>b = a</code> не копирует вообще — это второе имя того же объекта</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Три разных действия:</p>
+<ul><li><b>присваивание</b> <code>b = a</code> — копии нет, оба имени указывают на один объект;</li><li><b>поверхностная копия</b> — новый внешний объект, но внутри те же ссылки на вложенные объекты. Изменение самого списка копии оригинал не трогает, а изменение вложенного списка видно в обоих;</li><li><b>глубокая копия</b> — <code>copy.deepcopy</code> рекурсивно копирует вложенные объекты. Она отслеживает уже скопированное (словарь <code>memo</code>), поэтому корректно работает с циклическими ссылками и общими подобъектами.</li></ul>
+<p>Неизменяемые объекты (числа, строки, кортежи из неизменяемых) не копируются даже глубоко — в этом нет смысла.</p>
+<p>Глубокая копия медленнее и не всегда возможна: файлы, сокеты, блокировки не копируются. Свои классы могут управлять копированием через <code>__copy__</code> и <code>__deepcopy__</code>.</p>
+<p>Частый практический случай — матрица: <code>[[0] * 3] * 3</code> создаёт три ссылки на один и тот же внутренний список. Правильно — <code>[[0] * 3 for _ in range(3)]</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import copy
+
+a = [[1, 2], [3, 4]]
+shallow = copy.copy(a)
+deep = copy.deepcopy(a)
+
+a[0].append(99)
+shallow[0]   # [1, 2, 99] — вложенный список общий
+deep[0]      # [1, 2]     — независимая копия
+
+grid = [[0] * 3] * 3
+grid[0][0] = 1
+grid         # [[1, 0, 0], [1, 0, 0], [1, 0, 0]] — одна строка трижды</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Три уровня: присваивание, поверхностная и глубокая копия.</li><li>Способы сделать каждую копию.</li><li>Пример с вложенным изменяемым объектом.</li><li>Ловушка с <code>[[0] * n] * m</code> — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать <code>b = a</code> копией.</li><li>Думать, что <code>a[:]</code> или <code>list(a)</code> копирует вложенные списки.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/mutable-immutable/">Чем изменяемые типы отличаются от неизменяемых?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/args-passing/">Как передаются аргументы в функцию — по значению или по ссылке?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/slices/">Как работают срезы в Python?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/is-vs-eq/">Чем отличается is от ==?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем поверхностная копия отличается от глубокой?","acceptedAnswer":{"@type":"Answer","text":"Поверхностная копия создаёт новый контейнер со старыми элементами, глубокая — копирует всё рекурсивно. Поверхностная: copy.copy(x), x[:], list(x), dict(x), x.copy() Глубокая: copy.deepcopy(x) — вложенные объекты тоже новые Присваивание b = a не копирует вообще — это второе имя того же объекта Три разных действия: - присваивание b = a — копии нет, оба имени указывают на один объект; - поверхностная копия — новый внешний объект, но внутри те же ссылки на вложенные объекты. Изменение самого списка копии оригинал не трогает, а изменение вложенного списка видно в обоих; - глубокая копия — copy.deepcopy рекурсивно копирует вложенные объекты. Она отслеживает уже скопированное (словарь memo), поэтому корректно работает с циклическими ссылками и общими подобъектами. Неизменяемые объекты (числа, строки, кортежи из неизменяемых) не копируются даже глубоко — в этом нет смысла. Глубокая копия медленнее и не всегда возможна: файлы, сокеты, блокировки не копируются. Свои классы могут управлять копированием через __copy__ и __deepcopy__. Частый практический случай — матрица: [[0] 3] 3 создаёт три ссылки на один и тот же внутренний список. Правильно — [[0] 3 for _ in range(3)]."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

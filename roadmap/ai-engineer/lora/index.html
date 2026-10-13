@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LoRA и PEFT — карта «ИИ-инженер»</title>
+<meta name="description" content="Дообучение маленькой добавкой к весам вместо всей модели.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/ai-engineer/lora/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/ai-engineer/lora/">
+<meta property="og:title" content="LoRA и PEFT — карта «ИИ-инженер»">
+<meta property="og:description" content="Дообучение маленькой добавкой к весам вместо всей модели.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/ai-engineer/#finetuning">ИИ-инженер</a> <span>/</span> <a href="/roadmap/ai-engineer/finetuning/">Дообучение моделей</a> <span>/</span> <span>LoRA и PEFT</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"ИИ-инженер","item":"https://learn.getsotto.ru/roadmap/ai-engineer/#finetuning"},{"@type":"ListItem","position":3,"name":"Дообучение моделей","item":"https://learn.getsotto.ru/roadmap/ai-engineer/finetuning/"},{"@type":"ListItem","position":4,"name":"LoRA и PEFT"}]}</script>
+  <h1>LoRA и PEFT</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-middle">с Middle</span></div>
+  <p class="lead">Дообучение маленькой добавкой к весам вместо всей модели.</p>
+  <article class="md"><p>Полное дообучение меняет все миллиарды весов — дорого по памяти и времени. <b>LoRA</b> замораживает исходные веса и обучает небольшие матрицы низкого ранга, которые добавляются к слоям. Обучаемых параметров — доли процента, а качество близко к полному дообучению.</p>
+<h3>Что важно знать</h3>
+<ul><li><b>QLoRA</b> — LoRA поверх квантованной модели: дообучение модели на 7–8 млрд параметров на одной видеокарте.</li><li>Несколько адаптеров LoRA для разных задач поверх одной базовой модели.</li><li>Данные: пары «запрос — идеальный ответ» в формате диалога; качество и разнообразие важнее объёма.</li><li>Переобучение и «забывание» общих навыков — проверять на общем наборе.</li><li>Многие провайдеры API предлагают дообучение своих моделей без своей инфраструктуры.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Middle <small>≈ 16 ч</small></h3><ul><li>Готовит набор данных для дообучения и дообучает открытую модель с LoRA или QLoRA</li><li>Сравнивает модель до и после на своём наборе и проверяет потерю общих навыков</li></ul><p class="rm-practice"><b>Практика.</b> Дообучить модель на 7–8 млрд параметров с QLoRA на 1000 примеров извлечения данных и сравнить с исходной и с большой моделью по API.</p></div><div class="rm-grade"><h3>Senior <small>≈ 8 ч</small></h3><ul><li>Решает, оправдано ли дообучение, по ожидаемому выигрышу и полной стоимости</li></ul><p class="rm-practice"><b>Практика.</b> Подготовить обоснование дообучения против RAG и промптов для реальной задачи с расчётом стоимости и рисков.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/ai/finetuning-lora/">Что такое дообучение модели и LoRA?</a> <span class="lvl lvl-middle">Middle</span><p>Дообучение — продолжение обучения готовой модели на своих примерах, чтобы закрепить формат, стиль или навык; LoRA обучает небольшие добавочные матрицы вместо всех весов.</p></li></ul></section><section class="block"><h2>Документация</h2><ul class="links"><li><a href="https://huggingface.co/docs/peft/index" rel="noopener" target="_blank">Hugging Face PEFT ↗</a></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/ai-engineer/finetuning/">← Дообучение моделей</a><a class="next" href="/roadmap/ai-engineer/distillation-quantization/">Дистилляция и квантизация →</a></nav>
+  <p class="rm-back"><a href="/roadmap/ai-engineer/#finetuning">← Вся карта «ИИ-инженер»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"LoRA и PEFT","description":"Дообучение маленькой добавкой к весам вместо всей модели.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/ai-engineer/lora/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

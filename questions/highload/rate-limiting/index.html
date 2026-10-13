@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие алгоритмы ограничения частоты запросов вы знаете? — вопрос с собеседования</title>
+<meta name="description" content="Token bucket — ведро на B жетонов пополняется со скоростью R; запрос забирает жетон, нет жетона — отказ. Допускает всплески до B, в среднем не больше…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/rate-limiting/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/rate-limiting/">
+<meta property="og:title" content="Какие алгоритмы ограничения частоты запросов вы знаете? — вопрос с собеседования">
+<meta property="og:description" content="Token bucket — ведро на B жетонов пополняется со скоростью R; запрос забирает жетон, нет жетона — отказ. Допускает всплески до B, в среднем не больше…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Какие алгоритмы ограничения частоты запросов вы знаете?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Какие алгоритмы ограничения частоты запросов вы знаете?"}]}</script>
+  <h1>Какие алгоритмы ограничения частоты запросов вы знаете?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Перегрузка, лимиты и ретраи</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как работает token bucket?</li><li>Чем фиксированное окно хуже скользящего?</li><li>Чем leaky bucket отличается от token bucket?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Token bucket</b> — ведро на B жетонов пополняется со скоростью R; запрос забирает жетон, нет жетона — отказ. Допускает всплески до B, в среднем не больше R.</p><ul><li>Leaky bucket — очередь, которая вытекает с постоянной скоростью: сглаживает поток, всплески ждут</li><li>Фиксированное окно — счётчик на минуту: просто, но на стыке окон пропускает двойной объём</li><li>Скользящий журнал — точно, но хранит время каждого запроса; скользящий счётчик — приближение из двух окон</li></ul><p class="extra"><span>А ещё</span> Отказ — HTTP 429 с Retry-After и заголовками остатка лимита</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Rate limiter: token bucket и окна</p><script type="module" src="/widgets/rate-limiter.js"></script><sotto-rate-limiter theme="dark"></sotto-rate-limiter></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Зачем:</b> защитить сервис от перегрузки и злоупотреблений, честно разделить ресурс между клиентами (тарифы API), ограничить стоимость обращений к платным зависимостям, замедлить перебор паролей.</p>
+<p><b>Token bucket.</b> Ведро вмещает B жетонов и пополняется R жетонами в секунду (не больше B). Каждый запрос забирает жетон; если пусто — отказ (или ожидание). Хранить достаточно двух чисел: число жетонов и время последнего пополнения — пополнение считается лениво при запросе. Свойства: средняя скорость не выше R, но после затишья разрешён всплеск до B. Самый популярный вариант: AWS API Gateway, Stripe, Guava RateLimiter (с плавным выдачей), nginx <code>limit_req</code> с <code>burst</code>.</p>
+<p><b>Leaky bucket.</b> Запросы встают в очередь ограниченного размера и обрабатываются с постоянной скоростью R. Выход идеально ровный — подходит, когда нижний сервис не выносит всплесков. Цена — задержка в очереди. Как счётчик (без очереди) эквивалентен token bucket.</p>
+<p><b>Фиксированное окно.</b> Счётчик на интервал (<code>INCR key:минута</code>, TTL 60 с). Очень просто и дёшево. Проблема — на границе: 100 запросов в 12:00:59 и ещё 100 в 12:01:00 — 200 за две секунды при лимите 100 в минуту.</p>
+<p><b>Скользящий журнал.</b> Храним время каждого запроса за последнее окно (sorted set в Redis), выкидываем старые, считаем оставшиеся. Точно, но память пропорциональна лимиту.</p>
+<p><b>Скользящий счётчик.</b> Два фиксированных окна — текущее и предыдущее; оценка = текущее + предыдущее × доля перекрытия. Почти точно и дёшево (так делает Cloudflare).</p>
+<p><b>Что учесть:</b></p>
+<ul><li><b>ключ лимита</b> — пользователь, API-ключ, IP, тенант, эндпоинт; обычно несколько уровней сразу;</li><li><b>ответ</b> — 429 Too Many Requests, <code>Retry-After</code>, заголовки <code>RateLimit-Limit/Remaining/Reset</code>;</li><li><b>где считать</b> — в шлюзе или сайдкаре, локально (быстро, но лимит на экземпляр) или в общем хранилище (Redis) — точнее, но сетевой поход;</li><li><b>стоимость запроса</b> — тяжёлые запросы могут забирать больше жетонов;</li><li>поведение при недоступности хранилища лимитов — пропускать (fail-open) или отказывать (fail-closed).</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import time
+
+class TokenBucket:
+    def __init__(self, rate, burst):
+        self.rate, self.burst = rate, burst
+        self.tokens, self.ts = burst, time.monotonic()
+
+    def allow(self, cost=1):
+        now = time.monotonic()
+        self.tokens = min(self.burst, self.tokens + (now - self.ts) * self.rate)
+        self.ts = now
+        if self.tokens &gt;= cost:
+            self.tokens -= cost
+            return True
+        return False</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Token bucket: параметры, поведение со всплесками, ленивое пополнение.</li><li>Отличие leaky bucket.</li><li>Проблема фиксированного окна и скользящие варианты.</li><li>Практика: ключ лимита, 429 и Retry-After, где хранить состояние.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Не замечать двойной всплеск на границе фиксированного окна.</li><li>Путать rate limiting с ограничением параллелизма (сколько запросов одновременно).</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/design-distributed-rate-limiter/">Спроектируйте распределённый rate limiter для публичного API.</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/load-shedding/">Как сервису пережить нагрузку выше его возможностей?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/backpressure/">Что такое backpressure и как его реализовать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/graceful-degradation/">Нагрузка превысила возможности сервиса. Какие приёмы позволяют деградировать управляемо, а не упасть целиком?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие алгоритмы ограничения частоты запросов вы знаете?","acceptedAnswer":{"@type":"Answer","text":"Token bucket — ведро на B жетонов пополняется со скоростью R; запрос забирает жетон, нет жетона — отказ. Допускает всплески до B, в среднем не больше R. Leaky bucket — очередь, которая вытекает с постоянной скоростью: сглаживает поток, всплески ждут Фиксированное окно — счётчик на минуту: просто, но на стыке окон пропускает двойной объём Скользящий журнал — точно, но хранит время каждого запроса; скользящий счётчик — приближение из двух окон Отказ — HTTP 429 с Retry-After и заголовками остатка лимита Зачем: защитить сервис от перегрузки и злоупотреблений, честно разделить ресурс между клиентами (тарифы API), ограничить стоимость обращений к платным зависимостям, замедлить перебор паролей. Token bucket. Ведро вмещает B жетонов и пополняется R жетонами в секунду (не больше B). Каждый запрос забирает жетон; если пусто — отказ (или ожидание). Хранить достаточно двух чисел: число жетонов и время последнего пополнения — пополнение считается лениво при запросе. Свойства: средняя скорость не выше R, но после затишья разрешён всплеск до B. Самый популярный вариант: AWS API Gateway, Stripe, Guava RateLimiter (с плавным выдачей), nginx limit_req с burst. Leaky bucket. Запросы встают в очередь ограниченного размера и обрабатываются с постоянной скоростью R. Выход идеально ровный — подходит, когда нижний сервис не выносит всплесков. Цена — задержка в очереди. Как счётчик (без очереди)…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Наблюдаемость — карта «ИИ-инженер»</title>
+<meta name="description" content="Трассировка вызовов, логирование промптов и ответов, метрики качества и затрат.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/ai-engineer/observability/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/ai-engineer/observability/">
+<meta property="og:title" content="Наблюдаемость — карта «ИИ-инженер»">
+<meta property="og:description" content="Трассировка вызовов, логирование промптов и ответов, метрики качества и затрат.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/ai-engineer/#production">ИИ-инженер</a> <span>/</span> <a href="/roadmap/ai-engineer/production/">LLM в продакшене</a> <span>/</span> <span>Наблюдаемость</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"ИИ-инженер","item":"https://learn.getsotto.ru/roadmap/ai-engineer/#production"},{"@type":"ListItem","position":3,"name":"LLM в продакшене","item":"https://learn.getsotto.ru/roadmap/ai-engineer/production/"},{"@type":"ListItem","position":4,"name":"Наблюдаемость"}]}</script>
+  <h1>Наблюдаемость</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-middle">с Middle</span></div>
+  <p class="lead">Трассировка вызовов, логирование промптов и ответов, метрики качества и затрат.</p>
+  <article class="md"><h3>Что логировать</h3>
+<ul><li>Каждый вызов модели: промпт (или его версия и переменные), ответ, модель, параметры, токены, задержка, стоимость.</li><li>Для RAG — найденные фрагменты и их оценки.</li><li>Для агентов — <b>трассу</b>: все шаги, вызовы инструментов, ошибки.</li><li>Обратную связь пользователя, привязанную к ответу.</li></ul>
+<h3>Что важно знать</h3>
+<ul><li>Инструменты: Langfuse (можно развернуть у себя), LangSmith, Phoenix, а также стандарт OpenTelemetry для LLM.</li><li>Метрики: задержка (p50, p95, время до первого токена), доля ошибок провайдера, стоимость на запрос и на пользователя, доля отказов модели.</li><li>Алерты на рост стоимости и ошибок провайдера.</li><li>Логи содержат персональные данные — маскирование и ограничение доступа.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Middle <small>≈ 8 ч</small></h3><ul><li>Трассирует каждый вызов модели, поиск и инструменты с версиями, токенами и стоимостью</li><li>Строит дашборд задержки, ошибок и стоимости и настраивает алерты</li></ul><p class="rm-practice"><b>Практика.</b> Подключить Langfuse или аналог к своему RAG-сервису и найти по трассам 3 причины плохих ответов.</p></div><div class="rm-grade"><h3>Senior <small>≈ 4 ч</small></h3><ul><li>Проводит разбор падения качества по трассам и метрикам и доводит до исправления причин</li></ul><p class="rm-practice"><b>Практика.</b> Провести учебный разбор инцидента «качество упало» с поиском причины по трассам и письменным отчётом.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/ai/llm-observability/">Как наблюдать за LLM-приложением в продакшене?</a> <span class="lvl lvl-middle">Middle</span><p>Трассировать каждый шаг: промпт и ответ, найденные документы, вызовы инструментов, модель и версию промпта, токены, стоимость, задержку (TTFT и общую). Плюс качество…</p></li><li><a href="/questions/devops/prometheus-metrics/">Как работает Prometheus и какие типы метрик в нём есть?</a> <span class="lvl lvl-middle">Middle</span><p>Prometheus сам опрашивает (pull) эндпоинты /metrics целей, найденных через service discovery, и хранит временные ряды. Типы: counter — только растёт (запросы, ошибки), смотрят…</p></li><li><a href="/questions/ai/llm-incident/">Качество ответов ассистента внезапно упало. Как будете разбираться?</a> <span class="lvl lvl-senior">Senior</span><p>Сначала подтвердить и измерить: метрики качества, жалобы, доля передачи оператору — по сценариям и с момента начала. Затем искать что изменилось: выкатки кода, промптов и…</p></li></ul></section><section class="block"><h2>Документация</h2><ul class="links"><li><a href="https://langfuse.com/docs" rel="noopener" target="_blank">Langfuse ↗</a></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/ai-engineer/production/">← LLM в продакшене</a><a class="next" href="/roadmap/ai-engineer/cost-latency/">Стоимость и задержка →</a></nav>
+  <p class="rm-back"><a href="/roadmap/ai-engineer/#production">← Вся карта «ИИ-инженер»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Наблюдаемость","description":"Трассировка вызовов, логирование промптов и ответов, метрики качества и затрат.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/ai-engineer/observability/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

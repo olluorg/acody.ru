@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем мьютекс отличается от семафора? — вопрос с собеседования</title>
+<meta name="description" content="Мьютекс — замок на одного: в критической секции один поток, отпустить может только владелец. Семафор — счётчик разрешений: одновременно до N потоков…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/mutex-semaphore/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/mutex-semaphore/">
+<meta property="og:title" content="Чем мьютекс отличается от семафора? — вопрос с собеседования">
+<meta property="og:description" content="Мьютекс — замок на одного: в критической секции один поток, отпустить может только владелец. Семафор — счётчик разрешений: одновременно до N потоков…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Чем мьютекс отличается от семафора?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Чем мьютекс отличается от семафора?"}]}</script>
+  <h1>Чем мьютекс отличается от семафора?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Конкурентность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое монитор?</li><li>Зачем нужна условная переменная?</li><li>Что такое read-write lock?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Мьютекс</b> — замок на одного: в критической секции один поток, отпустить может только владелец. <b>Семафор</b> — счётчик разрешений: одновременно до N потоков.</p><ul><li>Семафор на 1 похож на мьютекс, но у него нет владельца</li><li>Семафор ограничивает параллелизм: не больше 10 запросов к внешнему API</li><li>Монитор = мьютекс + условные переменные (wait/notify, synchronized в Java)</li></ul><p class="extra"><span>А ещё</span> Read-write lock: много читателей или один писатель</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Мьютекс</b> (mutual exclusion) обеспечивает взаимное исключение: захватил — работаешь, остальные ждут; отпустил — один из ждущих заходит. У мьютекса есть <b>владелец</b>: отпустить его должен тот же поток. Бывают <b>реентерабельные</b> — поток может захватить свой же замок повторно (<code>synchronized</code> и <code>ReentrantLock</code> в Java, <code>RLock</code> в Python), иначе рекурсивный вызов заблокирует сам себя.</p>
+<p><b>Семафор</b> — счётчик. <code>acquire</code> уменьшает его и ждёт, если счётчик ноль; <code>release</code> увеличивает и будит ждущего. Владельца нет: освободить может любой поток. Применения:</p>
+<ul><li><b>ограничение параллелизма</b> — не больше N одновременных запросов к базе или внешнему API, N соединений в пуле;</li><li><b>сигнализация</b> — один поток делает <code>release</code>, другой ждёт на <code>acquire</code> (семафор с нулём);</li><li>двоичный семафор (N = 1) похож на мьютекс, но из-за отсутствия владельца легко ошибиться.</li></ul>
+<p><b>Монитор</b> — объект, в котором мьютекс объединён с <b>условными переменными</b>: поток в критической секции может ждать условия (<code>wait</code>), временно отпуская замок, а другой — разбудить его (<code>notify</code>). В Java каждый объект — монитор: <code>synchronized</code> + <code>wait/notify</code>; современнее — <code>ReentrantLock</code> + <code>Condition</code>. Ждать условия надо <b>в цикле</b> <code>while (!условие) wait()</code> — бывают ложные пробуждения, и пока поток просыпался, условие мог перехватить другой.</p>
+<p><b>Read-write lock</b> — много читателей одновременно или один писатель (<code>ReentrantReadWriteLock</code>). Выгоден, когда чтений намного больше и критическая секция заметная; иначе накладные расходы съедают выигрыш. <code>StampedLock</code> добавляет оптимистичное чтение без блокировки.</p>
+<p><b>Цена.</b> Свободный замок захватывается атомарной инструкцией за десятки наносекунд. Занятый — поток засыпает и просыпается через ядро (переключение контекста), это микросекунды. Поэтому критические секции делают короткими и не делают внутри них ввод-вывод.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import threading, time
+
+api_slots = threading.Semaphore(3)      # не больше 3 одновременных вызовов
+
+def call_api(i):
+    with api_slots:
+        print(&quot;старт&quot;, i)
+        time.sleep(1)                   # одновременно спят максимум трое
+
+for i in range(9):
+    threading.Thread(target=call_api, args=(i,)).start()</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Мьютекс — один поток и владелец, семафор — счётчик без владельца.</li><li>Применение семафора для ограничения параллелизма.</li><li>Монитор и условные переменные, ожидание в цикле.</li><li>Read-write lock и когда он оправдан — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Говорить, что семафор — «мьютекс на несколько потоков» и не упоминать отсутствие владельца.</li><li>Вызывать <code>wait</code> через <code>if</code>, а не в цикле.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/deadlock/">Что такое взаимная блокировка и как её избежать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/producer-consumer/">Как реализовать схему производитель — потребитель?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/race-condition/">Что такое состояние гонки?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/atomic-cas/">Что такое атомарные операции и CAS?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем мьютекс отличается от семафора?","acceptedAnswer":{"@type":"Answer","text":"Мьютекс — замок на одного: в критической секции один поток, отпустить может только владелец. Семафор — счётчик разрешений: одновременно до N потоков. Семафор на 1 похож на мьютекс, но у него нет владельца Семафор ограничивает параллелизм: не больше 10 запросов к внешнему API Монитор = мьютекс + условные переменные (wait/notify, synchronized в Java) Read-write lock: много читателей или один писатель Мьютекс (mutual exclusion) обеспечивает взаимное исключение: захватил — работаешь, остальные ждут; отпустил — один из ждущих заходит. У мьютекса есть владелец: отпустить его должен тот же поток. Бывают реентерабельные — поток может захватить свой же замок повторно (synchronized и ReentrantLock в Java, RLock в Python), иначе рекурсивный вызов заблокирует сам себя. Семафор — счётчик. acquire уменьшает его и ждёт, если счётчик ноль; release увеличивает и будит ждущего. Владельца нет: освободить может любой поток. Применения: - ограничение параллелизма — не больше N одновременных запросов к базе или внешнему API, N соединений в пуле; - сигнализация — один поток делает release, другой ждёт на acquire (семафор с нулём); - двоичный семафор (N = 1) похож на мьютекс, но из-за отсутствия владельца легко ошибиться. Монитор — объект, в котором мьютекс объединён с условными переменными: поток в…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

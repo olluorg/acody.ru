@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>gRPC, GraphQL, WebSocket и вебхуки — карта «Backend-разработчик»</title>
+<meta name="description" content="Когда REST не лучший выбор — межсервисное взаимодействие, гибкие запросы, реальное время.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/backend/api-styles/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/backend/api-styles/">
+<meta property="og:title" content="gRPC, GraphQL, WebSocket и вебхуки — карта «Backend-разработчик»">
+<meta property="og:description" content="Когда REST не лучший выбор — межсервисное взаимодействие, гибкие запросы, реальное время.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/#web-api">Backend-разработчик</a> <span>/</span> <a href="/roadmap/backend/web-api/">Веб и API</a> <span>/</span> <span>gRPC, GraphQL, WebSocket и вебхуки</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://learn.getsotto.ru/roadmap/backend/#web-api"},{"@type":"ListItem","position":3,"name":"Веб и API","item":"https://learn.getsotto.ru/roadmap/backend/web-api/"},{"@type":"ListItem","position":4,"name":"gRPC, GraphQL, WebSocket и вебхуки"}]}</script>
+  <h1>gRPC, GraphQL, WebSocket и вебхуки</h1>
+  <div class="chips"><span class="rm-kind k-optional">Полезно знать</span> <span class="lvl lvl-middle">с Middle</span></div>
+  <p class="lead">Когда REST не лучший выбор — межсервисное взаимодействие, гибкие запросы, реальное время.</p>
+  <article class="md"><div class="table"><table><thead><tr><th>стиль</th><th>когда</th></tr></thead><tbody><tr><td>REST</td><td>публичные API, простота, кэширование HTTP</td></tr><tr><td>gRPC</td><td>взаимодействие сервисов: строгий контракт, бинарный формат, потоки</td></tr><tr><td>GraphQL</td><td>клиенты сами выбирают поля: мобильные и сложные интерфейсы</td></tr><tr><td>WebSocket, SSE</td><td>обновления в реальном времени</td></tr><tr><td>вебхуки</td><td>уведомить внешнюю систему о событии</td></tr></tbody></table></div>
+<h3>Что важно знать</h3>
+<ul><li>gRPC работает поверх HTTP/2, контракт в protobuf, генерация кода.</li><li>GraphQL переносит сложность на сервер: N+1, ограничение тяжёлых запросов, кэширование.</li><li>Вебхуки: подпись запросов, повторы, идемпотентный приём.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Middle <small>≈ 6 ч</small></h3><ul><li>Выбирает стиль API под задачу — REST, gRPC, GraphQL, WebSocket, вебхуки — и обосновывает</li><li>Реализует gRPC-сервис с protobuf-контрактом</li></ul><p class="rm-practice"><b>Практика.</b> Реализовать один и тот же сервис в REST и gRPC и сравнить размер сообщений, задержку и удобство эволюции контракта.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/spring/spring-batch-purpose/">Для чего предназначен Spring Batch?</a> <span class="lvl lvl-junior">Junior</span><p>Пакетная обработка больших объёмов: импорт и выгрузка файлов, перерасчёты, рассылки — чтение, преобразование и запись порциями с сохранением прогресса и перезапуском с места сбоя.</p></li><li><a href="/questions/spring/batch-chunk-processing/">Как устроена chunk-ориентированная обработка в Spring Batch и что она даёт?</a> <span class="lvl lvl-middle">Middle</span><p>Chunk — порция: прочитать N записей по одной, обработать, записать пачкой в одной транзакции. Память ограничена размером чанка, а после сбоя задание продолжается с последнего…</p></li><li><a href="/questions/spring/spring-batch-basics/">Что такое Spring Batch и из каких основных частей состоит batch job?</a> <span class="lvl lvl-senior">Senior</span><p>Spring Batch — фреймворк для пакетной обработки больших объёмов: Job состоит из Step, шаг обычно chunk-ориентированный — ItemReader → ItemProcessor → ItemWriter пачками с коммитом…</p></li><li><a href="/questions/spring/spring-integration/">Когда полезен Spring Integration?</a> <span class="lvl lvl-senior">Senior</span><p>Spring Integration — реализация Enterprise Integration Patterns: сообщения проходят через каналы и конечные точки (маршрутизаторы, преобразователи, фильтры, разделители…</p></li><li><a href="/questions/spring/graphql-risks/">Какие основные backend-риски у GraphQL?</a> <span class="lvl lvl-senior">Senior</span><p>Клиент сам составляет запрос, поэтому риски на бэкенде: N+1 в резолверах, дорогие и глубокие запросы (DoS одним запросом), сложное кэширование (всё через POST на один URL)…</p></li></ul></section><section class="block"><h2>Разборы темы</h2><ul class="links"><li><a href="/articles/spring/integration-batch-api/">Spring Batch, Integration и API styles</a><p>Batch jobs, enterprise integration patterns, Spring Data REST, HATEOAS и GraphQL.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/backend/rest-api/">← Проектирование REST API</a><a class="next" href="/roadmap/backend/auth/">Аутентификация и авторизация →</a></nav>
+  <p class="rm-back"><a href="/roadmap/backend/#web-api">← Вся карта «Backend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"gRPC, GraphQL, WebSocket и вебхуки","description":"Когда REST не лучший выбор — межсервисное взаимодействие, гибкие запросы, реальное время.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/backend/api-styles/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

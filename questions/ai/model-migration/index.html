@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как безопасно перевести продукт на другую LLM? — вопрос с собеседования</title>
+<meta name="description" content="Смена модели — изменение поведения всей системы. Порядок: прогнать набор оценки на новой модели с текущими промптами → адаптировать промпты (модели…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/model-migration/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/model-migration/">
+<meta property="og:title" content="Как безопасно перевести продукт на другую LLM? — вопрос с собеседования">
+<meta property="og:description" content="Смена модели — изменение поведения всей системы. Порядок: прогнать набор оценки на новой модели с текущими промптами → адаптировать промпты (модели…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как безопасно перевести продукт на другую LLM?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как безопасно перевести продукт на другую LLM?"}]}</script>
+  <h1>Как безопасно перевести продукт на другую LLM?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">LLM в продакшене</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Провайдер выпустил новую модель — как обновиться без регресса?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Смена модели — изменение поведения всей системы. Порядок: прогнать <b>набор оценки</b> на новой модели с текущими промптами → <b>адаптировать промпты</b> (модели по-разному реагируют на формулировки, формат, инструменты) → сравнить качество, стоимость и задержку <b>по сценариям</b> → <b>теневой режим</b> или <b>canary</b> на доле трафика с онлайн-метриками → полное переключение с возможностью <b>мгновенного отката</b> конфигурацией.</p><ul><li>Фиксировать конкретную версию модели, а не псевдоним «latest»</li><li>Сравнивать не только качество: токенизация и длина ответов меняют стоимость</li><li>Проверить структурированный вывод, вызовы инструментов, отказы, тон</li></ul><p class="extra"><span>А ещё</span> Хорошая архитектура: промпты и модель — конфигурация, переключение без выкатки кода</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Что ломается при смене модели:</b></p>
+<ul><li>формат ответов и следование схеме;</li><li>выбор инструментов и аргументы;</li><li>длина и стиль ответов, частота отказов;</li><li>чувствительность к порядку контекста;</li><li>стоимость: другой токенизатор, другая длина ответа.</li></ul>
+<p><b>Процесс:</b></p>
+<ol><li>Набор оценки и базовые метрики текущей модели.</li><li>Прогон новой модели, разбор ухудшившихся примеров.</li><li>Отдельная версия промптов под новую модель.</li><li>Теневой прогон на реальном трафике без показа пользователю, сравнение судьёй.</li><li>Canary 5–10% с онлайн-метриками, затем расширение.</li><li>Старая конфигурация остаётся доступной для отката.</li></ol></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Оценка на наборе и адаптация промптов.</li><li>Теневой режим и постепенная выкатка с откатом.</li><li>Что именно ломается при смене модели.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/eval-strategy/">Как построить в команде систему оценки качества LLM-продукта?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/ai/llm-evaluation/">Как оценивать качество ответов LLM?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/model-selection/">Как выбрать модель для LLM-продукта — большая или маленькая, своя или по API?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-gateway/">Зачем компании единый шлюз к LLM и что в нём должно быть?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как безопасно перевести продукт на другую LLM?","acceptedAnswer":{"@type":"Answer","text":"Смена модели — изменение поведения всей системы. Порядок: прогнать набор оценки на новой модели с текущими промптами → адаптировать промпты (модели по-разному реагируют на формулировки, формат, инструменты) → сравнить качество, стоимость и задержку по сценариям → теневой режим или canary на доле трафика с онлайн-метриками → полное переключение с возможностью мгновенного отката конфигурацией. Фиксировать конкретную версию модели, а не псевдоним «latest» Сравнивать не только качество: токенизация и длина ответов меняют стоимость Проверить структурированный вывод, вызовы инструментов, отказы, тон Хорошая архитектура: промпты и модель — конфигурация, переключение без выкатки кода Что ломается при смене модели: - формат ответов и следование схеме; - выбор инструментов и аргументы; - длина и стиль ответов, частота отказов; - чувствительность к порядку контекста; - стоимость: другой токенизатор, другая длина ответа. Процесс: 1. Набор оценки и базовые метрики текущей модели. 2. Прогон новой модели, разбор ухудшившихся примеров. 3. Отдельная версия промптов под новую модель. 4. Теневой прогон на реальном трафике без показа пользователю, сравнение судьёй. 5. Canary 5–10% с онлайн-метриками, затем расширение. 6. Старая конфигурация остаётся доступной для отката."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

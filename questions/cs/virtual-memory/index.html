@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое виртуальная память? — вопрос с собеседования</title>
+<meta name="description" content="Каждый процесс видит своё виртуальное адресное пространство; процессор с ОС переводят виртуальные адреса в физические страницами (обычно по 4 КБ)…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/virtual-memory/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/virtual-memory/">
+<meta property="og:title" content="Что такое виртуальная память? — вопрос с собеседования">
+<meta property="og:description" content="Каждый процесс видит своё виртуальное адресное пространство; процессор с ОС переводят виртуальные адреса в физические страницами (обычно по 4 КБ)…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Что такое виртуальная память?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Что такое виртуальная память?"}]}</script>
+  <h1>Что такое виртуальная память?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Операционные системы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Зачем процессу виртуальные адреса?</li><li>Что такое страница памяти и page fault?</li><li>Что такое swap и почему он замедляет систему?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Каждый процесс видит своё <b>виртуальное адресное пространство</b>; процессор с ОС переводят виртуальные адреса в физические <b>страницами</b> (обычно по 4 КБ).</p><ul><li>Изоляция: процесс не может обратиться к чужой памяти</li><li>Память выделяется лениво — страница появляется при первом обращении (page fault)</li><li>Страницы можно вытеснять на диск (swap) и отображать файлы (mmap)</li></ul><p class="extra"><span>А ещё</span> TLB кэширует трансляцию; огромные страницы (huge pages) снижают промахи</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Программа работает с виртуальными адресами. Блок управления памятью процессора (MMU) переводит их в физические по <b>таблице страниц</b>, которую ведёт ОС для каждого процесса. Память нарезана на страницы фиксированного размера, обычно 4 КБ; соседние виртуальные страницы могут лежать где угодно в физической памяти.</p>
+<p><b>Что это даёт:</b></p>
+<ul><li><b>изоляцию</b> — у процессов разные таблицы страниц, чужие адреса просто не отображены; запись в недоступную страницу — segfault;</li><li><b>простоту</b> — каждый процесс видит непрерывное пространство, начиная с одних и тех же адресов, независимо от того, кто ещё работает;</li><li><b>ленивое выделение</b> — <code>malloc</code> на гигабайт резервирует адреса, а физическая страница выделяется при первом обращении. Обращение к неотображённой странице — <b>page fault</b>: ОС выделяет страницу и возобновляет программу. Поэтому RSS (резидентная память) меньше VSZ;</li><li><b>общие страницы</b> — библиотеки загружаются в память один раз и отображаются во все процессы; <code>fork</code> делит страницы с copy-on-write;</li><li><b>отображение файлов</b> — <code>mmap</code> превращает файл в участок памяти, страницы читаются с диска по требованию;</li><li><b>swap</b> — редко используемые страницы ОС выгружает на диск и подгружает обратно при обращении.</li></ul>
+<p><b>Цена.</b> Трансляция на каждый доступ к памяти была бы дорогой, поэтому у процессора есть <b>TLB</b> — кэш последних трансляций. Промах TLB — проход по многоуровневой таблице страниц. Для баз данных и JVM с большими кучами включают огромные страницы (2 МБ, 1 ГБ): меньше записей, меньше промахов.</p>
+<p><b>Swap и производительность.</b> Обращение к выгруженной странице — чтение с диска, в тысячи раз медленнее памяти (major page fault). Когда рабочему набору не хватает памяти, система постоянно гоняет страницы туда и обратно (thrashing) и почти не работает. Для серверов с базами swap часто отключают или ставят <code>vm.swappiness</code> низким, а при нехватке памяти срабатывает OOM killer.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>ps -o pid,vsz,rss,comm -p 1234
+  PID    VSZ    RSS COMMAND
+ 1234 8123456 412300 java       # 8 ГБ адресов зарезервировано, 400 МБ реально в памяти
+
+/usr/bin/time -v ./app | grep &quot;page faults&quot;
+  Major (requiring I/O) page faults: 12
+  Minor (reclaiming a frame) page faults: 48211</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Виртуальные адреса, страницы, таблица страниц, MMU.</li><li>Зачем: изоляция, ленивое выделение, общие страницы, mmap.</li><li>Page fault minor и major, swap и thrashing.</li><li>TLB и huge pages — плюс для middle.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Виртуальная память — это swap».</li><li>Считать VSZ реальным потреблением памяти.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/page-cache/">Почему повторное чтение файла быстрее первого?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/process-vs-thread/">Чем процесс отличается от потока?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/stack-vs-heap/">Чем стек отличается от кучи?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое виртуальная память?","acceptedAnswer":{"@type":"Answer","text":"Каждый процесс видит своё виртуальное адресное пространство; процессор с ОС переводят виртуальные адреса в физические страницами (обычно по 4 КБ). Изоляция: процесс не может обратиться к чужой памяти Память выделяется лениво — страница появляется при первом обращении (page fault) Страницы можно вытеснять на диск (swap) и отображать файлы (mmap) TLB кэширует трансляцию; огромные страницы (huge pages) снижают промахи Программа работает с виртуальными адресами. Блок управления памятью процессора (MMU) переводит их в физические по таблице страниц, которую ведёт ОС для каждого процесса. Память нарезана на страницы фиксированного размера, обычно 4 КБ; соседние виртуальные страницы могут лежать где угодно в физической памяти. Что это даёт: - изоляцию — у процессов разные таблицы страниц, чужие адреса просто не отображены; запись в недоступную страницу — segfault; - простоту — каждый процесс видит непрерывное пространство, начиная с одних и тех же адресов, независимо от того, кто ещё работает; - ленивое выделение — malloc на гигабайт резервирует адреса, а физическая страница выделяется при первом обращении. Обращение к неотображённой странице — page fault: ОС выделяет страницу и возобновляет программу. Поэтому RSS (резидентная память) меньше VSZ; - общие страницы — библиотеки загружаются в память один раз…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

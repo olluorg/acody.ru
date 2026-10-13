@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем отличаются HTTP/1.1, HTTP/2 и HTTP/3? — вопрос с собеседования</title>
+<meta name="description" content="HTTP/1.1 — текст, один запрос за раз в соединении. HTTP/2 — бинарные кадры, много потоков в одном TCP-соединении. HTTP/3 — то же поверх QUIC (UDP)…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/http-versions/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/http-versions/">
+<meta property="og:title" content="Чем отличаются HTTP/1.1, HTTP/2 и HTTP/3? — вопрос с собеседования">
+<meta property="og:description" content="HTTP/1.1 — текст, один запрос за раз в соединении. HTTP/2 — бинарные кадры, много потоков в одном TCP-соединении. HTTP/3 — то же поверх QUIC (UDP)…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Чем отличаются HTTP/1.1, HTTP/2 и HTTP/3?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Чем отличаются HTTP/1.1, HTTP/2 и HTTP/3?"}]}</script>
+  <h1>Чем отличаются HTTP/1.1, HTTP/2 и HTTP/3?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Сети</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое мультиплексирование в HTTP/2?</li><li>Зачем HTTP/3 перешёл на UDP?</li><li>Что такое head-of-line blocking?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>HTTP/1.1</b> — текст, один запрос за раз в соединении. <b>HTTP/2</b> — бинарные кадры, много потоков в одном TCP-соединении. <b>HTTP/3</b> — то же поверх QUIC (UDP), без общей блокировки при потере пакета.</p><ul><li>1.1: keep-alive, но браузер открывает ~6 соединений на домен, чтобы распараллелить</li><li>2: мультиплексирование, сжатие заголовков HPACK, приоритеты</li><li>2 убрал блокировку на уровне HTTP, но осталась на уровне TCP</li><li>3: QUIC — TLS 1.3 встроен, 1-RTT (0-RTT повторно), миграция соединения</li></ul><p class="extra"><span>А ещё</span> Смысл методов, кодов и заголовков одинаков во всех версиях</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>HTTP/1.1</b> (1997). Текстовый протокол, постоянные соединения (keep-alive) по умолчанию. Но в одном соединении запросы идут по очереди: следующий ответ ждёт предыдущего — <b>блокировка начала очереди</b> на уровне HTTP. Конвейеризация (pipelining) почти не прижилась. Поэтому браузеры открывают около 6 соединений на домен, а сайты раньше раскидывали статику по поддоменам, склеивали файлы и рисовали спрайты.</p>
+<p><b>HTTP/2</b> (2015). Смысл тот же — методы, заголовки, коды, — меняется передача:</p>
+<ul><li><b>бинарные кадры</b> вместо текста;</li><li><b>мультиплексирование</b> — много независимых потоков в одном соединении, кадры перемежаются; не нужны несколько соединений и склейки;</li><li><b>HPACK</b> — сжатие заголовков с общим словарём: повторяющиеся cookie и user-agent почти ничего не стоят;</li><li>приоритеты потоков и (ныне заброшенный) server push.</li></ul>
+<p>Но всё едет по одному TCP: потеря одного пакета задерживает <b>все</b> потоки, пока он не будет переотправлен. На плохих сетях HTTP/2 бывает хуже нескольких соединений HTTP/1.1. gRPC работает поверх HTTP/2.</p>
+<p><b>HTTP/3</b> (2022) — HTTP поверх <b>QUIC</b>, транспорта на UDP:</p>
+<ul><li>потоки независимы на уровне транспорта — потеря пакета задерживает только свой поток;</li><li>TLS 1.3 встроен: установка соединения и шифрования за 1 RTT вместо 2–3, при повторном подключении 0-RTT;</li><li>соединение определяется идентификатором, а не четвёркой адресов — переживает переход телефона с Wi-Fi на мобильную сеть;</li><li>реализован в пространстве пользователя, поэтому быстрее развивается.</li></ul>
+<p>Минусы: UDP иногда режут корпоративные сети (тогда откат на HTTP/2), больше нагрузка на CPU, сложнее отладка.</p>
+<p><b>На практике:</b> между браузером и CDN — HTTP/2 и 3; внутри дата-центра часто HTTP/1.1 с пулом соединений или HTTP/2 для gRPC. Версию выбирают согласованием в TLS (ALPN) и заголовком <code>Alt-Svc</code> для HTTP/3.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>$ curl -sI --http2 https://example.com | head -1
+HTTP/2 200
+$ curl -sI https://cloudflare.com | grep -i alt-svc
+alt-svc: h3=&quot;:443&quot;; ma=86400      # сервер предлагает HTTP/3</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Проблема HTTP/1.1: последовательные запросы и много соединений.</li><li>HTTP/2: бинарные кадры, мультиплексирование, HPACK.</li><li>Почему блокировка осталась на TCP и как её решает QUIC.</li><li>Плюсы HTTP/3: быстрое установление, миграция; минусы — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Думать, что HTTP/2 поменял семантику — методы и коды те же.</li><li>Считать HTTP/3 «HTTP поверх голого UDP» без надёжности.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/tls-handshake/">Как работает HTTPS и TLS-рукопожатие?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/tcp-vs-udp/">Чем TCP отличается от UDP?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/tcp-reliability/">Как TCP обеспечивает надёжную доставку и не перегружает сеть?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/connection-pooling/">Зачем нужен пул соединений к базе и как выбрать его размер?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем отличаются HTTP/1.1, HTTP/2 и HTTP/3?","acceptedAnswer":{"@type":"Answer","text":"HTTP/1.1 — текст, один запрос за раз в соединении. HTTP/2 — бинарные кадры, много потоков в одном TCP-соединении. HTTP/3 — то же поверх QUIC (UDP), без общей блокировки при потере пакета. 1.1: keep-alive, но браузер открывает ~6 соединений на домен, чтобы распараллелить 2: мультиплексирование, сжатие заголовков HPACK, приоритеты 2 убрал блокировку на уровне HTTP, но осталась на уровне TCP 3: QUIC — TLS 1.3 встроен, 1-RTT (0-RTT повторно), миграция соединения Смысл методов, кодов и заголовков одинаков во всех версиях HTTP/1.1 (1997). Текстовый протокол, постоянные соединения (keep-alive) по умолчанию. Но в одном соединении запросы идут по очереди: следующий ответ ждёт предыдущего — блокировка начала очереди на уровне HTTP. Конвейеризация (pipelining) почти не прижилась. Поэтому браузеры открывают около 6 соединений на домен, а сайты раньше раскидывали статику по поддоменам, склеивали файлы и рисовали спрайты. HTTP/2 (2015). Смысл тот же — методы, заголовки, коды, — меняется передача: - бинарные кадры вместо текста; - мультиплексирование — много независимых потоков в одном соединении, кадры перемежаются; не нужны несколько соединений и склейки; - HPACK — сжатие заголовков с общим словарём: повторяющиеся cookie и user-agent почти ничего не стоят; - приоритеты потоков и (ныне заброшенный) server push. Но всё едет по одному TCP: потеря одного пакета задерживает все потоки, пока он не будет…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

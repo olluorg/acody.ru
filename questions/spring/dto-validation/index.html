@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как в Spring MVC обычно обрабатывают ошибки и валидацию входных DTO? — вопрос с собеседования</title>
+<meta name="description" content="Ограничения — аннотациями Bean Validation на полях DTO (@NotBlank, @Email, @Size, @Positive), проверка — @Valid на параметре контроллера, ошибки — в…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/dto-validation/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/dto-validation/">
+<meta property="og:title" content="Как в Spring MVC обычно обрабатывают ошибки и валидацию входных DTO? — вопрос с собеседования">
+<meta property="og:description" content="Ограничения — аннотациями Bean Validation на полях DTO (@NotBlank, @Email, @Size, @Positive), проверка — @Valid на параметре контроллера, ошибки — в…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Как в Spring MVC обычно обрабатывают ошибки и валидацию входных DTO?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Как в Spring MVC обычно обрабатывают ошибки и валидацию входных DTO?"}]}</script>
+  <h1>Как в Spring MVC обычно обрабатывают ошибки и валидацию входных DTO?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Валидация и обработка ошибок</span><span class="chip">Spring</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как валидировать входные данные REST API в Spring?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Ограничения — <b>аннотациями Bean Validation</b> на полях DTO (<code>@NotBlank</code>, <code>@Email</code>, <code>@Size</code>, <code>@Positive</code>), проверка — **<code>@Valid</code><b> на параметре контроллера, ошибки — в </b><code>@RestControllerAdvice</code>** в едином формате (ProblemDetail с полями).</p><ul><li>Нужна зависимость spring-boot-starter-validation (Hibernate Validator)</li><li>Невалидное тело → MethodArgumentNotValidException → 400</li><li>Вложенные объекты — @Valid на поле; списки — <code>List&lt;@Valid Item&gt;</code></li></ul><p class="extra"><span>А ещё</span> Бизнес-правила (уникальность email) — в сервисе, а не аннотацией</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Объявление правил:</b></p>
+<pre class="lang-java"><code>public record CreateUserRequest(
+    @NotBlank @Size(max = 80) String name,
+    @NotBlank @Email String email,
+    @Valid @NotNull AddressDto address,
+    @Size(max = 10) List&lt;@NotBlank String&gt; tags) {}</code></pre>
+<p><b>Проверка:</b> <code>@PostMapping ... create(@Valid @RequestBody CreateUserRequest req)</code>. При нарушении Spring бросает <code>MethodArgumentNotValidException</code> (для <code>@RequestBody</code>) или <code>HandlerMethodValidationException</code> (Spring 6.1+, для параметров метода); по умолчанию — 400.</p>
+<p><b>Единый ответ:</b> в <code>@RestControllerAdvice</code> превращать <code>MethodArgumentNotValidException</code> в ProblemDetail со списком ошибок полей (<code>field</code>, <code>message</code>), чтобы клиент мог подсветить их в форме.</p>
+<p><b>Группы и параметры:</b> <code>@Validated(OnCreate.class)</code> — разные правила для создания и изменения; <code>@Validated</code> на классе сервиса — проверка параметров методов (<code>@NotNull</code>, <code>@Min</code> на аргументах).</p>
+<p><b>Где граница:</b> аннотации — для формата и обязательности. Правила, требующие данных (email уже занят, товар закончился), — в сервисе с понятным исключением (409, 422). Свои ограничения — аннотация + <code>ConstraintValidator</code>.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Аннотации на DTO и @Valid.</li><li>Исключение и обработка в едином формате.</li><li>Вложенные объекты, группы.</li><li>Граница между валидацией формата и бизнес-правилами.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Забыть стартер validation — аннотации молча не работают.</li><li>Проверять уникальность аннотацией с запросом в базу.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>@Valid запускает Bean Validation (ошибка → 400), а единый @RestControllerAdvice формирует контракт ошибки (ProblemDetail)</li><li class="no"><span class="mark">✗</span>Ловить исключения в каждом методе вручную</li><li class="no"><span class="mark">✗</span>Возвращать 200 OK с текстом ошибки</li><li class="no"><span class="mark">✗</span>Валидацию писать в SQL-триггерах</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем @Valid отличается от @Validated?</li><li>Как вернуть field errors?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/mvc-advanced/">Валидация и обработка ошибок</a><p>Bean Validation и @Valid/@Validated, превращение ошибок в ответ, @ControllerAdvice и единый контракт, ProblemDetail (RFC 7807), multipart и interceptors.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/validated-vs-valid/">Чем @Validated отличается от @Valid?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/invalid-request-body/">В контроллере стоит @Valid @RequestBody CreateUserRequest, и клиент прислал невалидное тело. Что произойдёт по умолчанию?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/valid-basic/">Зачем нужна аннотация @Valid на теле запроса в контроллере?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/spring/problem-detail-errors/">Как в Spring Boot 3 возвращать ошибки REST API в едином формате?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как в Spring MVC обычно обрабатывают ошибки и валидацию входных DTO?","acceptedAnswer":{"@type":"Answer","text":"Ограничения — аннотациями Bean Validation на полях DTO (@NotBlank, @Email, @Size, @Positive), проверка — @Valid на параметре контроллера, ошибки — в @RestControllerAdvice в едином формате (ProblemDetail с полями). Нужна зависимость spring-boot-starter-validation (Hibernate Validator) Невалидное тело → MethodArgumentNotValidException → 400 Вложенные объекты — @Valid на поле; списки — List<@Valid Item> Бизнес-правила (уникальность email) — в сервисе, а не аннотацией Объявление правил: Проверка: @PostMapping ... create(@Valid @RequestBody CreateUserRequest req). При нарушении Spring бросает MethodArgumentNotValidException (для @RequestBody) или HandlerMethodValidationException (Spring 6.1+, для параметров метода); по умолчанию — 400. Единый ответ: в @RestControllerAdvice превращать MethodArgumentNotValidException в ProblemDetail со списком ошибок полей (field, message), чтобы клиент мог подсветить их в форме. Группы и параметры: @Validated(OnCreate.class) — разные правила для создания и изменения; @Validated на классе сервиса — проверка параметров методов (@NotNull, @Min на аргументах). Где граница: аннотации — для формата и обязательности. Правила, требующие данных (email уже занят, товар закончился), — в сервисе с понятным исключением (409, 422). Свои ограничения — аннотация + ConstraintValidator."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

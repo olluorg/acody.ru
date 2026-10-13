@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Дистилляция и квантизация — карта «ИИ-инженер»</title>
+<meta name="description" content="Как сделать модель меньше и дешевле — учить маленькую на ответах большой и сжимать веса.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/ai-engineer/distillation-quantization/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/ai-engineer/distillation-quantization/">
+<meta property="og:title" content="Дистилляция и квантизация — карта «ИИ-инженер»">
+<meta property="og:description" content="Как сделать модель меньше и дешевле — учить маленькую на ответах большой и сжимать веса.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/ai-engineer/#finetuning">ИИ-инженер</a> <span>/</span> <a href="/roadmap/ai-engineer/finetuning/">Дообучение моделей</a> <span>/</span> <span>Дистилляция и квантизация</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"ИИ-инженер","item":"https://learn.getsotto.ru/roadmap/ai-engineer/#finetuning"},{"@type":"ListItem","position":3,"name":"Дообучение моделей","item":"https://learn.getsotto.ru/roadmap/ai-engineer/finetuning/"},{"@type":"ListItem","position":4,"name":"Дистилляция и квантизация"}]}</script>
+  <h1>Дистилляция и квантизация</h1>
+  <div class="chips"><span class="rm-kind k-optional">Полезно знать</span> <span class="lvl lvl-middle">с Middle</span></div>
+  <p class="lead">Как сделать модель меньше и дешевле — учить маленькую на ответах большой и сжимать веса.</p>
+  <article class="md"><p><b>Дистилляция</b> — большая модель генерирует ответы на ваши задачи, маленькая дообучается на них. Итог — модель, которая в узкой задаче близка к большой, но в разы дешевле и быстрее.</p>
+<p><b>Квантизация</b> — хранение весов в 8 или 4 битах вместо 16: память и стоимость падают в 2–4 раза, качество — немного.</p>
+<h3>Что важно знать</h3>
+<ul><li>Дистилляция ограничена условиями использования провайдера большой модели — их проверяют.</li><li>Форматы квантизации: GGUF (llama.cpp, Ollama), AWQ и GPTQ (серверы на GPU).</li><li>Качество после сжатия проверяют на своём наборе, а не по общим бенчмаркам.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Middle <small>≈ 6 ч</small></h3><ul><li>Объясняет дистилляцию и квантизацию и их влияние на качество и стоимость</li><li>Сравнивает квантованную модель с исходной на своём наборе</li></ul><p class="rm-practice"><b>Практика.</b> Запустить одну модель в 16, 8 и 4 битах и сравнить качество на наборе, память и скорость.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/ai/distillation/">Что такое дистилляция модели?</a> <span class="lvl lvl-middle">Middle</span><p>Дистилляция — обучение маленькой модели-ученика повторять поведение большой модели-учителя. Ученик учится на ответах или распределениях вероятностей учителя, а не только на…</p></li><li><a href="/questions/ai/quantization/">Что такое квантизация модели и чем приходится за неё платить?</a> <span class="lvl lvl-middle">Middle</span><p>Квантизация хранит веса (и иногда активации) с меньшей точностью: вместо 16 бит — 8 или 4. Модель занимает в 2–4 раза меньше памяти и генерирует быстрее, потому что decode…</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/ai-engineer/lora/">← LoRA и PEFT</a><a class="next" href="/roadmap/ai-engineer/multimodal/">Мультимодальность →</a></nav>
+  <p class="rm-back"><a href="/roadmap/ai-engineer/#finetuning">← Вся карта «ИИ-инженер»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Дистилляция и квантизация","description":"Как сделать модель меньше и дешевле — учить маленькую на ответах большой и сжимать веса.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/ai-engineer/distillation-quantization/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

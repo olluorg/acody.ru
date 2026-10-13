@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Внешний платёжный провайдер начал отвечать за 30 секунд вместо 200 миллисекунд. Через минуту сервис перестал отвечать вообще, включая страницы, не связанные с оплатой. Что произошло? — вопрос с собеседования</title>
+<meta name="description" content="Медленная зависимость выедает общий пул потоков и соединений: каждый запрос держит поток в 150 раз дольше, и сервис перестаёт обслуживать даже…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/slow-dependency-cascade/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/slow-dependency-cascade/">
+<meta property="og:title" content="Внешний платёжный провайдер начал отвечать за 30 секунд вместо 200 миллисекунд. Через минуту сервис перестал отвечать вообще, включая страницы, не связанные с оплатой. Что произошло? — вопрос с собеседования">
+<meta property="og:description" content="Медленная зависимость выедает общий пул потоков и соединений: каждый запрос держит поток в 150 раз дольше, и сервис перестаёт обслуживать даже…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Внешний платёжный провайдер начал отвечать за 30 секунд вместо 200 миллисекунд. Через минуту сервис перестал отвечать вообще, включая страницы, не связанные с оплатой. Что произошло?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Внешний платёжный провайдер начал отвечать за 30 секунд вместо 200 миллисекунд. Через минуту сервис перестал отвечать вообще, включая страницы, не связанные с оплатой. Что произошло?"}]}</script>
+  <h1>Внешний платёжный провайдер начал отвечать за 30 секунд вместо 200 миллисекунд. Через минуту сервис перестал отвечать вообще, включая страницы, не связанные с оплатой. Что произошло?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Надёжность и идемпотентность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое каскадный отказ?</li><li>Как медленная зависимость роняет весь сервис?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Медленная зависимость <b>выедает общий пул</b> потоков и соединений: каждый запрос держит поток в 150 раз дольше, и сервис перестаёт обслуживать даже страницы без оплаты.</p><ul><li>Таймаут на внешний вызов по наблюдаемому верхнему перцентилю</li><li>Bulkhead — отдельный пул для каждой внешней зависимости</li><li>Circuit breaker — перестать звать упавшую зависимость</li></ul><p class="extra"><span>А ещё</span> Закон Литтла: время ×150 при том же потоке — потоков нужно ×150</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Это классическое начало каскадного отказа. Пока провайдер отвечал за двести миллисекунд, каждый поток освобождался быстро и пула хватало; при тридцати секундах каждый запрос удерживает поток в полтораста раз дольше, поэтому пул исчерпывается за считанные секунды. Дальше запросы, не имеющие к оплате никакого отношения, встают в очередь за свободным потоком — и сервис выглядит полностью недоступным. Правильный набор мер известен: таймаут на каждый внешний вызов, выставленный по наблюдаемому верхнему перцентилю с запасом, а не в тридцать секунд; изоляция ресурсов, то есть отдельный пул или ограничение числа одновременных вызовов именно к этой зависимости, чтобы её деградация не касалась остального; предохранитель, который после порога ошибок начинает отклонять вызовы мгновенно и даёт провайдеру восстановиться; и продуманная деградация — принять заказ и подтвердить оплату позже вместо ожидания. Ответ про нехватку памяти неверен, а тезис «сервис не может быть быстрее зависимости» верен лишь для операций, которые эту зависимость используют, — и именно чтобы он не распространялся на всё остальное, применяют изоляцию.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механизм исчерпания общего пула.</li><li>Таймаут, изоляция ресурсов, предохранитель.</li><li>Почему страдают несвязанные запросы.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ставить один общий пул на все внешние вызовы.</li><li>Задавать таймаут «с запасом» в десятки секунд, что равносильно его отсутствию.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Потоки и соединения общего пула заняты ожиданием ответа провайдера, поэтому свободных для остальных запросов не осталось: нужны таймаут по верхнему перцентилю, отдельный пул для этой зависимости и предохранитель</li><li class="no"><span class="mark">✗</span>Провайдер начал возвращать ошибки, и сервис перегрузился их обработкой</li><li class="no"><span class="mark">✗</span>Не хватило памяти под ответы провайдера — нужно увеличить heap</li><li class="no"><span class="mark">✗</span>Так и должно быть: сервис не может работать быстрее самой медленной зависимости</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как выбрать значение таймаута для конкретной зависимости?</li><li>Чем ограничение конкурентности лучше выделенного пула потоков?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/reliability/">Надёжность и идемпотентность</a><p>Управляемая деградация вместо каскада, таймауты и бюджет времени запроса, безопасные ретраи и их мультипликация, идемпотентность как фундамент, предохранитель, отсеки и сброс нагрузки, transactional outbox вместо 2PC.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/circuit-breaker-states/">В каких состояниях бывает circuit breaker и как он между ними переходит?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/timeouts-retries/">Как правильно настраивать таймауты и повторы запросов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/thread-pool/">Зачем нужен пул потоков и как выбрать его размер?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/queueing-utilization/">Почему при загрузке сервера 90% время ответа растёт в разы, хотя запас ещё есть?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Внешний платёжный провайдер начал отвечать за 30 секунд вместо 200 миллисекунд. Через минуту сервис перестал отвечать вообще, включая страницы, не связанные с оплатой. Что произошло?","acceptedAnswer":{"@type":"Answer","text":"Медленная зависимость выедает общий пул потоков и соединений: каждый запрос держит поток в 150 раз дольше, и сервис перестаёт обслуживать даже страницы без оплаты. Таймаут на внешний вызов по наблюдаемому верхнему перцентилю Bulkhead — отдельный пул для каждой внешней зависимости Circuit breaker — перестать звать упавшую зависимость Закон Литтла: время ×150 при том же потоке — потоков нужно ×150 Это классическое начало каскадного отказа. Пока провайдер отвечал за двести миллисекунд, каждый поток освобождался быстро и пула хватало; при тридцати секундах каждый запрос удерживает поток в полтораста раз дольше, поэтому пул исчерпывается за считанные секунды. Дальше запросы, не имеющие к оплате никакого отношения, встают в очередь за свободным потоком — и сервис выглядит полностью недоступным. Правильный набор мер известен: таймаут на каждый внешний вызов, выставленный по наблюдаемому верхнему перцентилю с запасом, а не в тридцать секунд; изоляция ресурсов, то есть отдельный пул или ограничение числа одновременных вызовов именно к этой зависимости, чтобы её деградация не касалась остального; предохранитель, который после порога ошибок начинает отклонять вызовы мгновенно и даёт провайдеру восстановиться; и продуманная деградация — принять заказ и подтвердить оплату позже вместо…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

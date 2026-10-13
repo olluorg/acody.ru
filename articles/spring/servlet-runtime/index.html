@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сервлеты, фильтры и встроенный контейнер — разбор для собеседования</title>
+<meta name="description" content="Сервлет и встроенный Tomcat, модель thread-per-request, потокобезопасность контроллеров, Filter против Interceptor и forward/redirect.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/spring/servlet-runtime/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/spring/servlet-runtime/">
+<meta property="og:title" content="Сервлеты, фильтры и встроенный контейнер — разбор для собеседования">
+<meta property="og:description" content="Сервлет и встроенный Tomcat, модель thread-per-request, потокобезопасность контроллеров, Filter против Interceptor и forward/redirect.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#spring">Spring</a> <span>/</span> <span>Сервлеты, фильтры и встроенный контейнер</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/articles/#spring"},{"@type":"ListItem","position":3,"name":"Сервлеты, фильтры и встроенный контейнер"}]}</script>
+  <h1>Сервлеты, фильтры и встроенный контейнер</h1>
+  <p class="lead">Сервлет и встроенный Tomcat, модель thread-per-request, потокобезопасность контроллеров, Filter против Interceptor и forward/redirect.</p>
+  <article class="md"><h2>Сервлет и встроенный контейнер</h2>
+<p>Сервлет-контейнер управляет жизненным циклом сервлета: <code>init()</code> при загрузке, <code>service()</code> (→ <code>doGet</code>/<code>doPost</code>) на каждый запрос, <code>destroy()</code> при выгрузке. В Spring MVC единственный центральный сервлет — DispatcherServlet, через него проходят все запросы.</p>
+<p>Ключевой сдвиг Spring Boot: контейнер встроен (по умолчанию Tomcat; альтернативы — Jetty, Undertow). Приложение собирается в самодостаточный исполняемый jar со встроенным сервером, а не разворачивается WAR-файлом на внешний сервер приложений — это упрощает деплой и контейнеризацию.</p>
+<h2>Модель thread-per-request</h2>
+<p>Контейнер держит пул рабочих потоков (у Tomcat по умолчанию ~200). Каждый входящий запрос берёт один поток из пула и держит его всё время обработки, включая блокирующие ожидания (БД, внешние вызовы).</p>
+<p>Отсюда потолок: при блокирующем IO число одновременных запросов ограничено размером пула — потоки простаивают в ожидании. Это и есть мотивация WebFlux (неблокирующая модель) и виртуальных потоков (дешёвые потоки), которым посвящены отдельные уроки.</p>
+<h2>Потокобезопасность контроллеров</h2>
+<p>Один экземпляр сервлета (и singleton-контроллера Spring) обслуживает множество запросов параллельно разными потоками. Поэтому состояние конкретного запроса НЕЛЬЗЯ хранить в полях контроллера/сервлета — это гонка данных.</p>
+<p>Правило: в полях держат только потокобезопасные зависимости (другие бины), а данные запроса живут в параметрах метода, локальных переменных или request-scope бинах. Мутабельное поле-«состояние» в singleton-контроллере — классический баг.</p>
+<h2>Filter против Interceptor</h2>
+<p>Servlet Filter работает на уровне контейнера ДО DispatcherServlet и оборачивает всю обработку: CORS, security, сжатие, логирование, correlation id. Фильтры образуют цепочку (FilterChain), а порядок задают через <code>@Order</code> или FilterRegistrationBean.</p>
+<p>HandlerInterceptor работает ВНУТРИ MVC, вокруг выбранного обработчика: <code>preHandle</code>/<code>postHandle</code>/<code>afterCompletion</code>, с доступом к тому, какой handler выбран. Выбор: нужна низкоуровневая обработка любого запроса и доступ к сырым servlet API — Filter; нужна логика, привязанная к MVC-обработчику — Interceptor.</p>
+<h2>forward и redirect</h2>
+<p>forward — серверная передача обработки другому ресурсу в рамках ТОГО ЖЕ запроса: новый запрос браузера не делается, URL не меняется. redirect — ответ 3xx, после которого клиент делает НОВЫЙ запрос на другой URL (URL в адресной строке меняется).</p>
+<p>Отсюда паттерн PRG (Post/Redirect/Get): после успешного POST отвечают редиректом на GET-страницу, чтобы перезагрузка (F5) не повторяла отправку формы/платежа.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Объясните встроенный контейнер (jar вместо WAR) и модель thread-per-request (поток из пула на запрос, блокировка на IO → мотивация WebFlux/виртуальных потоков). Подчеркните потокобезопасность singleton-контроллеров (нет состояния запроса в полях). Различите Filter (до DispatcherServlet, контейнерный, цепочка) и Interceptor (внутри MVC, вокруг handler), и forward vs redirect с паттерном PRG.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/spring/servlet-lifecycle/">Каков жизненный цикл сервлета?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/filter-vs-interceptor/">Чем Servlet Filter отличается от HandlerInterceptor?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/stateful-controller-bug/">Разработчик добавил в @RestController поле private User currentUser и заполняет его в начале каждого метода. Что не так?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/forward-vs-redirect/">Чем forward отличается от redirect?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/dispatcherservlet/">Что делает DispatcherServlet в Spring MVC?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/spring/web/">Spring MVC: DispatcherServlet и обработка запроса</a><p>Конвейер обработки запроса, @Controller против @RestController, маппинги, извлечение данных и контроль ответа.</p></li><li><a href="/articles/spring/mvc-advanced/">Валидация и обработка ошибок</a><p>Bean Validation и @Valid/@Validated, превращение ошибок в ответ, @ControllerAdvice и единый контракт, ProblemDetail (RFC 7807), multipart и interceptors.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Сервлеты, фильтры и встроенный контейнер","description":"Сервлет и встроенный Tomcat, модель thread-per-request, потокобезопасность контроллеров, Filter против Interceptor и forward/redirect.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/spring/servlet-runtime/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

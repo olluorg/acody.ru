@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JIT, оптимизации и бенчмаркинг — разбор для собеседования</title>
+<meta name="description" content="Tiered compilation C1/C2, ключевые оптимизации JIT (inlining, escape analysis), деоптимизация и прогрев, корректные микробенчмарки на JMH.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/modern-java-performance/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/modern-java-performance/">
+<meta property="og:title" content="JIT, оптимизации и бенчмаркинг — разбор для собеседования">
+<meta property="og:description" content="Tiered compilation C1/C2, ключевые оптимизации JIT (inlining, escape analysis), деоптимизация и прогрев, корректные микробенчмарки на JMH.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>JIT, оптимизации и бенчмаркинг</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"JIT, оптимизации и бенчмаркинг"}]}</script>
+  <h1>JIT, оптимизации и бенчмаркинг</h1>
+  <p class="lead">Tiered compilation C1/C2, ключевые оптимизации JIT (inlining, escape analysis), деоптимизация и прогрев, корректные микробенчмарки на JMH.</p>
+  <article class="md"><h2>JIT и tiered compilation</h2>
+<p>Java исполняет байткод сначала интерпретатором, а горячие (часто вызываемые) методы компилирует в нативный код на лету — это JIT. Работает tiered compilation: сперва компилятор C1 (быстрая компиляция + сбор профиля исполнения), а самый горячий код перекомпилирует C2 — медленнее, но с агрессивными оптимизациями.</p>
+<p>Ключевой момент: оптимизации опираются на ПРОФИЛЬ реального исполнения (какие ветки берутся, какие типы приходят), поэтому пиковая производительность достигается не сразу, а после прогрева.</p>
+<h2>Ключевые оптимизации</h2>
+<p>Inlining (встраивание тела вызываемого метода в место вызова) — фундамент: он убирает накладные расходы вызова и открывает остальные оптимизации, давая компилятору видеть код целиком. Escape analysis доказывает, что объект не «убегает» из метода, и тогда возможны scalar replacement (объект не аллоцируется в куче вовсе, раскладывается на локальные значения) и lock elision (снятие ненужной синхронизации на не разделяемом объекте).</p>
+<p>Также работают dead code elimination (выкидывание кода без эффекта), constant folding (свёртка констант) и loop unrolling. Именно поэтому «маленький объект в цикле» может не стоить ничего, а наивный замер — показывать ноль.</p>
+<h2>Деоптимизация и прогрев</h2>
+<p>C2 делает спекулятивные оптимизации на основе профиля (например, «сюда всегда приходит один тип» → мономорфный inlining). Если предположение нарушится (пришёл новый тип, взялась редкая ветка), происходит деоптимизация — возврат к интерпретации с последующей перекомпиляцией.</p>
+<p>Практический вывод: производительность «холодного» кода и кода после прогрева различается в разы. Любой замер без warmup измеряет интерпретацию и компиляцию, а не установившуюся скорость.</p>
+<h2>Микробенчмарки и JMH</h2>
+<p>Наивный микробенчмарк (засечь время в цикле) почти всегда врёт: JIT может полностью выбросить код, результат которого не используется (dead code elimination), свернуть константы, или замер поймает фазу прогрева.</p>
+<p>Поэтому в Java микробенчмарки пишут на JMH: он делает прогрев (warmup), запускает в отдельных форк-процессах (forks) для изоляции профиля, и защищает от выбрасывания кода — результат нужно «потребить» возвратом или через Blackhole, а входные данные держать в <code>@State</code>, чтобы их не свернули в константу.</p>
+<pre class="lang-java"><code>@Benchmark
+public void parse(Blackhole bh) {
+    bh.consume(Integer.parseInt(&quot;42&quot;)); // иначе JIT выкинет вызов
+}</code></pre>
+<h2>Performance mindset</h2>
+<p>Сначала измеряйте, потом меняйте: смотрите перцентили задержек (p99, не среднее), allocation rate, CPU-профиль, время в БД — и только потом трогайте код, повторно замеряя эффект. Преждевременная оптимизация по догадке обычно усложняет код без выигрыша.</p>
+<p>И главное про приоритеты: самые дорогие проблемы backend-а почти никогда не в синтаксисе Java, а в лишних round-trips к БД/сети, плохих индексах, lock contention и неограниченных очередях. JIT и так прекрасно оптимизирует горячий код — фокусируйтесь на алгоритмах и I/O.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Объясните tiered compilation (интерпретация → C1 с профилем → C2) и зависимость пиковой скорости от прогрева, назовите ключевые оптимизации (inlining как основа, escape analysis → scalar replacement/lock elision, DCE). Расскажите про деоптимизацию (спекуляции по профилю) и почему наивный микробенчмарк врёт → JMH (warmup/forks/Blackhole/<code>@State</code>). Завершите mindset: измеряйте перцентили, узкие места backend-а — в I/O и алгоритмах, а не в синтаксисе.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/jmh/">Какой инструмент обычно используют для корректных Java microbenchmarks?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jit-tiered-compilation/">Что верно про JIT-компиляцию в HotSpot?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/microbenchmark-pitfalls/">Какие ошибки чаще всего делают самодельный микробенчмарк бессмысленным?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/escape-analysis/">Что такое escape analysis и какой эффект она даёт?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/jit-compiler/">Что делает JIT-компилятор в JVM?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/jvm-memory/">Память JVM и устройство объекта</a><p>Runtime data areas, стек против кучи, заголовок объекта и выравнивание, compressed oops и metaspace.</p></li><li><a href="/articles/java/gc-tuning/">GC: тюнинг и мониторинг</a><p>Ключевые флаги, unified GC-логи, метрики (паузы, throughput, allocation/promotion rate) и диагностика частых проблем.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"JIT, оптимизации и бенчмаркинг","description":"Tiered compilation C1/C2, ключевые оптимизации JIT (inlining, escape analysis), деоптимизация и прогрев, корректные микробенчмарки на JMH.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/modern-java-performance/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

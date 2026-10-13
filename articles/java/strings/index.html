@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Строки: неизменяемость, пул и StringBuilder — разбор для собеседования</title>
+<meta name="description" content="Почему String immutable, String pool и intern, конкатенация и StringBuilder, char/code points и compact strings.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/strings/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/strings/">
+<meta property="og:title" content="Строки: неизменяемость, пул и StringBuilder — разбор для собеседования">
+<meta property="og:description" content="Почему String immutable, String pool и intern, конкатенация и StringBuilder, char/code points и compact strings.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Строки: неизменяемость, пул и StringBuilder</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Строки: неизменяемость, пул и StringBuilder"}]}</script>
+  <h1>Строки: неизменяемость, пул и StringBuilder</h1>
+  <p class="lead">Почему String immutable, String pool и intern, конкатенация и StringBuilder, char/code points и compact strings.</p>
+  <article class="md"><h2>Почему String неизменяем</h2>
+<p>String — финальный класс с финальным внутренним хранилищем: после создания строку нельзя изменить, любые «модификации» возвращают новый объект. Это сознательное проектное решение, а не ограничение.</p>
+<p>Зачем: безопасность (строку-имя файла/класса/SQL нельзя подменить после проверки), кэширование <code>hashCode</code> (считается один раз — строки идеальны как ключи Map), потокобезопасность без синхронизации и возможность безопасно делить один объект между местами (пул).</p>
+<p>Как именно кэшируется <code>hashCode</code>: у String есть приватное поле int hash. Первый вызов <code>hashCode()</code> считает значение (по формуле s[0]*31^(n-1) + … + s[n-1]) и сохраняет его в это поле, а последующие вызовы возвращают сохранённое. Это безопасно ровно потому, что содержимое строки никогда не меняется — у изменяемого объекта такой трюк сломал бы контракт <code>hashCode</code>. Нюанс: для строк с <code>hashCode</code> == 0 (например, пустая строка) кэш не «срабатывает» и пересчитывается каждый раз, но это копеечный случай.</p>
+<h2>String pool и intern</h2>
+<p>Строковые литералы хранятся в пуле строк: одинаковый литерал во всём коде — это один и тот же объект. А <code>new String(&quot;x&quot;)</code> всегда создаёт новый объект в куче, не из пула. Поэтому "x" == "x" может быть true, а <code>new String(&quot;x&quot;)</code> == "x" — false.</p>
+<p>Как устроен пул внутри: это служебная хеш-таблица JVM (string table). С Java 7 сами строки пула живут в обычной куче (раньше — в PermGen), поэтому интернированные строки могут собираться GC, если на них не осталось ссылок. Литералы интернируются автоматически при загрузке класса; для произвольной строки то же делает <code>intern()</code>: ищет в таблице равную (по equals) и возвращает её, либо кладёт текущую и возвращает её.</p>
+<p>Деталь для глубокого вопроса: размер этой таблицы задаётся флагом -XX:StringTableSize, и при массовом <code>intern()</code> слишком маленькая таблица даёт коллизии и заметно тормозит. Поэтому ручным intern злоупотреблять не стоит.</p>
+<p><code>intern()</code> возвращает каноническую (пуловую) ссылку. Вручную им пользуются редко (массовый intern может раздуть string table); понимать механизм нужно прежде всего чтобы не попадаться на == для строк.</p>
+<pre class="lang-java"><code>String a = &quot;java&quot;;
+String b = &quot;java&quot;;
+String c = new String(&quot;java&quot;);
+System.out.println(a == b);          // true  (один литерал из пула)
+System.out.println(a == c);          // false (new — новый объект в куче)
+System.out.println(a == c.intern()); // true  (intern вернул пуловую ссылку)
+System.out.println(a.equals(c));     // true  — сравнивай так</code></pre>
+<h2>Конкатенация и StringBuilder</h2>
+<p>Поскольку String неизменяем, конкатенация создаёт новые объекты. Одиночное a + b компилятор оптимизирует (с Java 9 — через invokedynamic и StringConcatFactory), поэтому в простых выражениях беспокоиться не о чем.</p>
+<p>Но конкатенация в цикле (s += ...) создаёт новую строку на каждой итерации — это O(n²) по памяти и времени. Для построения строк в циклах берут StringBuilder — изменяемый буфер (внутри тот же растущий массив, что у ArrayList), амортизированно O(1) на append.</p>
+<p>StringBuilder против StringBuffer: API у них одинаковый, но StringBuffer синхронизирован (каждый метод под замком), а StringBuilder — нет. По умолчанию берут StringBuilder: он быстрее, а синхронизация StringBuffer бессмысленна для локальной переменной. StringBuffer — исторический класс, оправданный лишь в редком случае, когда один буфер действительно делится между потоками (что почти всегда признак сомнительного дизайна).</p>
+<pre class="lang-java"><code>StringBuilder sb = new StringBuilder();
+for (var part : parts) sb.append(part); // O(n), а не O(n^2)
+String result = sb.toString();</code></pre>
+<h2>char, code points и compact strings</h2>
+<p>char — это 16-битный UTF-16 code unit, а не «символ Unicode». Символы вне базовой плоскости (эмодзи, редкие иероглифы) кодируются суррогатной парой из двух char, поэтому <code>length()</code> считает code units, а не реальные символы; для символов используют <code>codePointCount</code>/<code>codePointAt</code>.</p>
+<p>С Java 9 действует compact strings — это автоматический, встроенный в JVM механизм, включённый по умолчанию и полностью прозрачный для кода: внутреннее хранилище String сменилось с char[] на byte[] плюс поле-coder. Если строка состоит только из Latin-1, она хранится по одному байту на символ (а не два), что заметно экономит память — большинство строк в приложениях именно такие. Ничего настраивать не нужно; механизм можно отключить флагом -XX:-CompactStrings, но на практике это почти никогда не требуется.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Объясните неизменяемость String и её причины (безопасность, кэш <code>hashCode</code>, потокобезопасность, пул), различите литерал из пула и new String (и почему строки сравнивают equals, а не ==), назовите ловушку конкатенации в цикле → StringBuilder, и блесните деталями: char = UTF-16 code unit (суррогатные пары) и compact strings с Java 9.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/string-equals-vs-double-equals/">Что вернут сравнения для new String(&quot;a&quot;) и new String(&quot;a&quot;) через == и через equals()?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/string-immutable/">Почему String в Java неизменяемый?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/string-stringbuilder-stringbuffer/">Чем String, StringBuilder и StringBuffer отличаются?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/reverse-string/">Реализуй метод reverse(String s), возвращающий строку в обратном порядке.</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/primitives/">Примитивы, обёртки и Integer cache</a><p>Восемь примитивов и их диапазоны, autoboxing, кэш Integer и ловушка ==, NPE при распаковке и цена боксинга.</p></li><li><a href="/articles/java/equality/">Равенство: ==, equals и hashCode</a><p>Идентичность против логического равенства, контракт equals и hashCode, проблема equals с наследованием и корректная реализация.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Строки: неизменяемость, пул и StringBuilder","description":"Почему String immutable, String pool и intern, конкатенация и StringBuilder, char/code points и compact strings.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/strings/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

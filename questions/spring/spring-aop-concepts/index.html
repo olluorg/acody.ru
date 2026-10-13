@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое AOP в Spring и его ключевые понятия? — вопрос с собеседования</title>
+<meta name="description" content="AOP выносит сквозную функциональность (транзакции, безопасность, логирование, метрики) из бизнес-кода в аспекты. Advice — что и когда выполнить…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/spring-aop-concepts/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/spring-aop-concepts/">
+<meta property="og:title" content="Что такое AOP в Spring и его ключевые понятия? — вопрос с собеседования">
+<meta property="og:description" content="AOP выносит сквозную функциональность (транзакции, безопасность, логирование, метрики) из бизнес-кода в аспекты. Advice — что и когда выполнить…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Что такое AOP в Spring и его ключевые понятия?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Что такое AOP в Spring и его ключевые понятия?"}]}</script>
+  <h1>Что такое AOP в Spring и его ключевые понятия?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">AOP и прокси</span><span class="chip">Spring</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое аспект, advice и pointcut?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">AOP выносит <b>сквозную функциональность</b> (транзакции, безопасность, логирование, метрики) из бизнес-кода в <b>аспекты</b>. <b>Advice</b> — что и когда выполнить; <b>pointcut</b> — где; <b>join point</b> — конкретная точка (в Spring — вызов метода).</p><ul><li>Виды advice: @Before, @After, @AfterReturning, @AfterThrowing, @Around</li><li>Spring AOP — на прокси: только методы бинов, только внешние вызовы</li><li>@Transactional, @Async, @Cacheable — тоже аспекты</li></ul><p class="extra"><span>А ещё</span> AspectJ умеет больше (поля, конструкторы, self-invocation), но требует weaving</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Проблема:</b> одинаковый код (транзакции, проверка прав, логирование, замер времени) повторяется в сотнях методов и смешивается с бизнес-логикой.</p>
+<p><b>Понятия:</b></p>
+<ul><li><b>аспект</b> — модуль со сквозной логикой (<code>@Aspect</code>);</li><li><b>join point</b> — точка выполнения, куда можно встроиться; в Spring AOP — только вызов метода бина;</li><li><b>pointcut</b> — выражение, выбирающее join points: <code>execution(* com.shop.service..*(..))</code>, <code>@annotation(Audited)</code>;</li><li><b>advice</b> — код и момент выполнения: до, после, после успеха, после исключения, вокруг (<code>@Around</code> с <code>ProceedingJoinPoint.proceed()</code>).</li></ul>
+<p><b>Реализация в Spring:</b> для бинов, к которым подходят pointcut, создаётся прокси (JDK dynamic proxy или CGLIB). Вызов идёт через прокси, который выполняет advice и вызывает метод.</p>
+<p><b>Ограничения прокси:</b> не перехватываются вызовы внутри объекта (<code>this.method()</code>), private-методы, final-методы для CGLIB, объекты не из контейнера.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>@Aspect @Component
+class TimingAspect {
+    @Around(&quot;@annotation(com.shop.Timed)&quot;)
+    Object time(ProceedingJoinPoint pjp) throws Throwable {
+        long t = System.nanoTime();
+        try { return pjp.proceed(); }
+        finally { log.info(&quot;{} {} мс&quot;, pjp.getSignature(), (System.nanoTime() - t) / 1_000_000); }
+    }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Сквозная функциональность как мотивация.</li><li>Аспект, advice, pointcut, join point.</li><li>Прокси и их ограничения.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ожидать срабатывания аспекта при self-invocation.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем around отличается от before/after?</li><li>Где типично применяют AOP?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/aop/">AOP: прокси и аспекты</a><p>Сквозная функциональность, понятия aspect/advice/pointcut/join point, JDK против CGLIB прокси, self-invocation и что на AOP построено.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/advice-types/">Какие виды advice существуют в Spring AOP?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/proxy-aop-limits/">Какие ограничения есть у Spring AOP из-за того, что он основан на прокси?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/aop-basic/">Какую задачу решает AOP?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое AOP в Spring и его ключевые понятия?","acceptedAnswer":{"@type":"Answer","text":"AOP выносит сквозную функциональность (транзакции, безопасность, логирование, метрики) из бизнес-кода в аспекты. Advice — что и когда выполнить; pointcut — где; join point — конкретная точка (в Spring — вызов метода). Виды advice: @Before, @After, @AfterReturning, @AfterThrowing, @Around Spring AOP — на прокси: только методы бинов, только внешние вызовы @Transactional, @Async, @Cacheable — тоже аспекты AspectJ умеет больше (поля, конструкторы, self-invocation), но требует weaving Проблема: одинаковый код (транзакции, проверка прав, логирование, замер времени) повторяется в сотнях методов и смешивается с бизнес-логикой. Понятия: - аспект — модуль со сквозной логикой (@Aspect); - join point — точка выполнения, куда можно встроиться; в Spring AOP — только вызов метода бина; - pointcut — выражение, выбирающее join points: execution( com.shop.service..(..)), @annotation(Audited); - advice — код и момент выполнения: до, после, после успеха, после исключения, вокруг (@Around с ProceedingJoinPoint.proceed()). Реализация в Spring: для бинов, к которым подходят pointcut, создаётся прокси (JDK dynamic proxy или CGLIB). Вызов идёт через прокси, который выполняет advice и вызывает метод. Ограничения прокси: не перехватываются вызовы внутри объекта (this.method()), private-методы, final-методы для CGLIB, объекты не из контейнера."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

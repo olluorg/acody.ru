@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как посчитать DAU, WAU, MAU и скользящий MAU на SQL? — вопрос с собеседования</title>
+<meta name="description" content="DAU — число уникальных пользователей за день: COUNT(DISTINCT user_id) GROUP BY day. MAU календарный — то же по месяцам. Скользящий MAU на каждый день…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/dau-mau-sql/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/dau-mau-sql/">
+<meta property="og:title" content="Как посчитать DAU, WAU, MAU и скользящий MAU на SQL? — вопрос с собеседования">
+<meta property="og:description" content="DAU — число уникальных пользователей за день: COUNT(DISTINCT user_id) GROUP BY day. MAU календарный — то же по месяцам. Скользящий MAU на каждый день…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Как посчитать DAU, WAU, MAU и скользящий MAU на SQL?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Как посчитать DAU, WAU, MAU и скользящий MAU на SQL?"}]}</script>
+  <h1>Как посчитать DAU, WAU, MAU и скользящий MAU на SQL?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">SQL для аналитика</span><span class="chip">SQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое stickiness DAU/MAU?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>DAU</b> — число уникальных пользователей за день: <code>COUNT(DISTINCT user_id) GROUP BY day</code>. <b>MAU</b> календарный — то же по месяцам. <b>Скользящий MAU</b> на каждый день — уникальные за последние 30 дней; его <b>нельзя получить суммой DAU</b> (пользователь посчитается много раз) — нужен join дней с окном событий.</p><ul><li>Stickiness = DAU / MAU — какую долю месяца средний пользователь активен</li><li>COUNT(DISTINCT) по окну в большинстве СУБД не поддерживается — используют самосоединение или приблизительные функции (HyperLogLog)</li><li>Определение «активности» фиксируют заранее</li></ul><p class="extra"><span>А ещё</span> На больших объёмах — uniq/uniqCombined в ClickHouse, approx_count_distinct</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Почему нельзя суммировать DAU.</b> Пользователь, заходящий каждый день, войдёт в сумму 30 раз. Уникальные пользователи не аддитивны — это частая ошибка в витринах, где MAU «считают» из DAU.</p>
+<p><b>Производительность.</b> Скользящий подсчёт уникальных — дорогая операция: для каждого дня просматривается окно событий. На больших данных:</p>
+<ul><li>предагрегировать «пользователь — день активности» (одна строка на пару) и считать по ней;</li><li>использовать приблизительные структуры (HyperLogLog), которые объединяются между днями;</li><li>для точного значения — битовые карты пользователей по дням.</li></ul>
+<p><b>Stickiness.</b> DAU/MAU = 0,2 значит, что средний активный за месяц пользователь заходит примерно 6 дней из 30. Для мессенджеров норма выше, для сервисов редких покупок — ниже.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-sql"><code>-- DAU
+SELECT event_date, COUNT(DISTINCT user_id) AS dau
+FROM events GROUP BY event_date;
+
+-- скользящий MAU (30 дней) на каждую дату
+SELECT d.day, COUNT(DISTINCT e.user_id) AS mau_30
+FROM generate_series(DATE &#x27;2026-09-01&#x27;, DATE &#x27;2026-09-30&#x27;, INTERVAL &#x27;1 day&#x27;) AS d(day)
+JOIN events e
+  ON e.event_date &gt;  d.day - INTERVAL &#x27;30 day&#x27;
+ AND e.event_date &lt;= d.day
+GROUP BY d.day;</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Подсчёт DAU и MAU.</li><li>Почему уникальные неаддитивны.</li><li>Скользящее окно и приблизительные методы.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/dau-mau-stickiness/">Что такое DAU, MAU и stickiness и как ими пользоваться?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/window-functions/">Что такое оконные функции в SQL и чем они отличаются от GROUP BY?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как посчитать DAU, WAU, MAU и скользящий MAU на SQL?","acceptedAnswer":{"@type":"Answer","text":"DAU — число уникальных пользователей за день: COUNT(DISTINCT user_id) GROUP BY day. MAU календарный — то же по месяцам. Скользящий MAU на каждый день — уникальные за последние 30 дней; его нельзя получить суммой DAU (пользователь посчитается много раз) — нужен join дней с окном событий. Stickiness = DAU / MAU — какую долю месяца средний пользователь активен COUNT(DISTINCT) по окну в большинстве СУБД не поддерживается — используют самосоединение или приблизительные функции (HyperLogLog) Определение «активности» фиксируют заранее На больших объёмах — uniq/uniqCombined в ClickHouse, approx_count_distinct Почему нельзя суммировать DAU. Пользователь, заходящий каждый день, войдёт в сумму 30 раз. Уникальные пользователи не аддитивны — это частая ошибка в витринах, где MAU «считают» из DAU. Производительность. Скользящий подсчёт уникальных — дорогая операция: для каждого дня просматривается окно событий. На больших данных: - предагрегировать «пользователь — день активности» (одна строка на пару) и считать по ней; - использовать приблизительные структуры (HyperLogLog), которые объединяются между днями; - для точного значения — битовые карты пользователей по дням. Stickiness. DAU/MAU = 0,2 значит, что средний активный за месяц пользователь заходит примерно 6 дней из 30. Для мессенджеров норма выше, для сервисов редких покупок — ниже."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

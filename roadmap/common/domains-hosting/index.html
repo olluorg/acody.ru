@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Домены, хостинг и CDN — карта «Frontend-разработчик»</title>
+<meta name="description" content="Где живёт сайт — регистрация домена, виды хостинга, статический хостинг и CDN.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/common/domains-hosting/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/common/domains-hosting/">
+<meta property="og:title" content="Домены, хостинг и CDN — карта «Frontend-разработчик»">
+<meta property="og:description" content="Где живёт сайт — регистрация домена, виды хостинга, статический хостинг и CDN.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/frontend/#internet">Frontend-разработчик</a> <span>/</span> <a href="/roadmap/frontend/internet/">Интернет и браузер</a> <span>/</span> <span>Домены, хостинг и CDN</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Frontend-разработчик","item":"https://learn.getsotto.ru/roadmap/frontend/#internet"},{"@type":"ListItem","position":3,"name":"Интернет и браузер","item":"https://learn.getsotto.ru/roadmap/frontend/internet/"},{"@type":"ListItem","position":4,"name":"Домены, хостинг и CDN"}]}</script>
+  <h1>Домены, хостинг и CDN</h1>
+  <div class="chips"><span class="rm-kind k-optional">Полезно знать</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Где живёт сайт — регистрация домена, виды хостинга, статический хостинг и CDN.</p>
+  <article class="md"><p>Чтобы сайт открылся по имени, нужны <b>домен</b> (покупается у регистратора), <b>DNS-записи</b>, указывающие на сервер, и сам <b>хостинг</b> — место, где лежат файлы или работает приложение.</p>
+<h3>Виды хостинга</h3>
+<ul><li><b>Статический хостинг</b> (GitHub Pages, Netlify, Vercel, объектное хранилище облака) — для сайтов из готовых HTML, CSS и JS. Дёшево, быстро, почти без администрирования.</li><li><b>Платформы приложений</b> (PaaS) — загружаете код, платформа запускает и масштабирует.</li><li><b>Виртуальный сервер</b> (VPS) — полный контроль и полная ответственность: обновления, безопасность, мониторинг.</li><li><b>Контейнеры и Kubernetes</b> — для команд с множеством сервисов.</li></ul>
+<h3>CDN</h3>
+<p>Сеть серверов по всему миру, которая хранит копии статических файлов ближе к пользователю. Уменьшает задержку и снимает нагрузку с основного сервера. Для фронтенда важно: файлы с хешем в имени (<code>app.3f9a1c.js</code>) можно кэшировать «навсегда», а <code>index.html</code> — коротко, чтобы пользователи получали новую версию.</p></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 3 ч</small></h3><ul><li>Выкладывает статический сайт на хостинг и подключает свой домен</li><li>Объясняет, что делает CDN</li></ul><p class="rm-practice"><b>Практика.</b> Выложить учебный проект на GitHub Pages или Netlify со своим доменом и HTTPS.</p></div><div class="rm-grade"><h3>Middle <small>≈ 3 ч</small></h3><ul><li>Выбирает вид хостинга под проект — статика, платформа, сервер — с обоснованием</li><li>Настраивает HTTPS и кэширование на CDN</li></ul><p class="rm-practice"><b>Практика.</b> Перенести проект за CDN, настроить кэширование статики и сравнить время загрузки из разных регионов.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/system-design/cdn/">Что делает CDN?</a> <span class="lvl lvl-middle">Middle</span><p>CDN — сеть серверов по миру, которые кэшируют контент рядом с пользователями: меньше задержка и нагрузка на исходный сервер (origin).</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/common/dns/">← DNS</a><a class="next" href="/roadmap/frontend/browsers/">Как работает браузер →</a></nav>
+  <p class="rm-back"><a href="/roadmap/frontend/#internet">← Вся карта «Frontend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Домены, хостинг и CDN","description":"Где живёт сайт — регистрация домена, виды хостинга, статический хостинг и CDN.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/common/domains-hosting/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

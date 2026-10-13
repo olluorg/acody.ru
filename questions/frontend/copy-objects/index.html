@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как скопировать объект в JavaScript и чем поверхностная копия отличается от глубокой? — вопрос с собеседования</title>
+<meta name="description" content="Поверхностная копия ({...obj}, Object.assign, [...arr], slice) копирует только верхний уровень — вложенные объекты общие. Глубокая …">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/copy-objects/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/copy-objects/">
+<meta property="og:title" content="Как скопировать объект в JavaScript и чем поверхностная копия отличается от глубокой? — вопрос с собеседования">
+<meta property="og:description" content="Поверхностная копия ({...obj}, Object.assign, [...arr], slice) копирует только верхний уровень — вложенные объекты общие. Глубокая …">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Как скопировать объект в JavaScript и чем поверхностная копия отличается от глубокой?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Как скопировать объект в JavaScript и чем поверхностная копия отличается от глубокой?"}]}</script>
+  <h1>Как скопировать объект в JavaScript и чем поверхностная копия отличается от глубокой?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Основы JavaScript</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое structuredClone?</li><li>Почему JSON.parse(JSON.stringify()) — плохой способ копирования?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Поверхностная</b> копия (<code>{...obj}</code>, <code>Object.assign</code>, <code>[...arr]</code>, <code>slice</code>) копирует только верхний уровень — вложенные объекты общие. <b>Глубокая</b> — <code>structuredClone(obj)</code> (встроенная, сохраняет Date, Map, Set, циклические ссылки). JSON-трюк теряет функции, undefined, Date и падает на циклах.</p><ul><li>В React и Redux состояние обновляют неизменяемо — копируя изменённые уровни</li><li>structuredClone не копирует функции, DOM-узлы и прототипы классов</li><li>Присваивание const b = a — не копия, а та же ссылка</li></ul><p class="extra"><span>А ещё</span> Immer позволяет «мутировать» черновик и получить неизменяемую копию</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Когда достаточно поверхностной копии:</b> в иммутабельном стиле, где вложенные объекты тоже не меняются, а заменяются. Обновление React- состояния копирует только путь до изменённого поля.</p>
+<p><b>Глубокая копия через JSON:</b></p>
+<ul><li>функции и <code>undefined</code> пропадают;</li><li><code>Date</code> становится строкой, <code>Map</code> и <code>Set</code> — пустыми объектами;</li><li><code>NaN</code> и <code>Infinity</code> становятся <code>null</code>;</li><li>циклические ссылки — исключение.</li></ul>
+<p><b>structuredClone</b> (во всех современных браузерах и Node 17+) решает эти проблемы, но объект теряет класс — получается обычный объект.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-js"><code>const user = { name: &quot;Аня&quot;, address: { city: &quot;Казань&quot; } };
+
+const shallow = { ...user };
+shallow.address.city = &quot;Сочи&quot;;
+user.address.city;            // &quot;Сочи&quot; — вложенный объект общий
+
+const deep = structuredClone(user);
+deep.address.city = &quot;Омск&quot;;
+user.address.city;            // &quot;Сочи&quot; — не изменился
+
+const updated = { ...user, address: { ...user.address, city: &quot;Пермь&quot; } };</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Различие видов копий.</li><li>Способы и их ограничения.</li><li>Связь с иммутабельными обновлениями.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/js-types/">Какие типы данных есть в JavaScript?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/react-state-immutability/">Почему в React нельзя изменять состояние напрямую?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/copy-deepcopy/">Чем поверхностная копия отличается от глубокой?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как скопировать объект в JavaScript и чем поверхностная копия отличается от глубокой?","acceptedAnswer":{"@type":"Answer","text":"Поверхностная копия ({...obj}, Object.assign, [...arr], slice) копирует только верхний уровень — вложенные объекты общие. Глубокая — structuredClone(obj) (встроенная, сохраняет Date, Map, Set, циклические ссылки). JSON-трюк теряет функции, undefined, Date и падает на циклах. В React и Redux состояние обновляют неизменяемо — копируя изменённые уровни structuredClone не копирует функции, DOM-узлы и прототипы классов Присваивание const b = a — не копия, а та же ссылка Immer позволяет «мутировать» черновик и получить неизменяемую копию Когда достаточно поверхностной копии: в иммутабельном стиле, где вложенные объекты тоже не меняются, а заменяются. Обновление React- состояния копирует только путь до изменённого поля. Глубокая копия через JSON: - функции и undefined пропадают; - Date становится строкой, Map и Set — пустыми объектами; - NaN и Infinity становятся null; - циклические ссылки — исключение. structuredClone (во всех современных браузерах и Node 17+) решает эти проблемы, но объект теряет класс — получается обычный объект."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

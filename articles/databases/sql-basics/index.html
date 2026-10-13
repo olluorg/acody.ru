@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL: операторы, NULL и фильтрация — разбор для собеседования</title>
+<meta name="description" content="Группы команд, логический порядок SELECT, трёхзначная логика NULL, разница WHERE/HAVING и оконные функции — с ловушками, на которых валятся на…">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/databases/sql-basics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/databases/sql-basics/">
+<meta property="og:title" content="SQL: операторы, NULL и фильтрация — разбор для собеседования">
+<meta property="og:description" content="Группы команд, логический порядок SELECT, трёхзначная логика NULL, разница WHERE/HAVING и оконные функции — с ловушками, на которых валятся на…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>SQL: операторы, NULL и фильтрация</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"SQL: операторы, NULL и фильтрация"}]}</script>
+  <h1>SQL: операторы, NULL и фильтрация</h1>
+  <p class="lead">Группы команд, логический порядок SELECT, трёхзначная логика NULL, разница WHERE/HAVING и оконные функции — с ловушками, на которых валятся на собеседовании.</p>
+  <article class="md"><h2>Что делает SQL и группы команд</h2>
+<p>SQL — декларативный язык: вы описываете, какой результат хотите, а планировщик СУБД сам решает, как его получить. Поэтому один и тот же запрос может выполняться по-разному в зависимости от данных, индексов и статистики.</p>
+<p>Команды делят на четыре группы:</p>
+<ul><li>DDL (Data Definition Language) — определяет схему: CREATE, ALTER, DROP.</li><li>DML (Data Manipulation Language) — работает с данными: SELECT, INSERT, UPDATE, DELETE.</li><li>TCL (Transaction Control Language) — управляет транзакциями: COMMIT, ROLLBACK, SAVEPOINT.</li><li>DCL (Data Control Language) — управляет правами: GRANT, REVOKE.</li></ul>
+<p>Важно не просто перечислить, а понимать разницу рисков: DML меняет строки и обычно откатывается, а DDL меняет структуру и в MySQL и Oracle фиксирует транзакцию неявно — откатить ALTER уже не выйдет. В PostgreSQL DDL транзакционный: миграцию можно выполнить целиком в одной транзакции и откатить при ошибке.</p>
+<h2>Логический порядок выполнения SELECT</h2>
+<p>Текст пишут как SELECT … FROM … WHERE …, но логически шаги идут иначе: FROM и JOIN → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → LIMIT.</p>
+<p>Из этого следует практичное правило: на этапе WHERE ещё нет ни групп, ни алиасов из SELECT — поэтому фильтровать по агрегату в WHERE нельзя, а ссылаться в WHERE на алиас столбца из SELECT обычно тоже нельзя (он вычисляется позже).</p>
+<p>ORDER BY, наоборот, выполняется после SELECT, поэтому в нём алиасы уже доступны.</p>
+<h2>NULL и трёхзначная логика</h2>
+<p>NULL — это «значение неизвестно/отсутствует», а не пустая строка и не ноль. Любое сравнение с NULL даёт не TRUE и не FALSE, а UNKNOWN, поэтому строка не проходит фильтр.</p>
+<p>Из-за этого = NULL не работает — нужны IS NULL / IS NOT NULL. Особенно коварен NOT IN с подзапросом, где встречается NULL: всё выражение становится UNKNOWN и результат оказывается пустым.</p>
+<p>Агрегаты игнорируют NULL: <code>count(column)</code> считает только не-NULL значения, тогда как <code>count(*)</code> считает строки. Это частый источник расхождений в отчётах.</p>
+<pre class="lang-sql"><code>-- неверно: вернёт пусто
+select * from users where deleted_at = null;
+-- верно:
+select * from users where deleted_at is null;
+
+-- count(*) считает строки, count(email) — не-NULL email
+select count(*), count(email) from users;</code></pre>
+<h2>WHERE против HAVING</h2>
+<p>WHERE фильтрует строки до группировки — поэтому его стоит использовать всегда, когда можно: чем раньше отсекли данные, тем меньше работы дальше и тем вероятнее задействуется индекс.</p>
+<p>HAVING фильтрует уже готовые группы и нужен для условий по агрегатам (count, sum, avg). Писать обычное условие по строке в HAVING — ошибка: оно отработает позже и без помощи индекса.</p>
+<pre class="lang-sql"><code>select user_id, count(*) as orders
+from orders
+where status = &#x27;PAID&#x27;   -- сначала отсекли строки
+group by user_id
+having count(*) &gt; 10;     -- затем отсекли группы</code></pre>
+<h2>Подзапросы и CTE</h2>
+<p>Подзапрос — это запрос внутри запроса. Скалярный подзапрос возвращает одно значение и подставляется как выражение; подзапрос в IN/EXISTS используется для фильтрации. EXISTS обычно эффективнее IN, когда важен лишь факт наличия строки (и он безопасен относительно NULL, в отличие от NOT IN).</p>
+<p>Коррелированный подзапрос ссылается на строку внешнего запроса и потому логически выполняется для каждой такой строки — это удобно читать, но легко получить медленный план; часто его переписывают в JOIN.</p>
+<p>CTE (WITH ... AS) — это именованный подзапрос, вынесенный вперёд: он не быстрее сам по себе, но делает сложный запрос читаемым и позволяет переиспользовать промежуточный результат и писать рекурсию (WITH RECURSIVE для деревьев/иерархий).</p>
+<pre class="lang-sql"><code>-- EXISTS: есть ли у пользователя хоть один оплаченный заказ
+select u.*
+from users u
+where exists (
+  select 1 from orders o
+  where o.user_id = u.id and o.status = &#x27;PAID&#x27;
+);
+
+-- CTE для читаемости
+with paid as (
+  select user_id, count(*) cnt from orders
+  where status = &#x27;PAID&#x27; group by user_id
+)
+select u.email, paid.cnt
+from users u join paid on paid.user_id = u.id;</code></pre>
+<h2>Оконные функции</h2>
+<p>Агрегат с GROUP BY схлопывает группу строк в одну. Оконная функция считает то же самое, но СТРОКИ СОХРАНЯЕТ: рядом с каждой строкой появляется значение, посчитанное по её «окну» — наборе соседних строк, заданном через OVER (PARTITION BY ... ORDER BY ...).</p>
+<p>PARTITION BY делит строки на независимые окна (как GROUP BY, но без схлопывания), а ORDER BY внутри OVER задаёт порядок внутри окна — от него зависят ранжирование и накопительные итоги (running total).</p>
+<p>Три ранжирующие функции путают чаще всего. <code>ROW_NUMBER()</code> нумерует сплошь (1, 2, 3, 4). <code>RANK()</code> при равных значениях даёт одинаковый ранг и оставляет дырку (1, 2, 2, 4). <code>DENSE_RANK()</code> — одинаковый ранг без дырки (1, 2, 2, 3). Отсюда классический ответ про «вторую по величине зарплату»: <code>DENSE_RANK()</code> = 2 корректно учитывает дубликаты, а LIMIT 1 OFFSET 1 без DISTINCT при двух одинаковых максимумах вернёт ту же зарплату.</p>
+<p>Важное следствие порядка выполнения: окна считаются после WHERE, GROUP BY и HAVING, поэтому фильтровать по результату оконной функции прямо в WHERE нельзя — запрос заворачивают в подзапрос или CTE и фильтруют снаружи.</p>
+<pre class="lang-sql"><code>-- вторая по величине зарплата с учётом дубликатов
+with ranked as (
+  select salary, dense_rank() over (order by salary desc) as rnk
+  from employee
+)
+select distinct salary from ranked where rnk = 2;
+
+-- топ-3 заказа каждого пользователя, строки не схлопываются
+select user_id, id, total
+from (
+  select user_id, id, total,
+         row_number() over (partition by user_id order by total desc) as rn
+  from orders
+) t
+where rn &lt;= 3;</code></pre>
+<h2>Частые ошибки</h2>
+<p>Типичные ловушки: сравнивать NULL через =, путать <code>count(*)</code> и <code>count(column)</code>, фильтровать агрегат в WHERE, ожидать, что NOT IN корректно отработает при NULL в наборе.</p>
+<p>Ещё две, на которых спотыкаются регулярно: ссылаться в WHERE на алиас из SELECT (его там ещё нет) и фильтровать по оконной функции без обёртки в подзапрос.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Начните с логического порядка SELECT (FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT) и привяжите к нему всё остальное — это каркас, из которого сами собой выводятся ответы: почему WHERE не видит агрегатов и алиасов, почему ORDER BY видит, почему по окну нельзя фильтровать в WHERE.</p>
+<p>Про NULL скажите главное: это не значение, а неизвестность, сравнение даёт UNKNOWN, отсюда IS NULL вместо = NULL и ловушка NOT IN с NULL в наборе. Разведите <code>count(*)</code> и <code>count(column)</code>.</p>
+<p>Разницу WHERE/HAVING объясняйте не формально, а через стоимость: WHERE отсекает строки до группировки и может использовать индекс, HAVING фильтрует уже готовые группы. Завершите оконными функциями: назовите ROW_NUMBER/RANK/DENSE_RANK и покажите на «второй зарплате», что понимаете поведение при дубликатах.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/databases/sql-command-groups/">К какой группе SQL-команд относятся SELECT, INSERT, UPDATE, DELETE?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/databases/null-in-sql/">Как правильно проверить значение на NULL в SQL?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/databases/having-vs-where/">Чем HAVING отличается от WHERE?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/databases/truncate-delete-drop/">Чем TRUNCATE отличается от DELETE и DROP?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/databases/second-highest-salary/">Напиши SQL-запрос, возвращающий вторую по величине зарплату из таблицы employee(id, salary).</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/databases/joins-keys/">JOIN, ключи и ограничения</a><p>INNER/OUTER/CROSS JOIN, ловушка ON vs WHERE, первичные/внешние/уникальные ключи и ссылочная целостность.</p></li><li><a href="/articles/databases/transactions/">Транзакции, изоляция и блокировки</a><p>ACID по буквам, аномалии чтения, уровни изоляции, MVCC и оптимистичные/пессимистичные блокировки.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"SQL: операторы, NULL и фильтрация","description":"Группы команд, логический порядок SELECT, трёхзначная логика NULL, разница WHERE/HAVING и оконные функции — с ловушками, на которых валятся на собеседовании.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/databases/sql-basics/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

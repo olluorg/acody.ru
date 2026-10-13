@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое тестирование чёрного, белого и серого ящика? — вопрос с собеседования</title>
+<meta name="description" content="Методы по доступу к коду: чёрный ящик — без знания внутреннего устройства, белый — с доступом к коду, серый — частичное знание (база, логи, API)…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/qa/black-white-grey-box/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/qa/black-white-grey-box/">
+<meta property="og:title" content="Что такое тестирование чёрного, белого и серого ящика? — вопрос с собеседования">
+<meta property="og:description" content="Методы по доступу к коду: чёрный ящик — без знания внутреннего устройства, белый — с доступом к коду, серый — частичное знание (база, логи, API)…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/qa/">Тестирование (QA)</a> <span>/</span> <span>Что такое тестирование чёрного, белого и серого ящика?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Тестирование (QA)","item":"https://learn.getsotto.ru/questions/qa/"},{"@type":"ListItem","position":3,"name":"Что такое тестирование чёрного, белого и серого ящика?"}]}</script>
+  <h1>Что такое тестирование чёрного, белого и серого ящика?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Виды тестирования</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем black box отличается от white box?</li><li>Что такое тестирование серого ящика?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Методы по доступу к коду: <b>чёрный ящик</b> — без знания внутреннего устройства, <b>белый</b> — с доступом к коду, <b>серый</b> — частичное знание (база, логи, API).</p><ul><li>Чёрный ящик — по требованиям и поведению; основной для ручного тестировщика</li><li>Белый — покрытие веток и условий кода, обычно разработчики</li></ul><p class="extra"><span>А ещё</span> Серый ящик — когда смотрите в базу или логи, чтобы проверить результат</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Чёрный ящик</b> — тестировщик не знает, как устроен код, и проверяет систему по входам и выходам: ввёл данные — сравнил результат с ожидаемым по требованиям. Сюда относятся почти все техники тест-дизайна: классы эквивалентности, граничные значения, таблицы решений, переходы состояний.</p>
+<p><b>Белый ящик</b> — тесты строятся по коду: чтобы выполнились все строки, ветки <code>if</code>, условия, циклы. Метрики — покрытие операторов, ветвей, условий. Обычно этим занимаются разработчики в unit-тестах.</p>
+<p><b>Серый ящик</b> — промежуточный вариант: тестировщик знает часть устройства — схему базы, архитектуру, API, логи — и использует это. Например, после оформления заказа проверяет в базе, что запись создалась с правильным статусом, или смотрит в логах, какая ошибка пришла от сервиса.</p>
+<p>На практике тестировщик чаще всего работает чёрным ящиком через интерфейс и серым — через DevTools, базу и логи.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><p>Форма скидки: «скидка 10 % от 5000 ₽». Чёрный ящик — проверить суммы 4999, 5000, 5001 и ожидаемую цену. Серый — после покупки посмотреть в таблице заказов, что скидка записана. Белый — убедиться, что тесты проходят обе ветки условия <code>if total &gt;= 5000</code>.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определение трёх методов через доступ к внутреннему устройству.</li><li>Кто какой метод использует.</li><li>Пример серого ящика из практики: база, логи, API.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Путать с уровнями тестирования.</li><li>Считать, что тестировщику доступен только чёрный ящик.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/qa/equivalence-partitioning/">Что такое классы эквивалентности?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/qa/test-levels/">Какие уровни тестирования вы знаете? Что такое пирамида тестирования?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое тестирование чёрного, белого и серого ящика?","acceptedAnswer":{"@type":"Answer","text":"Методы по доступу к коду: чёрный ящик — без знания внутреннего устройства, белый — с доступом к коду, серый — частичное знание (база, логи, API). Чёрный ящик — по требованиям и поведению; основной для ручного тестировщика Белый — покрытие веток и условий кода, обычно разработчики Серый ящик — когда смотрите в базу или логи, чтобы проверить результат Чёрный ящик — тестировщик не знает, как устроен код, и проверяет систему по входам и выходам: ввёл данные — сравнил результат с ожидаемым по требованиям. Сюда относятся почти все техники тест-дизайна: классы эквивалентности, граничные значения, таблицы решений, переходы состояний. Белый ящик — тесты строятся по коду: чтобы выполнились все строки, ветки if, условия, циклы. Метрики — покрытие операторов, ветвей, условий. Обычно этим занимаются разработчики в unit-тестах. Серый ящик — промежуточный вариант: тестировщик знает часть устройства — схему базы, архитектуру, API, логи — и использует это. Например, после оформления заказа проверяет в базе, что запись создалась с правильным статусом, или смотрит в логах, какая ошибка пришла от сервиса. На практике тестировщик чаще всего работает чёрным ящиком через интерфейс и серым — через DevTools, базу и логи."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

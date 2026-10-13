@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Под в состоянии CrashLoopBackOff. Как найти причину? — вопрос с собеседования</title>
+<meta name="description" content="CrashLoopBackOff — контейнер запускается и падает, kubelet перезапускает его с растущей паузой (до 5 минут). Порядок: kubectl describe pod (события…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/k8s-crashloopbackoff/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/k8s-crashloopbackoff/">
+<meta property="og:title" content="Под в состоянии CrashLoopBackOff. Как найти причину? — вопрос с собеседования">
+<meta property="og:description" content="CrashLoopBackOff — контейнер запускается и падает, kubelet перезапускает его с растущей паузой (до 5 минут). Порядок: kubectl describe pod (события…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Под в состоянии CrashLoopBackOff. Как найти причину?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Под в состоянии CrashLoopBackOff. Как найти причину?"}]}</script>
+  <h1>Под в состоянии CrashLoopBackOff. Как найти причину?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Kubernetes</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Под в статусе Pending или ImagePullBackOff — что делать?</li><li>Как отлаживать под в Kubernetes?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">CrashLoopBackOff — контейнер <b>запускается и падает</b>, kubelet перезапускает его с растущей паузой (до 5 минут). Порядок: <code>kubectl describe pod</code> (события, <b>Last State</b>, <b>код выхода</b>, причина) → <code>kubectl logs --previous</code> (лог <b>упавшего</b> экземпляра) → по коду выхода: <b>137</b> — OOMKilled или убит пробой, <b>1</b> — ошибка приложения, <b>127</b> — команда не найдена.</p><ul><li>Частые причины: нет переменной или секрета, недоступна БД при старте, неверная команда, OOM, liveness убивает до старта</li><li>Pending — не помещается на узлы (requests), нет PVC, taints; ImagePullBackOff — неверный образ или нет доступа к реестру</li><li>kubectl get events --sort-by=.lastTimestamp — что происходило в namespace</li></ul><p class="extra"><span>А ещё</span> kubectl debug — временный контейнер с инструментами рядом с упавшим</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Последовательность:</b></p>
+<pre class="lang-bash"><code>kubectl get pod orders-7d9f -o wide
+kubectl describe pod orders-7d9f          # Events, Last State, Exit Code
+kubectl logs orders-7d9f --previous       # лог прошлого запуска
+kubectl get events --sort-by=.lastTimestamp
+kubectl debug -it orders-7d9f --image=busybox --target=app</code></pre>
+<p><b>Коды выхода:</b></p>
+<div class="table"><table><thead><tr><th>код</th><th>смысл</th></tr></thead><tbody><tr><td>0</td><td>процесс завершился без ошибки — для сервиса это тоже сбой: команда отработала и вышла</td></tr><tr><td>1</td><td>ошибка приложения: смотреть лог</td></tr><tr><td>126/127</td><td>нельзя выполнить / команда не найдена</td></tr><tr><td>137</td><td>SIGKILL: OOMKilled или liveness</td></tr><tr><td>143</td><td>SIGTERM</td></tr></tbody></table></div>
+<p><b>Другие статусы:</b></p>
+<ul><li><b>Pending</b> — <code>describe</code> покажет «Insufficient memory», «didn't match node selector», «unbound PVC»;</li><li><b>ImagePullBackOff</b> — опечатка в теге, приватный реестр без imagePullSecrets, лимиты реестра;</li><li><b>CreateContainerConfigError</b> — отсутствует ConfigMap или Secret.</li></ul>
+<p>Если лог пуст, приложение падает до инициализации логирования — запустить образ локально с теми же переменными.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Последовательность команд диагностики.</li><li>Чтение кодов выхода.</li><li>Причины Pending, ImagePullBackOff и прочих статусов.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/devops/k8s-probes/">Приложение долго стартует, а Kubernetes перезапускает его по кругу. Как правильно настроить пробы?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/k8s-requests-limits/">Чем requests отличаются от limits в Kubernetes и что такое OOMKilled и троттлинг CPU?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/linux-troubleshooting-commands/">Какими командами вы диагностируете проблему на Linux-сервере?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Под в состоянии CrashLoopBackOff. Как найти причину?","acceptedAnswer":{"@type":"Answer","text":"CrashLoopBackOff — контейнер запускается и падает, kubelet перезапускает его с растущей паузой (до 5 минут). Порядок: kubectl describe pod (события, Last State, код выхода, причина) → kubectl logs --previous (лог упавшего экземпляра) → по коду выхода: 137 — OOMKilled или убит пробой, 1 — ошибка приложения, 127 — команда не найдена. Частые причины: нет переменной или секрета, недоступна БД при старте, неверная команда, OOM, liveness убивает до старта Pending — не помещается на узлы (requests), нет PVC, taints; ImagePullBackOff — неверный образ или нет доступа к реестру kubectl get events --sort-by=.lastTimestamp — что происходило в namespace kubectl debug — временный контейнер с инструментами рядом с упавшим Последовательность: Коды выхода: | код | смысл | | --- | --- | | 0 | процесс завершился без ошибки — для сервиса это тоже сбой: команда отработала и вышла | | 1 | ошибка приложения: смотреть лог | | 126/127 | нельзя выполнить / команда не найдена | | 137 | SIGKILL: OOMKilled или liveness | | 143 | SIGTERM | Другие статусы: - Pending — describe покажет «Insufficient memory», «didn't match node selector», «unbound PVC»; - ImagePullBackOff — опечатка в теге, приватный реестр без imagePullSecrets, лимиты реестра; - CreateContainerConfigError — отсутствует ConfigMap или Secret. Если лог пуст, приложение падает до инициализации логирования — запустить образ локально с теми же переменными."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

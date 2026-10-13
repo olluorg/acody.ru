@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что утверждает Interface Segregation Principle? — вопрос с собеседования</title>
+<meta name="description" content="Клиенты не должны зависеть от методов, которыми не пользуются: лучше несколько узких интерфейсов под роли, чем один толстый. Толстый интерфейс…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/interface-segregation/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/interface-segregation/">
+<meta property="og:title" content="Что утверждает Interface Segregation Principle? — вопрос с собеседования">
+<meta property="og:description" content="Клиенты не должны зависеть от методов, которыми не пользуются: лучше несколько узких интерфейсов под роли, чем один толстый. Толстый интерфейс…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что утверждает Interface Segregation Principle?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что утверждает Interface Segregation Principle?"}]}</script>
+  <h1>Что утверждает Interface Segregation Principle?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Принципы проектирования</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Клиенты не должны зависеть от методов, которыми не пользуются</b>: лучше несколько узких интерфейсов под роли, чем один толстый. Толстый интерфейс создаёт ложную связанность, а реализации вынуждены писать заглушки.</p><ul><li>Пример: Reader и Writer вместо одного FileAccess</li><li>java.sql.Connection — десятки методов</li><li>Признак нарушения — методы с UnsupportedOperationException</li></ul><p class="extra"><span>А ещё</span> В Spring Data — Repository, CrudRepository, PagingAndSortingRepository на выбор</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>ISP смотрит со стороны клиента: зависимость от толстого интерфейса создаёт ложную связанность — клиента задевают изменения методов, которые он не вызывает, а реализации вынуждены писать заглушки. Пример из платформы — java.sql.Connection с несколькими десятками методов. Чинится разделением по ролям: OrderReader и OrderWriter вместо всеобъемлющего OrderService.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Формулировка со стороны клиента.</li><li>Последствия толстого интерфейса.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что default-методы Java 8 решают проблему ISP: они убирают боль реализации, но клиент по-прежнему зависит от раздутого контракта.</li><li>Разделять интерфейсы по реализации, а не по потребностям клиентов.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Клиенты не должны зависеть от методов, которыми не пользуются</li><li class="no"><span class="mark">✗</span>Каждый класс должен реализовывать хотя бы один интерфейс</li><li class="no"><span class="mark">✗</span>Интерфейсы нельзя расширять другими интерфейсами</li><li class="no"><span class="mark">✗</span>У интерфейса должно быть не больше одной реализации</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как ISP связан с LSP и UnsupportedOperationException?</li><li>Может ли одна реализация имплементировать оба узких интерфейса?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/solid/">SOLID: пять принципов дизайна</a><p>SRP, OCP, LSP, ISP, DIP — что каждая буква значит на самом деле, как выглядит нарушение в Java-коде, чем DIP отличается от DI и IoC.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/interface-vs-abstract-class/">Чем интерфейс отличается от абстрактного класса и что изменили default-методы?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/single-responsibility-principle/">Что на самом деле утверждает Single Responsibility Principle?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что утверждает Interface Segregation Principle?","acceptedAnswer":{"@type":"Answer","text":"Клиенты не должны зависеть от методов, которыми не пользуются: лучше несколько узких интерфейсов под роли, чем один толстый. Толстый интерфейс создаёт ложную связанность, а реализации вынуждены писать заглушки. Пример: Reader и Writer вместо одного FileAccess java.sql.Connection — десятки методов Признак нарушения — методы с UnsupportedOperationException В Spring Data — Repository, CrudRepository, PagingAndSortingRepository на выбор ISP смотрит со стороны клиента: зависимость от толстого интерфейса создаёт ложную связанность — клиента задевают изменения методов, которые он не вызывает, а реализации вынуждены писать заглушки. Пример из платформы — java.sql.Connection с несколькими десятками методов. Чинится разделением по ролям: OrderReader и OrderWriter вместо всеобъемлющего OrderService."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

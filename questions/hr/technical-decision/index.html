@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Расскажите о сложном техническом решении, которое вы приняли или отстояли. — вопрос с собеседования</title>
+<meta name="description" content="История по STAR, где видно как вы решали: какие были варианты, по каким критериям сравнивали (стоимость, риски, сроки, поддержка), как проверили…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/hr/technical-decision/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/hr/technical-decision/">
+<meta property="og:title" content="Расскажите о сложном техническом решении, которое вы приняли или отстояли. — вопрос с собеседования">
+<meta property="og:description" content="История по STAR, где видно как вы решали: какие были варианты, по каким критериям сравнивали (стоимость, риски, сроки, поддержка), как проверили…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/hr/">HR-вопросы</a> <span>/</span> <span>Расскажите о сложном техническом решении, которое вы приняли или отстояли.</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"HR-вопросы","item":"https://learn.getsotto.ru/questions/hr/"},{"@type":"ListItem","position":3,"name":"Расскажите о сложном техническом решении, которое вы приняли или отстояли."}]}</script>
+  <h1>Расскажите о сложном техническом решении, которое вы приняли или отстояли.</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Истории из опыта</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как вы принимаете архитектурные решения?</li><li>Как вы убеждаете команду в своём техническом подходе?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">История по STAR, где видно <b>как</b> вы решали: какие были <b>варианты</b>, по каким <b>критериям</b> сравнивали (стоимость, риски, сроки, поддержка), как <b>проверили</b> гипотезы (прототип, замеры), как <b>договорились</b> с командой и зафиксировали решение (design doc, ADR) и <b>чем это кончилось</b> — включая то, что пошло не так.</p><ul><li>Решение принимается под ограничения бизнеса, а не по вкусу</li><li>Обратимые решения — быстро, необратимые — с прототипом и обсуждением</li><li>Зафиксированное решение с причинами экономит месяцы споров позже</li></ul><p class="extra"><span>А ещё</span> Сильный ход — рассказать, как вы пересмотрели своё решение, когда появились новые данные</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Интервьюер проверяет зрелость мышления: видите ли вы компромиссы, умеете ли аргументировать цифрами, вовлекаете ли команду и признаёте ли ошибки.</p>
+<p><b>Структура ответа:</b></p>
+<ol><li>Контекст и ограничения: нагрузка, сроки, команда, бюджет.</li><li>Варианты (минимум два) и критерии сравнения.</li><li>Как проверили: прототип, нагрузочный тест, расчёт.</li><li>Как договорились: документ с решением, обсуждение, кто был против и почему.</li><li>Результат через время и что бы сделали иначе.</li></ol>
+<p><b>Документ решения</b> (ADR): контекст, рассмотренные варианты, выбор, последствия. Его ценность — через год, когда новый человек спросит «почему так».</p></div></section><section class="block"><h2>Пример</h2><div class="md"><p>«Мы выбирали, переносить ли поиск по документам из PostgreSQL в отдельную векторную базу. Я собрал набор из 200 запросов и замерил: pgvector с HNSW давал нужную полноту при 40 мс на текущих двух миллионах фрагментов, а рост ожидался вдвое за год. Отдельная база добавляла инфраструктуру и синхронизацию прав доступа. Написал короткий документ с расчётом и порогом — при каком объёме пересматриваем решение. Команда согласилась, через год мы были на 70% порога, и переезд спланировали заранее, а не в аварийном режиме».</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Варианты, критерии и проверка фактами.</li><li>Вовлечение команды и фиксация решения.</li><li>Результат и рефлексия.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Выбрали, потому что модно» или «я так решил».</li><li>Нет альтернатив и компромиссов.</li><li>История без результата.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/hr/conflict/">Расскажите о конфликте в команде и как вы его решили</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/hr/disagree-decision/">Как вы поступите, если не согласны с решением руководителя или бизнеса?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/hr/mentoring/">Как вы помогаете расти младшим коллегам?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Расскажите о сложном техническом решении, которое вы приняли или отстояли.","acceptedAnswer":{"@type":"Answer","text":"История по STAR, где видно как вы решали: какие были варианты, по каким критериям сравнивали (стоимость, риски, сроки, поддержка), как проверили гипотезы (прототип, замеры), как договорились с командой и зафиксировали решение (design doc, ADR) и чем это кончилось — включая то, что пошло не так. Решение принимается под ограничения бизнеса, а не по вкусу Обратимые решения — быстро, необратимые — с прототипом и обсуждением Зафиксированное решение с причинами экономит месяцы споров позже Сильный ход — рассказать, как вы пересмотрели своё решение, когда появились новые данные Интервьюер проверяет зрелость мышления: видите ли вы компромиссы, умеете ли аргументировать цифрами, вовлекаете ли команду и признаёте ли ошибки. Структура ответа: 1. Контекст и ограничения: нагрузка, сроки, команда, бюджет. 2. Варианты (минимум два) и критерии сравнения. 3. Как проверили: прототип, нагрузочный тест, расчёт. 4. Как договорились: документ с решением, обсуждение, кто был против и почему. 5. Результат через время и что бы сделали иначе. Документ решения (ADR): контекст, рассмотренные варианты, выбор, последствия. Его ценность — через год, когда новый человек спросит «почему так»."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое контекстный менеджер и как работает with? — вопрос с собеседования</title>
+<meta name="description" content="Контекстный менеджер гарантирует подготовку и очистку вокруг блока with, даже при исключении. Протокол: __enter__ при входе, __exit__ при выходе…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/context-manager/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/context-manager/">
+<meta property="og:title" content="Что такое контекстный менеджер и как работает with? — вопрос с собеседования">
+<meta property="og:description" content="Контекстный менеджер гарантирует подготовку и очистку вокруг блока with, даже при исключении. Протокол: __enter__ при входе, __exit__ при выходе…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Что такое контекстный менеджер и как работает with?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Что такое контекстный менеджер и как работает with?"}]}</script>
+  <h1>Что такое контекстный менеджер и как работает with?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Исключения и контекстные менеджеры</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как написать свой контекстный менеджер?</li><li>Что делают __enter__ и __exit__?</li><li>Зачем нужен contextlib.contextmanager?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Контекстный менеджер <b>гарантирует подготовку и очистку</b> вокруг блока <code>with</code>, даже при исключении.</p><ul><li>Протокол: <code>__enter__</code> при входе, <code>__exit__</code> при выходе</li><li>Проще писать через <code>@contextlib.contextmanager</code> и генератор с одним <code>yield</code></li></ul><p class="extra"><span>А ещё</span> Если <code>__exit__</code> вернёт True, исключение будет подавлено — обычно так не делают</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><code>with</code> заменяет связку <code>try/finally</code> для ресурсов: файлов, соединений, блокировок, транзакций, временных настроек.</p>
+<p>Как работает <code>with cm as x:</code>:</p>
+<ol><li>вызывается <code>cm.__enter__()</code>, его результат попадает в <code>x</code>;</li><li>выполняется тело блока;</li><li>при любом выходе — обычном, через <code>return</code> или исключение — вызывается <code>cm.__exit__(exc_type, exc, tb)</code>. Если исключения не было, все три аргумента <code>None</code>.</li></ol>
+<p>Если <code>__exit__</code> вернёт истинное значение, исключение подавляется. Так устроен <code>contextlib.suppress</code>, но в своём коде это делают осознанно.</p>
+<p>Свой менеджер пишут двумя способами:</p>
+<ul><li><b>класс</b> с <code>__enter__</code> и <code>__exit__</code> — когда нужно состояние или повторное использование;</li><li><b>генератор</b> с декоратором <code>@contextmanager</code>: код до <code>yield</code> — вход, значение <code>yield</code> — то, что попадёт в <code>as</code>, код после — выход. Очистку ставят в <code>finally</code>, иначе при исключении она не выполнится.</li></ul>
+<p>В одном <code>with</code> можно открыть несколько менеджеров через запятую. Для асинхронного кода есть <code>async with</code> и <code>__aenter__</code>/<code>__aexit__</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import time
+from contextlib import contextmanager
+
+@contextmanager
+def timer(label):
+    start = time.perf_counter()
+    try:
+        yield
+    finally:
+        print(f&quot;{label}: {time.perf_counter() - start:.3f} с&quot;)
+
+with timer(&quot;загрузка&quot;):
+    data = open(&quot;big.csv&quot;).read()
+
+class Transaction:
+    def __init__(self, conn):
+        self.conn = conn
+    def __enter__(self):
+        return self.conn.cursor()
+    def __exit__(self, exc_type, exc, tb):
+        if exc_type is None:
+            self.conn.commit()
+        else:
+            self.conn.rollback()
+        return False          # исключение не подавляем</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Назначение: гарантированная очистка ресурса.</li><li>Протокол <code>__enter__</code>/<code>__exit__</code> и что получает <code>__exit__</code>.</li><li>Способ через <code>contextmanager</code> с <code>try/finally</code> вокруг <code>yield</code>.</li><li>Примеры: файлы, блокировки, транзакции.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>В генераторном менеджере не обернуть <code>yield</code> в <code>try/finally</code>.</li><li>Случайно вернуть True из <code>__exit__</code> и проглотить ошибку.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/try-except-else-finally/">Как работают try, except, else и finally?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/generators/">Что такое генератор и чем он полезен?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/dunder-str-repr/">Что такое магические методы? Чем __str__ отличается от __repr__?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое контекстный менеджер и как работает with?","acceptedAnswer":{"@type":"Answer","text":"Контекстный менеджер гарантирует подготовку и очистку вокруг блока with, даже при исключении. Протокол: __enter__ при входе, __exit__ при выходе Проще писать через @contextlib.contextmanager и генератор с одним yield Если __exit__ вернёт True, исключение будет подавлено — обычно так не делают with заменяет связку try/finally для ресурсов: файлов, соединений, блокировок, транзакций, временных настроек. Как работает with cm as x:: 1. вызывается cm.__enter__(), его результат попадает в x; 2. выполняется тело блока; 3. при любом выходе — обычном, через return или исключение — вызывается cm.__exit__(exc_type, exc, tb). Если исключения не было, все три аргумента None. Если __exit__ вернёт истинное значение, исключение подавляется. Так устроен contextlib.suppress, но в своём коде это делают осознанно. Свой менеджер пишут двумя способами: - класс с __enter__ и __exit__ — когда нужно состояние или повторное использование; - генератор с декоратором @contextmanager: код до yield — вход, значение yield — то, что попадёт в as, код после — выход. Очистку ставят в finally, иначе при исключении она не выполнится. В одном with можно открыть несколько менеджеров через запятую. Для…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

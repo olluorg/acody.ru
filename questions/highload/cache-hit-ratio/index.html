@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как оценить, насколько кэш разгружает базу, и что будет, если он упадёт? — вопрос с собеседования</title>
+<meta name="description" content="Нагрузка на базу = поток × доля промахов. Рост hit ratio с 90% до 99% снижает нагрузку на базу в 10 раз. Обратная сторона: если база рассчитана…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/cache-hit-ratio/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/cache-hit-ratio/">
+<meta property="og:title" content="Как оценить, насколько кэш разгружает базу, и что будет, если он упадёт? — вопрос с собеседования">
+<meta property="og:description" content="Нагрузка на базу = поток × доля промахов. Рост hit ratio с 90% до 99% снижает нагрузку на базу в 10 раз. Обратная сторона: если база рассчитана…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Как оценить, насколько кэш разгружает базу, и что будет, если он упадёт?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Как оценить, насколько кэш разгружает базу, и что будет, если он упадёт?"}]}</script>
+  <h1>Как оценить, насколько кэш разгружает базу, и что будет, если он упадёт?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Кэши под нагрузкой</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое hit ratio и почему 90% и 99% — большая разница?</li><li>Что делать с холодным кэшем после перезапуска?</li><li>Как защититься от падения кэша?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Нагрузка на базу = поток × <b>доля промахов</b>. Рост hit ratio с 90% до 99% снижает нагрузку на базу в <b>10 раз</b>. Обратная сторона: если база рассчитана только на промахи, падение кэша — это авария.</p><ul><li>Hit ratio зависит от размера кэша, распределения запросов (Ципф) и TTL</li><li>Холодный старт: после перезапуска все запросы — промахи; прогревать постепенно</li><li>Защита: база должна пережить хотя бы часть нагрузки без кэша, ограничители, деградация</li></ul><p class="extra"><span>А ещё</span> Отрицательное кэширование: запоминать и «не найдено», иначе несуществующие ключи всегда бьют в базу</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">LRU-кэш: хеш-таблица плюс двусвязный список</p><script type="module" src="/widgets/lru-cache.js"></script><sotto-lru-cache theme="dark"></sotto-lru-cache></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Арифметика.</b> При потоке 50 000 RPS и hit ratio 90% в базу идёт 5 000 RPS, при 99% — 500, при 99,9% — 50. Последние девятки дают самый большой эффект на базу, но достаются всё дороже по памяти.</p>
+<p><b>От чего зависит hit ratio:</b></p>
+<ul><li><b>распределение популярности</b> — запросы к контенту обычно следуют закону Ципфа: небольшая доля ключей получает основную долю запросов. Поэтому кэш на 1–5% данных часто даёт 80–95% попаданий, а дальше рост медленный;</li><li><b>размер кэша</b> относительно рабочего набора;</li><li><b>TTL</b> — короткий TTL снижает попадания даже при достаточной памяти;</li><li><b>политика вытеснения</b> и защита от сканирования;</li><li><b>ключи</b> — разные ключи для одного и того же (параметры в разном порядке, лишние поля) дробят кэш.</li></ul>
+<p><b>Время ответа.</b> Средняя задержка = hit × t_кэша + miss × t_базы. При кэше 1 мс и базе 20 мс: 90% → 2,9 мс, 99% → 1,2 мс.</p>
+<p><b>Опасность зависимости от кэша.</b> Со временем база начинает держать только промахи, и её «оптимизируют» под эту нагрузку. Если кэш упал или перезапустился пустым (холодный), в базу пойдёт в 10–100 раз больше запросов — и она ляжет, после чего не прогреть и кэш. Как защищаться:</p>
+<ul><li><b>база рассчитана</b> хотя бы на заметную часть нагрузки без кэша, или перед ней ограничитель параллелизма (лучше отказать части, чем всем);</li><li><b>кэш с репликами</b> и постоянством (Redis replica, Sentinel/Cluster), а не один экземпляр;</li><li><b>постепенный прогрев</b>: снять дамп горячих ключей и загрузить, или пускать трафик на новый узел кэша порциями;</li><li><b>схлопывание запросов</b> — при промахе по одному ключу в базу идёт один запрос, остальные ждут его;</li><li><b>двухуровневый кэш</b> — локальный в памяти сервиса на секунды гасит горячие ключи даже при недоступном общем;</li><li><b>устаревшие данные</b> при ошибке — отдать прошлое значение, если обновить не удалось (stale-if-error).</li></ul>
+<p><b>Отрицательное кэширование.</b> Запросы к несуществующим ключам (опечатки, боты, атака перебором id) — всегда промахи. Кэшировать «не найдено» на короткое время или ставить фильтр Блума перед базой.</p>
+<p><b>Метрики:</b> hit ratio по типам ключей, задержка кэша и базы, вытеснения (evictions), память, число ключей; алерт на падение hit ratio — ранний сигнал проблем.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>Поток 40 000 RPS, база выдерживает 6 000 RPS.
+hit 95% → 2 000 RPS в базу — запас трёхкратный.
+Кэш перезапустился пустым → 40 000 RPS в базу → отказ.
+Решение: прогрев из дампа ключей + ограничитель 5 000 RPS к базе + локальный кэш на 5 с.</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Нагрузка на базу через долю промахов, эффект последних девяток.</li><li>От чего зависит hit ratio: распределение, размер, TTL, ключи.</li><li>Риск падения или холодного кэша и способы защиты.</li><li>Отрицательное кэширование — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать кэш «необязательной оптимизацией», когда база без него уже не справится.</li><li>Не кэшировать отсутствие данных.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/redis-at-scale/">Какие проблемы бывают с Redis под высокой нагрузкой?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/cache-stampede/">Популярный ключ истекает, и сотни параллельных запросов одновременно уходят в базу за одним значением. Какие приёмы защищают от этого?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/caching-basics/">Зачем нужно кэширование и какие у него главные риски?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/highload/lru-lfu/">Как устроен LRU-кэш и какие ещё бывают политики вытеснения?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/hot-keys/">Что делать с горячими ключами, на которые приходится непропорционально большая нагрузка?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как оценить, насколько кэш разгружает базу, и что будет, если он упадёт?","acceptedAnswer":{"@type":"Answer","text":"Нагрузка на базу = поток × доля промахов. Рост hit ratio с 90% до 99% снижает нагрузку на базу в 10 раз. Обратная сторона: если база рассчитана только на промахи, падение кэша — это авария. Hit ratio зависит от размера кэша, распределения запросов (Ципф) и TTL Холодный старт: после перезапуска все запросы — промахи; прогревать постепенно Защита: база должна пережить хотя бы часть нагрузки без кэша, ограничители, деградация Отрицательное кэширование: запоминать и «не найдено», иначе несуществующие ключи всегда бьют в базу Арифметика. При потоке 50 000 RPS и hit ratio 90% в базу идёт 5 000 RPS, при 99% — 500, при 99,9% — 50. Последние девятки дают самый большой эффект на базу, но достаются всё дороже по памяти. От чего зависит hit ratio: - распределение популярности — запросы к контенту обычно следуют закону Ципфа: небольшая доля ключей получает основную долю запросов. Поэтому кэш на 1–5% данных часто даёт 80–95% попаданий, а дальше рост медленный; - размер кэша относительно рабочего набора; - TTL — короткий TTL снижает попадания даже при достаточной памяти; - политика вытеснения и защита от сканирования; - ключи — разные ключи для одного и того же (параметры в разном порядке, лишние поля) дробят кэш. Время ответа. Средняя задержка = hit × t_кэша + miss × t_базы. При кэше 1 мс и базе 20 мс: 90% → 2,9 мс, 99% → 1,2 мс. Опасность зависимости от кэша. Со временем база начинает держать только промахи, и её…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

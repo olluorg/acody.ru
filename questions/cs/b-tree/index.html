@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему индексы в базах данных устроены как B-дерево? — вопрос с собеседования</title>
+<meta name="description" content="B-дерево — сбалансированное дерево с широкими узлами: в узле сотни ключей, узел = страница на диске (8–16 КБ). Высота 3–4 даже для миллиардов строк …">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/b-tree/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/b-tree/">
+<meta property="og:title" content="Почему индексы в базах данных устроены как B-дерево? — вопрос с собеседования">
+<meta property="og:description" content="B-дерево — сбалансированное дерево с широкими узлами: в узле сотни ключей, узел = страница на диске (8–16 КБ). Высота 3–4 даже для миллиардов строк …">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Почему индексы в базах данных устроены как B-дерево?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Почему индексы в базах данных устроены как B-дерево?"}]}</script>
+  <h1>Почему индексы в базах данных устроены как B-дерево?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Хранение данных</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое B-дерево и B+-дерево?</li><li>Почему в базе не используют бинарное дерево поиска?</li><li>Сколько чтений с диска нужно, чтобы найти строку по индексу?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">B-дерево — сбалансированное дерево с <b>широкими узлами</b>: в узле сотни ключей, узел = страница на диске (8–16 КБ). Высота 3–4 даже для миллиардов строк — значит, 3–4 чтения страницы.</p><ul><li>Бинарное дерево дало бы высоту ~30 и столько же случайных чтений</li><li>Вставка в полный узел делит его пополам, дерево растёт от корня — всегда сбалансировано</li><li>B+-дерево: данные только в листьях, листья связаны — быстрый диапазонный поиск и ORDER BY</li></ul><p class="extra"><span>А ещё</span> Поэтому индекс помогает в =, &lt;, &gt;, BETWEEN, префиксе LIKE 'abc%' и сортировке</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">B-дерево: вставка и разделение узлов</p><script type="module" src="/widgets/b-tree.js"></script><sotto-b-tree theme="dark"></sotto-b-tree></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Диск (и даже SSD) читает не байты, а страницы, и случайное чтение дорогое. Значит, структура поиска должна минимизировать число прочитанных страниц.</p>
+<p><b>Бинарное дерево поиска</b> для миллиарда ключей имеет высоту не меньше 30; каждый узел — отдельная страница, итого ~30 случайных чтений. И даже сбалансированное (AVL, красно-чёрное) плохо ложится на страницы.</p>
+<p><b>B-дерево</b> делает узел размером со страницу. В странице 8 КБ помещаются сотни ключей с указателями — коэффициент ветвления 200–500. Тогда:</p>
+<ul><li>2 уровня — до 250 тыс. ключей;</li><li>3 уровня — до 60 млн;</li><li>4 уровня — до 15 млрд.</li></ul>
+<p>Корень и верхние уровни почти всегда в кэше, поэтому поиск — 1–2 реальных чтения. Внутри узла ключи отсортированы, и нужный указатель находится бинарным поиском.</p>
+<p><b>Вставка.</b> Ключ кладётся в нужный лист. Если лист переполнен, он делится пополам, а средний ключ поднимается в родителя; если переполнился родитель — делится и он. Корень делится — появляется новый корень, высота растёт на 1 для всех листьев сразу. Поэтому дерево всегда идеально сбалансировано. Удаление может сливать недозаполненные узлы.</p>
+<p><b>B+-дерево</b> — вариант, который используют почти все СУБД: во внутренних узлах только ключи-разделители, сами записи (или ссылки на них) — в листьях, а листья связаны в список. Диапазонный запрос находит начало и идёт по листьям подряд — это и <code>BETWEEN</code>, и <code>ORDER BY</code> без сортировки.</p>
+<p><b>Что из этого следует для запросов:</b></p>
+<ul><li>индекс работает для равенства, диапазонов, сортировки и префикса строки (<code>LIKE &#x27;ab%&#x27;</code>), но не для <code>LIKE &#x27;%ab&#x27;</code> и не для функции от колонки без функционального индекса;</li><li>составной индекс <code>(a, b)</code> отсортирован сначала по a — поэтому поиск по одному b его не использует;</li><li>вставка случайных ключей (UUIDv4) раскидывает записи по всем листьям: больше разделений, кэш хуже — отсюда интерес к UUIDv7 и автоинкременту;</li><li>каждый индекс — отдельное дерево, которое нужно обновлять при записи.</li></ul>
+<p>В InnoDB таблица сама хранится как B+-дерево по первичному ключу (кластерный индекс), а вторичные индексы хранят первичный ключ. В PostgreSQL таблица — куча, а индексы ссылаются на физический адрес строки.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>Таблица на 100 млн строк, ключ bigint (8 байт) + указатель (6 байт),
+страница 8 КБ → ~500 ключей на узел.
+log_500(100 000 000) ≈ 2,96 → 3 уровня: корень → внутренний узел → лист.
+Корень и внутренние узлы в памяти — поиск = 1 чтение листа.</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Связь узла со страницей диска и высокий коэффициент ветвления.</li><li>Оценка высоты и числа чтений.</li><li>Вставка с разделением узлов, рост от корня, баланс.</li><li>B+-дерево: данные в листьях, связанные листья, диапазоны.</li><li>Практические выводы для запросов и составных индексов.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«B — значит binary».</li><li>Считать, что поиск по индексу — O(1), как в хеш-таблице.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/lsm-tree/">Что такое LSM-дерево и чем оно отличается от B-дерева?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/binary-search-tree/">Что такое двоичное дерево поиска и зачем его балансировать?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/databases/btree-vs-hash-index/">Чем B-tree индекс принципиально превосходит hash-индекс?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/composite-index-order/">Почему в составном индексе важен порядок колонок?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему индексы в базах данных устроены как B-дерево?","acceptedAnswer":{"@type":"Answer","text":"B-дерево — сбалансированное дерево с широкими узлами: в узле сотни ключей, узел = страница на диске (8–16 КБ). Высота 3–4 даже для миллиардов строк — значит, 3–4 чтения страницы. Бинарное дерево дало бы высоту ~30 и столько же случайных чтений Вставка в полный узел делит его пополам, дерево растёт от корня — всегда сбалансировано B+-дерево: данные только в листьях, листья связаны — быстрый диапазонный поиск и ORDER BY Поэтому индекс помогает в =, <, >, BETWEEN, префиксе LIKE 'abc%' и сортировке Диск (и даже SSD) читает не байты, а страницы, и случайное чтение дорогое. Значит, структура поиска должна минимизировать число прочитанных страниц. Бинарное дерево поиска для миллиарда ключей имеет высоту не меньше 30; каждый узел — отдельная страница, итого ~30 случайных чтений. И даже сбалансированное (AVL, красно-чёрное) плохо ложится на страницы. B-дерево делает узел размером со страницу. В странице 8 КБ помещаются сотни ключей с указателями — коэффициент ветвления 200–500. Тогда: - 2 уровня — до 250 тыс. ключей; - 3 уровня — до 60 млн; - 4 уровня — до 15 млрд. Корень и верхние уровни почти всегда в кэше, поэтому поиск — 1–2 реальных чтения. Внутри узла ключи отсортированы, и нужный указатель находится бинарным поиском. Вставка. Ключ кладётся в нужный лист. Если лист переполнен, он делится пополам, а средний ключ поднимается в родителя; если переполнился родитель — делится и он…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

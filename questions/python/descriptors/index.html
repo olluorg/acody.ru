@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое дескриптор и как на нём построены property и методы? — вопрос с собеседования</title>
+<meta name="description" content="Дескриптор — объект в атрибуте класса, у которого есть __get__ (и, возможно, __set__, __delete__). При обращении obj.attr Python вызывает эти методы…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/descriptors/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/descriptors/">
+<meta property="og:title" content="Что такое дескриптор и как на нём построены property и методы? — вопрос с собеседования">
+<meta property="og:description" content="Дескриптор — объект в атрибуте класса, у которого есть __get__ (и, возможно, __set__, __delete__). При обращении obj.attr Python вызывает эти методы…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Что такое дескриптор и как на нём построены property и методы?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Что такое дескриптор и как на нём построены property и методы?"}]}</script>
+  <h1>Что такое дескриптор и как на нём построены property и методы?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">ООП</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как работает @property внутри?</li><li>Чем data descriptor отличается от non-data descriptor?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Дескриптор</b> — объект в атрибуте <b>класса</b>, у которого есть <code>__get__</code> (и, возможно, <code>__set__</code>, <code>__delete__</code>). При обращении <code>obj.attr</code> Python вызывает эти методы вместо простого чтения. На дескрипторах построены <b>property, методы (функции — дескрипторы), staticmethod, classmethod, __slots__</b>.</p><ul><li>Data descriptor (есть __set__ или __delete__) важнее словаря экземпляра</li><li>Non-data (только __get__) уступает словарю экземпляра — так методы можно перекрыть</li><li>__set_name__ сообщает дескриптору имя атрибута</li></ul><p class="extra"><span>А ещё</span> Применение: валидация полей, ленивые атрибуты, ORM-поля (Django, SQLAlchemy)</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Порядок поиска obj.x:</b></p>
+<ol><li>data-дескриптор в классе (и его предках) — вызвать его <code>__get__</code>;</li><li><code>obj.__dict__[&quot;x&quot;]</code>;</li><li>non-data дескриптор или обычный атрибут класса.</li></ol>
+<p><b>Свой дескриптор — валидация:</b></p>
+<pre class="lang-python"><code>class Positive:
+    def __set_name__(self, owner, name):
+        self.name = &quot;_&quot; + name
+    def __get__(self, obj, objtype=None):
+        return getattr(obj, self.name)
+    def __set__(self, obj, value):
+        if value &lt;= 0:
+            raise ValueError(&quot;должно быть &gt; 0&quot;)
+        setattr(obj, self.name, value)
+
+class Order:
+    qty = Positive()
+    def __init__(self, qty): self.qty = qty</code></pre>
+<p><b>Методы.</b> Функция в классе — non-data дескриптор: <code>obj.method</code> через <code>__get__</code> возвращает связанный метод, подставляющий <code>obj</code> как <code>self</code>. <code>staticmethod</code> возвращает функцию без связывания, <code>classmethod</code> — связывает с классом.</p>
+<p><b>property</b> — data-дескриптор, вызывающий заданные геттер, сеттер, делитер.</p>
+<p><b>Ленивое вычисление:</b> <code>functools.cached_property</code> — non-data дескриптор: первый вызов кладёт результат в <code>__dict__</code> экземпляра, и дальше словарь перекрывает дескриптор.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Протокол __get__, __set__, __delete__.</li><li>Data и non-data, порядок поиска.</li><li>Что на них построено.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/getattr-getattribute/">Чем __getattr__ отличается от __getattribute__?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/property/">Что такое @property и зачем он нужен?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/staticmethod-classmethod/">Чем @staticmethod отличается от @classmethod?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/slots/">Что такое __slots__ и когда его использовать?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое дескриптор и как на нём построены property и методы?","acceptedAnswer":{"@type":"Answer","text":"Дескриптор — объект в атрибуте класса, у которого есть __get__ (и, возможно, __set__, __delete__). При обращении obj.attr Python вызывает эти методы вместо простого чтения. На дескрипторах построены property, методы (функции — дескрипторы), staticmethod, classmethod, __slots__. Data descriptor (есть __set__ или __delete__) важнее словаря экземпляра Non-data (только __get__) уступает словарю экземпляра — так методы можно перекрыть __set_name__ сообщает дескриптору имя атрибута Применение: валидация полей, ленивые атрибуты, ORM-поля (Django, SQLAlchemy) Порядок поиска obj.x: 1. data-дескриптор в классе (и его предках) — вызвать его __get__; 2. obj.__dict__[\"x\"]; 3. non-data дескриптор или обычный атрибут класса. Свой дескриптор — валидация: Методы. Функция в классе — non-data дескриптор: obj.method через __get__ возвращает связанный метод, подставляющий obj как self. staticmethod возвращает функцию без связывания, classmethod — связывает с классом. property — data-дескриптор, вызывающий заданные геттер, сеттер, делитер. Ленивое вычисление: functools.cached_property — non-data дескриптор: первый вызов кладёт результат в __dict__ экземпляра, и дальше словарь перекрывает дескриптор."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

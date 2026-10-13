@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работает быстрая сортировка и когда она работает медленно? — вопрос с собеседования</title>
+<meta name="description" content="Выбираем опорный элемент, разбиваем массив: меньшие — влево, большие — вправо, опорный встаёт на своё место; затем рекурсивно сортируем части. В…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/quicksort/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/quicksort/">
+<meta property="og:title" content="Как работает быстрая сортировка и когда она работает медленно? — вопрос с собеседования">
+<meta property="og:description" content="Выбираем опорный элемент, разбиваем массив: меньшие — влево, большие — вправо, опорный встаёт на своё место; затем рекурсивно сортируем части. В…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Как работает быстрая сортировка и когда она работает медленно?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Как работает быстрая сортировка и когда она работает медленно?"}]}</script>
+  <h1>Как работает быстрая сортировка и когда она работает медленно?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Сортировки</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему у быстрой сортировки худший случай O(n²)?</li><li>Как выбирать опорный элемент?</li><li>Что такое разбиение Ломуто и Хоара?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Выбираем <b>опорный</b> элемент, <b>разбиваем</b> массив: меньшие — влево, большие — вправо, опорный встаёт на своё место; затем рекурсивно сортируем части.</p><ul><li>В среднем O(n log n), на практике часто быстрее остальных: работает на месте, хорошо дружит с кэшем</li><li>Худший O(n²) — когда опорный всё время крайний: например, последний элемент на отсортированных данных</li></ul><p class="extra"><span>А ещё</span> Защита: случайный опорный или медиана трёх; при глубокой рекурсии — переход на пирамидальную (introsort)</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Сортировки по шагам: пузырёк, вставки, выбор, слияние, быстрая, пирамидальная</p><script type="module" src="/widgets/sorting.js"></script><sotto-sorting theme="dark"></sotto-sorting></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Схема «разделяй и властвуй»:</b></p>
+<ol><li>выбрать опорный элемент (pivot);</li><li>разбиение (partition): переставить элементы так, чтобы слева были не больше опорного, справа — больше; опорный оказывается на своей итоговой позиции;</li><li>рекурсивно отсортировать левую и правую части.</li></ol>
+<p>Разбиение выполняется на месте за O(n). Две известные схемы: <b>Ломуто</b> — проще, опорный — последний элемент; <b>Хоара</b> — два указателя навстречу, меньше обменов.</p>
+<p><b>Почему O(n log n) в среднем.</b> Если опорный делит массив примерно пополам, глубина рекурсии — log n уровней, на каждом суммарно O(n) работы.</p>
+<p><b>Почему O(n²) в худшем.</b> Если опорный каждый раз минимальный или максимальный, одна часть пустая, а другая меньше всего на один элемент: n уровней по O(n). Классический случай — опорный «последний элемент» на уже отсортированных или почти отсортированных данных. Ещё один — много одинаковых значений при наивном разбиении.</p>
+<p><b>Как защищаются:</b></p>
+<ul><li>случайный опорный — худший случай становится крайне маловероятным;</li><li>медиана трёх (первый, средний, последний);</li><li>трёхпутевое разбиение для повторов (меньше, равно, больше);</li><li>introsort — при слишком глубокой рекурсии переключение на пирамидальную сортировку, что гарантирует O(n log n).</li></ul>
+<p>Быстрая сортировка неустойчива, дополнительная память — O(log n) на стек рекурсии (если сначала рекурсивно обрабатывать меньшую часть).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>def quicksort(a, lo=0, hi=None):
+    if hi is None:
+        hi = len(a) - 1
+    if lo &gt;= hi:
+        return
+    pivot = a[hi]                      # Ломуто: опорный — последний
+    i = lo - 1
+    for j in range(lo, hi):
+        if a[j] &lt;= pivot:
+            i += 1
+            a[i], a[j] = a[j], a[i]
+    a[i + 1], a[hi] = a[hi], a[i + 1]  # опорный на своё место
+    quicksort(a, lo, i)
+    quicksort(a, i + 2, hi)</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Опорный, разбиение, рекурсия.</li><li>Средняя сложность и почему.</li><li>Причина худшего случая и пример данных.</li><li>Способы защиты: случайный опорный, медиана трёх, introsort.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Не знать про худший случай O(n²).</li><li>Считать быструю сортировку устойчивой.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/merge-sort/">Как работает сортировка слиянием?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/stable-sort/">Что такое устойчивая (стабильная) сортировка и когда это важно?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/sorting-overview/">Какие алгоритмы сортировки вы знаете и чем они отличаются?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работает быстрая сортировка и когда она работает медленно?","acceptedAnswer":{"@type":"Answer","text":"Выбираем опорный элемент, разбиваем массив: меньшие — влево, большие — вправо, опорный встаёт на своё место; затем рекурсивно сортируем части. В среднем O(n log n), на практике часто быстрее остальных: работает на месте, хорошо дружит с кэшем Худший O(n²) — когда опорный всё время крайний: например, последний элемент на отсортированных данных Защита: случайный опорный или медиана трёх; при глубокой рекурсии — переход на пирамидальную (introsort) Схема «разделяй и властвуй»: 1. выбрать опорный элемент (pivot); 2. разбиение (partition): переставить элементы так, чтобы слева были не больше опорного, справа — больше; опорный оказывается на своей итоговой позиции; 3. рекурсивно отсортировать левую и правую части. Разбиение выполняется на месте за O(n). Две известные схемы: Ломуто — проще, опорный — последний элемент; Хоара — два указателя навстречу, меньше обменов. Почему O(n log n) в среднем. Если опорный делит массив примерно пополам, глубина рекурсии — log n уровней, на каждом суммарно O(n) работы. Почему O(n²) в худшем. Если опорный каждый раз минимальный или максимальный, одна часть пустая, а другая меньше всего на один элемент: n уровней по O(n). Классический случай — опорный «последний элемент» на уже отсортированных или почти отсортированных данных. Ещё один — много одинаковых значений при наивном разбиении. Как защищаются…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

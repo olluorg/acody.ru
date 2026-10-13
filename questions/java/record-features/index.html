@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что верно про record в Java? — вопрос с собеседования</title>
+<meta name="description" content="Компилятор генерирует private final поля, канонический конструктор, аксессоры (name(), без get), equals, hashCode, toString по всем компонентам…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/record-features/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/record-features/">
+<meta property="og:title" content="Что верно про record в Java? — вопрос с собеседования">
+<meta property="og:description" content="Компилятор генерирует private final поля, канонический конструктор, аксессоры (name(), без get), equals, hashCode, toString по всем компонентам…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что верно про record в Java?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что верно про record в Java?"}]}</script>
+  <h1>Что верно про record в Java?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Современная Java</span><span class="chip ver">Java &gt;=16</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что компилятор генерирует для record и когда record использовать не стоит?</li><li>Что компилятор генерирует для record и в каких случаях record использовать не стоит?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Компилятор генерирует <b>private final поля</b>, <b>канонический конструктор</b>, <b>аксессоры</b> (name(), без get), <b>equals, hashCode, toString</b> по всем компонентам. Record <b>неявно final</b>, наследует java.lang.Record и не может расширять другой класс, но реализует интерфейсы. <b>Компактный конструктор</b> — для валидации и нормализации.</p><ul><li>Можно добавлять методы, статические поля, свои конструкторы (делегирующие каноническому)</li><li>Полей экземпляра сверх компонентов — нельзя</li><li>Не подходит: изменяемые сущности (JPA), сокрытие представления, наследование</li></ul><p class="extra"><span>А ещё</span> Сериализация record идёт через канонический конструктор — инварианты проверяются</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Record — это прозрачный носитель данных: состояние объявлено в заголовке, и всё остальное компилятор выводит из него. Наследоваться record не может (неявно final и уже наследует java.lang.Record), но интерфейсы реализовывать вправе. Компактный конструктор — самая полезная деталь на практике: в нём проверяют инварианты и нормализуют аргументы, а присваивание полей компилятор добавит сам. Важная оговорка про неизменяемость: неизменяемы сами поля, а не то, на что они ссылаются — список внутри record можно менять, поэтому для настоящей неизменяемости в компактном конструкторе делают защитную копию.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>record Money(BigDecimal amount, String currency) {
+    Money {
+        Objects.requireNonNull(currency);
+        if (amount.signum() &lt; 0) throw new IllegalArgumentException();
+    }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Что генерируется.</li><li>Ограничения record.</li><li>Компактный конструктор.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать record полностью неизменяемым при наличии изменяемых компонентов.</li><li>Пытаться унаследовать record от класса.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Несколько верных вариантов. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Компилятор генерирует equals, hashCode и toString по компонентам</li><li class="ok"><span class="mark">✓</span>Record неявно final и не может наследовать другой класс</li><li class="ok"><span class="mark">✓</span>Компактный конструктор позволяет проверить и нормализовать параметры до присваивания полей</li><li class="no"><span class="mark">✗</span>Компоненты record можно объявить изменяемыми, добавив сеттеры</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как сделать защитную копию в компактном конструкторе?</li><li>Чем record отличается от класса, сгенерированного Lombok?</li><li>Как record ведёт себя при десериализации из JSON?</li><li>Зачем нужна деконструкция record в pattern matching?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/records/">Records: компактные носители данных</a><p>Что генерирует record, канонический и компактный конструкторы, ограничения и когда применять.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/record/">Для чего предназначен record?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/record-when-not/">Когда record — неудачный выбор?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/record-defensive-copy/">Чего record НЕ делает за вас при проектировании неизменяемого носителя данных?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/record-array-equals/">Что произойдёт, если объявить record с полем-массивом и сравнить два таких объекта с одинаковым содержимым массива?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что верно про record в Java?","acceptedAnswer":{"@type":"Answer","text":"Компилятор генерирует private final поля, канонический конструктор, аксессоры (name(), без get), equals, hashCode, toString по всем компонентам. Record неявно final, наследует java.lang.Record и не может расширять другой класс, но реализует интерфейсы. Компактный конструктор — для валидации и нормализации. Можно добавлять методы, статические поля, свои конструкторы (делегирующие каноническому) Полей экземпляра сверх компонентов — нельзя Не подходит: изменяемые сущности (JPA), сокрытие представления, наследование Сериализация record идёт через канонический конструктор — инварианты проверяются Record — это прозрачный носитель данных: состояние объявлено в заголовке, и всё остальное компилятор выводит из него. Наследоваться record не может (неявно final и уже наследует java.lang.Record), но интерфейсы реализовывать вправе. Компактный конструктор — самая полезная деталь на практике: в нём проверяют инварианты и нормализуют аргументы, а присваивание полей компилятор добавит сам. Важная оговорка про неизменяемость: неизменяемы сами поля, а не то, на что они ссылаются — список внутри record можно менять, поэтому для настоящей неизменяемости в компактном конструкторе делают защитную копию."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

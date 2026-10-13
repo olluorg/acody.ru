@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Линейные модели — карта «Data Scientist»</title>
+<meta name="description" content="Линейная и логистическая регрессия, регуляризация L1 и L2.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/data-science/linear-models/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/data-science/linear-models/">
+<meta property="og:title" content="Линейные модели — карта «Data Scientist»">
+<meta property="og:description" content="Линейная и логистическая регрессия, регуляризация L1 и L2.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/data-science/#ml-models">Data Scientist</a> <span>/</span> <a href="/roadmap/data-science/ml-models/">Модели машинного обучения</a> <span>/</span> <span>Линейные модели</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Data Scientist","item":"https://learn.getsotto.ru/roadmap/data-science/#ml-models"},{"@type":"ListItem","position":3,"name":"Модели машинного обучения","item":"https://learn.getsotto.ru/roadmap/data-science/ml-models/"},{"@type":"ListItem","position":4,"name":"Линейные модели"}]}</script>
+  <h1>Линейные модели</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Линейная и логистическая регрессия, регуляризация L1 и L2.</p>
+  <article class="md"><h3>Что важно знать</h3>
+<ul><li>Линейная регрессия минимизирует квадраты ошибок.</li><li>Логистическая — сигмоида от линейной комбинации, обучается по кросс-энтропии.</li><li>L1 обнуляет веса (отбор признаков), L2 уменьшает их.</li><li>Сильная базовая линия и простая интерпретация.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 8 ч</small></h3><ul><li>Обучает линейную и логистическую регрессию и интерпретирует коэффициенты</li></ul><p class="rm-practice"><b>Практика.</b> Построить модель цены квартир линейной регрессией с интерпретацией коэффициентов.</p></div><div class="rm-grade"><h3>Middle <small>≈ 4 ч</small></h3><ul><li>Объясняет регуляризацию L1 и L2 и её влияние на веса</li><li>Объясняет, почему логистическая регрессия выдаёт вероятность и что такое калибровка</li></ul><p class="rm-practice"><b>Практика.</b> Сравнить L1, L2 и ElasticNet на данных с множеством коррелированных признаков и объяснить отличия весов.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/ai/linear-logistic-regression/">Как работают линейная и логистическая регрессия?</a> <span class="lvl lvl-junior">Junior</span><p>Линейная регрессия предсказывает число как взвешенную сумму признаков, веса подбираются минимизацией среднеквадратичной ошибки. Логистическая регрессия — это классификация: ту же…</p></li><li><a href="/questions/ai/regularization/">Что такое регуляризация и чем L1 отличается от L2?</a> <span class="lvl lvl-middle">Middle</span><p>Регуляризация добавляет к функции потерь штраф за большие веса, чтобы модель не подгонялась под шум. L2 (Ridge) — штраф за сумму квадратов: веса уменьшаются плавно, но не до нуля…</p></li><li><a href="/questions/ai/gradient-descent/">Как работает градиентный спуск и что такое learning rate?</a> <span class="lvl lvl-junior">Junior</span><p>Градиентный спуск минимизирует функцию потерь, шаг за шагом сдвигая параметры против градиента — в сторону наибольшего уменьшения ошибки. Learning rate — размер шага: слишком…</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/data-science/ml-models/">← Модели машинного обучения</a><a class="next" href="/roadmap/data-science/trees-boosting/">Деревья, ансамбли и бустинг →</a></nav>
+  <p class="rm-back"><a href="/roadmap/data-science/#ml-models">← Вся карта «Data Scientist»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Линейные модели","description":"Линейная и логистическая регрессия, регуляризация L1 и L2.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/data-science/linear-models/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

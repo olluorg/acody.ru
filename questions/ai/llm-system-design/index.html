@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Спроектируйте ассистента поддержки интернет-магазина на LLM. — вопрос с собеседования</title>
+<meta name="description" content="Начать с требований: какие вопросы закрывает бот (статус заказа, возврат, доставка), объём (например, 20 тысяч диалогов в день), допустимая задержка…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/llm-system-design/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/llm-system-design/">
+<meta property="og:title" content="Спроектируйте ассистента поддержки интернет-магазина на LLM. — вопрос с собеседования">
+<meta property="og:description" content="Начать с требований: какие вопросы закрывает бот (статус заказа, возврат, доставка), объём (например, 20 тысяч диалогов в день), допустимая задержка…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Спроектируйте ассистента поддержки интернет-магазина на LLM.</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Спроектируйте ассистента поддержки интернет-магазина на LLM."}]}</script>
+  <h1>Спроектируйте ассистента поддержки интернет-магазина на LLM.</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">LLM в продакшене</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как бы вы спроектировали чат-бота на LLM для поддержки клиентов?</li><li>Системный дизайн RAG-ассистента</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Начать с <b>требований</b>: какие вопросы закрывает бот (статус заказа, возврат, доставка), объём (например, 20 тысяч диалогов в день), допустимая задержка, доля передачи оператору, бюджет, где можно обрабатывать данные. Архитектура: <b>API с авторизацией</b> → <b>оркестратор</b> → <b>маршрутизация</b> по типу вопроса → <b>RAG по базе знаний</b> и <b>инструменты</b> (заказы, доставка, возвраты с подтверждением) → <b>guardrails</b> → потоковый ответ; передача оператору с резюме диалога. Вокруг — <b>оценка качества</b>, <b>трассировка</b>, <b>учёт стоимости</b>.</p><ul><li>Простые частые вопросы — дешёвая модель или шаблоны, сложные — сильная модель</li><li>Действия с деньгами — только через инструменты с проверкой прав и подтверждением</li><li>Метрики: доля решённых без оператора, CSAT, стоимость на обращение, доля ошибок</li></ul><p class="extra"><span>А ещё</span> Запуск поэтапно: подсказки оператору → ответы на часть тем → расширение по метрикам</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Оценка нагрузки</b> (пример): 20 тысяч диалогов в день, 6 сообщений в диалоге, пик в 3 раза выше среднего → около 4 запросов к модели в секунду в пик. При 3 тысячах входных и 300 выходных токенов на запрос — около 400 млн токенов в месяц: это определяет выбор модели и лимиты провайдера.</p>
+<p><b>Компоненты:</b></p>
+<div class="table"><table><thead><tr><th>компонент</th><th>решение</th></tr></thead><tbody><tr><td>вход</td><td>авторизация клиента, лимиты, guardrails (персональные данные, токсичность, инъекции)</td></tr><tr><td>маршрутизация</td><td>классификатор темы: справка, заказ, жалоба, оператор</td></tr><tr><td>знания</td><td>RAG: гибридный поиск по базе знаний и правилам, реранкер, ссылки</td></tr><tr><td>действия</td><td>инструменты к API заказов и доставки с правами текущего клиента</td></tr><tr><td>модели</td><td>шлюз: основная и резервная модель, кэш префикса, учёт затрат</td></tr><tr><td>выход</td><td>проверка ответа, запрет обещаний вне правил, потоковая выдача</td></tr><tr><td>оператор</td><td>передача с резюме диалога и найденными данными</td></tr><tr><td>данные</td><td>диалоги, трассы, оценки, логи — с маскированием персональных данных</td></tr></tbody></table></div>
+<p><b>Качество:</b> набор из реальных обращений по темам, автоматическая оценка при каждом изменении, ежедневный разбор выборки диалогов, онлайн-метрики и A/B-тест при запуске.</p>
+<p><b>Отказоустойчивость:</b> таймауты и резервная модель; при недоступности модели — сразу оператор; инструменты с идемпотентными операциями.</p>
+<p><b>Риски:</b> обещания вне правил (компенсации), утечки чужих заказов, инъекции через текст обращения, галлюцинации в правилах возврата.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Требования и оценка нагрузки до архитектуры.</li><li>RAG и инструменты с правами пользователя, передача оператору.</li><li>Оценка качества, наблюдаемость, стоимость, поэтапный запуск.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/llm-gateway/">Зачем компании единый шлюз к LLM и что в нём должно быть?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/ai/what-is-rag/">Что такое RAG и как он устроен?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/tool-calling-agents/">Что такое вызов инструментов (tool calling) и агенты?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-evaluation/">Как оценивать качество ответов LLM?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-cost-latency/">Как снизить стоимость и задержку приложения на LLM?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Спроектируйте ассистента поддержки интернет-магазина на LLM.","acceptedAnswer":{"@type":"Answer","text":"Начать с требований: какие вопросы закрывает бот (статус заказа, возврат, доставка), объём (например, 20 тысяч диалогов в день), допустимая задержка, доля передачи оператору, бюджет, где можно обрабатывать данные. Архитектура: API с авторизацией → оркестратор → маршрутизация по типу вопроса → RAG по базе знаний и инструменты (заказы, доставка, возвраты с подтверждением) → guardrails → потоковый ответ; передача оператору с резюме диалога. Вокруг — оценка качества, трассировка, учёт стоимости. Простые частые вопросы — дешёвая модель или шаблоны, сложные — сильная модель Действия с деньгами — только через инструменты с проверкой прав и подтверждением Метрики: доля решённых без оператора, CSAT, стоимость на обращение, доля ошибок Запуск поэтапно: подсказки оператору → ответы на часть тем → расширение по метрикам Оценка нагрузки (пример): 20 тысяч диалогов в день, 6 сообщений в диалоге, пик в 3 раза выше среднего → около 4 запросов к модели в секунду в пик. При 3 тысячах входных и 300 выходных токенов на запрос — около 400 млн токенов в месяц: это определяет выбор модели и лимиты провайдера. Компоненты: | компонент | решение | | --- | --- | | вход | авторизация клиента, лимиты, guardrails (персональные данные, токсичность, инъекции) | | маршрутизация | классификатор темы: справка, заказ, жалоба, оператор | | знания | RAG: гибридный поиск по базе знаний и правилам, реранкер, ссылки | | действия | инструменты к API заказов и доставки с правами текущего клиента | | модели | шлюз: основная и резервная модель, кэш префикса, учёт затрат | | выход | проверка ответа, запрет обещаний вне правил, потоковая выдача | | оператор | передача с резюме диалога и найденными данными | | данные | диалоги, трассы…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Инструменты и агенты — карта «ИИ-инженер»</title>
+<meta name="description" content="Модель, которая вызывает функции, — tool calling, циклы агентов, MCP и фреймворки.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/ai-engineer/agents/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/ai-engineer/agents/">
+<meta property="og:title" content="Инструменты и агенты — карта «ИИ-инженер»">
+<meta property="og:description" content="Модель, которая вызывает функции, — tool calling, циклы агентов, MCP и фреймворки.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/ai-engineer/#agents">ИИ-инженер</a> <span>/</span> <span>Инструменты и агенты</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"ИИ-инженер","item":"https://learn.getsotto.ru/roadmap/ai-engineer/#agents"},{"@type":"ListItem","position":3,"name":"Инструменты и агенты"}]}</script>
+  <h1>Инструменты и агенты</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span></div>
+  <p class="lead">Модель, которая вызывает функции, — tool calling, циклы агентов, MCP и фреймворки.</p>
+  <article class="md"><p><b>Вызов инструментов</b> — модель получает описание функций и вместо текста может ответить «вызови <code>get_order(id=42)</code>». Код выполняет функцию, возвращает результат модели, и она продолжает. <b>Агент</b> — цикл, в котором модель сама решает, какие инструменты вызывать и когда задача решена.</p>
+<pre><code>пользователь → модель → вызов инструмента → результат → модель → … → ответ</code></pre>
+<p>Агенты — самая обсуждаемая и самая рискованная часть LLM-разработки: гибкость оплачивается непредсказуемостью, стоимостью и сложностью отладки. Хорошее правило — начинать с простейшей схемы (один вызов, фиксированная цепочка шагов) и добавлять автономию только там, где она действительно нужна.</p></article>
+  <section class="block"><h2>Темы этапа</h2><ul class="links"><li><a href="/roadmap/ai-engineer/tool-calling/">Вызов инструментов</a> <span class="rm-kind k-core">Основа</span><p>Описание функций для модели, выполнение вызовов и обработка результатов.</p></li><li><a href="/roadmap/ai-engineer/agent-design/">Проектирование агентов</a> <span class="rm-kind k-core">Основа</span><p>Цепочки, маршрутизация, оркестратор и исполнители — и почему агенты ломаются.</p></li><li><a href="/roadmap/ai-engineer/mcp/">Model Context Protocol</a> <span class="rm-kind k-core">Основа</span><p>Открытый протокол подключения инструментов и данных к LLM-приложениям.</p></li><li><a href="/roadmap/ai-engineer/agent-frameworks/">Фреймворки для агентов и RAG</a> <span class="rm-kind k-optional">Полезно знать</span><p>LangChain, LangGraph, LlamaIndex и SDK провайдеров — когда помогают, а когда мешают.</p></li></ul></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/ai/tool-calling-agents/">Что такое вызов инструментов (tool calling) и агенты?</a> <span class="lvl lvl-middle">Middle</span><p>Модель получает описания инструментов (имя, параметры по схеме) и вместо текста может вернуть запрос на вызов; вызывает их код приложения и отдаёт результат обратно модели.</p></li><li><a href="/questions/ai/agent-design/">Как проектировать LLM-агента и почему агенты ломаются?</a> <span class="lvl lvl-middle">Middle</span><p>Агент — цикл: модель решает, какой инструмент вызвать, получает результат и решает дальше, пока задача не решена (паттерн ReAct: рассуждение → действие → наблюдение). Начинать…</p></li></ul></section><section class="block"><h2>Документация</h2><ul class="links"><li><a href="https://www.anthropic.com/engineering/building-effective-agents" rel="noopener" target="_blank">Anthropic: Building effective agents ↗</a></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/ai-engineer/long-context/">← Длинный контекст против RAG</a><a class="next" href="/roadmap/ai-engineer/tool-calling/">Вызов инструментов →</a></nav>
+  <p class="rm-back"><a href="/roadmap/ai-engineer/#agents">← Вся карта «ИИ-инженер»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Инструменты и агенты","description":"Модель, которая вызывает функции, — tool calling, циклы агентов, MCP и фреймворки.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/ai-engineer/agents/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

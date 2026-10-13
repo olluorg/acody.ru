@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Контейнер: события, FactoryBean и тонкое связывание — разбор для собеседования</title>
+<meta name="description" content="События приложения и @EventListener, FactoryBean, Aware-интерфейсы, порядок бинов (@Order/@DependsOn) и отложенное получение…">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/spring/container-advanced/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/spring/container-advanced/">
+<meta property="og:title" content="Контейнер: события, FactoryBean и тонкое связывание — разбор для собеседования">
+<meta property="og:description" content="События приложения и @EventListener, FactoryBean, Aware-интерфейсы, порядок бинов (@Order/@DependsOn) и отложенное получение…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#spring">Spring</a> <span>/</span> <span>Контейнер: события, FactoryBean и тонкое связывание</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/articles/#spring"},{"@type":"ListItem","position":3,"name":"Контейнер: события, FactoryBean и тонкое связывание"}]}</script>
+  <h1>Контейнер: события, FactoryBean и тонкое связывание</h1>
+  <p class="lead">События приложения и @EventListener, FactoryBean, Aware-интерфейсы, порядок бинов (@Order/@DependsOn) и отложенное получение (ObjectProvider/@Lazy/@Lookup).</p>
+  <article class="md"><h2>События приложения</h2>
+<p>ApplicationContext умеет публиковать события: <code>ApplicationEventPublisher.publishEvent(event)</code> рассылает их, а методы с <code>@EventListener</code> их принимают (в Spring Boot событием может быть любой объект, не обязательно наследник ApplicationEvent). Это способ развязать модули ВНУТРИ одного приложения — издатель не знает о подписчиках.</p>
+<p>Важные нюансы: по умолчанию слушатели СИНХРОННЫ — выполняются в том же потоке и той же транзакции, что и <code>publishEvent</code> (исключение в слушателе откатит транзакцию издателя). Для асинхронности ставят <code>@Async</code>, а чтобы реагировать только после успешного коммита — <code>@TransactionalEventListener(phase = AFTER_COMMIT)</code>. Это не межсервисная шина (для неё — брокеры из уроков про messaging).</p>
+<pre class="lang-java"><code>publisher.publishEvent(new OrderPaid(orderId));
+
+@TransactionalEventListener(phase = AFTER_COMMIT)
+void onPaid(OrderPaid e) { notifications.send(e); } // после commit</code></pre>
+<h2>FactoryBean</h2>
+<p><code>FactoryBean&lt;T&gt;</code> — это бин, чья задача — СОЗДАТЬ другой бин: контейнер вызывает его <code>getObject()</code> и кладёт в контекст продукт, а не сам FactoryBean. Его применяют, когда создание объекта сложное/условное или интегрирует чужую фабрику.</p>
+<p>Тонкость доступа: <code>getBean(&quot;x&quot;)</code> вернёт ПРОДУКТ фабрики, а <code>getBean(&quot;&amp;x&quot;)</code> — сам объект FactoryBean. Многие интеграции Spring (прокси для репозиториев, клиентов, JNDI) внутри устроены именно как FactoryBean.</p>
+<h2>Aware-интерфейсы</h2>
+<p>Реализовав Aware-интерфейс, бин получает ссылку на инфраструктуру контейнера на соответствующей стадии жизненного цикла: BeanNameAware (своё имя), ApplicationContextAware (сам контекст), EnvironmentAware (Environment), BeanFactoryAware и др.</p>
+<p>Пользоваться ими стоит осторожно — они жёстко связывают код со Spring и усложняют тестирование. В большинстве случаев нужное получают обычной инъекцией зависимости; Aware оправдан в инфраструктурном коде.</p>
+<h2>Порядок бинов</h2>
+<p>Когда важна последовательность, её задают явно. <code>@Order</code> (или интерфейс Ordered) управляет ПОРЯДКОМ в коллекциях бинов: инъекция <code>List&lt;Handler&gt;</code> придёт в этом порядке, как и цепочки фильтров, аспектов, CommandLineRunner/ApplicationRunner.</p>
+<p><code>@DependsOn</code> — про другое: он форсирует порядок СОЗДАНИЯ бинов, когда между ними есть неявная зависимость инициализации, не выраженная через прямую инъекцию (например, бин должен подняться после того, как другой зарегистрировал что-то глобально).</p>
+<h2>Отложенное и опциональное получение</h2>
+<p><code>ObjectProvider&lt;T&gt;</code> — современный способ получать зависимость лениво, опционально или во множественном числе: <code>provider.getObject()</code> (каждый раз новый prototype), <code>getIfAvailable()</code> (может отсутствовать), <code>orderedStream()</code> (все реализации по порядку). Это аккуратная замена устаревшему <code>@Lookup</code> и решение проблемы «prototype внутри singleton» (см. урок про бины).</p>
+<p><code>@Lazy</code> откладывает создание бина до первого обращения (и иногда помогает разорвать цикл зависимостей), а <code>@Lookup</code> — легаси-приём method injection. По возможности предпочитают ObjectProvider как самый явный и тестируемый вариант.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Объясните события (<code>@EventListener</code> для развязки модулей; СИНХРОННЫ и в транзакции издателя по умолчанию → <code>@Async</code>/<code>@TransactionalEventListener</code> AFTER_COMMIT). Расскажите FactoryBean (создаёт другой бин, <code>getBean(&quot;&amp;x&quot;)</code> — сам фабрика) и Aware-интерфейсы (доступ к контейнеру, но осторожно). Различите <code>@Order</code> (порядок в коллекциях/цепочках) и <code>@DependsOn</code> (порядок создания), и назовите ObjectProvider как современный способ ленивого/опционального/prototype-получения вместо <code>@Lookup</code>.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/spring/bean-post-processor/">Что такое BeanPostProcessor и зачем он нужен?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/prototype-in-singleton/">Как корректно получать prototype-бин внутри singleton-бина, чтобы каждый раз создавался новый экземпляр?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/order-annotation/">Что на самом деле задаёт аннотация @Order на бине?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/application-events/">Что верно про события приложения и @EventListener в Spring?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/singleton-count/">Сколько экземпляров бина со scope singleton создаст контейнер?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/spring/bean/">Бины: жизненный цикл и scopes</a><p>Бин и BeanDefinition, полный жизненный цикл, роль BeanPostProcessor, области видимости и их ловушки.</p></li><li><a href="/articles/spring/context-config/">ApplicationContext и конфигурация</a><p>BeanFactory против ApplicationContext, способы конфигурации, @Configuration full/lite, профили и Environment, @Conditional.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Контейнер: события, FactoryBean и тонкое связывание","description":"События приложения и @EventListener, FactoryBean, Aware-интерфейсы, порядок бинов (@Order/@DependsOn) и отложенное получение (ObjectProvider/@Lazy/@Lookup).","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/spring/container-advanced/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

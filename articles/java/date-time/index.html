@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Дата и время: java.time — разбор для собеседования</title>
+<meta name="description" content="Почему java.time вытеснил Date/Calendar, машинное (Instant) и человеческое (LocalDateTime) время, часовые пояса, Duration/Period и потокобезопасный…">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/date-time/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/date-time/">
+<meta property="og:title" content="Дата и время: java.time — разбор для собеседования">
+<meta property="og:description" content="Почему java.time вытеснил Date/Calendar, машинное (Instant) и человеческое (LocalDateTime) время, часовые пояса, Duration/Period и потокобезопасный…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Дата и время: java.time</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Дата и время: java.time"}]}</script>
+  <h1>Дата и время: java.time</h1>
+  <p class="lead">Почему java.time вытеснил Date/Calendar, машинное (Instant) и человеческое (LocalDateTime) время, часовые пояса, Duration/Period и потокобезопасный DateTimeFormatter.</p>
+  <article class="md"><h2>Зачем java.time</h2>
+<p>Старые <code>java.util.Date</code> и Calendar — изменяемые и не потокобезопасные, с ловушками: у Date почти весь API устарел, у Calendar месяцы нумеруются с нуля (январь = 0), а SimpleDateFormat нельзя шарить между потоками. Это десятилетиями было источником багов.</p>
+<p><code>java.time</code> (JSR-310, Java 8) построен иначе: все типы неизменяемы и потокобезопасны, модель явная (отдельно момент, дата, время, зона), а API текучий и предсказуемый. Это стандарт де-факто; старый код переводят на него.</p>
+<h2>Машинное и человеческое время</h2>
+<p>Instant — момент на глобальной шкале (секунды/наносекунды от эпохи 1970-01-01T00:00:00Z, всегда UTC). Это «машинное» время: удобно хранить, сравнивать и логировать.</p>
+<p>LocalDate (только дата), LocalTime (только время) и LocalDateTime (дата+время) — «человеческое» время БЕЗ зоны. LocalDateTime «2026-01-01 09:00» не задаёт конкретный момент, пока не привязан к зоне: в Москве и в Нью-Йорке это разные моменты.</p>
+<pre class="lang-java"><code>Instant now = Instant.now();                 // момент в UTC
+LocalDate today = LocalDate.now();           // дата без времени и зоны
+LocalDateTime dt = LocalDateTime.of(2026, 1, 1, 9, 0); // без зоны — ещё не момент</code></pre>
+<h2>Часовые пояса: ZoneId и ZonedDateTime</h2>
+<p>ZonedDateTime = LocalDateTime + ZoneId (например, Europe/Moscow): это уже конкретный момент с правилами перехода на летнее время. OffsetDateTime проще — дата-время с фиксированным смещением от UTC (+03:00), без правил DST.</p>
+<p>Практическое правило: храните и передавайте моменты в UTC (Instant), а в местную зону переводите только при показе пользователю. Так вы избегаете ошибок на переходах летнего времени и между регионами.</p>
+<pre class="lang-java"><code>ZonedDateTime msk = dt.atZone(ZoneId.of(&quot;Europe/Moscow&quot;));
+Instant instant = msk.toInstant();           // момент для хранения (UTC)
+ZonedDateTime ny = instant.atZone(ZoneId.of(&quot;America/New_York&quot;)); // то же мгновение в другой зоне</code></pre>
+<h2>Длительности: Duration и Period</h2>
+<p>Duration — машинная длительность в секундах и наносекундах (между Instant/LocalTime): «90 минут», «5 секунд». Period — календарная длительность в годах, месяцах и днях (между LocalDate): «2 месяца», «3 дня».</p>
+<p>Разница не косметическая: <code>Period.ofDays(1)</code> и <code>Duration.ofHours(24)</code> могут дать разный результат на стыке перехода на летнее время, потому что календарный «день» не всегда равен 24 часам. Берите тип по смыслу: машинное время — Duration, календарь — Period.</p>
+<h2>Форматирование и разбор</h2>
+<p>Типы <code>java.time</code> умеют ISO-формат из коробки (<code>toString</code> → 2026-01-01T09:00). Для своих шаблонов есть DateTimeFormatter — и, в отличие от SimpleDateFormat, он неизменяемый и потокобезопасный, поэтому его держат в static-константе.</p>
+<p><code>format(formatter)</code> превращает дату в строку, <code>parse(text, formatter)</code> — строку в дату. Для локализованного вывода задают Locale; при разборе шаблон должен точно соответствовать входу, иначе будет DateTimeParseException.</p>
+<pre class="lang-java"><code>static final DateTimeFormatter F = DateTimeFormatter.ofPattern(&quot;dd.MM.yyyy HH:mm&quot;);
+String s = dt.format(F);                  // &quot;01.01.2026 09:00&quot;
+LocalDateTime back = LocalDateTime.parse(s, F);</code></pre>
+<h2>Неизменяемость и совместимость с legacy</h2>
+<p>Все типы <code>java.time</code> неизменяемы: <code>plusDays</code>, <code>withYear</code> и т.п. возвращают НОВЫЙ объект, исходный не меняется — забытое присваивание (<code>dt.plusDays(1)</code> без сохранения) частая ошибка. Зато их безопасно шарить между потоками.</p>
+<p>С legacy-кодом наводят мосты: <code>new Date()</code> ↔ <code>Date.toInstant()</code>/<code>Date.from(Instant)</code>; <code>java.sql</code>-типы конвертируются своими методами. Новый код пишут на <code>java.time</code>, а конверсии делают только на границе со старым API.</p>
+<pre class="lang-java"><code>LocalDate tomorrow = today.plusDays(1);  // НОВЫЙ объект; today не изменился
+Instant i = new java.util.Date().toInstant(); // мост из legacy</code></pre>
+<h2>Как отвечать на собеседовании</h2>
+<p>Объясните, почему <code>java.time</code> вытеснил Date/Calendar (неизменяемость, потокобезопасность, явная модель, ловушки старого API). Различите Instant (машинный момент в UTC) и LocalDateTime (без зоны), ZonedDateTime/ZoneId и правило «хранить в UTC». Разведите Duration (секунды) и Period (календарь), упомяните потокобезопасный DateTimeFormatter против SimpleDateFormat и неизменяемость (методы возвращают новый объект).</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/localdatetime-vs-zoneddatetime/">Чем LocalDateTime отличается от ZonedDateTime?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/java-time-vs-date/">Почему java.time (Java 8) предпочитают старым Date/Calendar?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/instant-duration-period/">Чем Instant и LocalDateTime отличаются и когда брать Duration, а когда Period?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/simpledateformat-thread-safety/">Статическое поле SimpleDateFormat используется из нескольких потоков, и изредка возвращаются неверные даты. В чём причина и что делать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/localdate-immutable/">Что произойдёт при вызове date.plusDays(1) у объекта LocalDate?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/order-time-types/">В сервисе нужно сохранить момент оформления заказа и дату доставки, выбранную пользователем. Какие типы java.time возьмёшь и почему?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/optional/">Optional: явное отсутствие значения</a><p>Зачем Optional, orElse против orElseGet, композиция map/flatMap/filter и антипаттерны использования.</p></li><li><a href="/articles/java/immutability/">Проектирование неизменяемых классов</a><p>Зачем нужна неизменяемость, рецепт immutable-класса, защитные копии, безопасная публикация и records.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Дата и время: java.time","description":"Почему java.time вытеснил Date/Calendar, машинное (Instant) и человеческое (LocalDateTime) время, часовые пояса, Duration/Period и потокобезопасный DateTimeFormatter.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/date-time/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

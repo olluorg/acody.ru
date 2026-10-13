@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем map, flatMap и filter отличаются в Stream API? — вопрос с собеседования</title>
+<meta name="description" content="map — один элемент → один элемент (преобразование). flatMap — один элемент → поток элементов, все потоки разворачиваются в один. filter — оставляет…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/stream-map-flatmap-filter/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/stream-map-flatmap-filter/">
+<meta property="og:title" content="Чем map, flatMap и filter отличаются в Stream API? — вопрос с собеседования">
+<meta property="og:description" content="map — один элемент → один элемент (преобразование). flatMap — один элемент → поток элементов, все потоки разворачиваются в один. filter — оставляет…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Чем map, flatMap и filter отличаются в Stream API?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Чем map, flatMap и filter отличаются в Stream API?"}]}</script>
+  <h1>Чем map, flatMap и filter отличаются в Stream API?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Лямбды и Stream API</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>map</b> — один элемент → один элемент (преобразование). <b>flatMap</b> — один элемент → поток элементов, все потоки <b>разворачиваются в один</b>. <b>filter</b> — оставляет элементы, удовлетворяющие условию.</p><ul><li>map(User::email): Stream&lt;User&gt; → Stream&lt;String&gt;</li><li>flatMap(u -&gt; u.roles().stream()): Stream&lt;User&gt; → Stream&lt;Role&gt;</li><li>Java 16: mapMulti — альтернатива flatMap без создания промежуточных стримов</li></ul><p class="extra"><span>А ещё</span> Та же пара map/flatMap есть у Optional и CompletableFuture (thenApply/thenCompose)</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><pre class="lang-java"><code>List&lt;String&gt; emails = users.stream()
+    .filter(User::isActive)               // Stream&lt;User&gt;, только активные
+    .map(User::email)                     // Stream&lt;String&gt;
+    .toList();
+
+Set&lt;Role&gt; roles = users.stream()
+    .flatMap(u -&gt; u.roles().stream())     // Stream&lt;Role&gt; из всех списков
+    .collect(Collectors.toSet());</code></pre>
+<p>Если в втором примере взять <code>map</code>, получится <code>Stream&lt;Stream&lt;Role&gt;&gt;</code> — поток потоков, с которым неудобно работать.</p>
+<p><b>Частые применения flatMap:</b> развернуть вложенные коллекции, разбить строки на слова (<code>lines.flatMap(l -&gt; Arrays.stream(l.split(&quot; &quot;)))</code>), отбросить пустые Optional (<code>.flatMap(Optional::stream)</code>).</p>
+<p><b>Порядок:</b> filter стоит ставить раньше дорогого map — элементы проходят конвейер по одному, и отброшенные не будут преобразованы зря.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Различие трёх операций с типами.</li><li>Пример flatMap для вложенных коллекций.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Получить Stream&lt;Stream&lt;T&gt;&gt; там, где нужен flatMap.</li><li>Делать побочные эффекты внутри map/filter.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Почему stream операции ленивые?</li><li>Чем collect отличается от reduce?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/streams/">Stream API: устройство и ленивый конвейер</a><p>Что такое стрим, источники, промежуточные против терминальных, ленивость и short-circuiting, stateful-операции, параллельность и примитивные стримы.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/stream-intermediate-terminal/">Чем промежуточные операции Stream отличаются от терминальных?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/thencompose-vs-thenapply/">Чем thenCompose отличается от thenApply в CompletableFuture?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем map, flatMap и filter отличаются в Stream API?","acceptedAnswer":{"@type":"Answer","text":"map — один элемент → один элемент (преобразование). flatMap — один элемент → поток элементов, все потоки разворачиваются в один. filter — оставляет элементы, удовлетворяющие условию. map(User::email): Stream<User> → Stream<String> flatMap(u -> u.roles().stream()): Stream<User> → Stream<Role> Java 16: mapMulti — альтернатива flatMap без создания промежуточных стримов Та же пара map/flatMap есть у Optional и CompletableFuture (thenApply/thenCompose) Если в втором примере взять map, получится Stream<Stream<Role>> — поток потоков, с которым неудобно работать. Частые применения flatMap: развернуть вложенные коллекции, разбить строки на слова (lines.flatMap(l -> Arrays.stream(l.split(\" \")))), отбросить пустые Optional (.flatMap(Optional::stream)). Порядок: filter стоит ставить раньше дорогого map — элементы проходят конвейер по одному, и отброшенные не будут преобразованы зря."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем нагрузка OLAP отличается от OLTP? — вопрос с собеседования</title>
+<meta name="description" content="OLTP — много коротких операций над отдельными записями (оформить заказ). OLAP — немного тяжёлых запросов с агрегацией по многим строкам и немногим…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/oltp-vs-olap/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/oltp-vs-olap/">
+<meta property="og:title" content="Чем нагрузка OLAP отличается от OLTP? — вопрос с собеседования">
+<meta property="og:description" content="OLTP — много коротких операций над отдельными записями (оформить заказ). OLAP — немного тяжёлых запросов с агрегацией по многим строкам и немногим…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Чем нагрузка OLAP отличается от OLTP?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Чем нагрузка OLAP отличается от OLTP?"}]}</script>
+  <h1>Чем нагрузка OLAP отличается от OLTP?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Колоночные БД</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем аналитическая нагрузка отличается от транзакционной?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>OLTP</b> — много коротких операций над отдельными записями (оформить заказ). <b>OLAP</b> — немного тяжёлых запросов с агрегацией по многим строкам и немногим колонкам (выручка по регионам за год).</p><ul><li>OLTP — строковое хранение, индексы, транзакции</li><li>OLAP — колоночное хранение, сжатие, пакетная загрузка</li><li>Смешивать на одной базе опасно: отчёт тормозит транзакции</li></ul><p class="extra"><span>А ещё</span> Данные из OLTP в OLAP — ETL или CDC</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Из разницы профилей вытекает разное устройство хранилищ. Транзакционной нагрузке нужен быстрый доступ к конкретной строке целиком, поэтому данные хранят построчно. Аналитике важно прочитать пару колонок, но по миллионам строк — здесь выигрывает колоночное хранение, где не нужно поднимать лишние поля и однотипные значения хорошо сжимаются. Поэтому аналитику обычно не гоняют по боевой транзакционной базе, а переливают данные в отдельное хранилище.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Различие профилей нагрузки.</li><li>Подходящие хранилища.</li><li>Почему разделяют.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Запускать тяжёлую аналитику на боевой транзакционной базе.</li><li>Ожидать от аналитического хранилища быстрых точечных обновлений.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>OLTP — много коротких операций над отдельными записями; OLAP — редкие тяжёлые запросы, агрегирующие миллионы строк по нескольким колонкам</li><li class="no"><span class="mark">✗</span>OLAP работает только с данными в памяти, OLTP — только с диском</li><li class="no"><span class="mark">✗</span>OLTP предназначен для чтения, OLAP — для записи</li><li class="no"><span class="mark">✗</span>Различие только в объёме хранимых данных</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Почему колоночное хранение выигрывает в аналитике?</li><li>Как данные обычно попадают в аналитическое хранилище?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/wide-column-db/">Колоночные БД: wide-column и аналитические</a><p>Разница между wide-column (Cassandra) и column-oriented OLAP (ClickHouse), partition/clustering keys, LSM-дерево и зачем хранить по колонкам.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/row-vs-column/">Чем строковое хранение отличается от колоночного?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/columnar-analytics/">Почему колоночное хранение выигрывает у строчного в аналитических нагрузках?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем нагрузка OLAP отличается от OLTP?","acceptedAnswer":{"@type":"Answer","text":"OLTP — много коротких операций над отдельными записями (оформить заказ). OLAP — немного тяжёлых запросов с агрегацией по многим строкам и немногим колонкам (выручка по регионам за год). OLTP — строковое хранение, индексы, транзакции OLAP — колоночное хранение, сжатие, пакетная загрузка Смешивать на одной базе опасно: отчёт тормозит транзакции Данные из OLTP в OLAP — ETL или CDC Из разницы профилей вытекает разное устройство хранилищ. Транзакционной нагрузке нужен быстрый доступ к конкретной строке целиком, поэтому данные хранят построчно. Аналитике важно прочитать пару колонок, но по миллионам строк — здесь выигрывает колоночное хранение, где не нужно поднимать лишние поля и однотипные значения хорошо сжимаются. Поэтому аналитику обычно не гоняют по боевой транзакционной базе, а переливают данные в отдельное хранилище."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

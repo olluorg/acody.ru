@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое фильтр Блума и где он применяется? — вопрос с собеседования</title>
+<meta name="description" content="Битовый массив и k хеш-функций. Добавление — выставить k бит; проверка — все k бит выставлены? Ответ «точно нет» или «возможно есть». Ложных отказов…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/bloom-filter/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/bloom-filter/">
+<meta property="og:title" content="Что такое фильтр Блума и где он применяется? — вопрос с собеседования">
+<meta property="og:description" content="Битовый массив и k хеш-функций. Добавление — выставить k бит; проверка — все k бит выставлены? Ответ «точно нет» или «возможно есть». Ложных отказов…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Что такое фильтр Блума и где он применяется?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Что такое фильтр Блума и где он применяется?"}]}</script>
+  <h1>Что такое фильтр Блума и где он применяется?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Вероятностные структуры</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как быстро проверить, что элемента точно нет в множестве?</li><li>Почему фильтр Блума даёт ложные срабатывания, но не ложные отказы?</li><li>Как выбрать размер фильтра Блума?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Битовый массив и k хеш-функций. Добавление — выставить k бит; проверка — все k бит выставлены? Ответ «<b>точно нет</b>» или «<b>возможно есть</b>».</p><ul><li>Ложных отказов нет: добавленный элемент всегда найдётся</li><li>Ложные срабатывания есть: биты могли выставить другие элементы</li><li>~10 бит на элемент и 7 хешей — 1% ложных срабатываний, независимо от размера самих элементов</li></ul><p class="extra"><span>А ещё</span> Удалять нельзя (counting Bloom filter или cuckoo filter — можно)</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Фильтр Блума и ложные срабатывания</p><script type="module" src="/widgets/bloom-filter.js"></script><sotto-bloom-filter theme="dark"></sotto-bloom-filter></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Устройство.</b> Массив из m бит, изначально нули, и k независимых хеш-функций, каждая даёт позицию в массиве.</p>
+<ul><li><b>добавить x</b> — вычислить k позиций и выставить эти биты в 1;</li><li><b>проверить x</b> — если хоть один из k бит равен 0, x точно не добавляли; если все 1 — возможно, добавляли (или биты выставили другие элементы).</li></ul>
+<p><b>Вероятность ложного срабатывания</b> после n вставок: p ≈ (1 − e^(−kn/m))^k. Оптимальное k = (m/n) · ln 2. На практике:</p>
+<ul><li>10 бит на элемент, k = 7 → около 1%;</li><li>15 бит → около 0,1%;</li><li>каждые ~4,8 бита на элемент уменьшают p в 10 раз.</li></ul>
+<p>Миллион элементов при 1% — около 1,2 МБ, сколько бы ни весили сами элементы (URL, адреса, ключи).</p>
+<p><b>Применения — везде, где проверка «нет» дешевле дорогого поиска:</b></p>
+<ul><li><b>LSM-хранилища</b> (RocksDB, Cassandra, HBase) — фильтр у каждого SSTable: при чтении ключа пропускаем файлы, где его точно нет;</li><li><b>перед кэшем и базой</b> — отсечь запросы к несуществующим ключам (защита от перебора id и cache penetration);</li><li><b>CDN</b> — кэшировать объект только при втором запросе (Akamai: фильтр «уже видели один раз»), не засоряя кэш одноразовыми;</li><li><b>браузеры и антифишинг</b> — локальная проверка URL по списку;</li><li><b>распределённые JOIN</b> — передать фильтр ключей вместо самих ключей;</li><li><b>рекомендации и ленты</b> — «уже показывали этому пользователю».</li></ul>
+<p><b>Ограничения:</b></p>
+<ul><li><b>удаление</b> невозможно — обнуление бита сломает другие элементы. Counting Bloom filter хранит счётчики вместо бит; <b>cuckoo filter</b> поддерживает удаление и компактнее при малых p;</li><li>размер нужно знать заранее: при переполнении p растёт. Scalable Bloom filter добавляет новые слои;</li><li>хеш-функции — быстрые некриптографические (MurmurHash, xxHash); k хешей получают из двух: h1 + i·h2.</li></ul>
+<p>В Redis — модуль RedisBloom (<code>BF.ADD</code>, <code>BF.EXISTS</code>), в Java — Guava <code>BloomFilter</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import hashlib, math
+
+class Bloom:
+    def __init__(self, n, p=0.01):
+        self.m = math.ceil(-n * math.log(p) / math.log(2) ** 2)
+        self.k = round(self.m / n * math.log(2))
+        self.bits = bytearray((self.m + 7) // 8)
+
+    def _pos(self, item):
+        d = hashlib.blake2b(item.encode(), digest_size=16).digest()
+        h1, h2 = int.from_bytes(d[:8], &quot;little&quot;), int.from_bytes(d[8:], &quot;little&quot;)
+        return [(h1 + i * h2) % self.m for i in range(self.k)]
+
+    def add(self, item):
+        for p in self._pos(item): self.bits[p // 8] |= 1 &lt;&lt; (p % 8)
+
+    def __contains__(self, item):
+        return all(self.bits[p // 8] &gt;&gt; (p % 8) &amp; 1 for p in self._pos(item))</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Устройство: биты и k хешей, операции добавления и проверки.</li><li>Асимметрия ответов: точно нет / возможно есть.</li><li>Порядок размера: ~10 бит на элемент для 1%.</li><li>Применения: LSM, защита базы, CDN.</li><li>Нельзя удалять и как это обходят — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что фильтр может сказать «точно есть».</li><li>Пытаться удалять элементы сбросом бит.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/hyperloglog/">Как посчитать число уникальных посетителей за день при миллиардах событий?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/count-min-top-k/">Как найти самые популярные элементы в бесконечном потоке событий?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/lsm-tree/">Что такое LSM-дерево и чем оно отличается от B-дерева?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/cs/hash-table/">Как устроена хеш-таблица?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/highload/cache-hit-ratio/">Как оценить, насколько кэш разгружает базу, и что будет, если он упадёт?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое фильтр Блума и где он применяется?","acceptedAnswer":{"@type":"Answer","text":"Битовый массив и k хеш-функций. Добавление — выставить k бит; проверка — все k бит выставлены? Ответ «точно нет» или «возможно есть». Ложных отказов нет: добавленный элемент всегда найдётся Ложные срабатывания есть: биты могли выставить другие элементы ~10 бит на элемент и 7 хешей — 1% ложных срабатываний, независимо от размера самих элементов Удалять нельзя (counting Bloom filter или cuckoo filter — можно) Устройство. Массив из m бит, изначально нули, и k независимых хеш-функций, каждая даёт позицию в массиве. - добавить x — вычислить k позиций и выставить эти биты в 1; - проверить x — если хоть один из k бит равен 0, x точно не добавляли; если все 1 — возможно, добавляли (или биты выставили другие элементы). Вероятность ложного срабатывания после n вставок: p ≈ (1 − e^(−kn/m))^k. Оптимальное k = (m/n) ln 2. На практике: - 10 бит на элемент, k = 7 → около 1%; - 15 бит → около 0,1%; - каждые ~4,8 бита на элемент уменьшают p в 10 раз. Миллион элементов при 1% — около 1,2 МБ, сколько бы ни весили сами элементы (URL, адреса, ключи). Применения — везде, где проверка «нет» дешевле дорогого поиска: - LSM-хранилища (RocksDB, Cassandra, HBase) — фильтр у каждого SSTable: при чтении ключа пропускаем файлы, где его точно нет; - перед кэшем и базой — отсечь запросы к несуществующим ключам (защита от…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

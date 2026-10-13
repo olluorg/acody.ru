@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как сделать consumer идемпотентным при семантике at-least-once? — вопрос с собеседования</title>
+<meta name="description" content="Дубли неизбежны при at-least-once, поэтому обработчик делает повтор безвредным: проверка id сообщения в таблице обработанных в той же транзакции, что…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/brokers/idempotent-consumer/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/brokers/idempotent-consumer/">
+<meta property="og:title" content="Как сделать consumer идемпотентным при семантике at-least-once? — вопрос с собеседования">
+<meta property="og:description" content="Дубли неизбежны при at-least-once, поэтому обработчик делает повтор безвредным: проверка id сообщения в таблице обработанных в той же транзакции, что…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/brokers/">Брокеры сообщений</a> <span>/</span> <span>Как сделать consumer идемпотентным при семантике at-least-once?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/questions/brokers/"},{"@type":"ListItem","position":3,"name":"Как сделать consumer идемпотентным при семантике at-least-once?"}]}</script>
+  <h1>Как сделать consumer идемпотентным при семантике at-least-once?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Проектирование событий</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как обрабатывать дубли сообщений?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Дубли неизбежны при at-least-once, поэтому обработчик делает повтор <b>безвредным</b>: проверка id сообщения в таблице обработанных <b>в той же транзакции</b>, что и эффект, или естественно идемпотентные операции.</p><ul><li>Таблица processed_messages(message_id PRIMARY KEY) + бизнес-изменение одной транзакцией</li><li>UPSERT, «установить статус», запись с версией вместо «прибавить»</li><li>Ключ дедупликации — id события от издателя, а не offset</li></ul><p class="extra"><span>А ещё</span> Внешние эффекты (письмо, платёж) — ключ идемпотентности у внешнего API</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Почему нужно:</b> сообщение может прийти повторно после сбоя потребителя, ребаланса, повтора продюсера. «Прибавить 100 рублей» дважды — уже ошибка.</p>
+<p><b>Способы:</b></p>
+<ul><li><b>дедупликация по id</b> — каждое событие несёт уникальный <code>event_id</code>. Обработчик в одной транзакции вставляет id в таблицу обработанных (уникальный ключ) и делает изменение. Повтор упадёт на уникальности — пропускаем. Записи хранят ограниченное время;</li><li><b>естественная идемпотентность</b> — операции, повтор которых ничего не меняет: <code>UPSERT</code> по ключу, «установить статус оплачен», «записать последнее значение»;</li><li><b>версии</b> — применять событие, только если его версия больше сохранённой для агрегата (заодно защищает от перестановок);</li><li><b>внешние вызовы</b> — передавать ключ идемпотентности во внешний API (платёжный провайдер не спишет дважды).</li></ul>
+<p><b>Важная деталь:</b> проверка и эффект — атомарно. «Проверить в Redis, потом записать в базу» — гонка и окно для дубля при падении между шагами.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-sql"><code>BEGIN;
+INSERT INTO processed_events(event_id) VALUES ($1);   -- дубль упадёт здесь
+UPDATE accounts SET balance = balance + $2 WHERE id = $3;
+COMMIT;</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Почему дубли неизбежны.</li><li>Дедупликация по id в одной транзакции с эффектом.</li><li>Естественно идемпотентные операции и версии.</li><li>Внешние эффекты с ключом идемпотентности.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Проверять дубликат и применять эффект в разных хранилищах без атомарности.</li><li>Дедуплицировать по offset.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое inbox/outbox паттерн?</li><li>Как выбрать окно дедупликации?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/brokers/message-design/">Проектирование событий и команд</a><p>Event vs command, обязательные поля envelope, idempotency key, schema evolution, thick vs thin payload и transactional outbox.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/idempotency-key/">Клиент отправил POST для создания заказа, не дождался ответа из-за таймаута и повторил запрос. Как правильно не допустить второго заказа?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/at-least-once-consumer/">Как на стороне consumer-а добиться доставки at-least-once и почему при этом появляются дубли?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/idempotency/">Что означает идемпотентность операции?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как сделать consumer идемпотентным при семантике at-least-once?","acceptedAnswer":{"@type":"Answer","text":"Дубли неизбежны при at-least-once, поэтому обработчик делает повтор безвредным: проверка id сообщения в таблице обработанных в той же транзакции, что и эффект, или естественно идемпотентные операции. Таблица processed_messages(message_id PRIMARY KEY) + бизнес-изменение одной транзакцией UPSERT, «установить статус», запись с версией вместо «прибавить» Ключ дедупликации — id события от издателя, а не offset Внешние эффекты (письмо, платёж) — ключ идемпотентности у внешнего API Почему нужно: сообщение может прийти повторно после сбоя потребителя, ребаланса, повтора продюсера. «Прибавить 100 рублей» дважды — уже ошибка. Способы: - дедупликация по id — каждое событие несёт уникальный event_id. Обработчик в одной транзакции вставляет id в таблицу обработанных (уникальный ключ) и делает изменение. Повтор упадёт на уникальности — пропускаем. Записи хранят ограниченное время; - естественная идемпотентность — операции, повтор которых ничего не меняет: UPSERT по ключу, «установить статус оплачен», «записать последнее значение»; - версии — применять событие, только если его версия больше сохранённой для агрегата (заодно защищает от перестановок); - внешние вызовы — передавать ключ идемпотентности во внешний API (платёжный провайдер не спишет дважды). Важная деталь: проверка и эффект — атомарно. «Проверить в Redis, потом записать в базу» — гонка и окно для дубля при…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как управлять состоянием в React-приложении — Context, Redux, Zustand, серверное состояние? — вопрос с собеседования</title>
+<meta name="description" content="Сначала — локальное состояние и подъём к общему предку. Context — передать редко меняющиеся данные глубоко (тема, пользователь, язык) без…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/react-state-management/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/react-state-management/">
+<meta property="og:title" content="Как управлять состоянием в React-приложении — Context, Redux, Zustand, серверное состояние? — вопрос с собеседования">
+<meta property="og:description" content="Сначала — локальное состояние и подъём к общему предку. Context — передать редко меняющиеся данные глубоко (тема, пользователь, язык) без…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Как управлять состоянием в React-приложении — Context, Redux, Zustand, серверное состояние?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Как управлять состоянием в React-приложении — Context, Redux, Zustand, серверное состояние?"}]}</script>
+  <h1>Как управлять состоянием в React-приложении — Context, Redux, Zustand, серверное состояние?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">React</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Когда нужен Redux?</li><li>Чем серверное состояние отличается от клиентского?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Сначала — <b>локальное состояние</b> и подъём к общему предку. <b>Context</b> — передать редко меняющиеся данные глубоко (тема, пользователь, язык) без прокидывания props. <b>Глобальное хранилище</b> (Redux Toolkit, Zustand) — сложное клиентское состояние, которое меняют многие компоненты. <b>Серверное состояние</b> (данные из API) — отдельная задача: TanStack Query, RTK Query кэшируют, обновляют и дедуплицируют запросы.</p><ul><li>Context перерисовывает всех потребителей при изменении значения</li><li>Значительная часть «глобального состояния» — на деле кэш серверных данных</li><li>Состояние формы — локально или react-hook-form</li></ul><p class="extra"><span>А ещё</span> Состояние в URL (фильтры, страница) — им можно поделиться ссылкой</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Виды состояния:</b></p>
+<ul><li><b>локальное UI</b> — открыт ли попап, текст в поле: useState;</li><li><b>общее клиентское</b> — корзина, настройки: подъём, Context или стор;</li><li><b>серверное</b> — копия данных бэкенда, которая устаревает: библиотека запросов с кэшем и инвалидацией;</li><li><b>URL</b> — фильтры, сортировка, номер страницы.</li></ul>
+<p><b>Context</b> — механизм передачи, а не хранилище: изменение значения перерисовывает всех, кто его читает. Для часто меняющихся данных — разделять контексты или брать стор с подписками на части состояния.</p>
+<p><b>Redux Toolkit</b> — предсказуемые обновления через действия и редьюсеры, DevTools с историей; оправдан в больших приложениях с командой. <b>Zustand</b> — минималистичный стор с селекторами.</p>
+<p><b>TanStack Query</b> снимает основную боль: загрузка, ошибки, повторы, кэш, фоновое обновление, отмена — без ручных useEffect.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Разделение видов состояния.</li><li>Когда хватает локального и Context.</li><li>Роль сторов и библиотек серверного состояния.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/react-state-props/">Чем state отличается от props в React?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/react-rerender/">Когда компонент React перерисовывается и как избежать лишних рендеров?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как управлять состоянием в React-приложении — Context, Redux, Zustand, серверное состояние?","acceptedAnswer":{"@type":"Answer","text":"Сначала — локальное состояние и подъём к общему предку. Context — передать редко меняющиеся данные глубоко (тема, пользователь, язык) без прокидывания props. Глобальное хранилище (Redux Toolkit, Zustand) — сложное клиентское состояние, которое меняют многие компоненты. Серверное состояние (данные из API) — отдельная задача: TanStack Query, RTK Query кэшируют, обновляют и дедуплицируют запросы. Context перерисовывает всех потребителей при изменении значения Значительная часть «глобального состояния» — на деле кэш серверных данных Состояние формы — локально или react-hook-form Состояние в URL (фильтры, страница) — им можно поделиться ссылкой Виды состояния: - локальное UI — открыт ли попап, текст в поле: useState; - общее клиентское — корзина, настройки: подъём, Context или стор; - серверное — копия данных бэкенда, которая устаревает: библиотека запросов с кэшем и инвалидацией; - URL — фильтры, сортировка, номер страницы. Context — механизм передачи, а не хранилище: изменение значения перерисовывает всех, кто его читает. Для часто меняющихся данных — разделять контексты или брать стор с подписками на части состояния. Redux Toolkit — предсказуемые обновления через действия и редьюсеры, DevTools с историей; оправдан в больших приложениях с командой. Zustand — минималистичный стор с селекторами. TanStack Query снимает основную боль: загрузка, ошибки, повторы, кэш, фоновое обновление, отмена — без ручных useEffect."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

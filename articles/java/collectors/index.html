@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collectors и свёртка — разбор для собеседования</title>
+<meta name="description" content="reduce против collect, базовые коллекторы и ловушка toMap, группировка и downstream-коллекторы, характеристики и параллельность.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/collectors/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/collectors/">
+<meta property="og:title" content="Collectors и свёртка — разбор для собеседования">
+<meta property="og:description" content="reduce против collect, базовые коллекторы и ловушка toMap, группировка и downstream-коллекторы, характеристики и параллельность.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Collectors и свёртка</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Collectors и свёртка"}]}</script>
+  <h1>Collectors и свёртка</h1>
+  <p class="lead">reduce против collect, базовые коллекторы и ловушка toMap, группировка и downstream-коллекторы, характеристики и параллельность.</p>
+  <article class="md"><h2>reduce против collect</h2>
+<p>Свёртка стрима бывает двух видов. reduce — неизменяемая свёртка: identity + ассоциативная функция объединения (1+2+3 → сумма). Она хороша для значений (числа, конкатенация коротких строк), но накапливать ею в коллекцию неэффективно — на каждом шаге создаётся новый контейнер.</p>
+<p>collect — изменяемая свёртка (mutable reduction): результат накапливается в один мутируемый контейнер (список, карта, StringBuilder) через Collector. Для построения коллекций используют именно collect.</p>
+<h2>Базовые коллекторы и ловушка toMap</h2>
+<p><code>Collectors.toList()</code>/<code>toSet()</code>/<code>toUnmodifiableList()</code> собирают в коллекцию; <code>joining(&quot;, &quot;)</code> — в строку с разделителем. <code>toMap(keyFn, valueFn)</code> собирает в Map.</p>
+<p>Ловушка <code>toMap</code>: если два элемента дают одинаковый ключ, бросается IllegalStateException (Duplicate key). Поэтому при возможных дубликатах ОБЯЗАТЕЛЬНО передают третий аргумент — функцию слияния (merge), решающую конфликт (например, (a, b) -&gt; a или сумму).</p>
+<pre class="lang-java"><code>Map&lt;String, Integer&gt; byName = users.stream()
+    .collect(Collectors.toMap(User::name, User::age,
+             (a, b) -&gt; a)); // merge: что делать при дубликате ключа</code></pre>
+<h2>Группировка</h2>
+<p><code>groupingBy(classifier)</code> превращает поток в <code>Map&lt;K, List&lt;V&gt;&gt;</code> — группы по ключу (заказы по пользователю, слова по длине). <code>partitioningBy(predicate)</code> — частный случай: разбивает на два ведра по булеву условию (<code>Map&lt;Boolean, List&lt;V&gt;&gt;</code>), всегда содержит оба ключа.</p>
+<p>Это декларативная замена ручному циклу с <code>computeIfAbsent</code>.</p>
+<pre class="lang-java"><code>Map&lt;Department, List&lt;Employee&gt;&gt; byDept =
+    employees.stream().collect(Collectors.groupingBy(Employee::department));</code></pre>
+<h2>Downstream-коллекторы</h2>
+<p>Сила <code>groupingBy</code> — во втором аргументе, downstream-коллекторе, который сворачивает каждую группу дальше: <code>counting()</code> (размер группы), mapping(fn, <code>toList()</code>) (преобразовать элементы группы), <code>summingInt</code>/<code>averagingInt</code> (агрегаты), <code>toSet()</code>, <code>maxBy</code>/<code>minBy</code>.</p>
+<p>Так одной строкой строят «количество сотрудников по отделам» или «средняя зарплата по отделам» — вложенная свёртка.</p>
+<pre class="lang-java"><code>Map&lt;Department, Long&gt; headcount = employees.stream()
+    .collect(Collectors.groupingBy(Employee::department, Collectors.counting()));</code></pre>
+<h2>Характеристики и параллельность</h2>
+<p>У коллектора есть характеристики (CONCURRENT, UNORDERED, IDENTITY_FINISH), подсказывающие стриму, можно ли собирать конкурентно и важен ли порядок. Для параллельной группировки есть <code>groupingByConcurrent</code>.</p>
+<p>Главное практическое следствие — функции коллектора должны быть ассоциативны и без побочных эффектов, иначе параллельная свёртка даст неверный результат. И помните про обязательный merge в <code>toMap</code> для устойчивости к дубликатам.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Различите reduce (immutable, для значений) и collect (mutable reduction, для контейнеров), назовите базовые коллекторы и обязательно — ловушку <code>toMap</code> без merge (IllegalStateException на дубликате). Покажите <code>groupingBy</code> с downstream (counting/mapping/<code>summingInt</code>) как замену ручному циклу и упомяните характеристики/ассоциативность для параллельной сборки.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/collect-vs-reduce/">Чем collect отличается от reduce при сборке стрима?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/tomap-duplicate-key/">Что произойдёт в Collectors.toMap, если два элемента дают одинаковый ключ, а merge-функция не передана?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/groupingby-counting/">Как одним коллектором получить «количество элементов в каждой группе»?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/tomap-null-value/">Функция значения в Collectors.toMap вернула null для одного из элементов. Что произойдёт?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/stream-collect/">Что делает терминальная операция collect?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/streams/">Stream API: устройство и ленивый конвейер</a><p>Что такое стрим, источники, промежуточные против терминальных, ленивость и short-circuiting, stateful-операции, параллельность и примитивные стримы.</p></li><li><a href="/articles/java/optional/">Optional: явное отсутствие значения</a><p>Зачем Optional, orElse против orElseGet, композиция map/flatMap/filter и антипаттерны использования.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Collectors и свёртка","description":"reduce против collect, базовые коллекторы и ловушка toMap, группировка и downstream-коллекторы, характеристики и параллельность.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/collectors/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

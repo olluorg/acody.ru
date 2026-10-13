@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как вы спланируете выкатку изменения, затрагивающего и код, и схему базы, чтобы её можно было безопасно откатить? — вопрос с собеседования</title>
+<meta name="description" content="Миграция и код — разными релизами; схема меняется через expand–contract; необратимые шаги (удаление колонок, данных) — в самом конце и с задержкой…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/safe-deploy-code-and-schema/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/safe-deploy-code-and-schema/">
+<meta property="og:title" content="Как вы спланируете выкатку изменения, затрагивающего и код, и схему базы, чтобы её можно было безопасно откатить? — вопрос с собеседования">
+<meta property="og:description" content="Миграция и код — разными релизами; схема меняется через expand–contract; необратимые шаги (удаление колонок, данных) — в самом конце и с задержкой…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Как вы спланируете выкатку изменения, затрагивающего и код, и схему базы, чтобы её можно было безопасно откатить?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Как вы спланируете выкатку изменения, затрагивающего и код, и схему базы, чтобы её можно было безопасно откатить?"}]}</script>
+  <h1>Как вы спланируете выкатку изменения, затрагивающего и код, и схему базы, чтобы её можно было безопасно откатить?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Выкатка и миграции</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как безопасно выкатить изменение кода и схемы?</li><li>Как обеспечить возможность отката при миграции базы?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Миграция и код — <b>разными релизами</b>; схема меняется через <b>expand–contract</b>; <b>необратимые шаги</b> (удаление колонок, данных) — в самом конце и с задержкой.</p><ul><li>Пока необратимых шагов нет — быстрый откат; после — только исправление вперёд</li><li>Флаг на новое поведение — мгновенное выключение без отката</li><li>Постепенный раскат с метриками по версии и отрепетированный откат</li></ul><p class="extra"><span>А ещё</span> Миграции — отдельный конвейер с проверкой на копии продовых данных</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Принцип.</b> Во время выкатки и отката живут обе версии кода, поэтому каждый шаг должен быть совместим с текущей и предыдущей версией.</p>
+<p><b>План:</b></p>
+<ol><li><b>Расширение схемы</b> — отдельным релизом: новые таблицы и nullable-колонки, индексы <code>CONCURRENTLY</code>. Старый код их не замечает.</li><li><b>Код под флагом</b> — пишет и в старое, и в новое; новое поведение выключено. Выкатка постепенная (canary), метрики по версии.</li><li><b>Бэкфилл</b> — порциями, с контролем нагрузки и отставания реплик.</li><li><b>Включение флагом</b> — постепенно, по процентам; быстрое выключение при проблемах.</li><li><b>Переключение чтения</b> на новое.</li><li><b>Сужение</b> — удаление старого кода, затем, через период наблюдения, удаление старых колонок. Это необратимо — поэтому последним.</li></ol>
+<p><b>Откат:</b> на шагах 1–5 откат кода безопасен — старые данные на месте. После удаления данных остаётся только исправление вперёд (roll-forward). Поэтому необратимые шаги отделяют по времени и делают, когда уверены.</p>
+<p><b>Проверка:</b> прогон миграции на копии продовых данных (время, блокировки), таймауты на миграции (<code>lock_timeout</code>), отрепетированный откат, мониторинг ошибок и задержки в разрезе версии.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Разделение миграции и кода, совместимость с двумя версиями.</li><li>Фазы expand–contract с практическими деталями.</li><li>Обратимые и необратимые шаги, roll-forward.</li><li>Флаги, постепенный раскат, репетиция отката.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Удалять старые колонки в том же релизе, что и новый код.</li><li>Не иметь плана на случай, когда откат кода уже невозможен.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что делать, если бэкфилл занимает несколько суток?</li><li>Как понять, что старых версий в проде уже не осталось?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/delivery/">Выкатка без простоя и миграции схемы</a><p>Rolling, blue-green и canary с их ценой, отделение деплоя от релиза через feature flags, expand–contract для схемы БД, совместимость соседних версий и стратегия отката.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/rolling-update-compatibility/">Во время rolling update в проде одновременно работают старая и новая версии сервиса. Какое требование из этого следует?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/rename-column-zero-downtime/">Нужно переименовать колонку name в full_name без простоя при rolling-выкатке. Какая последовательность верна?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/feature-flags/">Что верно про feature flags?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/canary-vs-blue-green/">Чем canary-выкатка принципиально отличается от blue-green?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как вы спланируете выкатку изменения, затрагивающего и код, и схему базы, чтобы её можно было безопасно откатить?","acceptedAnswer":{"@type":"Answer","text":"Миграция и код — разными релизами; схема меняется через expand–contract; необратимые шаги (удаление колонок, данных) — в самом конце и с задержкой. Пока необратимых шагов нет — быстрый откат; после — только исправление вперёд Флаг на новое поведение — мгновенное выключение без отката Постепенный раскат с метриками по версии и отрепетированный откат Миграции — отдельный конвейер с проверкой на копии продовых данных Принцип. Во время выкатки и отката живут обе версии кода, поэтому каждый шаг должен быть совместим с текущей и предыдущей версией. План: 1. Расширение схемы — отдельным релизом: новые таблицы и nullable-колонки, индексы CONCURRENTLY. Старый код их не замечает. 2. Код под флагом — пишет и в старое, и в новое; новое поведение выключено. Выкатка постепенная (canary), метрики по версии. 3. Бэкфилл — порциями, с контролем нагрузки и отставания реплик. 4. Включение флагом — постепенно, по процентам; быстрое выключение при проблемах. 5. Переключение чтения на новое. 6. Сужение — удаление старого кода, затем, через период наблюдения, удаление старых колонок. Это необратимо — поэтому последним. Откат: на шагах 1–5 откат кода безопасен — старые данные на месте. После удаления данных остаётся только исправление вперёд (roll-forward). Поэтому необратимые шаги отделяют по времени и делают, когда…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

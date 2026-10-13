@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем bcrypt и argon2 принципиально отличаются от SHA-256 применительно к хранению паролей? — вопрос с собеседования</title>
+<meta name="description" content="SHA-256 быстрый — это хорошо для контрольных сумм и плохо для паролей: утёкшую базу перебирают миллиардами вариантов в секунду. bcrypt, scrypt и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/password-hashing-kdf/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/password-hashing-kdf/">
+<meta property="og:title" content="Чем bcrypt и argon2 принципиально отличаются от SHA-256 применительно к хранению паролей? — вопрос с собеседования">
+<meta property="og:description" content="SHA-256 быстрый — это хорошо для контрольных сумм и плохо для паролей: утёкшую базу перебирают миллиардами вариантов в секунду. bcrypt, scrypt и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Чем bcrypt и argon2 принципиально отличаются от SHA-256 применительно к хранению паролей?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Чем bcrypt и argon2 принципиально отличаются от SHA-256 применительно к хранению паролей?"}]}</script>
+  <h1>Чем bcrypt и argon2 принципиально отличаются от SHA-256 применительно к хранению паролей?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Безопасность приложения</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему SHA-256 не подходит для паролей?</li><li>Чем argon2 лучше bcrypt?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">SHA-256 <b>быстрый</b> — это хорошо для контрольных сумм и плохо для паролей: утёкшую базу перебирают миллиардами вариантов в секунду. bcrypt, scrypt и argon2 <b>намеренно медленные</b> и настраиваются параметром стоимости.</p><ul><li>argon2id ещё и требует много памяти — мешает перебору на видеокартах</li><li>Соль — случайная на каждый пароль, хранится рядом с хешем</li><li>Пароли хешируют, а не шифруют: восстанавливать их не нужно</li></ul><p class="extra"><span>А ещё</span> Параметры повышают со временем и перехешируют при входе</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Зачем медленная функция.</b> После утечки базы атакующий перебирает словари и варианты паролей, вычисляя хеш для каждого. SHA-256 на видеокарте — миллиарды вычислений в секунду: короткие и словарные пароли находятся за минуты. Функции для паролей (KDF) специально делают одно вычисление дорогим — десятки–сотни миллисекунд. Для легитимного входа это незаметно, для перебора — замедление в миллионы раз.</p>
+<p><b>Различия функций:</b></p>
+<ul><li><b>bcrypt</b> — параметр cost (каждая единица удваивает время), проверен временем, обрезает пароль до 72 байт;</li><li><b>scrypt</b> — стоимость по памяти и времени;</li><li><b>argon2id</b> — победитель конкурса Password Hashing Competition, настраиваются память, итерации и параллелизм; память делает перебор на GPU и ASIC дорогим. Текущая рекомендация OWASP;</li><li><b>PBKDF2</b> — если нужна сертификация FIPS, с большим числом итераций.</li></ul>
+<p><b>Соль</b> — уникальная случайная строка на каждый пароль. Одинаковые пароли дают разные хеши, радужные таблицы бесполезны, перебор идёт по каждому пользователю отдельно. Все перечисленные функции включают соль и параметры в выходную строку.</p>
+<p><b>Не шифрование:</b> зашифрованный пароль расшифровывается ключом, который лежит рядом — утечка ключа раскрывает все пароли.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Ключевое: намеренная стоимость, а не длина хеша.</li><li>Особенности bcrypt и argon2, память как защита от GPU.</li><li>Роль соли.</li><li>Хеширование вместо шифрования.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«SHA-256 с солью достаточно».</li><li>Глобальная соль на всех пользователей.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Они намеренно медленные и настраиваемые по стоимости, что делает массовый перебор дорогим</li><li class="no"><span class="mark">✗</span>Они дают более длинный хеш, который труднее подобрать</li><li class="no"><span class="mark">✗</span>Они шифруют пароль, а не хешируют, поэтому его можно расшифровать при необходимости</li><li class="no"><span class="mark">✗</span>Они не требуют соли, потому что устойчивы к радужным таблицам сами по себе</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что делать с сохранёнными хешами при повышении параметра стоимости?</li><li>Почему сообщение об ошибке входа не должно различать неверный логин и неверный пароль?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/security/">Безопасность приложения: OWASP, доступ и секреты</a><p>OWASP Top 10 в редакции 2025, разница аутентификации и авторизации, ловушки JWT против сессий, хранение паролей и секретов, безопасность цепочки поставок.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/password-storage/">Как правильно хранить пароли пользователей?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/hashing-vs-encryption/">Чем хеширование отличается от шифрования и кодирования?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем bcrypt и argon2 принципиально отличаются от SHA-256 применительно к хранению паролей?","acceptedAnswer":{"@type":"Answer","text":"SHA-256 быстрый — это хорошо для контрольных сумм и плохо для паролей: утёкшую базу перебирают миллиардами вариантов в секунду. bcrypt, scrypt и argon2 намеренно медленные и настраиваются параметром стоимости. argon2id ещё и требует много памяти — мешает перебору на видеокартах Соль — случайная на каждый пароль, хранится рядом с хешем Пароли хешируют, а не шифруют: восстанавливать их не нужно Параметры повышают со временем и перехешируют при входе Зачем медленная функция. После утечки базы атакующий перебирает словари и варианты паролей, вычисляя хеш для каждого. SHA-256 на видеокарте — миллиарды вычислений в секунду: короткие и словарные пароли находятся за минуты. Функции для паролей (KDF) специально делают одно вычисление дорогим — десятки–сотни миллисекунд. Для легитимного входа это незаметно, для перебора — замедление в миллионы раз. Различия функций: - bcrypt — параметр cost (каждая единица удваивает время), проверен временем, обрезает пароль до 72 байт; - scrypt — стоимость по памяти и времени; - argon2id — победитель конкурса Password Hashing Competition, настраиваются память, итерации и параллелизм; память делает перебор на GPU и ASIC дорогим. Текущая рекомендация OWASP; - PBKDF2 — если нужна сертификация FIPS, с большим числом итераций. Соль — уникальная случайная строка на каждый пароль. Одинаковые пароли дают разные…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

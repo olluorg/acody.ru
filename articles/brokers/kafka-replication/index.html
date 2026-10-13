@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kafka replication и отказоустойчивость — разбор для собеседования</title>
+<meta name="description" content="Leader/followers, ISR и lag, связка acks/min.insync, high watermark и видимость для consumer, выборы лидера и unclean election, rack awareness.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/brokers/kafka-replication/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/brokers/kafka-replication/">
+<meta property="og:title" content="Kafka replication и отказоустойчивость — разбор для собеседования">
+<meta property="og:description" content="Leader/followers, ISR и lag, связка acks/min.insync, high watermark и видимость для consumer, выборы лидера и unclean election, rack awareness.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#brokers">Брокеры сообщений</a> <span>/</span> <span>Kafka replication и отказоустойчивость</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/articles/#brokers"},{"@type":"ListItem","position":3,"name":"Kafka replication и отказоустойчивость"}]}</script>
+  <h1>Kafka replication и отказоустойчивость</h1>
+  <p class="lead">Leader/followers, ISR и lag, связка acks/min.insync, high watermark и видимость для consumer, выборы лидера и unclean election, rack awareness.</p>
+  <article class="md"><h2>Leader и followers</h2>
+<p>У каждой партиции один leader и несколько followers. Все чтения и записи идут через leader; followers непрерывно подтягивают данные с него и держат у себя точную копию лога.</p>
+<p>Сколько копий держать — задаёт <code>replication.factor</code> (типично 3). Реплики размещают на РАЗНЫХ брокерах, а в облаке — желательно ещё и в разных зонах/стойках через <code>broker.rack</code>, чтобы пережить падение целого узла или AZ.</p>
+<figure><img src="/articles/assets/kafka-replication.webp" alt="Реплика-лидер на одном брокере и реплики-фолловеры на других; продюсер пишет лидеру, синхронные реплики образуют ISR, отстающая — вне ISR." loading="lazy"><figcaption>Продюсер пишет только лидеру; синхронные фолловеры входят в ISR, отстающие выпадают из него.</figcaption></figure>
+<h2>ISR (in-sync replicas)</h2>
+<p>ISR — подмножество реплик, которые «успевают» за leader (отстают не дольше <code>replica.lag.time.max.ms</code>). Только реплики из ISR имеют право стать новым лидером при failover — поэтому ISR определяет фактическую отказоустойчивость партиции.</p>
+<p>Если follower отстаёт сильнее лимита, его выбрасывают из ISR. Постоянно скачущая ISR — признак проблем (медленная сеть/диски, перекос нагрузки) и тревожный сигнал в мониторинге.</p>
+<h2>Acks и min.insync.replicas</h2>
+<p>Это вторая половина истории про долговечность, начатой в уроке про producer. acks=all требует подтверждения от всех реплик ISR, а <code>min.insync.replicas</code> задаёт МИНИМАЛЬНОЕ число синхронных реплик, при котором запись вообще принимается.</p>
+<p>Боевая комбинация — RF=3, <code>min.insync.replicas</code>=2, acks=all: переживаем падение одной реплики без потерь и без блокировки записи. Если ISR схлопывается ниже <code>min.insync</code>, продюсер получает NotEnoughReplicasException — это лучше, чем тихо потерять данные.</p>
+<h2>High watermark и видимость</h2>
+<p>Записи, реплицированные на все ISR-реплики, считаются «закоммиченными». Граница закоммиченных данных — high watermark (HW). Consumer'ы видят только записи ДО HW, даже если на leader уже лежат более свежие байты.</p>
+<p>Это и обеспечивает корректность при failover: если новый лидер ещё не имел этих незакоммиченных данных, они «не существовали» с точки зрения consumer'ов — и не возникает ситуации «сообщение пропало после переключения». Видимость для приложений всегда консервативна по сравнению с физическим логом.</p>
+<h2>Выборы лидера и unclean election</h2>
+<p>При падении leader controller (нода с координацией метаданных) выбирает нового лидера ИЗ ISR. Если в ISR не осталось живых реплик, по умолчанию партиция уходит в offline — запись и чтение блокируются до восстановления.</p>
+<p>Флаг <code>unclean.leader.election.enable</code>=true разрешает взять лидером реплику ВНЕ ISR. Доступность восстановится, но эта реплика отстала, и часть подтверждённых записей будет потеряна. Для критичных данных (платежи, события домена) почти всегда оставляют false: лучше временный простой записи, чем потеря committed-сообщений.</p>
+<h2>Rack awareness и сохранность</h2>
+<p><code>broker.rack</code> помечает физическое размещение брокера (стойка/AZ). Kafka использует это для rack-aware размещения реплик: не складывает все реплики партиции в один rack, а распределяет по разным — падение целой стойки/AZ не лишает партицию доступного лидера.</p>
+<p>Это «бесплатная» отказоустойчивость, но требует, чтобы топология брокеров действительно отражала физическую/облачную топологию — иначе rack awareness становится пустой меткой.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Опишите leader/followers и RF=3 как боевой дефолт. Главное — ISR (только in-sync реплики имеют право стать лидером) и связка acks=all + <code>min.insync.replicas</code>=2 для долговечности. Объясните high watermark (consumer видит только закоммиченное → нет «исчезающих» сообщений при failover) и опасность <code>unclean.leader.election.enable</code>=true (доступность ценой подтверждённых данных). Завершите <code>broker.rack</code> для rack-aware размещения по AZ.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/brokers/kafka-isr/">Что такое ISR (in-sync replicas) в Kafka и какую роль он играет?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/min-insync-replicas/">Как min.insync.replicas работает вместе с acks=all?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/high-watermark/">Что такое high watermark в Kafka и как он связан с видимостью сообщений для consumer-а?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/unclean-leader-election/">Чем опасен unclean leader election (unclean.leader.election.enable=true) в Kafka?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/kafka-replication-basic/">Зачем партиции реплицируются между брокерами?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/brokers/kafka-producer/">Kafka Producer</a><p>Запись и сериализация, выбор партиции, батчинг и сжатие, acks и долговечность, идемпотентный producer и транзакции.</p></li><li><a href="/articles/brokers/kafka-ecosystem/">Kafka API и экосистема</a><p>Клиентские API, Kafka Connect и Debezium, Streams и stream-processing, ksqlDB, Schema Registry и MirrorMaker для multi-DC.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Kafka replication и отказоустойчивость","description":"Leader/followers, ISR и lag, связка acks/min.insync, high watermark и видимость для consumer, выборы лидера и unclean election, rack awareness.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/brokers/kafka-replication/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

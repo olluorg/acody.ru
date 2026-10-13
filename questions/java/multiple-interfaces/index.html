@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сколько интерфейсов может реализовать один класс в Java? — вопрос с собеседования</title>
+<meta name="description" content="Интерфейсов — сколько угодно, класс-родитель — только один. Множественное наследование классов запрещено из-за конфликта состояния и реализаций У…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/multiple-interfaces/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/multiple-interfaces/">
+<meta property="og:title" content="Сколько интерфейсов может реализовать один класс в Java? — вопрос с собеседования">
+<meta property="og:description" content="Интерфейсов — сколько угодно, класс-родитель — только один. Множественное наследование классов запрещено из-за конфликта состояния и реализаций У…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Сколько интерфейсов может реализовать один класс в Java?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Сколько интерфейсов может реализовать один класс в Java?"}]}</script>
+  <h1>Сколько интерфейсов может реализовать один класс в Java?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">ООП</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Есть ли в Java множественное наследование?</li><li>Почему класс может наследовать только один класс?</li><li>Что такое проблема ромба и как её решают default-методы?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Интерфейсов — <b>сколько угодно</b>, класс-родитель — <b>только один</b>.</p><ul><li>Множественное наследование классов запрещено из-за конфликта состояния и реализаций</li><li>У интерфейса нет полей-состояния, поэтому реализовать можно много</li></ul><p class="extra"><span>А ещё</span> С default-методами конфликт возможен — класс обязан переопределить метод явно</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>В Java класс наследует ровно один класс (<code>extends</code>), но реализует любое число интерфейсов (<code>implements A, B, C</code>).</p>
+<p>Почему так: при множественном наследовании классов возникает неоднозначность — «проблема ромба». Если два родителя содержат поле или метод с одинаковым именем, непонятно, что наследует потомок, и как инициализировать состояние двух родителей. Java избегает этого, разрешая только одного родителя-класса.</p>
+<p>У интерфейсов нет состояния экземпляра, поэтому реализовать несколько безопасно. Интерфейс описывает <b>роль</b> объекта: класс может быть одновременно <code>Comparable</code>, <code>Serializable</code> и <code>AutoCloseable</code>.</p>
+<p>С Java 8 у интерфейсов есть default-методы с реализацией, и конфликт снова возможен: если два интерфейса дают default-метод с одной сигнатурой, компилятор потребует переопределить его в классе и, при желании, вызвать нужный вариант через <code>A.super.method()</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>interface Flyer   { default String move() { return &quot;fly&quot;; } }
+interface Swimmer { default String move() { return &quot;swim&quot;; } }
+
+class Duck implements Flyer, Swimmer {
+    @Override
+    public String move() { return Flyer.super.move() + &quot; and &quot; + Swimmer.super.move(); }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Ответ: интерфейсов сколько угодно, родитель-класс один.</li><li>Причина — проблема ромба и состояние.</li><li>Интерфейс как роль объекта.</li><li>Конфликт default-методов и его решение — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что интерфейсы полностью заменяют абстрактные классы.</li><li>Забывать, что состояние в интерфейсе объявить нельзя.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Сколько угодно — в отличие от наследования классов, которое допускает только один родитель</li><li class="no"><span class="mark">✗</span>Не более одного</li><li class="no"><span class="mark">✗</span>Не более двух</li><li class="no"><span class="mark">✗</span>Столько же, сколько классов он наследует</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что произойдёт при конфликте одинаковых default-методов?</li><li>Когда выбирают абстрактный класс, а не интерфейс?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/interfaces/">Интерфейсы против абстрактных классов</a><p>Контракт против частичной реализации, default/static/private-методы, разрешение конфликта default-методов и критерий выбора.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/default-methods-purpose/">Ради чего в Java 8 добавили default-методы интерфейсов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/interface-vs-abstract-class/">Чем интерфейс отличается от абстрактного класса и что изменили default-методы?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/default-method-conflict/">Класс реализует два несвязанных интерфейса, в каждом из которых есть default-метод с одинаковой сигнатурой. Что произойдёт?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Сколько интерфейсов может реализовать один класс в Java?","acceptedAnswer":{"@type":"Answer","text":"Интерфейсов — сколько угодно, класс-родитель — только один. Множественное наследование классов запрещено из-за конфликта состояния и реализаций У интерфейса нет полей-состояния, поэтому реализовать можно много С default-методами конфликт возможен — класс обязан переопределить метод явно В Java класс наследует ровно один класс (extends), но реализует любое число интерфейсов (implements A, B, C). Почему так: при множественном наследовании классов возникает неоднозначность — «проблема ромба». Если два родителя содержат поле или метод с одинаковым именем, непонятно, что наследует потомок, и как инициализировать состояние двух родителей. Java избегает этого, разрешая только одного родителя-класса. У интерфейсов нет состояния экземпляра, поэтому реализовать несколько безопасно. Интерфейс описывает роль объекта: класс может быть одновременно Comparable, Serializable и AutoCloseable. С Java 8 у интерфейсов есть default-методы с реализацией, и конфликт снова возможен: если два интерфейса дают default-метод с одной сигнатурой, компилятор потребует переопределить его в классе и, при желании, вызвать нужный вариант через A.super.method()."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

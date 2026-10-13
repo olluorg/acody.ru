@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Порождающие паттерны — разбор для собеседования</title>
+<meta name="description" content="Factory Method против статической фабрики Блоха, Abstract Factory, Builder в двух версиях, Prototype и почему clone() считают ошибкой, object pool …">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/patterns-creational/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/patterns-creational/">
+<meta property="og:title" content="Порождающие паттерны — разбор для собеседования">
+<meta property="og:description" content="Factory Method против статической фабрики Блоха, Abstract Factory, Builder в двух версиях, Prototype и почему clone() считают ошибкой, object pool …">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Порождающие паттерны</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Порождающие паттерны"}]}</script>
+  <h1>Порождающие паттерны</h1>
+  <p class="lead">Factory Method против статической фабрики Блоха, Abstract Factory, Builder в двух версиях, Prototype и почему clone() считают ошибкой, object pool — с примерами из JDK и Spring.</p>
+  <article class="md"><h2>Зачем порождающие паттерны</h2>
+<p>Порождающие паттерны отвечают на один вопрос: как создать объект, не привязывая клиента к конкретному классу и не превращая создание в кашу из new. Оператор new — это жёсткая связь с реализацией, и там, где вариантов больше одного, он мешает и расширению (OCP), и подмене в тестах.</p>
+<p>На собеседовании эту группу спрашивают чаще остальных, и почти всегда просят пример из JDK или Spring. Заготовьте по одному примеру на паттерн — это отличает выученное определение от рабочего знания.</p>
+<p>Важная рамка, которую стоит проговорить: паттерн — не цель. Это имя для решения, которое и так возникает из требований. Вводить Abstract Factory там, где хватает конструктора, — тот же случай спекулятивной общности, что и интерфейс с единственной реализацией.</p>
+<h2>Factory Method и статическая фабрика — это разные вещи</h2>
+<p>Это самая частая путаница в этой теме, и на ней хорошо отличают уровень кандидата.</p>
+<p>Factory Method по GoF — паттерн с наследованием: базовый класс объявляет метод создания продукта, а решение о конкретном классе принимает подкласс. Клиент работает с базовым типом и не знает, что именно ему создали. Ключевой признак — полиморфизм: выбор происходит в рантайме через подставленную реализацию.</p>
+<p>Статическая фабрика (static factory method) — идиома из Effective Java, а не паттерн GoF. Это просто статический метод вместо публичного конструктора: <code>Integer.valueOf</code>, <code>List.of</code>, <code>Optional.of</code>, <code>LocalDate.of</code>, <code>EnumSet.noneOf</code>. Её плюсы: у метода есть имя (два конструктора с одинаковой сигнатурой невозможны, а of и <code>copyOf</code> — пожалуйста), не обязана каждый раз создавать новый объект (<code>Integer.valueOf</code> берёт из кэша, <code>Boolean.valueOf</code> возвращает константу), может вернуть подтип (EnumSet отдаёт RegularEnumSet или JumboEnumSet в зависимости от размера).</p>
+<p>Ответ уровня senior на вопрос «что такое фабрика» звучит так: уточнить, о чём речь — о паттерне Factory Method с полиморфной подстановкой или о статической фабрике Блоха, — и объяснить разницу. Примеры в JDK: <code>Calendar.getInstance()</code> и <code>NumberFormat.getInstance()</code> — фабрики, отдающие подходящую реализацию; <code>Collection.iterator()</code> — классический Factory Method, где каждая коллекция создаёт свой итератор.</p>
+<pre class="lang-java"><code>// Factory Method (GoF): решение принимает подкласс.
+abstract class Dialog {
+    abstract Button createButton();          // factory method
+    void render() { createButton().draw(); } // клиент не знает конкретный класс
+}
+class WebDialog extends Dialog { Button createButton() { return new HtmlButton(); } }
+
+// Статическая фабрика (Effective Java, item 1) — не паттерн GoF.
+Integer i   = Integer.valueOf(127);   // может вернуть объект из кэша
+List&lt;String&gt; l = List.of(&quot;a&quot;, &quot;b&quot;);   // может вернуть специализированный подтип</code></pre>
+<h2>Abstract Factory</h2>
+<p>Abstract Factory создаёт семейства связанных объектов так, чтобы клиент не знал их конкретных классов и не мог случайно смешать два семейства. Ключевое слово — семейство: если объект один, это не Abstract Factory, а обычная фабрика.</p>
+<p>Пример в платформе — <code>javax.xml.parsers.DocumentBuilderFactory</code> и TransformerFactory: <code>newInstance()</code> отдаёт реализацию, выбранную по конфигурации, а та уже создаёт согласованный набор объектов парсера. Похожая идея у <code>java.sql.Connection</code>: одно соединение порождает Statement, PreparedStatement и Blob одной и той же СУБД — смешать объекты от разных драйверов невозможно.</p>
+<p>В Spring роль контейнера фабрик играет BeanFactory. Отдельно стоит знать интерфейс FactoryBean: это бин, задача которого — создавать другой бин. Классический вопрос на собеседовании — как получить сам FactoryBean, а не его продукт: через префикс амперсанда в имени бина.</p>
+<p>Цена паттерна — жёсткость набора. Добавить новый продукт в семейство означает править интерфейс фабрики и все её реализации: Abstract Factory хорош, когда меняются семейства, и плох, когда часто меняется состав продуктов.</p>
+<h2>Builder: две разные версии одного имени</h2>
+<p>Под словом Builder на интервью тоже скрываются две разные вещи, и различить их — сильный ход.</p>
+<p>Builder по GoF разделяет процесс конструирования и представление: есть Director, который знает последовательность шагов, и несколько билдеров, дающих разные результаты из одного и того же сценария сборки. Акцент — на пошаговом процессе.</p>
+<p>Builder Блоха (Effective Java) решает более приземлённую задачу: телескопические конструкторы и длинные списки одинаковых по типу параметров. Вместо конструктора с восемью аргументами — цепочка именованных методов и <code>build()</code> в конце. Именно эту версию порождает Lombok через <code>@Builder</code>, и именно она в 95% случаев имеется в виду в проде.</p>
+<p>Почему билдер особенно ценен для неизменяемых объектов: он позволяет собирать состояние по частям, а на выходе отдать полностью проинициализированный immutable-объект и проверить все инварианты разом в <code>build()</code>. Без билдера пришлось бы либо делать сеттеры (и потерять неизменяемость), либо тащить громоздкий конструктор.</p>
+<p>Примеры в JDK: <code>HttpRequest.newBuilder()</code> из Java 11, <code>Stream.builder()</code>, Locale.Builder, Calendar.Builder. Внимание к частой ошибке: StringBuilder — не паттерн Builder. Это изменяемый буфер, у него нет продукта с инвариантами и нет пошагового конструирования разных представлений; совпало только название.</p>
+<pre class="lang-java"><code>// Builder Блоха: именованные шаги + проверка инвариантов в build().
+Order order = Order.builder()
+        .customer(id)
+        .item(sku, 2)
+        .deliveryAddress(address)
+        .build();          // здесь валидируем: адрес обязателен, позиций &gt; 0
+
+// JDK, Java 11+
+HttpRequest request = HttpRequest.newBuilder()
+        .uri(URI.create(&quot;https://example.org&quot;))
+        .header(&quot;Accept&quot;, &quot;application/json&quot;)
+        .timeout(Duration.ofSeconds(5))
+        .build();</code></pre>
+<h2>Prototype и почему clone() не любят</h2>
+<p>Prototype создаёт новый объект копированием существующего — это полезно, когда конструирование дорого (тяжёлая инициализация, поход в сеть) или когда нужен объект «как этот, но с одним отличием».</p>
+<p>В Java этот паттерн исторически представлен Cloneable и <code>Object.clone()</code>, и это признанно неудачный дизайн. Cloneable — маркерный интерфейс без единого метода: он не объявляет <code>clone()</code>, а лишь меняет поведение защищённого метода Object. Сам <code>clone()</code> объявлен protected, поэтому его нужно переопределять и повышать видимость; он не вызывает конструктор, из-за чего final-поля и инварианты остаются в стороне; и по умолчанию копия поверхностная — вложенные изменяемые объекты остаются общими с оригиналом.</p>
+<p>Поверхностное против глубокого копирования — отдельный частый вопрос. Shallow copy копирует значения полей, то есть ссылки; изменяемый список внутри копии окажется тем же самым объектом, что и в оригинале. Deep copy рекурсивно копирует и вложенные объекты. Глубокое копирование делают вручную, через копирующие конструкторы или через сериализацию (последнее медленно и ломается на несериализуемых полях).</p>
+<p>Рекомендация Блоха, которую стоит озвучить: вместо Cloneable использовать копирующий конструктор или копирующую статическую фабрику — <code>new ArrayList&lt;&gt;(other)</code>, <code>List.copyOf(other)</code>, <code>EnumSet.copyOf(other)</code>. Они работают с интерфейсом, не требуют приведения типа, не бросают CloneNotSupportedException и позволяют менять представление при копировании. Отдельно: для по-настоящему неизменяемых объектов копирование не нужно вовсе — их можно разделять.</p>
+<h2>Singleton и object pool</h2>
+<p>Singleton подробно разобран в уроке про тестирование и базовые паттерны — здесь только место в классификации и главное. Гарантирует единственный экземпляр; потокобезопасные варианты в Java: enum (защищён и от рефлексии, и от сериализации), static holder и double-checked locking с обязательным volatile. Главный минус — глобальное изменяемое состояние, из-за которого страдают тестируемость и изоляция.</p>
+<p>Отдельно проговорите отличие от singleton scope в Spring: контейнерный синглтон — это один экземпляр на ApplicationContext, а не на JVM, и он не создаёт глобальной точки доступа, потому что зависимость приходит через внедрение. Поэтому «в Spring везде синглтоны» и «паттерн Singleton — антипаттерн» уживаются без противоречия.</p>
+<p>Object pool переиспользует дорогие в создании объекты вместо повторного конструирования. Живые примеры — пулы соединений (HikariCP) и пулы потоков (ThreadPoolExecutor). Именно поэтому пул соединений настраивают, а не создают Connection на каждый запрос: рукопожатие с БД дороже самой выборки.</p>
+<p>Родственная идея — Flyweight: разделять неизменяемые экземпляры вместо создания одинаковых. В JDK это кэш <code>Integer.valueOf</code> на диапазоне -128..127, пул строковых литералов и константы Boolean.TRUE/FALSE. Отсюда же знаменитая ловушка с == на Integer.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>На вопрос «какие знаете порождающие паттерны» не перечисляйте список — назовите и сразу привяжите к примеру из JDK. Это занимает те же тридцать секунд, но звучит принципиально иначе.</p>
+<p>Держите наготове два разграничения, которые дают быстрый плюс: Factory Method (полиморфизм, решает подкласс) против статической фабрики Блоха (именованный статический метод, может кэшировать и возвращать подтип), и Builder GoF (Director, разные представления) против Builder Блоха (борьба с телескопическими конструкторами, то, что делает Lombok).</p>
+<p>Про Prototype отвечайте честно: паттерн полезен, но реализация через Cloneable в Java неудачна — маркерный интерфейс, protected <code>clone()</code>, обход конструктора, поверхностная копия по умолчанию. Правильная замена — копирующий конструктор или копирующая фабрика.</p>
+<p>Если спросят про паттерны в Spring, соберите их в одну карту: BeanFactory и FactoryBean — фабрики, singleton scope — управляемый контейнером экземпляр, прототипный scope — новый объект на каждый запрос зависимости, пул соединений — object pool.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/static-factory-vs-factory-method/">Чем Integer.valueOf(127) отличается от паттерна Factory Method по GoF?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/static-factory-advantages/">Какие преимущества даёт статическая фабрика по сравнению с публичным конструктором?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/builder-immutable/">Почему паттерн Builder особенно удобен при создании неизменяемых объектов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/shallow-vs-deep-copy/">Чем поверхностное копирование отличается от глубокого и как правильно копировать объекты в современной Java?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/abstract-factory/">Что отличает Abstract Factory от обычной фабрики?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/creational-patterns/">Какую задачу решают порождающие паттерны?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/testing-logging-patterns/">Тестирование, логирование и базовые паттерны</a><p>Unit/integration тесты, уровни логирования, MDC и Singleton без ловушек.</p></li><li><a href="/articles/java/solid/">SOLID: пять принципов дизайна</a><p>SRP, OCP, LSP, ISP, DIP — что каждая буква значит на самом деле, как выглядит нарушение в Java-коде, чем DIP отличается от DI и IoC.</p></li><li><a href="/articles/java/immutability/">Проектирование неизменяемых классов</a><p>Зачем нужна неизменяемость, рецепт immutable-класса, защитные копии, безопасная публикация и records.</p></li><li><a href="/articles/java/patterns-structural/">Структурные паттерны</a><p>Adapter, Decorator, Proxy и чем они отличаются друг от друга, Facade, Composite, Bridge и Flyweight — на примерах java.io, java.lang.reflect.Proxy и Spring AOP.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Порождающие паттерны","description":"Factory Method против статической фабрики Блоха, Abstract Factory, Builder в двух версиях, Prototype и почему clone() считают ошибкой, object pool — с примерами из JDK и Spring.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/patterns-creational/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

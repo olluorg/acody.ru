@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем Unicode отличается от UTF-8? — вопрос с собеседования</title>
+<meta name="description" content="Unicode — таблица: каждому символу номер (кодовую точку), U+0416 — «Ж». UTF-8 — способ записать эти номера байтами. UTF-8: от 1 до 4 байт на символ…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/unicode-encodings/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/unicode-encodings/">
+<meta property="og:title" content="Чем Unicode отличается от UTF-8? — вопрос с собеседования">
+<meta property="og:description" content="Unicode — таблица: каждому символу номер (кодовую точку), U+0416 — «Ж». UTF-8 — способ записать эти номера байтами. UTF-8: от 1 до 4 байт на символ…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Чем Unicode отличается от UTF-8?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Чем Unicode отличается от UTF-8?"}]}</script>
+  <h1>Чем Unicode отличается от UTF-8?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Числа в компьютере</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое кодировка?</li><li>Почему длина строки с эмодзи бывает больше, чем видно на экране?</li><li>Чем UTF-8 отличается от UTF-16?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Unicode</b> — таблица: каждому символу номер (кодовую точку), U+0416 — «Ж». <b>UTF-8</b> — способ записать эти номера байтами.</p><ul><li>UTF-8: от 1 до 4 байт на символ, ASCII — 1 байт, кириллица — 2, эмодзи — 4</li><li>UTF-16: 2 или 4 байта (суррогатные пары) — внутри Java, JavaScript, Windows</li><li>«Длина строки» бывает в байтах, единицах кодировки, кодовых точках и видимых символах</li></ul><p class="extra"><span>А ещё</span> Кракозябры — текст прочитали не в той кодировке, в которой записали</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Компьютер хранит байты, текст — договорённость, как их читать.</p>
+<p><b>Unicode</b> — единый каталог символов всех письменностей: каждому присвоен номер, кодовая точка, от U+0000 до U+10FFFF. Это ещё не байты.</p>
+<p><b>Кодировка</b> превращает номера в байты:</p>
+<ul><li><b>UTF-8</b> — переменная длина: U+0000…U+007F (ASCII) — 1 байт, дальше 2, 3 или 4. Старшие биты первого байта говорят длину последовательности, а продолжения начинаются с <code>10</code>, поэтому по любому месту в потоке можно найти начало символа. Совместима с ASCII, не зависит от порядка байтов — стандарт для файлов, сети и веба;</li><li><b>UTF-16</b> — единицы по 2 байта; символы за пределами базовой плоскости (эмодзи, редкие иероглифы) — парой единиц, суррогатной парой. Так строки устроены внутри Java, JavaScript, C#, Windows API;</li><li><b>UTF-32</b> — всегда 4 байта, просто, но расточительно;</li><li><b>однобайтовые</b> — cp1251, KOI8-R: 256 символов, только одна письменность.</li></ul>
+<p><b>Что такое «длина»</b> — частый вопрос с подвохом:</p>
+<ul><li>байты — <code>len(&quot;Ж&quot;.encode())</code> = 2;</li><li>единицы UTF-16 — <code>&quot;😀&quot;.length()</code> в Java = 2;</li><li>кодовые точки — <code>len(&quot;😀&quot;)</code> в Python = 1;</li><li>графемы, видимые символы — флаг 🇷🇺 это две кодовые точки, а «семья» эмодзи — до семи, соединённых невидимым ZWJ. «й» можно записать одной точкой или «и» плюс комбинирующий знак — и строки не будут равны без нормализации (NFC).</li></ul>
+<p><b>На практике:</b> всегда явно указывать кодировку при чтении файлов и в HTTP (<code>Content-Type: text/html; charset=utf-8</code>), в MySQL выбирать <code>utf8mb4</code> (старый <code>utf8</code> хранит максимум 3 байта и теряет эмодзи), обрезать строки по графемам, а не по байтам.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>s = &quot;Ж😀&quot;
+len(s)                       # 2 кодовые точки
+s.encode(&quot;utf-8&quot;)            # b&#x27;\xd0\x96\xf0\x9f\x98\x80&#x27; — 2 + 4 байта
+len(s.encode(&quot;utf-16-le&quot;))   # 6 — «Ж» 2 байта, эмодзи суррогатной парой 4
+&quot;Привет&quot;.encode(&quot;utf-8&quot;).decode(&quot;cp1251&quot;)  # &#x27;РџСЂРёРІРµС‚&#x27; — кракозябры</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Разделение: таблица символов против способа кодирования в байты.</li><li>Переменная длина UTF-8 и совместимость с ASCII.</li><li>UTF-16 и суррогатные пары — почему length у эмодзи 2.</li><li>Разные смыслы длины строки и явная кодировка при вводе-выводе.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Unicode — это кодировка в 2 байта».</li><li>Резать строку по байтам и получать половину символа.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/bitwise-ops/">Какие битовые операции вы знаете и где они применяются?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем Unicode отличается от UTF-8?","acceptedAnswer":{"@type":"Answer","text":"Unicode — таблица: каждому символу номер (кодовую точку), U+0416 — «Ж». UTF-8 — способ записать эти номера байтами. UTF-8: от 1 до 4 байт на символ, ASCII — 1 байт, кириллица — 2, эмодзи — 4 UTF-16: 2 или 4 байта (суррогатные пары) — внутри Java, JavaScript, Windows «Длина строки» бывает в байтах, единицах кодировки, кодовых точках и видимых символах Кракозябры — текст прочитали не в той кодировке, в которой записали Компьютер хранит байты, текст — договорённость, как их читать. Unicode — единый каталог символов всех письменностей: каждому присвоен номер, кодовая точка, от U+0000 до U+10FFFF. Это ещё не байты. Кодировка превращает номера в байты: - UTF-8 — переменная длина: U+0000…U+007F (ASCII) — 1 байт, дальше 2, 3 или 4. Старшие биты первого байта говорят длину последовательности, а продолжения начинаются с 10, поэтому по любому месту в потоке можно найти начало символа. Совместима с ASCII, не зависит от порядка байтов — стандарт для файлов, сети и веба; - UTF-16 — единицы по 2 байта; символы за пределами базовой плоскости (эмодзи, редкие иероглифы) — парой единиц, суррогатной парой. Так строки устроены внутри Java, JavaScript, C#, Windows API; - UTF-32 — всегда 4 байта, просто, но расточительно; - однобайтовые — cp1251, KOI8-R: 256 символов, только одна письменность. Что такое «длина» — частый…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

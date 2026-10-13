@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему Python медленный и как ускорить вычисления? — вопрос с собеседования</title>
+<meta name="description" content="CPython — интерпретатор байткода с динамической типизацией: каждая операция проверяет типы, числа — объекты в куче. Ускорение: векторизация (NumPy…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/python-speedup/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/python-speedup/">
+<meta property="og:title" content="Почему Python медленный и как ускорить вычисления? — вопрос с собеседования">
+<meta property="og:description" content="CPython — интерпретатор байткода с динамической типизацией: каждая операция проверяет типы, числа — объекты в куче. Ускорение: векторизация (NumPy…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Почему Python медленный и как ускорить вычисления?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Почему Python медленный и как ускорить вычисления?"}]}</script>
+  <h1>Почему Python медленный и как ускорить вычисления?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Сложность и производительность</span><span class="chip ver">Python &gt;=3.11</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем помогают NumPy, Cython и PyPy?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">CPython — интерпретатор байткода с <b>динамической типизацией</b>: каждая операция проверяет типы, числа — объекты в куче. Ускорение: <b>векторизация</b> (NumPy, pandas — циклы на C), <b>встроенные функции</b> вместо ручных циклов, <b>Cython/Rust-расширения</b> для горячих мест, <b>PyPy</b> (JIT), <b>процессы</b> для параллелизма.</p><ul><li>Python 3.11 ускорен на 10–60% (адаптивный интерпретатор), 3.13 — экспериментальный JIT</li><li>sum, sorted, set, dict, str.join реализованы на C</li><li>Чаще узкое место — ввод-вывод и алгоритм, а не скорость интерпретатора</li></ul><p class="extra"><span>А ещё</span> Numba компилирует числовые функции декоратором @njit</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Откуда медлительность:</b> <code>a + b</code> — поиск метода <code>__add__</code> по типам, создание нового объекта int в куче, подсчёт ссылок. Цикл по миллиону чисел — миллионы таких операций.</p>
+<p><b>Что помогает, по возрастанию усилий:</b></p>
+<ol><li><b>Алгоритм и структуры данных</b>: set вместо list для проверок принадлежности, словарь вместо поиска в цикле.</li><li><b>Встроенные и стандартная библиотека</b> — циклы внутри на C: <code>sum(x*x for x in xs)</code> медленнее <code>np.dot(arr, arr)</code> в десятки раз, но быстрее ручного цикла с накоплением.</li><li><b>NumPy / pandas / polars</b> — операции над массивами целиком.</li><li><b>Numba, Cython, Rust (PyO3)</b> — компиляция горячей функции.</li><li><b>PyPy</b> — альтернативный интерпретатор с JIT, ускоряет чистый Python в разы, но совместимость с C-расширениями хуже.</li><li><b>Параллелизм</b> — процессы или free-threaded сборка.</li></ol>
+<p><b>Версии CPython:</b> 3.11 — специализирующий адаптивный интерпретатор (PEP 659), заметный прирост без изменения кода; 3.13 — экспериментальный JIT (copy-and-patch).</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Причины медлительности.</li><li>Способы ускорения по возрастанию усилий.</li><li>Начинать с профиля и алгоритма.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/profiling/">Как найти, что тормозит в Python-программе?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/gil/">Что такое GIL?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/concurrent-futures/">Как пользоваться concurrent.futures и чем ThreadPoolExecutor отличается от ProcessPoolExecutor?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему Python медленный и как ускорить вычисления?","acceptedAnswer":{"@type":"Answer","text":"CPython — интерпретатор байткода с динамической типизацией: каждая операция проверяет типы, числа — объекты в куче. Ускорение: векторизация (NumPy, pandas — циклы на C), встроенные функции вместо ручных циклов, Cython/Rust-расширения для горячих мест, PyPy (JIT), процессы для параллелизма. Python 3.11 ускорен на 10–60% (адаптивный интерпретатор), 3.13 — экспериментальный JIT sum, sorted, set, dict, str.join реализованы на C Чаще узкое место — ввод-вывод и алгоритм, а не скорость интерпретатора Numba компилирует числовые функции декоратором @njit Откуда медлительность: a + b — поиск метода __add__ по типам, создание нового объекта int в куче, подсчёт ссылок. Цикл по миллиону чисел — миллионы таких операций. Что помогает, по возрастанию усилий: 1. Алгоритм и структуры данных: set вместо list для проверок принадлежности, словарь вместо поиска в цикле. 2. Встроенные и стандартная библиотека — циклы внутри на C: sum(xx for x in xs) медленнее np.dot(arr, arr) в десятки раз, но быстрее ручного цикла с накоплением. 3. NumPy / pandas / polars — операции над массивами целиком. 4. Numba, Cython, Rust (PyO3) — компиляция горячей функции. 5. PyPy — альтернативный интерпретатор с JIT, ускоряет чистый Python в разы, но совместимость с C-расширениями хуже. 6. Параллелизм — процессы или free-threaded сборка. Версии CPython: 3.11 — специализирующий адаптивный интерпретатор (PEP 659), заметный прирост без изменения кода; 3.13 — экспериментальный…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

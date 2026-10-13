@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kafka Consumer и consumer group — разбор для собеседования</title>
+<meta name="description" content="Группа и распределение партиций, poll-цикл, heartbeat и таймауты, модели commit offset, ребаланс и роль идемпотентности.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/brokers/kafka-consumer/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/brokers/kafka-consumer/">
+<meta property="og:title" content="Kafka Consumer и consumer group — разбор для собеседования">
+<meta property="og:description" content="Группа и распределение партиций, poll-цикл, heartbeat и таймауты, модели commit offset, ребаланс и роль идемпотентности.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#brokers">Брокеры сообщений</a> <span>/</span> <span>Kafka Consumer и consumer group</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/articles/#brokers"},{"@type":"ListItem","position":3,"name":"Kafka Consumer и consumer group"}]}</script>
+  <h1>Kafka Consumer и consumer group</h1>
+  <p class="lead">Группа и распределение партиций, poll-цикл, heartbeat и таймауты, модели commit offset, ребаланс и роль идемпотентности.</p>
+  <article class="md"><h2>Consumer group и assignment</h2>
+<p><code>group.id</code> задаёт логического подписчика. Брокер распределяет партиции темы между consumer'ами группы (assignment): в каждый момент одна партиция принадлежит ровно одному consumer'у группы. Так одна группа = work queue, разные группы = независимые pub/sub-потоки поверх того же лога.</p>
+<p>Стратегия распределения настраивается: range и round-robin — классические; sticky и особенно cooperative-sticky стараются МИНИМИЗИРОВАТЬ движение партиций при ребалансе (важно для горячих кэшей). Если consumer'ов в группе больше, чем партиций, лишние простаивают без работы.</p>
+<figure><img src="/articles/assets/kafka-consumer-group.webp" alt="Партиции топика распределены между консьюмерами группы — по одному владельцу на партицию; при подключении нового консьюмера происходит ребаланс." loading="lazy"><figcaption>Каждую партицию читает ровно один консьюмер группы; при изменении состава происходит ребаланс.</figcaption></figure>
+<h2>Poll loop</h2>
+<p>Kafka — pull-модель: consumer сам ходит к брокеру через <code>consumer.poll(timeout)</code>. Тот возвращает батч записей, consumer обрабатывает их и коммитит offset, после чего следующий <code>poll()</code>. Это единственный «нормальный» цикл — обработка и коммит в нём же.</p>
+<p>Размером батча и поведением ожидания управляют параметры: <code>max.poll.records</code> (макс записей за один poll), <code>fetch.min.bytes</code> и <code>fetch.max.wait.ms</code> (брокер может подержать запрос, чтобы собрать больше данных — батчинг и на стороне брокера). Тяжёлый serializer/десериализация добавляют латентность каждого poll.</p>
+<h2>Heartbeat и обнаружение смерти</h2>
+<p>У consumer есть отдельный heartbeat-thread, который отправляет брокеру сигналы жизни. <code>session.timeout.ms</code> задаёт, через сколько без heartbeat consumer'а сочтут мёртвым и запустят rebalance.</p>
+<p>Отдельно — <code>max.poll.interval.ms</code>: МАКСИМУМ между двумя <code>poll()</code>. Если обработка батча затянулась дольше, брокер считает consumer'а зависшим (даже если heartbeat шёл) и выгоняет его из группы. Отсюда правило: тяжёлую обработку либо ускоряют, либо повышают <code>max.poll.interval.ms</code>, либо выносят в отдельные воркеры, а consumer только декодирует и распределяет.</p>
+<h2>Модели commit offset</h2>
+<p>Способов фиксировать прогресс несколько. <code>enable.auto.commit</code>=true (фоновый авто-commit каждые <code>auto.commit.interval.ms</code>) проще, но опасен: легко закоммитить ДО обработки и потерять сообщения при падении. Для прода обычно отключают и коммитят руками.</p>
+<p>Ручной commit: <code>commitSync()</code> — блокирующий и надёжный (повторяет ретраиваемые ошибки), <code>commitAsync()</code> — быстрее, но без гарантий. Практичный паттерн — обработать батч → <code>commitSync</code> после успеха (at-least-once + идемпотентность обработки). Чем коммитят: offset, который указывает на СЛЕДУЮЩЕЕ сообщение, а не последнее обработанное (классическая ошибка off-by-one).</p>
+<h2>Ребаланс</h2>
+<p>Ребаланс — перераспределение партиций между членами группы — случается при подключении/уходе consumer'а, изменении подписки или числа партиций. В классическом «eager» протоколе вся группа на короткое время ОСТАНАВЛИВАЕТСЯ (stop-the-world): все возвращают свои партиции, потом получают новые.</p>
+<p>Cooperative rebalance (Kafka 2.4+, cooperative-sticky) делает то же ИНКРЕМЕНТАЛЬНО — двигаются только нужные партиции, остальные продолжают работу. Для cleanup и сохранения локального состояния перед сменой партиции вешают ConsumerRebalanceListener (commit, очистка кэша).</p>
+<p>В Kafka 4.0 появился новый протокол групп (KIP-848, <code>group.protocol=consumer</code>): распределение партиций считает уже не лидер группы на клиенте, а координатор на брокере, и ребаланс идёт инкрементально по умолчанию — без остановки всей группы.</p>
+<h2>At-least-once и идемпотентность</h2>
+<p>Практический дефолт обработки — at-least-once: получили батч → обработали с побочным эффектом → закоммитили offset. Если упасть между обработкой и commit, при следующем запуске сообщение придёт повторно — отсюда требование к ИДЕМПОТЕНТНОЙ обработке (см. урок про основы).</p>
+<p>Альтернатива — commit ДО обработки (at-most-once): дублей не будет, но при сбое сообщение потеряется. Для большинства бизнес-сценариев это неприемлемо, поэтому при-обработке-потом-commit + идемпотентность — устоявшаяся практика.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Разберите группу и assignment (range/round-robin/sticky/cooperative-sticky; consumer ≤ партиций по полезной работе). Объясните pull-poll-цикл и его параметры (<code>max.poll.records</code>, <code>fetch.min.bytes</code>). Разделите <code>session.timeout.ms</code> (heartbeat) и <code>max.poll.interval.ms</code> (тяжёлая обработка → eviction). Сравните commit-модели (auto-commit опасен; ручной sync после успеха — дефолт) и порядок rebalance (eager STW vs cooperative-sticky без полного STW). Завершите тезисом at-least-once + идемпотентность как практическим стандартом.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/brokers/consumer-group-scaling/">Как consumer group в Kafka масштабирует потребление?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/more-consumers-than-partitions/">Что произойдёт, если потребителей в consumer group больше, чем партиций в топике?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/commit-sync-async/">Чем commitSync() отличается от commitAsync() у Kafka consumer?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/auto-offset-reset/">Что делает настройка auto.offset.reset=earliest?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/consumer-group-basic/">Зачем потребителей объединяют в consumer group?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/brokers/kafka-core/">Kafka: topic, partition, offset</a><p>Распределённый append-only лог, партиция как единица масштаба и упорядоченности, ключ и порядок, retention и log compaction, replay.</p></li><li><a href="/articles/brokers/dlq-retries/">Retries, DLQ и идемпотентность</a><p>Что повторять и почему не всё, backoff/jitter, non-blocking retry, дизайн DLQ и redrive, идемпотентность как фундамент.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Kafka Consumer и consumer group","description":"Группа и распределение партиций, poll-цикл, heartbeat и таймауты, модели commit offset, ребаланс и роль идемпотентности.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/brokers/kafka-consumer/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зачем нужен Spring Cloud Config Server? — вопрос с собеседования</title>
+<meta name="description" content="Spring Cloud Config Server раздаёт конфигурацию сервисам из одного места (обычно git-репозиторий): по имени приложения, профилю и метке (ветке)…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/config-server/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/config-server/">
+<meta property="og:title" content="Зачем нужен Spring Cloud Config Server? — вопрос с собеседования">
+<meta property="og:description" content="Spring Cloud Config Server раздаёт конфигурацию сервисам из одного места (обычно git-репозиторий): по имени приложения, профилю и метке (ветке)…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Зачем нужен Spring Cloud Config Server?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Зачем нужен Spring Cloud Config Server?"}]}</script>
+  <h1>Зачем нужен Spring Cloud Config Server?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Spring Cloud</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как централизованно хранить конфигурацию микросервисов?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Spring Cloud Config Server</b> раздаёт конфигурацию сервисам из одного места (обычно git-репозиторий): по имени приложения, профилю и метке (ветке). Сервисы подключают его через <code>spring.config.import=configserver:</code>.</p><ul><li>История и ревью изменений настроек — через git</li><li>Обновление без перезапуска: @RefreshScope + /actuator/refresh или Spring Cloud Bus</li><li>Секреты — шифрование {cipher} или Vault в качестве бэкенда</li></ul><p class="extra"><span>А ещё</span> В Kubernetes часто достаточно ConfigMap и Secret — отдельный сервер лишний</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Как работает:</b> Config Server — отдельное приложение (<code>@EnableConfigServer</code>) с бэкендом: git, файловая система, Vault, база. Клиент при старте запрашивает <code>/{application}/{profile}/{label}</code> и получает свойства, которые встают в его Environment поверх локальных.</p>
+<p><b>Плюсы:</b> одна точка правды для всех сервисов и окружений; изменения настроек проходят ревью и имеют историю в git; общие настройки (<code>application.yml</code> в репозитории конфигов) для всех сервисов.</p>
+<p><b>Обновление на лету:</b> бины с <code>@RefreshScope</code> пересоздаются при вызове <code>/actuator/refresh</code>; Spring Cloud Bus рассылает событие обновления всем экземплярам через брокер. <code>@ConfigurationProperties</code> перепривязываются автоматически.</p>
+<p><b>Секреты:</b> значения <code>{cipher}...</code> шифруются ключом сервера, или Vault как бэкенд.</p>
+<p><b>Минусы и альтернативы:</b> ещё один сервис, от которого зависит старт всех остальных (нужна отказоустойчивость, <code>spring.cloud.config.fail-fast</code>, повторы). В Kubernetes многие используют ConfigMap/Secret, смонтированные файлами (<code>spring.config.import=configtree:</code>), и внешние операторы секретов — без отдельного сервера.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Назначение и как клиент получает конфигурацию.</li><li>Обновление без перезапуска.</li><li>Секреты.</li><li>Альтернатива в Kubernetes.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Делать Config Server единственной точкой отказа без запасного плана.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Хранит пользовательские сессии</li><li class="ok"><span class="mark">✓</span>Централизует конфигурацию нескольких сервисов и окружений (часто из Git); секреты при этом хранят отдельно (Vault)</li><li class="no"><span class="mark">✗</span>Балансирует нагрузку между сервисами</li><li class="no"><span class="mark">✗</span>Заменяет базу данных</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое refresh scope?</li><li>Как Spring profiles связаны с Config Server?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/cloud-platform/">Spring Cloud: config, discovery, gateway, tracing</a><p>Config Server, Eureka/DiscoveryClient, Spring Cloud Gateway и распределённая трассировка.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/external-configuration/">Как Spring Boot работает с внешней конфигурацией?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/service-discovery/">Что такое service discovery и где здесь Eureka?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Зачем нужен Spring Cloud Config Server?","acceptedAnswer":{"@type":"Answer","text":"Spring Cloud Config Server раздаёт конфигурацию сервисам из одного места (обычно git-репозиторий): по имени приложения, профилю и метке (ветке). Сервисы подключают его через spring.config.import=configserver:. История и ревью изменений настроек — через git Обновление без перезапуска: @RefreshScope + /actuator/refresh или Spring Cloud Bus Секреты — шифрование {cipher} или Vault в качестве бэкенда В Kubernetes часто достаточно ConfigMap и Secret — отдельный сервер лишний Как работает: Config Server — отдельное приложение (@EnableConfigServer) с бэкендом: git, файловая система, Vault, база. Клиент при старте запрашивает /{application}/{profile}/{label} и получает свойства, которые встают в его Environment поверх локальных. Плюсы: одна точка правды для всех сервисов и окружений; изменения настроек проходят ревью и имеют историю в git; общие настройки (application.yml в репозитории конфигов) для всех сервисов. Обновление на лету: бины с @RefreshScope пересоздаются при вызове /actuator/refresh; Spring Cloud Bus рассылает событие обновления всем экземплярам через брокер. @ConfigurationProperties перепривязываются автоматически. Секреты: значения {cipher}... шифруются ключом сервера, или Vault как бэкенд. Минусы и альтернативы: ещё один сервис, от которого зависит старт всех остальных (нужна отказоустойчивость, spring.cloud.config.fail-fast, повторы). В…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

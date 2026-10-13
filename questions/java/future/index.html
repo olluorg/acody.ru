@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что представляет собой объект Future? — вопрос с собеседования</title>
+<meta name="description" content="Future — ссылка на результат, который появится позже: можно проверить готовность, дождаться значения или отменить задачу. get() блокирует вызывающий…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/future/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/future/">
+<meta property="og:title" content="Что представляет собой объект Future? — вопрос с собеседования">
+<meta property="og:description" content="Future — ссылка на результат, который появится позже: можно проверить готовность, дождаться значения или отменить задачу. get() блокирует вызывающий…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что представляет собой объект Future?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что представляет собой объект Future?"}]}</script>
+  <h1>Что представляет собой объект Future?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Многопоточность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем Future отличается от CompletableFuture?</li><li>Как получить результат задачи из другого потока?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Future — <b>ссылка на результат</b>, который появится позже: можно проверить готовность, дождаться значения или отменить задачу.</p><ul><li>get() блокирует вызывающий поток до готовности — лучше с таймаутом</li><li>Исключение задачи всплывает в get() как ExecutionException</li></ul><p class="extra"><span>А ещё</span> Для цепочек и неблокирующей обработки — CompletableFuture: thenApply, thenCombine, exceptionally</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Когда задача отправлена в пул через <code>submit</code>, сразу возвращается <code>Future&lt;T&gt;</code>. Вызывающий поток продолжает работу, а за результатом обращается, когда он нужен.</p>
+<p>Методы:</p>
+<ul><li><code>get()</code> — дождаться результата, блокируя поток; <code>get(timeout, unit)</code> — с ограничением по времени;</li><li><code>isDone()</code> — готов ли результат;</li><li><code>cancel(mayInterrupt)</code> — отменить задачу.</li></ul>
+<p>Если задача упала, исключение не теряется: <code>get()</code> бросит <code>ExecutionException</code>, а причина — в <code>getCause()</code>.</p>
+<p>Ограничения базового <code>Future</code>: получить результат можно только блокирующим ожиданием, объединять несколько задач и описывать «что делать после» неудобно.</p>
+<p><code>CompletableFuture</code> (Java 8) решает это: цепочки преобразований (<code>thenApply</code>, <code>thenCompose</code>), объединение (<code>thenCombine</code>, <code>allOf</code>), обработка ошибок (<code>exceptionally</code>, <code>handle</code>) — без блокировки. По умолчанию асинхронные этапы выполняются в общем пуле <code>ForkJoinPool</code>; для задач с ожиданием I/O лучше передать свой executor.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>CompletableFuture&lt;User&gt; user = CompletableFuture.supplyAsync(() -&gt; loadUser(id), ioPool);
+CompletableFuture&lt;List&lt;Order&gt;&gt; orders = CompletableFuture.supplyAsync(() -&gt; loadOrders(id), ioPool);
+
+CompletableFuture&lt;Profile&gt; profile = user.thenCombine(orders, Profile::new)
+        .exceptionally(e -&gt; Profile.empty());</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Future как обещание результата.</li><li>Блокирующий get(), таймаут, ExecutionException.</li><li>Ограничения Future и чем помогает CompletableFuture.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Запрашивать результат сразу после отправки задачи и терять всю параллельность.</li><li>Забывать про таймаут при ожидании результата.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Ссылку на результат задачи, который появится позже: у него можно спросить готовность или дождаться значения</li><li class="no"><span class="mark">✗</span>Копию задачи для повторного выполнения</li><li class="no"><span class="mark">✗</span>Поток, в котором выполняется задача</li><li class="no"><span class="mark">✗</span>Очередь задач, ожидающих выполнения</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Какие ограничения снимает CompletableFuture?</li><li>Что произойдёт с исключением, брошенным внутри задачи?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/completablefuture/">Future и CompletableFuture</a><p>Ограничения Future, асинхронная композиция CompletableFuture, async-варианты с пулами и обработка ошибок.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/completablefuture-error-handling/">Чем различаются exceptionally, handle и whenComplete у CompletableFuture?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/future-vs-completablefuture/">Какое ограничение Future решает CompletableFuture?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/completablefuture-blocking-common-pool/">Почему опасно выполнять блокирующие операции в стадиях CompletableFuture без явного Executor?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/thencompose-vs-thenapply/">Чем thenCompose отличается от thenApply в CompletableFuture?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что представляет собой объект Future?","acceptedAnswer":{"@type":"Answer","text":"Future — ссылка на результат, который появится позже: можно проверить готовность, дождаться значения или отменить задачу. get() блокирует вызывающий поток до готовности — лучше с таймаутом Исключение задачи всплывает в get() как ExecutionException Для цепочек и неблокирующей обработки — CompletableFuture: thenApply, thenCombine, exceptionally Когда задача отправлена в пул через submit, сразу возвращается Future<T>. Вызывающий поток продолжает работу, а за результатом обращается, когда он нужен. Методы: - get() — дождаться результата, блокируя поток; get(timeout, unit) — с ограничением по времени; - isDone() — готов ли результат; - cancel(mayInterrupt) — отменить задачу. Если задача упала, исключение не теряется: get() бросит ExecutionException, а причина — в getCause(). Ограничения базового Future: получить результат можно только блокирующим ожиданием, объединять несколько задач и описывать «что делать после» неудобно. CompletableFuture (Java 8) решает это: цепочки преобразований (thenApply, thenCompose), объединение (thenCombine, allOf), обработка ошибок (exceptionally, handle) — без блокировки. По умолчанию асинхронные этапы выполняются в общем пуле ForkJoinPool; для задач с ожиданием I/O лучше передать свой executor."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

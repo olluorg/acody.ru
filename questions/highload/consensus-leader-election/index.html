@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как в кластере выбирают лидера и что такое split brain? — вопрос с собеседования</title>
+<meta name="description" content="Лидером может стать только узел, за которого проголосовало большинство. Два большинства всегда пересекаются, поэтому в одном «сроке» (term) не бывает…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/consensus-leader-election/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/consensus-leader-election/">
+<meta property="og:title" content="Как в кластере выбирают лидера и что такое split brain? — вопрос с собеседования">
+<meta property="og:description" content="Лидером может стать только узел, за которого проголосовало большинство. Два большинства всегда пересекаются, поэтому в одном «сроке» (term) не бывает…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Как в кластере выбирают лидера и что такое split brain?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Как в кластере выбирают лидера и что такое split brain?"}]}</script>
+  <h1>Как в кластере выбирают лидера и что такое split brain?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Репликация</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как работает Raft в общих чертах?</li><li>Зачем кворум из нечётного числа узлов?</li><li>Что такое fencing token?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Лидером может стать только узел, за которого проголосовало <b>большинство</b>. Два большинства всегда пересекаются, поэтому в одном «сроке» (term) не бывает двух лидеров — это защищает от <b>split brain</b>.</p><ul><li>Raft: лидер шлёт heartbeat; нет heartbeat — узел становится кандидатом, повышает term и просит голоса</li><li>Запись подтверждена, когда её сохранило большинство; новый лидер обязан иметь все подтверждённые записи</li><li>3 узла переживают отказ 1, 5 — отказ 2; чётное число не добавляет устойчивости</li></ul><p class="extra"><span>А ещё</span> Старый лидер может «очнуться» после паузы — защита fencing-токеном (номером срока) на стороне хранилища</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Split brain</b> — два узла одновременно считают себя лидером и принимают записи. Возникает при разделении сети или долгой паузе (GC, зависание VM): остальные решили, что лидер умер, и выбрали нового, а старый очнулся и продолжает писать. Итог — расходящиеся данные.</p>
+<p><b>Большинство как защита.</b> Если для любого решения нужно согласие более половины узлов, два решения не могут быть приняты разными группами — любые два большинства пересекаются хотя бы в одном узле. Отсюда размер кластера: из 3 узлов должны работать 2 (переживает 1 отказ), из 5 — 3 (2 отказа). 4 узла переживают тоже только 1 отказ — чётное число не помогает, а голосований больше.</p>
+<p><b>Raft в общих чертах:</b></p>
+<ul><li>время делится на <b>сроки</b> (terms) с номерами; в каждом сроке не более одного лидера;</li><li>лидер рассылает heartbeat; узел, не получивший его за случайный таймаут, становится кандидатом, увеличивает term и просит голоса;</li><li>узел голосует один раз за срок и только за кандидата, чей журнал не короче своего — так лидером не станет узел без подтверждённых записей;</li><li>лидер добавляет записи в журнал и реплицирует; запись <b>подтверждена</b>, когда её сохранило большинство. Только тогда её применяют и отвечают клиенту;</li><li>узел, увидевший больший term, сразу становится последователем — старый лидер, вернувшись, теряет полномочия.</li></ul>
+<p>Где используется: etcd (и значит Kubernetes), Consul, ZooKeeper (ZAB — похожий протокол), KRaft в Kafka, CockroachDB и YugabyteDB (Raft на каждый диапазон данных), Patroni через etcd.</p>
+<p><b>Fencing.</b> Даже с консенсусом старый лидер или держатель распределённой блокировки может не знать, что его сместили (пауза GC на 30 секунд, а аренда истекла). Защита — <b>fencing token</b>: при каждом назначении выдаётся монотонно растущий номер (term, версия блокировки), и хранилище отклоняет запросы с номером меньше уже виденного. Без этого распределённая блокировка на Redis с TTL небезопасна для корректности.</p>
+<p><b>Цена консенсуса:</b> каждая запись — оборот до большинства (поэтому узлы в разных зонах, а не континентах), лидер — узкое место записи, при потере большинства система перестаёт принимать записи (выбор C в CAP).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>5 узлов, лидер N1 в term 7. Сеть разделилась: {N1, N2} | {N3, N4, N5}.
+N3 не получает heartbeat → кандидат, term 8 → голоса N4, N5 → лидер (3 из 5).
+N1 продолжает считать себя лидером term 7, но запись не наберёт большинство (2 из 5) — не подтвердится.
+Сеть восстановилась: N1 видит term 8 → становится последователем, неподтверждённое отбрасывает.</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Что такое split brain и откуда берётся.</li><li>Большинство и пересечение кворумов; почему нечётное число узлов.</li><li>Основные шаги Raft: сроки, выборы, подтверждение большинством.</li><li>Fencing token — для senior.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что двух узлов достаточно для отказоустойчивого выбора лидера.</li><li>Полагаться на TTL-блокировку как на гарантию единственного исполнителя.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/sync-async-replication/">Чем синхронная репликация отличается от асинхронной и что выбрать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/replication-models/">Какие бывают схемы репликации и чем они отличаются?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/cap-theorem/">Что утверждает CAP-теорема?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как в кластере выбирают лидера и что такое split brain?","acceptedAnswer":{"@type":"Answer","text":"Лидером может стать только узел, за которого проголосовало большинство. Два большинства всегда пересекаются, поэтому в одном «сроке» (term) не бывает двух лидеров — это защищает от split brain. Raft: лидер шлёт heartbeat; нет heartbeat — узел становится кандидатом, повышает term и просит голоса Запись подтверждена, когда её сохранило большинство; новый лидер обязан иметь все подтверждённые записи 3 узла переживают отказ 1, 5 — отказ 2; чётное число не добавляет устойчивости Старый лидер может «очнуться» после паузы — защита fencing-токеном (номером срока) на стороне хранилища Split brain — два узла одновременно считают себя лидером и принимают записи. Возникает при разделении сети или долгой паузе (GC, зависание VM): остальные решили, что лидер умер, и выбрали нового, а старый очнулся и продолжает писать. Итог — расходящиеся данные. Большинство как защита. Если для любого решения нужно согласие более половины узлов, два решения не могут быть приняты разными группами — любые два большинства пересекаются хотя бы в одном узле. Отсюда размер кластера: из 3 узлов должны работать 2 (переживает 1 отказ), из 5 — 3 (2 отказа). 4 узла переживают тоже только 1 отказ — чётное число не помогает, а голосований больше. Raft в общих чертах: - время делится на сроки (terms) с номерами; в каждом сроке не более одного лидера; - лидер рассылает heartbeat; узел, не получивший его за случайный таймаут, становится кандидатом, увеличивает term и просит голоса; - узел голосует один…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Где должен располагаться вызов unlock() при работе с ReentrantLock? — вопрос с собеседования</title>
+<meta name="description" content="unlock() — в finally, а lock() — перед try: иначе исключение в критической секции оставит замок захваченным навсегда. В отличие от synchronized…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/reentrantlock-unlock-finally/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/reentrantlock-unlock-finally/">
+<meta property="og:title" content="Где должен располагаться вызов unlock() при работе с ReentrantLock? — вопрос с собеседования">
+<meta property="og:description" content="unlock() — в finally, а lock() — перед try: иначе исключение в критической секции оставит замок захваченным навсегда. В отличие от synchronized…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Где должен располагаться вызов unlock() при работе с ReentrantLock?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Где должен располагаться вызов unlock() при работе с ReentrantLock?"}]}</script>
+  <h1>Где должен располагаться вызов unlock() при работе с ReentrantLock?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Многопоточность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем ReentrantLock отличается от synchronized?</li><li>Что такое tryLock?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>unlock() — в finally</b>, а <b>lock() — перед try</b>: иначе исключение в критической секции оставит замок захваченным навсегда.</p><ul><li>В отличие от synchronized, явный замок не освобождается сам</li><li>Зато умеет tryLock с таймаутом, прерываемое ожидание, справедливость, несколько Condition</li></ul><p class="extra"><span>А ещё</span> Если lock() внутри try и он упадёт — finally вызовет unlock() у не захваченного замка</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><code>ReentrantLock</code> — явная блокировка из <code>java.util.concurrent.locks</code>. Монитор <code>synchronized</code> освобождается автоматически при любом выходе из блока, а явный замок нужно освободить вручную. Если между <code>lock()</code> и <code>unlock()</code> вылетит исключение и <code>unlock()</code> не выполнится, замок останется захваченным, и все остальные потоки встанут в ожидание навсегда — внешне это выглядит как зависание без ошибок в логах.</p>
+<p>Поэтому шаблон строгий: <code>lock()</code> — непосредственно перед <code>try</code>, <code>unlock()</code> — в <code>finally</code>. Захват ставят вне <code>try</code>: если бы <code>lock()</code> оказался внутри и сам бросил исключение, <code>finally</code> попытался бы освободить незахваченный замок и получил бы <code>IllegalMonitorStateException</code>.</p>
+<p>Зачем вообще явный замок, если есть <code>synchronized</code>:</p>
+<ul><li><code>tryLock()</code> и <code>tryLock(timeout)</code> — попытаться захватить, не блокируясь навсегда;</li><li><code>lockInterruptibly()</code> — ожидание, которое можно прервать;</li><li>справедливый режим — очередь потоков в порядке прихода;</li><li>несколько условий <code>Condition</code> вместо одного <code>wait/notify</code>;</li><li><code>ReentrantReadWriteLock</code> — параллельные чтения при редких записях.</li></ul>
+<p>Если эти возможности не нужны, <code>synchronized</code> проще и безопаснее.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>private final ReentrantLock lock = new ReentrantLock();
+
+void transfer() {
+    lock.lock();
+    try {
+        // критическая секция
+    } finally {
+        lock.unlock();
+    }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>unlock в finally и lock перед try, с объяснением почему.</li><li>Чем явный замок отличается от synchronized.</li><li>Возможности: tryLock, прерываемость, Condition.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Помещать захват внутрь try.</li><li>Забывать освобождение при раннем возврате из метода.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>В блоке finally — иначе исключение внутри критической секции оставит блокировку захваченной навсегда</li><li class="no"><span class="mark">✗</span>Сразу после lock(), до основной работы</li><li class="no"><span class="mark">✗</span>В конце метода, после блока try</li><li class="no"><span class="mark">✗</span>Вызывать его не нужно — блокировка снимается автоматически</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Какие возможности даёт явная блокировка по сравнению с synchronized?</li><li>Зачем нужен захват с таймаутом?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/locks/">Явные блокировки: ReentrantLock, RW и Condition</a><p>Когда synchronized мало, ReentrantLock с tryLock/fairness, ReadWriteLock и StampedLock, Condition вместо wait/notify.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/stampedlock-optimistic-read/">Что даёт оптимистичное чтение в StampedLock и о каком его ограничении важно помнить?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/reentrantlock-vs-synchronized/">Какие возможности даёт ReentrantLock, недоступные при использовании synchronized?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/deadlock/">Что такое deadlock и как его предотвращать?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Где должен располагаться вызов unlock() при работе с ReentrantLock?","acceptedAnswer":{"@type":"Answer","text":"unlock() — в finally, а lock() — перед try: иначе исключение в критической секции оставит замок захваченным навсегда. В отличие от synchronized, явный замок не освобождается сам Зато умеет tryLock с таймаутом, прерываемое ожидание, справедливость, несколько Condition Если lock() внутри try и он упадёт — finally вызовет unlock() у не захваченного замка ReentrantLock — явная блокировка из java.util.concurrent.locks. Монитор synchronized освобождается автоматически при любом выходе из блока, а явный замок нужно освободить вручную. Если между lock() и unlock() вылетит исключение и unlock() не выполнится, замок останется захваченным, и все остальные потоки встанут в ожидание навсегда — внешне это выглядит как зависание без ошибок в логах. Поэтому шаблон строгий: lock() — непосредственно перед try, unlock() — в finally. Захват ставят вне try: если бы lock() оказался внутри и сам бросил исключение, finally попытался бы освободить незахваченный замок и получил бы IllegalMonitorStateException. Зачем вообще явный замок, если есть synchronized: - tryLock() и tryLock(timeout) — попытаться захватить, не блокируясь навсегда; - lockInterruptibly() — ожидание, которое можно прервать; - справедливый режим — очередь потоков в порядке прихода; -…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

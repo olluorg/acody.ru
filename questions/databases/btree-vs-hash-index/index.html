@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем B-tree индекс принципиально превосходит hash-индекс? — вопрос с собеседования</title>
+<meta name="description" content="B-дерево упорядочено — поддерживает равенство, диапазоны, сортировку и префиксы строк. Hash-индекс — только равенство. Поэтому почти всегда выбирают…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/btree-vs-hash-index/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/btree-vs-hash-index/">
+<meta property="og:title" content="Чем B-tree индекс принципиально превосходит hash-индекс? — вопрос с собеседования">
+<meta property="og:description" content="B-дерево упорядочено — поддерживает равенство, диапазоны, сортировку и префиксы строк. Hash-индекс — только равенство. Поэтому почти всегда выбирают…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Чем B-tree индекс принципиально превосходит hash-индекс?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Чем B-tree индекс принципиально превосходит hash-индекс?"}]}</script>
+  <h1>Чем B-tree индекс принципиально превосходит hash-индекс?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Индексы и планы запросов</span><span class="chip">PostgreSQL</span><span class="chip">SQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Когда использовать hash-индекс?</li><li>Какие типы индексов есть в PostgreSQL?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>B-дерево упорядочено</b> — поддерживает равенство, диапазоны, сортировку и префиксы строк. <b>Hash-индекс</b> — только равенство. Поэтому почти всегда выбирают B-дерево.</p><ul><li>B-дерево: <code>=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>BETWEEN</code>, <code>ORDER BY</code>, <code>LIKE &#x27;abc%&#x27;</code></li><li>Hash: только <code>=</code>, чуть компактнее для длинных ключей</li><li>Специальные: GIN (массивы, JSONB, полнотекст), GiST (геометрия, диапазоны), BRIN (огромные таблицы с естественным порядком)</li></ul><p class="extra"><span>А ещё</span> Hash-индексы в PostgreSQL журналируются только с версии 10</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>B-дерево</b> хранит ключи по порядку в сбалансированном дереве страниц. Поиск значения — O(log n), диапазон — найти начало и идти по листьям, сортировка — просто читать по порядку. Подходит для чисел, строк, дат, составных ключей. Вариант по умолчанию в любой СУБД.</p>
+<p><b>Hash-индекс</b> хранит хеши ключей в корзинах. Поиск по точному значению — O(1) в среднем, но порядок теряется: никаких диапазонов, сортировки, префиксов. На практике выигрыш над B-деревом невелик (несколько уровней дерева всё равно в кэше), поэтому hash выбирают редко — для очень длинных ключей, по которым ищут только на равенство. В PostgreSQL до версии 10 hash-индексы не писались в WAL и не реплицировались.</p>
+<p><b>Другие типы в PostgreSQL:</b></p>
+<ul><li><b>GIN</b> — инвертированный индекс: элементы массивов, ключи JSONB, полнотекстовый поиск (<code>tsvector</code>), триграммы (<code>pg_trgm</code> для <code>LIKE &#x27;%abc%&#x27;</code>);</li><li><b>GiST / SP-GiST</b> — геометрия, диапазоны, ближайшие соседи;</li><li><b>BRIN</b> — минимумы и максимумы по блокам; крошечный индекс для огромных таблиц, где данные физически упорядочены (журналы по времени);</li><li><b>частичные</b> (<code>WHERE status = &#x27;active&#x27;</code>) и <b>функциональные</b> (<code>lower(email)</code>) индексы.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Ключевое различие: упорядоченность.</li><li>Какие операции поддерживает каждый.</li><li>Почему по умолчанию B-дерево.</li><li>Специальные типы индексов — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать hash-индекс всегда быстрее.</li><li>Пытаться ускорить <code>LIKE &#x27;%abc%&#x27;</code> обычным B-деревом.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Поддерживает поиск по диапазону и сортировку, а не только по равенству</li><li class="no"><span class="mark">✗</span>Всегда быстрее для любых запросов</li><li class="no"><span class="mark">✗</span>Не занимает места на диске</li><li class="no"><span class="mark">✗</span>Гарантирует уникальность значений столбца</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое covering index?</li><li>Когда индекс по равенству выгоднее B-tree?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/indexes/">Индексы и планы запросов</a><p>Устройство B-tree, hash vs B-tree, составной и covering индекс, цена записи и когда индекс не используется.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/b-tree/">Почему индексы в базах данных устроены как B-дерево?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/hash-table/">Как устроена хеш-таблица?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/databases/index-effect/">Каков основной эффект добавления индекса по столбцу?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем B-tree индекс принципиально превосходит hash-индекс?","acceptedAnswer":{"@type":"Answer","text":"B-дерево упорядочено — поддерживает равенство, диапазоны, сортировку и префиксы строк. Hash-индекс — только равенство. Поэтому почти всегда выбирают B-дерево. B-дерево: =, <, >, BETWEEN, ORDER BY, LIKE 'abc%' Hash: только =, чуть компактнее для длинных ключей Специальные: GIN (массивы, JSONB, полнотекст), GiST (геометрия, диапазоны), BRIN (огромные таблицы с естественным порядком) Hash-индексы в PostgreSQL журналируются только с версии 10 B-дерево хранит ключи по порядку в сбалансированном дереве страниц. Поиск значения — O(log n), диапазон — найти начало и идти по листьям, сортировка — просто читать по порядку. Подходит для чисел, строк, дат, составных ключей. Вариант по умолчанию в любой СУБД. Hash-индекс хранит хеши ключей в корзинах. Поиск по точному значению — O(1) в среднем, но порядок теряется: никаких диапазонов, сортировки, префиксов. На практике выигрыш над B-деревом невелик (несколько уровней дерева всё равно в кэше), поэтому hash выбирают редко — для очень длинных ключей, по которым ищут только на равенство. В PostgreSQL до версии 10 hash-индексы не писались в WAL и не реплицировались. Другие типы в PostgreSQL: - GIN — инвертированный индекс: элементы массивов, ключи JSONB, полнотекстовый поиск (tsvector), триграммы (pg_trgm для LIKE '%abc%'); - GiST / SP-GiST — геометрия, диапазоны, ближайшие соседи; - BRIN…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

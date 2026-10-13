@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие вероятностные распределения нужно знать аналитику? — вопрос с собеседования</title>
+<meta name="description" content="Бернулли и биномиальное — успех/неуспех и число успехов из n попыток (конверсия). Пуассона — число редких событий за интервал (заказы в минуту…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/distributions/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/distributions/">
+<meta property="og:title" content="Какие вероятностные распределения нужно знать аналитику? — вопрос с собеседования">
+<meta property="og:description" content="Бернулли и биномиальное — успех/неуспех и число успехов из n попыток (конверсия). Пуассона — число редких событий за интервал (заказы в минуту…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Какие вероятностные распределения нужно знать аналитику?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Какие вероятностные распределения нужно знать аналитику?"}]}</script>
+  <h1>Какие вероятностные распределения нужно знать аналитику?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Статистика</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Где встречается распределение Пуассона?</li><li>Почему доходы распределены логнормально?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Бернулли и биномиальное</b> — успех/неуспех и число успехов из n попыток (конверсия). <b>Пуассона</b> — число редких событий за интервал (заказы в минуту, ошибки в час). <b>Нормальное</b> — суммы многих независимых факторов, распределение средних по ЦПТ. <b>Логнормальное</b> и <b>степенные</b> — чеки, доходы, популярность: длинный правый хвост. <b>Экспоненциальное</b> — время между событиями пуассоновского потока.</p><ul><li>Тип распределения определяет подходящий тест и интервал</li><li>У Пуассона среднее равно дисперсии; если дисперсия больше — «избыточная дисперсия» (отрицательное биномиальное)</li><li>Логарифм логнормальной величины распределён нормально</li></ul><p class="extra"><span>А ещё</span> Степенной закон (80/20): немного объектов дают большую часть суммы</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><div class="table"><table><thead><tr><th>распределение</th><th>что описывает</th><th>пример</th></tr></thead><tbody><tr><td>Бернулли / биномиальное</td><td>успехи из n попыток</td><td>конверсия, клики</td></tr><tr><td>Пуассона</td><td>число редких событий за интервал</td><td>заказы в минуту, инциденты</td></tr><tr><td>экспоненциальное</td><td>время между событиями</td><td>интервал между запросами</td></tr><tr><td>нормальное</td><td>сумма многих факторов, выборочные средние</td><td>рост, ошибки измерения</td></tr><tr><td>логнормальное</td><td>произведение факторов, положительные с хвостом</td><td>чек, доход, время сессии</td></tr><tr><td>степенное</td><td>«богатые богатеют»</td><td>популярность товаров, размеры городов</td></tr></tbody></table></div>
+<p><b>Зачем аналитику:</b></p>
+<ul><li>выбрать тест: для конверсии — тест пропорций, для выручки с хвостом — бутстреп или преобразование;</li><li>моделировать нагрузку: пуассоновский поток заказов → вероятность пиков;</li><li>не ошибаться с выбросами: в логнормальных данных «выбросы» — часть распределения, а не мусор.</li></ul>
+<p><b>Проверка:</b> гистограмма, QQ-график, сравнение среднего и дисперсии, логарифмирование.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Основные распределения с примерами из продукта.</li><li>Связь распределения с выбором метода.</li><li>Длинные хвосты и что с ними делать.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/central-tendency/">Чем отличаются среднее, медиана и мода и когда что использовать?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/clt-confidence-intervals/">Что такое центральная предельная теорема и доверительный интервал?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие вероятностные распределения нужно знать аналитику?","acceptedAnswer":{"@type":"Answer","text":"Бернулли и биномиальное — успех/неуспех и число успехов из n попыток (конверсия). Пуассона — число редких событий за интервал (заказы в минуту, ошибки в час). Нормальное — суммы многих независимых факторов, распределение средних по ЦПТ. Логнормальное и степенные — чеки, доходы, популярность: длинный правый хвост. Экспоненциальное — время между событиями пуассоновского потока. Тип распределения определяет подходящий тест и интервал У Пуассона среднее равно дисперсии; если дисперсия больше — «избыточная дисперсия» (отрицательное биномиальное) Логарифм логнормальной величины распределён нормально Степенной закон (80/20): немного объектов дают большую часть суммы | распределение | что описывает | пример | | --- | --- | --- | | Бернулли / биномиальное | успехи из n попыток | конверсия, клики | | Пуассона | число редких событий за интервал | заказы в минуту, инциденты | | экспоненциальное | время между событиями | интервал между запросами | | нормальное | сумма многих факторов, выборочные средние | рост, ошибки измерения | | логнормальное | произведение факторов, положительные с хвостом | чек, доход, время сессии | | степенное | «богатые богатеют» | популярность товаров, размеры городов | Зачем аналитику: - выбрать тест: для конверсии — тест пропорций, для выручки с хвостом — бутстреп или преобразование; - моделировать нагрузку: пуассоновский поток заказов → вероятность пиков; - не ошибаться с выбросами: в логнормальных данных «выбросы» — часть распределения, а не мусор. Проверка: гистограмма, QQ-график, сравнение среднего и дисперсии…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

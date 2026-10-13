@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое __slots__ и когда его использовать? — вопрос с собеседования</title>
+<meta name="description" content="__slots__ = (&quot;x&quot;, &quot;y&quot;) заменяет у экземпляров словарь __dict__ на фиксированные ячейки: объект занимает в несколько раз меньше памяти, доступ к…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/slots/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/slots/">
+<meta property="og:title" content="Что такое __slots__ и когда его использовать? — вопрос с собеседования">
+<meta property="og:description" content="__slots__ = (&quot;x&quot;, &quot;y&quot;) заменяет у экземпляров словарь __dict__ на фиксированные ячейки: объект занимает в несколько раз меньше памяти, доступ к…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Что такое __slots__ и когда его использовать?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Что такое __slots__ и когда его использовать?"}]}</script>
+  <h1>Что такое __slots__ и когда его использовать?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Внутреннее устройство</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как уменьшить память под миллион объектов в Python?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><code>__slots__ = (&quot;x&quot;, &quot;y&quot;)</code> заменяет у экземпляров словарь <code>__dict__</code> на <b>фиксированные ячейки</b>: объект занимает в несколько раз меньше памяти, доступ к атрибутам чуть быстрее, а <b>добавить новый атрибут нельзя</b> (AttributeError).</p><ul><li>Выигрыш заметен на миллионах мелких объектов</li><li>Наследники без своих __slots__ снова получают __dict__</li><li>Для weakref нужно добавить '__weakref__' в слоты</li></ul><p class="extra"><span>А ещё</span> @dataclass(slots=True) с Python 3.10 генерирует слоты сам</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Без слотов</b> каждый экземпляр хранит атрибуты в своём словаре — гибко, но словарь на каждый объект стоит сотни байт.</p>
+<pre class="lang-python"><code>class Point:
+    __slots__ = (&quot;x&quot;, &quot;y&quot;)
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+
+p = Point(1, 2)
+p.z = 3      # AttributeError</code></pre>
+<p>Слоты реализованы дескрипторами на уровне класса: каждый атрибут — ячейка фиксированного смещения в объекте.</p>
+<p><b>Ограничения:</b></p>
+<ul><li>нельзя добавлять атрибуты, не перечисленные в слотах;</li><li>множественное наследование от двух классов с непустыми слотами невозможно;</li><li>значения по умолчанию через атрибуты класса конфликтуют со слотами;</li><li>pickle и копирование работают, но старые библиотеки, ожидающие <code>__dict__</code>, могут сломаться.</li></ul>
+<p><b>Когда применять:</b> много мелких объектов (точки, узлы графа, записи из парсера). Для обычных бизнес-объектов выигрыш не нужен.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Что заменяют слоты и выигрыш в памяти.</li><li>Ограничения.</li><li>dataclass(slots=True).</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/refcount-gc/">Как Python управляет памятью — подсчёт ссылок и сборщик мусора?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/dataclasses/">Чем dataclass отличается от namedtuple и Pydantic-модели?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое __slots__ и когда его использовать?","acceptedAnswer":{"@type":"Answer","text":"__slots__ = (\"x\", \"y\") заменяет у экземпляров словарь __dict__ на фиксированные ячейки: объект занимает в несколько раз меньше памяти, доступ к атрибутам чуть быстрее, а добавить новый атрибут нельзя (AttributeError). Выигрыш заметен на миллионах мелких объектов Наследники без своих __slots__ снова получают __dict__ Для weakref нужно добавить '__weakref__' в слоты @dataclass(slots=True) с Python 3.10 генерирует слоты сам Без слотов каждый экземпляр хранит атрибуты в своём словаре — гибко, но словарь на каждый объект стоит сотни байт. Слоты реализованы дескрипторами на уровне класса: каждый атрибут — ячейка фиксированного смещения в объекте. Ограничения: - нельзя добавлять атрибуты, не перечисленные в слотах; - множественное наследование от двух классов с непустыми слотами невозможно; - значения по умолчанию через атрибуты класса конфликтуют со слотами; - pickle и копирование работают, но старые библиотеки, ожидающие __dict__, могут сломаться. Когда применять: много мелких объектов (точки, узлы графа, записи из парсера). Для обычных бизнес-объектов выигрыш не нужен."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

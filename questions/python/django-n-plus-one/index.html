@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как найти и исправить проблему N+1 запросов в Django ORM? — вопрос с собеседования</title>
+<meta name="description" content="N+1 — один запрос за списком и по запросу на каждый элемент при обращении к связанному объекту в цикле. select_related — JOIN в одном запросе для…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/django-n-plus-one/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/django-n-plus-one/">
+<meta property="og:title" content="Как найти и исправить проблему N+1 запросов в Django ORM? — вопрос с собеседования">
+<meta property="og:description" content="N+1 — один запрос за списком и по запросу на каждый элемент при обращении к связанному объекту в цикле. select_related — JOIN в одном запросе для…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Как найти и исправить проблему N+1 запросов в Django ORM?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Как найти и исправить проблему N+1 запросов в Django ORM?"}]}</script>
+  <h1>Как найти и исправить проблему N+1 запросов в Django ORM?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Веб-фреймворки</span><span class="chip">Django</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем select_related отличается от prefetch_related?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>N+1</b> — один запрос за списком и по запросу на каждый элемент при обращении к связанному объекту в цикле. <b>select_related</b> — JOIN в одном запросе для ForeignKey и OneToOne. <b>prefetch_related</b> — отдельный запрос на связь и склейка в Python для ManyToMany и обратных связей.</p><ul><li>Найти: django-debug-toolbar, логирование SQL, assertNumQueries в тестах</li><li>only/defer — не тянуть лишние колонки</li><li>Prefetch(queryset=...) — отфильтрованная предзагрузка</li></ul><p class="extra"><span>А ещё</span> Агрегаты считать в базе: annotate(Count(...)), а не len() в цикле</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Откуда берётся.</b> Ленивые связи ORM: <code>order.customer</code> загружается при первом обращении. В цикле по 100 заказам — 101 запрос. В шаблонах и сериализаторах DRF это особенно незаметно.</p>
+<p><b>select_related</b> строит SQL JOIN — подходит для связей «к одному». Для «ко многим» JOIN размножил бы строки, поэтому там <b>prefetch_related</b>: второй запрос <code>WHERE order_id IN (...)</code> и раскладка результатов по объектам в памяти.</p>
+<p><b>Контроль в тестах:</b></p>
+<pre class="lang-python"><code>def test_list(self):
+    with self.assertNumQueries(2):
+        self.client.get(&quot;/orders/&quot;)</code></pre>
+<p>Тот же класс проблем есть в любом ORM: в Hibernate — fetch join и EntityGraph, в SQLAlchemy — <code>joinedload</code> и <code>selectinload</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code># N+1: 1 запрос за заказами + по запросу за покупателем на каждый
+for order in Order.objects.all():
+    print(order.customer.name)
+
+# 1 запрос с JOIN
+for order in Order.objects.select_related(&quot;customer&quot;):
+    print(order.customer.name)
+
+# 2 запроса: заказы и все их позиции
+orders = Order.objects.prefetch_related(&quot;items&quot;)</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Что такое N+1 и откуда.</li><li>select_related и prefetch_related — когда какой.</li><li>Как обнаружить и не допустить снова.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/databases/n-plus-one/">Что такое проблема N+1 запросов и как её решать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/spring-n-plus-one/">Список из 100 заказов рендерится вместе с покупателем каждого, и в логе видно 101 SQL-запрос. Какие способы исправят проблему?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как найти и исправить проблему N+1 запросов в Django ORM?","acceptedAnswer":{"@type":"Answer","text":"N+1 — один запрос за списком и по запросу на каждый элемент при обращении к связанному объекту в цикле. select_related — JOIN в одном запросе для ForeignKey и OneToOne. prefetch_related — отдельный запрос на связь и склейка в Python для ManyToMany и обратных связей. Найти: django-debug-toolbar, логирование SQL, assertNumQueries в тестах only/defer — не тянуть лишние колонки Prefetch(queryset=...) — отфильтрованная предзагрузка Агрегаты считать в базе: annotate(Count(...)), а не len() в цикле Откуда берётся. Ленивые связи ORM: order.customer загружается при первом обращении. В цикле по 100 заказам — 101 запрос. В шаблонах и сериализаторах DRF это особенно незаметно. select_related строит SQL JOIN — подходит для связей «к одному». Для «ко многим» JOIN размножил бы строки, поэтому там prefetch_related: второй запрос WHERE order_id IN (...) и раскладка результатов по объектам в памяти. Контроль в тестах: Тот же класс проблем есть в любом ORM: в Hibernate — fetch join и EntityGraph, в SQLAlchemy — joinedload и selectinload."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

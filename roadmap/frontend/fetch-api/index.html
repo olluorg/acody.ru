@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Работа с сетью — fetch и REST — карта «Frontend-разработчик»</title>
+<meta name="description" content="Запросы к серверу из браузера — fetch, JSON, обработка ошибок, отмена, CORS.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/frontend/fetch-api/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/frontend/fetch-api/">
+<meta property="og:title" content="Работа с сетью — fetch и REST — карта «Frontend-разработчик»">
+<meta property="og:description" content="Запросы к серверу из браузера — fetch, JSON, обработка ошибок, отмена, CORS.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/frontend/#javascript">Frontend-разработчик</a> <span>/</span> <a href="/roadmap/frontend/javascript/">JavaScript</a> <span>/</span> <span>Работа с сетью — fetch и REST</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Frontend-разработчик","item":"https://learn.getsotto.ru/roadmap/frontend/#javascript"},{"@type":"ListItem","position":3,"name":"JavaScript","item":"https://learn.getsotto.ru/roadmap/frontend/javascript/"},{"@type":"ListItem","position":4,"name":"Работа с сетью — fetch и REST"}]}</script>
+  <h1>Работа с сетью — fetch и REST</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Запросы к серверу из браузера — fetch, JSON, обработка ошибок, отмена, CORS.</p>
+  <article class="md"><pre class="lang-js"><code>async function loadOrder(id, signal) {
+  const res = await fetch(`/api/orders/${id}`, { signal, headers: { Accept: &quot;application/json&quot; } });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);   // fetch не бросает на 4xx/5xx
+  return res.json();
+}
+const ctrl = new AbortController();
+loadOrder(42, ctrl.signal);
+ctrl.abort();   // например, при уходе со страницы</code></pre>
+<h3>Что важно знать</h3>
+<ul><li><code>fetch</code> отклоняет промис только при сетевой ошибке; коды 4xx и 5xx нужно проверять через <code>res.ok</code>.</li><li>Отправка JSON: <code>method: &quot;POST&quot;</code>, <code>body: JSON.stringify(data)</code>, заголовок <code>Content-Type: application/json</code>.</li><li><b>CORS</b>: запрос на другой домен браузер разрешит, только если сервер ответил нужными заголовками; «непростые» запросы предваряются preflight <code>OPTIONS</code>. Это защита браузера, а не сервера.</li><li>Cookies на другой домен — <code>credentials: &quot;include&quot;</code> и согласие сервера.</li><li>Состояния загрузки и ошибки, повторы с паузой, гонки ответов (старый ответ пришёл позже нового) — отмена через <code>AbortController</code>.</li><li>В приложениях серверное состояние обычно ведут библиотеки вроде TanStack Query: кэш, повторы, обновление в фоне.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 6 ч</small></h3><ul><li>Делает запросы через fetch, проверяет res.ok и показывает состояния загрузки и ошибки</li><li>Объясняет CORS и почему ошибка CORS — настройка сервера</li></ul><p class="rm-practice"><b>Практика.</b> Сделать страницу, которая загружает данные из публичного API с состояниями загрузки, пустого результата и ошибки.</p></div><div class="rm-grade"><h3>Middle <small>≈ 4 ч</small></h3><ul><li>Отменяет запросы при уходе со страницы и обрабатывает повторы и таймауты</li><li>Работает с cookies на другом домене и понимает preflight</li></ul><p class="rm-practice"><b>Практика.</b> Написать обёртку над fetch с таймаутом, повтором, отменой и типизацией ответа.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/cs/csrf-cors/">Что такое CSRF и как он связан с CORS?</a> <span class="lvl lvl-middle">Middle</span><p>CSRF — чужой сайт заставляет браузер жертвы отправить запрос на ваш сайт; браузер сам приложит cookie, и запрос выполнится от имени пользователя. CORS — правила, когда скрипт с…</p></li><li><a href="/questions/qa/http-methods/">Какие HTTP-методы вы знаете? Чем GET отличается от POST?</a> <span class="lvl lvl-junior">Junior</span><p>GET — получить данные, POST — создать или отправить, PUT — заменить целиком, PATCH — изменить частично, DELETE — удалить.</p></li><li><a href="/questions/system-design/api-backward-compatibility/">Какие изменения REST API обратно совместимы для существующих клиентов?</a> <span class="lvl lvl-middle">Middle</span><p>Добавлять можно (новое необязательное поле в ответе, новый эндпоинт, новый необязательный параметр); удалять, переименовывать, менять тип и ужесточать — нельзя.</p></li></ul></section><section class="block"><h2>Документация</h2><ul class="links"><li><a href="https://developer.mozilla.org/ru/docs/Web/API/Fetch_API/Using_Fetch" rel="noopener" target="_blank">MDN: Fetch API ↗</a></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/frontend/dom-events/">← DOM и события</a><a class="next" href="/roadmap/frontend/js-modules/">Модули →</a></nav>
+  <p class="rm-back"><a href="/roadmap/frontend/#javascript">← Вся карта «Frontend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Работа с сетью — fetch и REST","description":"Запросы к серверу из браузера — fetch, JSON, обработка ошибок, отмена, CORS.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/frontend/fetch-api/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

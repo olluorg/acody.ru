@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что делает терминальная операция collect? — вопрос с собеседования</title>
+<meta name="description" content="collect — терминальная операция, которая складывает результат конвейера в структуру: список, множество, карту, строку. Готовые сборщики: toList…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/stream-collect/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/stream-collect/">
+<meta property="og:title" content="Что делает терминальная операция collect? — вопрос с собеседования">
+<meta property="og:description" content="collect — терминальная операция, которая складывает результат конвейера в структуру: список, множество, карту, строку. Готовые сборщики: toList…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что делает терминальная операция collect?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что делает терминальная операция collect?"}]}</script>
+  <h1>Что делает терминальная операция collect?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Лямбды и Stream API</span><span class="chip ver">Java &gt;=8</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как сгруппировать элементы стрима?</li><li>Что такое Collectors?</li><li>Почему Collectors.toMap бросает исключение?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><code>collect</code> — терминальная операция, которая <b>складывает результат</b> конвейера в структуру: список, множество, карту, строку.</p><ul><li>Готовые сборщики: toList, toSet, toMap, joining, groupingBy, partitioningBy, counting</li><li>groupingBy заменяет цикл с картой и проверкой ключа одной строкой</li></ul><p class="extra"><span>А ещё</span> toMap: одинаковые ключи без функции слияния → IllegalStateException, значение null → NPE</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><code>collect(Collector)</code> завершает конвейер и собирает элементы. Способ сборки задают готовые коллекторы из <code>Collectors</code>:</p>
+<ul><li><code>toList()</code>, <code>toSet()</code>, <code>toCollection(TreeSet::new)</code>;</li><li><code>toMap(keyFn, valueFn)</code> — в карту;</li><li><code>joining(&quot;, &quot;)</code> — склеить строки;</li><li><code>groupingBy(classifier)</code> — сгруппировать в <code>Map&lt;K, List&lt;T&gt;&gt;</code>; со вторым аргументом — посчитать, просуммировать, собрать в множество;</li><li><code>partitioningBy(predicate)</code> — разделить на две группы по условию;</li><li><code>counting()</code>, <code>summingInt</code>, <code>averagingDouble</code>, <code>mapping</code>.</li></ul>
+<p>С Java 16 для списка есть короткий <code>stream.toList()</code> — он возвращает неизменяемый список.</p>
+<p>Ловушки <code>toMap</code>:</p>
+<ul><li>если два элемента дают одинаковый ключ, будет <code>IllegalStateException</code> — нужен третий аргумент, функция слияния;</li><li>значение <code>null</code> вызывает <code>NullPointerException</code>.</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>Map&lt;String, List&lt;Order&gt;&gt; byCity = orders.stream()
+        .collect(Collectors.groupingBy(Order::city));
+
+Map&lt;String, Long&gt; countByCity = orders.stream()
+        .collect(Collectors.groupingBy(Order::city, Collectors.counting()));
+
+Map&lt;String, Integer&gt; totalByCustomer = orders.stream()
+        .collect(Collectors.toMap(Order::customer, Order::total, Integer::sum));</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Назначение collect.</li><li>Основные коллекторы, особенно groupingBy.</li><li>Ловушки toMap.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Собирать в карту без обработки повторяющихся ключей.</li><li>Допускать null-значения при сборке в карту.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Собирает элементы конвейера в результирующую структуру — список, множество, карту или строку</li><li class="no"><span class="mark">✗</span>Фильтрует элементы по заданному условию</li><li class="no"><span class="mark">✗</span>Сортирует элементы перед выводом</li><li class="no"><span class="mark">✗</span>Запускает обработку в несколько потоков</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем сборка отличается от свёртки через reduce?</li><li>Как посчитать количество элементов в каждой группе?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/collectors/">Collectors и свёртка</a><p>reduce против collect, базовые коллекторы и ловушка toMap, группировка и downstream-коллекторы, характеристики и параллельность.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/tomap-null-value/">Функция значения в Collectors.toMap вернула null для одного из элементов. Что произойдёт?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/collect-vs-reduce/">Чем collect отличается от reduce при сборке стрима?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/groupingby-counting/">Как одним коллектором получить «количество элементов в каждой группе»?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/tomap-duplicate-key/">Что произойдёт в Collectors.toMap, если два элемента дают одинаковый ключ, а merge-функция не передана?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что делает терминальная операция collect?","acceptedAnswer":{"@type":"Answer","text":"collect — терминальная операция, которая складывает результат конвейера в структуру: список, множество, карту, строку. Готовые сборщики: toList, toSet, toMap, joining, groupingBy, partitioningBy, counting groupingBy заменяет цикл с картой и проверкой ключа одной строкой toMap: одинаковые ключи без функции слияния → IllegalStateException, значение null → NPE collect(Collector) завершает конвейер и собирает элементы. Способ сборки задают готовые коллекторы из Collectors: - toList(), toSet(), toCollection(TreeSet::new); - toMap(keyFn, valueFn) — в карту; - joining(\", \") — склеить строки; - groupingBy(classifier) — сгруппировать в Map<K, List<T>>; со вторым аргументом — посчитать, просуммировать, собрать в множество; - partitioningBy(predicate) — разделить на две группы по условию; - counting(), summingInt, averagingDouble, mapping. С Java 16 для списка есть короткий stream.toList() — он возвращает неизменяемый список. Ловушки toMap: - если два элемента дают одинаковый ключ, будет IllegalStateException — нужен третий аргумент, функция слияния; - значение null вызывает NullPointerException."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

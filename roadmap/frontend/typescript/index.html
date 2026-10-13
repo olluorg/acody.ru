@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TypeScript — карта «Frontend-разработчик»</title>
+<meta name="description" content="JavaScript со статическими типами — стандарт для коммерческой фронтенд-разработки.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/frontend/typescript/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/frontend/typescript/">
+<meta property="og:title" content="TypeScript — карта «Frontend-разработчик»">
+<meta property="og:description" content="JavaScript со статическими типами — стандарт для коммерческой фронтенд-разработки.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/frontend/#typescript">Frontend-разработчик</a> <span>/</span> <span>TypeScript</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Frontend-разработчик","item":"https://learn.getsotto.ru/roadmap/frontend/#typescript"},{"@type":"ListItem","position":3,"name":"TypeScript"}]}</script>
+  <h1>TypeScript</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">JavaScript со статическими типами — стандарт для коммерческой фронтенд-разработки.</p>
+  <article class="md"><p>TypeScript добавляет к JavaScript типы, которые проверяются при сборке и стираются в итоговом коде. Ошибки вида «undefined is not a function» ловятся до запуска, редактор подсказывает поля и методы, рефакторинг становится безопасным.</p>
+<pre class="lang-ts"><code>type Order = { id: number; status: &quot;new&quot; | &quot;paid&quot; | &quot;shipped&quot;; total?: number };
+
+function label(o: Order): string {
+  switch (o.status) {
+    case &quot;new&quot;: return &quot;Новый&quot;;
+    case &quot;paid&quot;: return &quot;Оплачен&quot;;
+    case &quot;shipped&quot;: return &quot;Отправлен&quot;;
+  }
+}</code></pre>
+<h3>Что важно знать</h3>
+<ul><li>Структурная типизация: совместимость по форме, а не по имени типа.</li><li>Объединения (<code>|</code>), литеральные типы, сужение через <code>typeof</code>, <code>in</code>, проверку поля-дискриминатора.</li><li><code>unknown</code> вместо <code>any</code>: значение нужно проверить перед использованием.</li><li>Дженерики: <code>function first&lt;T&gt;(xs: T[]): T | undefined</code>.</li><li>Утилиты: <code>Partial</code>, <code>Pick</code>, <code>Omit</code>, <code>Record</code>, <code>ReturnType</code>.</li><li><code>interface</code> и <code>type</code> почти взаимозаменяемы; <code>interface</code> расширяется объявлением, <code>type</code> умеет объединения и вычисляемые типы.</li><li><code>strict: true</code> в tsconfig — обязательно.</li><li>Типы не проверяют данные в рантайме: ответ сервера валидируют (Zod, Valibot).</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 10 ч</small></h3><ul><li>Типизирует функции, объекты и пропсы, использует объединения и сужение типов</li><li>Использует unknown вместо any и включает strict</li></ul><p class="rm-practice"><b>Практика.</b> Перевести учебный JS-проект на TypeScript в режиме strict без any.</p></div><div class="rm-grade"><h3>Middle <small>≈ 10 ч</small></h3><ul><li>Пишет дженерики и использует утилитарные типы</li><li>Описывает дискриминированные объединения для состояний (загрузка, успех, ошибка)</li><li>Валидирует данные с сервера схемой (Zod) и выводит из неё типы</li></ul><p class="rm-practice"><b>Практика.</b> Типизировать слой API — дженерик-клиент, схемы Zod для ответов, дискриминированные объединения для состояний запросов.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/frontend/typescript-basics/">Зачем нужен TypeScript и чем any отличается от unknown?</a> <span class="lvl lvl-junior">Junior</span><p>TypeScript добавляет к JavaScript статические типы, которые проверяются при компиляции и стираются в итоговом JS. Польза: ошибки до запуска, автодополнение, безопасный…</p></li><li><a href="/questions/frontend/typescript-interface-type/">Чем interface отличается от type в TypeScript и что такое утилитарные типы?</a> <span class="lvl lvl-junior">Junior</span><p>Оба описывают форму объекта. interface — расширяется через extends и сливается при повторном объявлении (удобно для расширения чужих типов). type — умеет больше: объединения…</p></li></ul></section><section class="block"><h2>Документация</h2><ul class="links"><li><a href="https://www.typescriptlang.org/docs/handbook/intro.html" rel="noopener" target="_blank">Документация TypeScript ↗</a></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/frontend/package-managers/">← Пакетные менеджеры — npm, pnpm, Yarn</a><a class="next" href="/roadmap/frontend/frameworks/">Фреймворк →</a></nav>
+  <p class="rm-back"><a href="/roadmap/frontend/#typescript">← Вся карта «Frontend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"TypeScript","description":"JavaScript со статическими типами — стандарт для коммерческой фронтенд-разработки.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/frontend/typescript/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

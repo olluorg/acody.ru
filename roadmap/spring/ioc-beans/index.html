@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IoC, DI и бины — карта «Spring»</title>
+<meta name="description" content="Внедрение зависимостей, стереотипы и @Bean, жизненный цикл, scopes.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/spring/ioc-beans/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/spring/ioc-beans/">
+<meta property="og:title" content="IoC, DI и бины — карта «Spring»">
+<meta property="og:description" content="Внедрение зависимостей, стереотипы и @Bean, жизненный цикл, scopes.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/">Backend-разработчик</a> <span>/</span> <a href="/roadmap/java/">Java</a> <span>/</span> <a href="/roadmap/spring/#core">Spring</a> <span>/</span> <a href="/roadmap/spring/core/">Контейнер и бины</a> <span>/</span> <span>IoC, DI и бины</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://learn.getsotto.ru/roadmap/backend/"},{"@type":"ListItem","position":3,"name":"Java","item":"https://learn.getsotto.ru/roadmap/java/"},{"@type":"ListItem","position":4,"name":"Spring","item":"https://learn.getsotto.ru/roadmap/spring/#core"},{"@type":"ListItem","position":5,"name":"Контейнер и бины","item":"https://learn.getsotto.ru/roadmap/spring/core/"},{"@type":"ListItem","position":6,"name":"IoC, DI и бины"}]}</script>
+  <h1>IoC, DI и бины</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Внедрение зависимостей, стереотипы и @Bean, жизненный цикл, scopes.</p>
+  <article class="md"><h3>Что важно знать</h3>
+<ul><li><b>IoC</b>: объекты не создают зависимости сами — их внедряет контейнер.</li><li><b>Внедрение через конструктор</b> — обязательные зависимости явно, неизменяемые поля, удобные тесты.</li><li><code>@Component</code>, <code>@Service</code>, <code>@Repository</code>, <code>@Configuration</code> + <code>@Bean</code>.</li><li><b>Жизненный цикл</b>: создание, внедрение, <code>@PostConstruct</code>, прокси, использование, <code>@PreDestroy</code>.</li><li><b>Scopes</b>: singleton по умолчанию, prototype, request, session.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 8 ч</small></h3><ul><li>Объясняет IoC и внедрение через конструктор и почему оно предпочтительнее</li><li>Объявляет бины стереотипами и методами @Bean</li><li>Описывает жизненный цикл бина и scopes singleton и prototype</li></ul><p class="rm-practice"><b>Практика.</b> Сделать приложение из трёх слоёв (контроллер, сервис, репозиторий) с внедрением через конструктор и тестом сервиса.</p></div><div class="rm-grade"><h3>Middle <small>≈ 4 ч</small></h3><ul><li>Решает конфликты при нескольких кандидатах — @Primary, @Qualifier</li><li>Объясняет, почему prototype внутри singleton не обновляется и как это исправить</li></ul><p class="rm-practice"><b>Практика.</b> Разобрать на примере проблему prototype-бина внутри singleton и исправить через ObjectProvider.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/spring/ioc-vs-di/">Как соотносятся IoC и DI в Spring?</a> <span class="lvl lvl-junior">Junior</span><p>IoC (инверсия управления) — принцип: объекты не создают свои зависимости и не управляют своим жизненным циклом, это делает контейнер. DI (внедрение зависимостей) — конкретный…</p></li><li><a href="/questions/spring/component-vs-bean/">Чем @Component отличается от @Bean?</a> <span class="lvl lvl-middle">Middle</span><p>@Component — на своём классе, бин находится сканированием. @Bean — на методе в @Configuration-классе, который создаёт и настраивает объект; подходит для чужих классов и сложной…</p></li><li><a href="/questions/spring/constructor-injection/">Какие преимущества у constructor injection по сравнению с field injection? Выберите все верные.</a> <span class="lvl lvl-junior">Junior</span><p>Внедрение через конструктор даёт final-поля, полностью готовый объект сразу после создания, явные зависимости и тесты без Spring — достаточно вызвать конструктор.</p></li><li><a href="/questions/spring/qualifier-primary/">Как разрешить неоднозначность, когда для внедрения подходят несколько бинов одного типа?</a> <span class="lvl lvl-middle">Middle</span><p>При нескольких кандидатах — NoUniqueBeanDefinitionException. Решения: @Primary — бин по умолчанию; @Qualifier(&quot;имя&quot;) — выбрать конкретный в точке внедрения (он сильнее @Primary).</p></li><li><a href="/questions/spring/spring-bean/">Что такое Spring Bean?</a> <span class="lvl lvl-junior">Junior</span><p>Бин — объект, которым управляет контейнер Spring: создаёт, внедряет зависимости, инициализирует, оборачивает прокси и уничтожает при закрытии контекста.</p></li><li><a href="/questions/spring/inject-all-implementations/">Как внедрить сразу все реализации интерфейса и выбирать нужную в рантайме?</a> <span class="lvl lvl-middle">Middle</span><p>Внедрить List&lt;T&gt; или Map&lt;String, T&gt;: Spring передаст все бины типа. Список — в порядке @Order, карта — с именами бинов в ключах. Нужная стратегия выбирается в рантайме.</p></li></ul></section><section class="block"><h2>Разборы темы</h2><ul class="links"><li><a href="/articles/spring/bean/">Бины: жизненный цикл и scopes</a><p>Бин и BeanDefinition, полный жизненный цикл, роль BeanPostProcessor, области видимости и их ловушки.</p></li><li><a href="/articles/spring/ioc/">IoC и Dependency Injection</a><p>Принцип инверсии управления, DI как его форма, три способа внедрения и почему конструктор, разрешение циклических зависимостей.</p></li><li><a href="/articles/spring/stereotypes/">Стереотипы, @Bean и автосвязывание</a><p>Стереотипные аннотации и их семантика, @Bean против @Component, component-scan, @Autowired и разрешение неоднозначности.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/spring/core/">← Контейнер и бины</a><a class="next" href="/roadmap/spring/configuration/">Конфигурация и контекст →</a></nav>
+  <p class="rm-back"><a href="/roadmap/spring/#core">← Вся карта «Spring»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"IoC, DI и бины","description":"Внедрение зависимостей, стереотипы и @Bean, жизненный цикл, scopes.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/spring/ioc-beans/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

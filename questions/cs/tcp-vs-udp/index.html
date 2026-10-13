@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем TCP отличается от UDP? — вопрос с собеседования</title>
+<meta name="description" content="TCP — надёжный упорядоченный поток байтов с установкой соединения. UDP — отдельные датаграммы без гарантий: быстро и просто. TCP: рукопожатие…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/tcp-vs-udp/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/tcp-vs-udp/">
+<meta property="og:title" content="Чем TCP отличается от UDP? — вопрос с собеседования">
+<meta property="og:description" content="TCP — надёжный упорядоченный поток байтов с установкой соединения. UDP — отдельные датаграммы без гарантий: быстро и просто. TCP: рукопожатие…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Чем TCP отличается от UDP?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Чем TCP отличается от UDP?"}]}</script>
+  <h1>Чем TCP отличается от UDP?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Сети</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Когда выбирают UDP вместо TCP?</li><li>Почему видеозвонки работают по UDP?</li><li>Почему DNS использует UDP?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>TCP</b> — надёжный упорядоченный поток байтов с установкой соединения. <b>UDP</b> — отдельные датаграммы без гарантий: быстро и просто.</p><ul><li>TCP: рукопожатие, подтверждения, повторная передача, порядок, управление потоком и перегрузкой</li><li>UDP: нет соединения, нет повторов, порядок не гарантирован, сообщения сохраняют границы</li><li>UDP — где потерянное устарело: голос, видео, игры; где запрос маленький: DNS</li></ul><p class="extra"><span>А ещё</span> QUIC (HTTP/3) — надёжность поверх UDP, чтобы обойти ограничения TCP</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">TCP: рукопожатие, потери и повторная передача</p><script type="module" src="/widgets/tcp.js"></script><sotto-tcp theme="dark"></sotto-tcp></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>TCP</b> даёт приложению абстракцию трубы: что записали с одной стороны, то в том же порядке и без потерь прочитают с другой. Для этого:</p>
+<ul><li>установка соединения тройным рукопожатием;</li><li>нумерация байтов и подтверждения, повторная отправка потерянного;</li><li>переупорядочивание на приёме;</li><li>управление потоком — не завалить медленного получателя;</li><li>управление перегрузкой — не завалить сеть.</li></ul>
+<p>Цена — задержка на установку соединения, состояние на обеих сторонах и <b>блокировка начала очереди</b>: если потерялся один сегмент, все следующие ждут его повторной отправки, даже если уже пришли.</p>
+<p><b>UDP</b> добавляет к IP только порты и контрольную сумму. Нет соединения, нет подтверждений, нет порядка; каждая датаграмма — отдельное сообщение, границы сохраняются (в TCP их нет — приложение само делит поток на сообщения). Приложение может само реализовать ровно ту надёжность, которая нужна.</p>
+<p><b>Когда что:</b></p>
+<ul><li><b>TCP</b> — почти всё, где важна целостность: HTTP/1.1 и 2, базы данных, почта, SSH, брокеры;</li><li><b>UDP</b> — реальное время, где повтор опоздавших данных бесполезен: голос и видео (RTP, WebRTC), онлайн-игры; короткие запросы-ответы, где дешевле переспросить, чем устанавливать соединение: DNS, NTP; рассылка многим получателям (multicast); метрики (StatsD) — потеря точки не страшна;</li><li><b>QUIC</b> — транспорт HTTP/3 поверх UDP: шифрование встроено, установка соединения за один оборот (или ноль при повторном), независимые потоки без общей блокировки, переезд соединения при смене сети.</li></ul>
+<p>DNS переходит на TCP, если ответ больше 512 байт (или лимита EDNS), и для передачи зон.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import socket
+# UDP: одна датаграмма, ответа может не быть
+u = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+u.sendto(b&quot;ping&quot;, (&quot;127.0.0.1&quot;, 9999))
+
+# TCP: соединение и поток байтов — два send могут прийти одним recv
+t = socket.create_connection((&quot;example.com&quot;, 80))
+t.sendall(b&quot;GET / HTTP/1.1\r\nHost: example.com\r\nConnection: close\r\n\r\n&quot;)
+print(t.recv(100))</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Надёжный поток против датаграмм без гарантий.</li><li>Механизмы TCP: рукопожатие, подтверждения, порядок, управление потоком и перегрузкой.</li><li>Примеры выбора UDP и почему.</li><li>Отсутствие границ сообщений в TCP, QUIC — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«UDP быстрее, потому что пакеты меньше» — дело в отсутствии ожиданий и повторов.</li><li>Считать, что TCP гарантирует доставку сообщений приложению на другой стороне — он гарантирует байты в буфер ядра, не обработку.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/tcp-handshake/">Как устанавливается и закрывается TCP-соединение?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/tcp-reliability/">Как TCP обеспечивает надёжную доставку и не перегружает сеть?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/osi-tcp-ip/">Расскажите про модель OSI и стек TCP/IP.</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/http-versions/">Чем отличаются HTTP/1.1, HTTP/2 и HTTP/3?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем TCP отличается от UDP?","acceptedAnswer":{"@type":"Answer","text":"TCP — надёжный упорядоченный поток байтов с установкой соединения. UDP — отдельные датаграммы без гарантий: быстро и просто. TCP: рукопожатие, подтверждения, повторная передача, порядок, управление потоком и перегрузкой UDP: нет соединения, нет повторов, порядок не гарантирован, сообщения сохраняют границы UDP — где потерянное устарело: голос, видео, игры; где запрос маленький: DNS QUIC (HTTP/3) — надёжность поверх UDP, чтобы обойти ограничения TCP TCP даёт приложению абстракцию трубы: что записали с одной стороны, то в том же порядке и без потерь прочитают с другой. Для этого: - установка соединения тройным рукопожатием; - нумерация байтов и подтверждения, повторная отправка потерянного; - переупорядочивание на приёме; - управление потоком — не завалить медленного получателя; - управление перегрузкой — не завалить сеть. Цена — задержка на установку соединения, состояние на обеих сторонах и блокировка начала очереди: если потерялся один сегмент, все следующие ждут его повторной отправки, даже если уже пришли. UDP добавляет к IP только порты и контрольную сумму. Нет соединения, нет подтверждений, нет порядка; каждая датаграмма — отдельное сообщение, границы сохраняются (в TCP их нет — приложение само делит поток на сообщения). Приложение может само реализовать ровно ту надёжность, которая нужна. Когда что: - TCP — почти всё, где…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

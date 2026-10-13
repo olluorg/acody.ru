@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как правильно работать с секретами в CI/CD и инфраструктуре? — вопрос с собеседования</title>
+<meta name="description" content="Секреты не хранят в коде, образах и логах. Источник — хранилище секретов (Vault, облачный менеджер, секреты CI), выдача — по минимальным правам и по…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/ci-secrets/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/ci-secrets/">
+<meta property="og:title" content="Как правильно работать с секретами в CI/CD и инфраструктуре? — вопрос с собеседования">
+<meta property="og:description" content="Секреты не хранят в коде, образах и логах. Источник — хранилище секретов (Vault, облачный менеджер, секреты CI), выдача — по минимальным правам и по…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Как правильно работать с секретами в CI/CD и инфраструктуре?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Как правильно работать с секретами в CI/CD и инфраструктуре?"}]}</script>
+  <h1>Как правильно работать с секретами в CI/CD и инфраструктуре?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">CI/CD и Git</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Разработчик закоммитил пароль в Git. Что делать?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Секреты не хранят в коде, образах и логах. Источник — <b>хранилище секретов</b> (Vault, облачный менеджер, секреты CI), выдача — по <b>минимальным правам</b> и по возможности <b>короткоживущая</b> (OIDC вместо статических ключей облака). Утёкший в Git секрет считается <b>скомпрометированным</b>: сначала <b>отозвать и заменить</b>, потом уже чистить историю.</p><ul><li>Удаление коммита не помогает: история уже у всех, в форках и кэшах</li><li>Сканеры секретов в pre-commit и CI (gitleaks, trufflehog)</li><li>CI маскирует секреты в логах, но echo в base64 или опечатка обходят маску</li></ul><p class="extra"><span>А ещё</span> Секреты из CI не доступны сборкам из форков — иначе любой PR их украдёт</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Иерархия решений:</b></p>
+<ol><li>Не иметь секрета: OIDC-федерация CI с облаком, workload identity в Kubernetes — временные токены вместо постоянных ключей.</li><li>Короткоживущие динамические секреты (Vault выдаёт пароль к БД на час).</li><li>Статические секреты в хранилище с ротацией и аудитом доступа.</li></ol>
+<p><b>Утечка в Git — порядок действий:</b></p>
+<ol><li>Отозвать ключ, выпустить новый, обновить потребителей.</li><li>Проверить журналы использования ключа.</li><li>Почистить историю (git filter-repo) — для гигиены, а не защиты.</li><li>Добавить сканер, чтобы не повторилось.</li></ol>
+<p><b>Частые ошибки:</b> <code>.env</code> в репозитории, секреты в <code>ARG</code> Dockerfile, вывод переменных окружения в логи при отладке, один общий ключ на всё, self-hosted раннер с доступом к проду, на котором запускаются чужие PR.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Хранилище и минимальные права, короткоживущие учётные данные.</li><li>Правильная реакция на утечку.</li><li>Профилактика: сканеры, маски, изоляция раннеров.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/devops/k8s-config-secrets/">Как передать конфигурацию и секреты приложению в Kubernetes?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/ci-cd-pipeline/">Из каких этапов состоит CI/CD-пайплайн и чем continuous delivery отличается от continuous deployment?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/container-security/">Как сделать контейнер безопаснее?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как правильно работать с секретами в CI/CD и инфраструктуре?","acceptedAnswer":{"@type":"Answer","text":"Секреты не хранят в коде, образах и логах. Источник — хранилище секретов (Vault, облачный менеджер, секреты CI), выдача — по минимальным правам и по возможности короткоживущая (OIDC вместо статических ключей облака). Утёкший в Git секрет считается скомпрометированным: сначала отозвать и заменить, потом уже чистить историю. Удаление коммита не помогает: история уже у всех, в форках и кэшах Сканеры секретов в pre-commit и CI (gitleaks, trufflehog) CI маскирует секреты в логах, но echo в base64 или опечатка обходят маску Секреты из CI не доступны сборкам из форков — иначе любой PR их украдёт Иерархия решений: 1. Не иметь секрета: OIDC-федерация CI с облаком, workload identity в Kubernetes — временные токены вместо постоянных ключей. 2. Короткоживущие динамические секреты (Vault выдаёт пароль к БД на час). 3. Статические секреты в хранилище с ротацией и аудитом доступа. Утечка в Git — порядок действий: 1. Отозвать ключ, выпустить новый, обновить потребителей. 2. Проверить журналы использования ключа. 3. Почистить историю (git filter-repo) — для гигиены, а не защиты. 4. Добавить сканер, чтобы не повторилось. Частые ошибки: .env в репозитории, секреты в ARG Dockerfile, вывод переменных окружения в логи при отладке, один общий ключ на всё, self-hosted раннер с доступом к проду, на котором запускаются чужие PR."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

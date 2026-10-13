@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое self и __init__ в классе? — вопрос с собеседования</title>
+<meta name="description" content="self — ссылка на текущий экземпляр, Python передаёт её в метод первым аргументом. __init__ — инициализатор: заполняет уже созданный объект Создаёт…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/class-self-init/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/class-self-init/">
+<meta property="og:title" content="Что такое self и __init__ в классе? — вопрос с собеседования">
+<meta property="og:description" content="self — ссылка на текущий экземпляр, Python передаёт её в метод первым аргументом. __init__ — инициализатор: заполняет уже созданный объект Создаёт…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Что такое self и __init__ в классе?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Что такое self и __init__ в классе?"}]}</script>
+  <h1>Что такое self и __init__ в классе?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">ООП</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Зачем нужен self?</li><li>Является ли __init__ конструктором?</li><li>Чем атрибут класса отличается от атрибута экземпляра?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><code>self</code> — ссылка на <b>текущий экземпляр</b>, Python передаёт её в метод первым аргументом.</p><ul><li><code>__init__</code> — инициализатор: заполняет уже созданный объект</li><li>Создаёт объект <code>__new__</code>, его переопределяют редко</li></ul><p class="extra"><span>А ещё</span> Атрибуты класса общие для всех экземпляров — осторожно с изменяемыми</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Метод — функция, объявленная в классе. При вызове <code>obj.method(1)</code> Python фактически вызывает <code>Class.method(obj, 1)</code>: экземпляр передаётся первым аргументом. По соглашению его называют <code>self</code>. Через <code>self</code> метод читает и пишет атрибуты конкретного объекта.</p>
+<p>Создание объекта <code>User(&quot;Аня&quot;)</code> идёт в два шага:</p>
+<ol><li><code>__new__</code> создаёт пустой объект нужного класса;</li><li><code>__init__</code> получает этот объект как <code>self</code> и заполняет атрибуты.</li></ol>
+<p>Поэтому <code>__init__</code> точнее называть инициализатором. <code>__new__</code> переопределяют, когда нужно управлять созданием: неизменяемые типы (наследники <code>int</code>, <code>tuple</code>), синглтоны.</p>
+<p><b>Атрибуты класса и экземпляра.</b> Переменная в теле класса — общая для всех экземпляров. Переменная через <code>self.x = ...</code> — своя у каждого. Если атрибут класса — список, и экземпляры его меняют, изменения увидят все.</p>
+<p>Для простых классов-хранилищ данных удобен <code>@dataclass</code>: он сам генерирует <code>__init__</code>, <code>__repr__</code> и <code>__eq__</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>class User:
+    count = 0                  # атрибут класса — общий
+
+    def __init__(self, name):
+        self.name = name       # атрибут экземпляра — свой
+        User.count += 1
+
+    def greet(self):
+        return f&quot;Привет, {self.name}&quot;
+
+u = User(&quot;Аня&quot;)
+u.greet()             # то же, что User.greet(u)
+
+class Bad:
+    tags = []          # один список на всех!
+
+from dataclasses import dataclass, field
+
+@dataclass
+class Good:
+    name: str
+    tags: list = field(default_factory=list)</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li><code>self</code> как явно передаваемый экземпляр, эквивалентность <code>obj.m()</code> и <code>Class.m(obj)</code>.</li><li><code>__init__</code> инициализирует, <code>__new__</code> создаёт.</li><li>Разница атрибутов класса и экземпляра, ловушка с изменяемым атрибутом класса.</li><li>Знание <code>dataclass</code> — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Называть <code>__init__</code> конструктором без оговорки.</li><li>Объявить список в теле класса вместо <code>__init__</code>.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/inheritance-super-mro/">Как работают наследование, super() и MRO?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/staticmethod-classmethod/">Чем @staticmethod отличается от @classmethod?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/property/">Что такое @property и зачем он нужен?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/dunder-str-repr/">Что такое магические методы? Чем __str__ отличается от __repr__?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое self и __init__ в классе?","acceptedAnswer":{"@type":"Answer","text":"self — ссылка на текущий экземпляр, Python передаёт её в метод первым аргументом. __init__ — инициализатор: заполняет уже созданный объект Создаёт объект __new__, его переопределяют редко Атрибуты класса общие для всех экземпляров — осторожно с изменяемыми Метод — функция, объявленная в классе. При вызове obj.method(1) Python фактически вызывает Class.method(obj, 1): экземпляр передаётся первым аргументом. По соглашению его называют self. Через self метод читает и пишет атрибуты конкретного объекта. Создание объекта User(\"Аня\") идёт в два шага: 1. __new__ создаёт пустой объект нужного класса; 2. __init__ получает этот объект как self и заполняет атрибуты. Поэтому __init__ точнее называть инициализатором. __new__ переопределяют, когда нужно управлять созданием: неизменяемые типы (наследники int, tuple), синглтоны. Атрибуты класса и экземпляра. Переменная в теле класса — общая для всех экземпляров. Переменная через self.x = ... — своя у каждого. Если атрибут класса — список, и экземпляры его меняют, изменения увидят все. Для простых классов-хранилищ данных удобен @dataclass: он сам генерирует __init__, __repr__ и __eq__."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

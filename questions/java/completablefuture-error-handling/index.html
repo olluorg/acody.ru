@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем различаются exceptionally, handle и whenComplete у CompletableFuture? — вопрос с собеседования</title>
+<meta name="description" content="exceptionally — только при ошибке, подменяет результат. handle — вызывается всегда, получает значение и исключение и возвращает новый результат…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/completablefuture-error-handling/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/completablefuture-error-handling/">
+<meta property="og:title" content="Чем различаются exceptionally, handle и whenComplete у CompletableFuture? — вопрос с собеседования">
+<meta property="og:description" content="exceptionally — только при ошибке, подменяет результат. handle — вызывается всегда, получает значение и исключение и возвращает новый результат…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Чем различаются exceptionally, handle и whenComplete у CompletableFuture?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Чем различаются exceptionally, handle и whenComplete у CompletableFuture?"}]}</script>
+  <h1>Чем различаются exceptionally, handle и whenComplete у CompletableFuture?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Многопоточность</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>exceptionally</b> — только при ошибке, подменяет результат. <b>handle</b> — вызывается всегда, получает значение и исключение и возвращает новый результат. <b>whenComplete</b> — побочный эффект (лог, метрика) без изменения результата: ошибка идёт дальше.</p><ul><li>Исключение приходит обёрнутым в CompletionException — смотреть getCause</li><li>Java 12+: exceptionallyCompose для асинхронного восстановления</li><li>Исключение внутри whenComplete не заменит исходное</li></ul><p class="extra"><span>А ещё</span> Не обработанная нигде ошибка теряется молча</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Выбор зависит от намерения. Нужно подставить значение по умолчанию при сбое — exceptionally. Нужно единообразно превратить оба исхода в какой-то результат — handle. Нужно записать метрику или лог, ничего не меняя, — whenComplete: он пробрасывает исходный результат или исключение дальше, даже если внутри что-то пошло не так. Важная деталь, о которой часто забывают: исключение внутри цепочки заворачивается в CompletionException, поэтому при разборе причины нужно смотреть getCause. И ещё одна: стадии, добавленные после места сбоя и не обрабатывающие ошибку, просто пропускаются — результат пробрасывается дальше в состоянии исключения.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Назначение трёх методов.</li><li>Обёртка CompletionException.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ожидать от whenComplete подмены результата.</li><li>Не разворачивать CompletionException при анализе причины.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>exceptionally срабатывает только при ошибке и подменяет результат; handle получает и результат, и исключение и возвращает новое значение; whenComplete лишь наблюдает и не меняет исход</li><li class="no"><span class="mark">✗</span>Это три синонима с разными сигнатурами</li><li class="no"><span class="mark">✗</span>whenComplete подменяет результат, а handle только наблюдает</li><li class="no"><span class="mark">✗</span>exceptionally перехватывает ошибки всех последующих стадий, а не предыдущих</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что произойдёт с thenApply после стадии, завершившейся исключением?</li><li>Почему исключение оборачивается в CompletionException?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/completablefuture/">Future и CompletableFuture</a><p>Ограничения Future, асинхронная композиция CompletableFuture, async-варианты с пулами и обработка ошибок.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/future-vs-completablefuture/">Какое ограничение Future решает CompletableFuture?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/thencompose-vs-thenapply/">Чем thenCompose отличается от thenApply в CompletableFuture?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/submit-swallows-exception/">Задача, отправленная в пул через submit(), бросает RuntimeException, но в логах ничего нет. Почему?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем различаются exceptionally, handle и whenComplete у CompletableFuture?","acceptedAnswer":{"@type":"Answer","text":"exceptionally — только при ошибке, подменяет результат. handle — вызывается всегда, получает значение и исключение и возвращает новый результат. whenComplete — побочный эффект (лог, метрика) без изменения результата: ошибка идёт дальше. Исключение приходит обёрнутым в CompletionException — смотреть getCause Java 12+: exceptionallyCompose для асинхронного восстановления Исключение внутри whenComplete не заменит исходное Не обработанная нигде ошибка теряется молча Выбор зависит от намерения. Нужно подставить значение по умолчанию при сбое — exceptionally. Нужно единообразно превратить оба исхода в какой-то результат — handle. Нужно записать метрику или лог, ничего не меняя, — whenComplete: он пробрасывает исходный результат или исключение дальше, даже если внутри что-то пошло не так. Важная деталь, о которой часто забывают: исключение внутри цепочки заворачивается в CompletionException, поэтому при разборе причины нужно смотреть getCause. И ещё одна: стадии, добавленные после места сбоя и не обрабатывающие ошибку, просто пропускаются — результат пробрасывается дальше в состоянии исключения."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вас просят спроектировать ленту новостей. С чего вы начнёте оценку и какие вопросы зададите до выбора архитектуры? — вопрос с собеседования</title>
+<meta name="description" content="Сначала вопросы и допущения вслух, потом цепочка от аудитории к QPS, хранению и трафику, и обязательно вывод: где узкое место и что из этого следует…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/feed-estimation-questions/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/feed-estimation-questions/">
+<meta property="og:title" content="Вас просят спроектировать ленту новостей. С чего вы начнёте оценку и какие вопросы зададите до выбора архитектуры? — вопрос с собеседования">
+<meta property="og:description" content="Сначала вопросы и допущения вслух, потом цепочка от аудитории к QPS, хранению и трафику, и обязательно вывод: где узкое место и что из этого следует…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Вас просят спроектировать ленту новостей. С чего вы начнёте оценку и какие вопросы зададите до выбора архитектуры?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Вас просят спроектировать ленту новостей. С чего вы начнёте оценку и какие вопросы зададите до выбора архитектуры?"}]}</script>
+  <h1>Вас просят спроектировать ленту новостей. С чего вы начнёте оценку и какие вопросы зададите до выбора архитектуры?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Оценка нагрузки</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>С чего начать system design интервью?</li><li>Какие уточняющие вопросы задать при проектировании ленты?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Сначала <b>вопросы и допущения вслух</b>, потом <b>цепочка от аудитории к QPS, хранению и трафику</b>, и обязательно <b>вывод</b>: где узкое место и что из этого следует для архитектуры.</p><ul><li>Вопросы: аудитория и активность, чтение/запись, свежесть ленты, хранение, география, медиа</li><li>Лента — чтение доминирует (~100:1) — архитектуру определяет чтение</li><li>Медиа определяют объём и трафик — их отдаёт CDN, метаданные малы</li></ul><p class="extra"><span>А ещё</span> Число без архитектурного следствия не стоит ничего</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Уточняющие вопросы:</b></p>
+<ul><li>сколько активных пользователей в день, сколько раз открывают ленту, сколько публикуют;</li><li>соотношение чтения и записи — для ленты легко 100:1;</li><li>сколько подписок в среднем и максимум (знаменитости с миллионами подписчиков);</li><li>насколько свежей должна быть лента: секунды или минуты задержки допустимы;</li><li>хронологическая или ранжированная;</li><li>сколько хранить, где пользователи, есть ли фото и видео.</li></ul>
+<p><b>Цепочка расчёта</b> (вслух, с округлением): 100 млн DAU × 10 открытий = 10⁹ чтений в сутки ≈ 10 000 QPS, пик ×3 ≈ 30 000; публикаций 10⁷ в сутки ≈ 100 QPS. Хранение постов: 10⁷ × 1 КБ = 10 ГБ в сутки (× репликация). Трафик: 30 000 × 20 КБ = 600 МБ/с метаданных; медиа — на порядки больше, их отдаёт CDN.</p>
+<p><b>Выводы:</b></p>
+<ul><li>чтение доминирует — нужна предвычисленная лента (fan-out on write) в кэше и денормализованная модель чтения;</li><li>знаменитости ломают fan-out on write — гибрид;</li><li>хранение растёт — партиционирование по времени, холодное хранилище для старых постов;</li><li>медиа — объектное хранилище и CDN.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Уточняющие вопросы до решения.</li><li>Расчёт с допущениями вслух.</li><li>Архитектурные выводы из чисел.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Сразу рисовать архитектуру без вопросов.</li><li>Считать числа и не делать из них выводов.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Fan-out на запись или на чтение и почему?</li><li>Как изменится решение для пользователя с десятью миллионами подписчиков?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/estimation/">Оценка нагрузки и ресурсов</a><p>Как считать на салфетке: QPS из аудитории, пиковые коэффициенты, объём хранения и трафик, порядки задержек, узкое место и типичные ошибки оценки на интервью.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/design-news-feed/">Спроектируйте ленту новостей социальной сети.</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/system-design/qps-estimation/">Сервисом пользуются 10 млн активных пользователей в сутки, каждый совершает около 20 целевых действий. Какой примерно QPS в пике при коэффициенте пиковости 3?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/storage-estimation/">Сервис принимает 100 млн сообщений в сутки по 1 КБ. Сколько примерно места потребуется за год и какой множитель забывают чаще всего?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Вас просят спроектировать ленту новостей. С чего вы начнёте оценку и какие вопросы зададите до выбора архитектуры?","acceptedAnswer":{"@type":"Answer","text":"Сначала вопросы и допущения вслух, потом цепочка от аудитории к QPS, хранению и трафику, и обязательно вывод: где узкое место и что из этого следует для архитектуры. Вопросы: аудитория и активность, чтение/запись, свежесть ленты, хранение, география, медиа Лента — чтение доминирует (~100:1) — архитектуру определяет чтение Медиа определяют объём и трафик — их отдаёт CDN, метаданные малы Число без архитектурного следствия не стоит ничего Уточняющие вопросы: - сколько активных пользователей в день, сколько раз открывают ленту, сколько публикуют; - соотношение чтения и записи — для ленты легко 100:1; - сколько подписок в среднем и максимум (знаменитости с миллионами подписчиков); - насколько свежей должна быть лента: секунды или минуты задержки допустимы; - хронологическая или ранжированная; - сколько хранить, где пользователи, есть ли фото и видео. Цепочка расчёта (вслух, с округлением): 100 млн DAU × 10 открытий = 10⁹ чтений в сутки ≈ 10 000 QPS, пик ×3 ≈ 30 000; публикаций 10⁷ в сутки ≈ 100 QPS. Хранение постов: 10⁷ × 1 КБ = 10 ГБ в сутки (× репликация). Трафик: 30 000 × 20 КБ = 600 МБ/с метаданных; медиа — на порядки больше, их отдаёт CDN. Выводы: - чтение доминирует — нужна предвычисленная лента (fan-out on write) в кэше и денормализованная модель чтения; - знаменитости ломают fan-out on write — гибрид; - хранение…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое магические методы? Чем __str__ отличается от __repr__? — вопрос с собеседования</title>
+<meta name="description" content="Магические методы (__имя__) — крючки, через которые объект поддерживает встроенные операции языка. __repr__ — однозначное представление для…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/dunder-str-repr/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/dunder-str-repr/">
+<meta property="og:title" content="Что такое магические методы? Чем __str__ отличается от __repr__? — вопрос с собеседования">
+<meta property="og:description" content="Магические методы (__имя__) — крючки, через которые объект поддерживает встроенные операции языка. __repr__ — однозначное представление для…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Что такое магические методы? Чем __str__ отличается от __repr__?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Что такое магические методы? Чем __str__ отличается от __repr__?"}]}</script>
+  <h1>Что такое магические методы? Чем __str__ отличается от __repr__?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">ООП</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Какие dunder-методы вы знаете?</li><li>Для чего нужен __repr__?</li><li>Как сделать объект сравнимым или поддерживающим len()?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Магические методы (<code>__имя__</code>) — крючки, через которые объект поддерживает <b>встроенные операции</b> языка.</p><ul><li><code>__repr__</code> — однозначное представление для разработчика, <code>__str__</code> — читаемое для человека</li><li><code>print</code> и <code>str()</code> берут <code>__str__</code>, а если его нет — <code>__repr__</code></li></ul><p class="extra"><span>А ещё</span> Ещё примеры: <code>__eq__</code>/<code>__hash__</code>, <code>__len__</code>, <code>__iter__</code>, <code>__enter__</code>/<code>__exit__</code>, <code>__call__</code></p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Python вызывает магические методы сам, когда вы используете встроенный синтаксис: <code>len(x)</code> → <code>x.__len__()</code>, <code>a + b</code> → <code>a.__add__(b)</code>, <code>a == b</code> → <code>a.__eq__(b)</code>, <code>for</code> → <code>__iter__</code>, <code>with</code> → <code>__enter__</code>/<code>__exit__</code>, <code>obj()</code> → <code>__call__</code>. Реализовав их, свой класс начинает вести себя как встроенный тип.</p>
+<p>**<code>__repr__</code> и <code>__str__</code>.**</p>
+<ul><li><code>__repr__</code> — для отладки и логов: однозначно описывает объект, в идеале так, чтобы по строке можно было его воссоздать: <code>Point(x=1, y=2)</code>. Его показывают консоль, отладчик и контейнеры: <code>print([p])</code> выведет <code>repr</code> элементов.</li><li><code>__str__</code> — для пользователя: <code>print(p)</code>, <code>str(p)</code>, f-строки.</li><li>Если <code>__str__</code> нет, используется <code>__repr__</code>; наоборот — нет. Поэтому писать стоит хотя бы <code>__repr__</code>.</li></ul>
+<p><b>Сравнение и хеш.</b> Переопределив <code>__eq__</code>, нужно позаботиться о <code>__hash__</code>: иначе объект станет нехешируемым. Для упорядочивания хватит <code>__eq__</code> и <code>__lt__</code> с декоратором <code>functools.total_ordering</code>.</p>
+<p><code>@dataclass</code> генерирует <code>__init__</code>, <code>__repr__</code> и <code>__eq__</code> сам.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>class Point:
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+    def __repr__(self):
+        return f&quot;Point(x={self.x}, y={self.y})&quot;
+    def __str__(self):
+        return f&quot;({self.x}, {self.y})&quot;
+    def __eq__(self, other):
+        return isinstance(other, Point) and (self.x, self.y) == (other.x, other.y)
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+p = Point(1, 2)
+print(p)       # (1, 2)
+print([p])     # [Point(x=1, y=2)] — у элементов repr</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Что такое магические методы и что их вызывает сам язык.</li><li>Различие назначения <code>__repr__</code> и <code>__str__</code>, правило подстановки.</li><li>Несколько примеров за пределами строкового представления.</li><li>Связь <code>__eq__</code> и <code>__hash__</code>.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Сказать, что <code>__str__</code> и <code>__repr__</code> взаимозаменяемы в обе стороны.</li><li>Переопределить <code>__eq__</code> и забыть про <code>__hash__</code>.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/dict-how-it-works/">Как устроен словарь в Python?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/context-manager/">Что такое контекстный менеджер и как работает with?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/class-self-init/">Что такое self и __init__ в классе?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/is-vs-eq/">Чем отличается is от ==?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое магические методы? Чем __str__ отличается от __repr__?","acceptedAnswer":{"@type":"Answer","text":"Магические методы (__имя__) — крючки, через которые объект поддерживает встроенные операции языка. __repr__ — однозначное представление для разработчика, __str__ — читаемое для человека print и str() берут __str__, а если его нет — __repr__ Ещё примеры: __eq__/__hash__, __len__, __iter__, __enter__/__exit__, __call__ Python вызывает магические методы сам, когда вы используете встроенный синтаксис: len(x) → x.__len__(), a + b → a.__add__(b), a == b → a.__eq__(b), for → __iter__, with → __enter__/__exit__, obj() → __call__. Реализовав их, свой класс начинает вести себя как встроенный тип. __repr__ и __str__. - __repr__ — для отладки и логов: однозначно описывает объект, в идеале так, чтобы по строке можно было его воссоздать: Point(x=1, y=2). Его показывают консоль, отладчик и контейнеры: print([p]) выведет repr элементов. - __str__ — для пользователя: print(p), str(p), f-строки. - Если __str__ нет, используется __repr__; наоборот — нет. Поэтому писать стоит хотя бы __repr__. Сравнение и хеш. Переопределив __eq__, нужно позаботиться о __hash__: иначе объект станет нехешируемым. Для упорядочивания хватит __eq__ и __lt__ с декоратором functools.total_ordering. @dataclass генерирует __init__, __repr__ и…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

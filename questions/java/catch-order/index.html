@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какой порядок catch-блоков корректен для FileNotFoundException и IOException? — вопрос с собеседования</title>
+<meta name="description" content="Сначала FileNotFoundException, затем IOException: catch проверяются сверху вниз, и общий тип перед частным делает частный недостижимым — ошибка…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/catch-order/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/catch-order/">
+<meta property="og:title" content="Какой порядок catch-блоков корректен для FileNotFoundException и IOException? — вопрос с собеседования">
+<meta property="og:description" content="Сначала FileNotFoundException, затем IOException: catch проверяются сверху вниз, и общий тип перед частным делает частный недостижимым — ошибка…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Какой порядок catch-блоков корректен для FileNotFoundException и IOException?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Какой порядок catch-блоков корректен для FileNotFoundException и IOException?"}]}</script>
+  <h1>Какой порядок catch-блоков корректен для FileNotFoundException и IOException?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Исключения и ресурсы</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Сначала FileNotFoundException, затем IOException</b>: catch проверяются сверху вниз, и общий тип перед частным делает частный недостижимым — ошибка компиляции.</p><ul><li>FileNotFoundException наследует IOException</li><li>Multi-catch: catch (IOException | SQLException e), типы не должны быть родственными</li><li>Ловить частный тип стоит, только если реакция отличается</li></ul><p class="extra"><span>А ещё</span> Порядок в multi-catch неважен</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>catch проверяются сверху вниз. Если поставить IOException первым, catch для FileNotFoundException станет недостижимым, потому что FileNotFoundException наследуется от IOException.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Правильный порядок и почему.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ставить общий тип исключения раньше частного.</li><li>Думать, что выполнятся оба catch-блока.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Сначала IOException, затем FileNotFoundException</li><li class="ok"><span class="mark">✓</span>Сначала FileNotFoundException, затем IOException</li><li class="no"><span class="mark">✗</span>Порядок не важен</li><li class="no"><span class="mark">✗</span>Оба исключения нельзя ловить в одном try</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как работает multi-catch?</li><li>Когда finally не выполнится?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/exceptions/">Исключения: иерархия и checked/unchecked</a><p>Дерево Throwable, философия checked против unchecked, раскрутка стека и стоимость, цепочки причин и практики обработки.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/throwable-hierarchy/">Что верно про иерархию Throwable?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/checked-vs-unchecked/">Чем checked-исключения отличаются от unchecked?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какой порядок catch-блоков корректен для FileNotFoundException и IOException?","acceptedAnswer":{"@type":"Answer","text":"Сначала FileNotFoundException, затем IOException: catch проверяются сверху вниз, и общий тип перед частным делает частный недостижимым — ошибка компиляции. FileNotFoundException наследует IOException Multi-catch: catch (IOException | SQLException e), типы не должны быть родственными Ловить частный тип стоит, только если реакция отличается Порядок в multi-catch неважен catch проверяются сверху вниз. Если поставить IOException первым, catch для FileNotFoundException станет недостижимым, потому что FileNotFoundException наследуется от IOException."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

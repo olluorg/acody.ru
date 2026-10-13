@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Интерфейсы против абстрактных классов — разбор для собеседования</title>
+<meta name="description" content="Контракт против частичной реализации, default/static/private-методы, разрешение конфликта default-методов и критерий выбора.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/interfaces/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/interfaces/">
+<meta property="og:title" content="Интерфейсы против абстрактных классов — разбор для собеседования">
+<meta property="og:description" content="Контракт против частичной реализации, default/static/private-методы, разрешение конфликта default-методов и критерий выбора.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Интерфейсы против абстрактных классов</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Интерфейсы против абстрактных классов"}]}</script>
+  <h1>Интерфейсы против абстрактных классов</h1>
+  <p class="lead">Контракт против частичной реализации, default/static/private-методы, разрешение конфликта default-методов и критерий выбора.</p>
+  <article class="md"><h2>Контракт против частичной реализации</h2>
+<p>Интерфейс описывает контракт — что тип умеет, без состояния (только константы) и без конструктора. Абстрактный класс — частично готовая реализация: может иметь поля-состояние, конструктор и обычные методы наряду с абстрактными.</p>
+<p>Ключевое структурное различие: класс реализует сколько угодно интерфейсов (множественное наследование типа), но наследует только один класс (одиночное наследование реализации). Поэтому интерфейсы — про «способности» из разных осей, а абстрактный класс — про общую основу одной иерархии.</p>
+<h2>default-методы</h2>
+<p>default-метод — метод с реализацией прямо в интерфейсе. Его ввели в Java 8, чтобы добавлять методы в существующие интерфейсы, не ломая всех, кто их уже реализует: классический пример — <code>Collection.stream()</code> и <code>Iterable.forEach</code>, которые «приехали» в старые интерфейсы как default.</p>
+<p>Реализация по умолчанию наследуется автоматически и может быть переопределена. Это эволюция API, а не способ протащить состояние — состояния в интерфейсе по-прежнему нет.</p>
+<h2>static и private методы интерфейсов</h2>
+<p>Интерфейсы умеют и static-методы — обычно это фабрики и утилиты, логически связанные с типом: <code>List.of(...)</code>, <code>Comparator.comparing(...)</code>. Они вызываются по имени интерфейса и не наследуются реализациями.</p>
+<p>С Java 9 в интерфейсах есть и private-методы — они не часть публичного контракта, а способ вынести общий код нескольких default-методов без дублирования.</p>
+<h2>Конфликт default-методов (diamond)</h2>
+<p>Если класс получает default-метод с одной сигнатурой из двух интерфейсов, компилятор не выбирает сам — это ошибка компиляции, и класс ОБЯЗАН переопределить метод, явно указав нужную версию через <code>Interface.super.method()</code>.</p>
+<p>Правила разрешения, когда конфликт неоднозначен лишь частично: класс важнее интерфейса (метод суперкласса побеждает default интерфейса), а более конкретный (под-) интерфейс важнее более общего.</p>
+<pre class="lang-java"><code>interface A { default String hi() { return &quot;A&quot;; } }
+interface B { default String hi() { return &quot;B&quot;; } }
+class C implements A, B {
+    public String hi() { return A.super.hi(); } // обязаны выбрать явно
+}</code></pre>
+<h2>Что выбирать</h2>
+<p>Интерфейс — когда тип выражает способность, реализации не связаны общей основой, или нужно «множественное наследование» поведения (Comparable, AutoCloseable, Runnable). Абстрактный класс — когда есть общее состояние и реализация, разделяемые тесной иерархией «является».</p>
+<p>Современная рекомендация — предпочитать интерфейсы и композицию наследованию: интерфейс с default-методами часто заменяет абстрактный класс, не занимая единственный слот наследования и не навязывая состояние.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Сформулируйте интерфейс=контракт без состояния (много на класс) против абстрактного класса=частичная реализация с состоянием (один). Объясните мотив default-методов (эволюция API: <code>Collection.stream</code>), static/private в интерфейсах, разрешение конфликта default через <code>Interface.super</code> и правило «класс &gt; интерфейс». Завершите критерием выбора (способность/несвязанные типы → интерфейс; общая основа → абстрактный) и креном в сторону интерфейсов+композиции.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/interface-vs-abstract-class/">Чем интерфейс отличается от абстрактного класса и что изменили default-методы?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/default-method-conflict/">Класс реализует два несвязанных интерфейса, в каждом из которых есть default-метод с одинаковой сигнатурой. Что произойдёт?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/default-methods-purpose/">Ради чего в Java 8 добавили default-методы интерфейсов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/multiple-interfaces/">Сколько интерфейсов может реализовать один класс в Java?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/oop/">ООП и его принципы</a><p>Инкапсуляция, наследование, полиморфизм, абстракция — зачем они нужны, как работают внутри и почему композицию предпочитают наследованию.</p></li><li><a href="/articles/java/equality/">Равенство: ==, equals и hashCode</a><p>Идентичность против логического равенства, контракт equals и hashCode, проблема equals с наследованием и корректная реализация.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Интерфейсы против абстрактных классов","description":"Контракт против частичной реализации, default/static/private-методы, разрешение конфликта default-методов и критерий выбора.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/interfaces/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

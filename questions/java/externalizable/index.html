@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем Externalizable отличается от Serializable? — вопрос с собеседования</title>
+<meta name="description" content="Externalizable — полный ручной контроль: формат пишут writeExternal и readExternal, нужен публичный конструктор без аргументов (вызывается при…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/externalizable/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/externalizable/">
+<meta property="og:title" content="Чем Externalizable отличается от Serializable? — вопрос с собеседования">
+<meta property="og:description" content="Externalizable — полный ручной контроль: формат пишут writeExternal и readExternal, нужен публичный конструктор без аргументов (вызывается при…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Чем Externalizable отличается от Serializable?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Чем Externalizable отличается от Serializable?"}]}</script>
+  <h1>Чем Externalizable отличается от Serializable?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Сериализация</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Externalizable</b> — полный ручной контроль: формат пишут writeExternal и readExternal, нужен <b>публичный конструктор без аргументов</b> (вызывается при восстановлении). Serializable — маркер, всё делает механизм через рефлексию.</p><ul><li>Компактнее и быстрее, но поддерживать вручную синхронно с классом</li><li>Поля родителя тоже записывать самим</li><li>Поля не могут быть final — заполняются после конструктора</li></ul><p class="extra"><span>А ещё</span> На практике почти не используют — берут внешние форматы</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Serializable — маркерный интерфейс, за который всю работу делает механизм рефлексии. Externalizable отдаёт управление вам: формат определяете сами, поэтому он бывает компактнее и быстрее. Цена высока: логику сериализации приходится поддерживать вручную и синхронно с изменениями класса, наследуемые поля тоже становятся вашей заботой, а нужен ещё и публичный конструктор без аргументов — при десериализации вызывается именно он, после чего объект наполняется в readExternal. На практике оба подхода сегодня вытесняются внешними форматами вроде Protobuf, где схема отделена от классов.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Различие и цена ручного контроля.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Забыть про публичный конструктор без аргументов.</li><li>Не учесть поля суперкласса при ручной реализации.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Externalizable требует самостоятельно записать и прочитать состояние и вызывает публичный конструктор без аргументов при восстановлении</li><li class="no"><span class="mark">✗</span>Externalizable — это маркерный интерфейс без методов</li><li class="no"><span class="mark">✗</span>Externalizable автоматически шифрует сериализованные данные</li><li class="no"><span class="mark">✗</span>Externalizable работает только с примитивными полями</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Почему при Externalizable конструктор всё-таки вызывается?</li><li>Когда ручной контроль формата действительно оправдан?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/serialization/">Сериализация и форматы данных</a><p>Java serialization и её механика, serialVersionUID, почему её опасно использовать и какие форматы выбирают вместо неё.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/transient/">Что произойдёт с полем, помеченным transient, при сериализации и последующей десериализации?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/java-serialization-dangers/">Почему встроенную Java-сериализацию считают небезопасной и устаревшей?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем Externalizable отличается от Serializable?","acceptedAnswer":{"@type":"Answer","text":"Externalizable — полный ручной контроль: формат пишут writeExternal и readExternal, нужен публичный конструктор без аргументов (вызывается при восстановлении). Serializable — маркер, всё делает механизм через рефлексию. Компактнее и быстрее, но поддерживать вручную синхронно с классом Поля родителя тоже записывать самим Поля не могут быть final — заполняются после конструктора На практике почти не используют — берут внешние форматы Serializable — маркерный интерфейс, за который всю работу делает механизм рефлексии. Externalizable отдаёт управление вам: формат определяете сами, поэтому он бывает компактнее и быстрее. Цена высока: логику сериализации приходится поддерживать вручную и синхронно с изменениями класса, наследуемые поля тоже становятся вашей заботой, а нужен ещё и публичный конструктор без аргументов — при десериализации вызывается именно он, после чего объект наполняется в readExternal. На практике оба подхода сегодня вытесняются внешними форматами вроде Protobuf, где схема отделена от классов."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

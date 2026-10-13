@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем виртуальный поток отличается от обычного платформенного? — вопрос с собеседования</title>
+<meta name="description" content="Виртуальный поток — лёгкий поток под управлением JVM, а не ОС: создание и блокировка стоят копейки, их можно держать миллионами. При блокировке на…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/virtual-threads/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/virtual-threads/">
+<meta property="og:title" content="Чем виртуальный поток отличается от обычного платформенного? — вопрос с собеседования">
+<meta property="og:description" content="Виртуальный поток — лёгкий поток под управлением JVM, а не ОС: создание и блокировка стоят копейки, их можно держать миллионами. При блокировке на…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Чем виртуальный поток отличается от обычного платформенного?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Чем виртуальный поток отличается от обычного платформенного?"}]}</script>
+  <h1>Чем виртуальный поток отличается от обычного платформенного?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Многопоточность</span><span class="chip ver">Java &gt;=21</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое Project Loom?</li><li>Когда использовать виртуальные потоки?</li><li>Ускоряют ли виртуальные потоки вычисления?</li><li>Чем virtual threads отличаются от platform threads?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Виртуальный поток — <b>лёгкий поток под управлением JVM</b>, а не ОС: создание и блокировка стоят копейки, их можно держать <b>миллионами</b>.</p><ul><li>При блокировке на I/O отцепляется от несущего потока и освобождает его</li><li>Позволяет писать обычный блокирующий код и держать десятки тысяч соединений</li></ul><p class="extra"><span>А ещё</span> Вычисления не ускоряют; пул для них не нужен — создают поток на задачу</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Платформенный поток — обёртка над потоком ОС: мегабайты памяти на стек и дорогие переключения ядром, поэтому их держат сотнями. Сервер «поток на запрос» упирается в это ограничение, и раньше приходилось переходить на асинхронный реактивный код.</p>
+<p>Виртуальные потоки (Java 21, Project Loom) живут внутри JVM. Их выполняют несколько несущих платформенных потоков. Когда виртуальный поток блокируется на вводе-выводе (сеть, база, <code>sleep</code>), JVM снимает его с несущего потока и сохраняет стек в куче, а несущий поток берёт другую задачу. Когда данные пришли — поток продолжается.</p>
+<p>Что это даёт: простой последовательный блокирующий код, который масштабируется до десятков и сотен тысяч одновременных операций ввода-вывода.</p>
+<p>Что важно знать:</p>
+<ul><li><b>не ускоряют вычисления</b> — для CPU-задач число ядер не меняется;</li><li><b>пул не нужен</b> — создают поток на задачу (<code>Executors.newVirtualThreadPerTaskExecutor()</code>); ограничивать параллелизм к ресурсу лучше семафором;</li><li><b>pinning</b> — в ранних версиях блокировка внутри <code>synchronized</code> «прикалывала» поток к несущему; в Java 24 это в основном исправлено;</li><li>много <code>ThreadLocal</code> становятся дорогими.</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+    for (String url : urls) {
+        executor.submit(() -&gt; httpClient.send(request(url), ofString()));
+    }
+} // ждёт завершения всех задач</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Виртуальный поток управляется JVM и дешёв.</li><li>Механизм: отцепление от несущего потока при блокировке.</li><li>Для чего подходят (I/O) и для чего нет (вычисления).</li><li>Не нужно пулить — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ожидать ускорения вычислительных задач.</li><li>Помещать виртуальные потоки в пул — они задуманы одноразовыми.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Он управляется средой выполнения Java, а не операционной системой, поэтому дёшев — их можно создавать миллионами</li><li class="no"><span class="mark">✗</span>Он выполняется быстрее за счёт компиляции в машинный код</li><li class="no"><span class="mark">✗</span>Он работает только с неблокирующим вводом-выводом</li><li class="no"><span class="mark">✗</span>Он не может выполнять код параллельно с другими потоками</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что происходит с виртуальным потоком при блокирующем вызове?</li><li>Почему их не пулят?</li><li>Что такое pinning?</li><li>Как virtual threads влияют на Spring MVC?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/virtual-threads/">Виртуальные потоки (Project Loom)</a><p>Лёгкие потоки JVM, монтирование на carrier, когда их применять, почему не пулят и проблема pinning.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/virtual-thread-unmount/">Что происходит с виртуальным потоком, когда он выполняет блокирующий сетевой вызов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/virtual-thread-pinning/">Что такое pinning виртуального потока и в каких случаях он всё ещё возможен в актуальных версиях Java?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/virtual-threads-practice/">Что верно про практическое применение виртуальных потоков?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем виртуальный поток отличается от обычного платформенного?","acceptedAnswer":{"@type":"Answer","text":"Виртуальный поток — лёгкий поток под управлением JVM, а не ОС: создание и блокировка стоят копейки, их можно держать миллионами. При блокировке на I/O отцепляется от несущего потока и освобождает его Позволяет писать обычный блокирующий код и держать десятки тысяч соединений Вычисления не ускоряют; пул для них не нужен — создают поток на задачу Платформенный поток — обёртка над потоком ОС: мегабайты памяти на стек и дорогие переключения ядром, поэтому их держат сотнями. Сервер «поток на запрос» упирается в это ограничение, и раньше приходилось переходить на асинхронный реактивный код. Виртуальные потоки (Java 21, Project Loom) живут внутри JVM. Их выполняют несколько несущих платформенных потоков. Когда виртуальный поток блокируется на вводе-выводе (сеть, база, sleep), JVM снимает его с несущего потока и сохраняет стек в куче, а несущий поток берёт другую задачу. Когда данные пришли — поток продолжается. Что это даёт: простой последовательный блокирующий код, который масштабируется до десятков и сотен тысяч одновременных операций ввода-вывода. Что важно знать: - не ускоряют вычисления — для CPU-задач число ядер не меняется; - пул не нужен — создают поток на задачу (Executors.newVirtualThreadPerTaskExecutor()); ограничивать…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Спроектируйте счётчик просмотров для видео с миллионами просмотров в минуту. — вопрос с собеседования</title>
+<meta name="description" content="Не делать UPDATE views = views + 1 на каждый просмотр: одна строка вирусного видео станет узким местом. События — в очередь, счётчики — агрегировать…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/design-view-counter/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/design-view-counter/">
+<meta property="og:title" content="Спроектируйте счётчик просмотров для видео с миллионами просмотров в минуту. — вопрос с собеседования">
+<meta property="og:description" content="Не делать UPDATE views = views + 1 на каждый просмотр: одна строка вирусного видео станет узким местом. События — в очередь, счётчики — агрегировать…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Спроектируйте счётчик просмотров для видео с миллионами просмотров в минуту.</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Спроектируйте счётчик просмотров для видео с миллионами просмотров в минуту."}]}</script>
+  <h1>Спроектируйте счётчик просмотров для видео с миллионами просмотров в минуту.</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Задачи на проектирование</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как считать лайки и просмотры под высокой нагрузкой?</li><li>Как не убить базу инкрементами одного счётчика?</li><li>Как считать уникальные просмотры?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Не делать <code>UPDATE views = views + 1</code> на каждый просмотр: одна строка вирусного видео станет узким местом. События — в <b>очередь</b>, счётчики — <b>агрегировать пачками</b> в памяти и сбрасывать раз в секунды; показывать приблизительное значение.</p><ul><li>Шардированные счётчики для горячих ключей</li><li>Уникальные — HyperLogLog на видео и период</li><li>Защита от накруток: дедупликация по пользователю и окну, отложенная проверка</li></ul><p class="extra"><span>А ещё</span> Точность «в моменте» не нужна — допустима задержка в секунды и округление</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Требования:</b> отображать число просмотров (и лайков) на странице видео, учитывать каждый просмотр, не считать накрутки, выдерживать вирусные пики. Обычно допустимо: значение отстаёт на секунды, «1,2 млн» вместо точного числа.</p>
+<p><b>Оценка:</b> 50 000 просмотров в секунду в среднем, пики ×5; один вирусный ролик может давать 10% всех просмотров — 25 000 инкрементов в секунду одного ключа.</p>
+<p><b>Почему не прямой UPDATE:</b> каждый инкремент берёт блокировку строки; одна строка выдерживает от сотен до пары тысяч обновлений в секунду, и очередь на блокировку растёт. Плюс WAL и репликация на каждое событие.</p>
+<p><b>Конвейер:</b></p>
+<ol><li>клиент или сервис раздачи отправляет событие просмотра (видео, пользователь, время, длительность) → балансировщик → приёмник, который сразу кладёт в Kafka (партиции по video_id) и отвечает;</li><li><b>агрегатор</b> читает партиции, копит счётчики в памяти (<code>video_id → +N</code>) и раз в 1–5 секунд сбрасывает дельты пачкой: <code>UPDATE ... SET views = views + delta</code> — одна запись вместо тысяч;</li><li>смещение Kafka фиксируется после сброса — при падении агрегатора события перечитываются (возможен двойной счёт пачки — либо смириться, либо идемпотентный сброс с номером пачки);</li><li><b>чтение</b> — из кэша (Redis), обновляемого при сбросе; страница показывает значение с задержкой в секунды.</li></ol>
+<p><b>Горячие ключи:</b> партиция с вирусным видео перегружает одного агрегатора — шардировать ключ (<code>video#0..15</code>) или предагрегировать на приёмниках. В Redis — шардированные счётчики и сумма при чтении.</p>
+<p><b>Уникальные зрители</b> — HyperLogLog на видео и день (12 КБ на ключ), объединение для периодов.</p>
+<p><b>Накрутки:</b> просмотр засчитывается при просмотре дольше N секунд; дедупликация по пользователю/устройству в окне (Redis <code>SET NX</code> с TTL или фильтр Блума); антифрод-анализ потом может «откатить» часть просмотров — поэтому публичное число иногда замирает (как у YouTube на 301).</p>
+<p><b>Аналитика</b> (просмотры по часам, регионам) — те же события в ClickHouse, отдельно от счётчика для страницы.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>from collections import Counter
+import time
+
+pending, last_flush = Counter(), time.monotonic()
+
+for event in consumer:                         # Kafka, партиции по video_id
+    pending[event.video_id] += 1
+    if time.monotonic() - last_flush &gt; 2:
+        db.execute_batch(&quot;UPDATE videos SET views = views + %s WHERE id = %s&quot;,
+                         [(n, vid) for vid, n in pending.items()])
+        consumer.commit()                      # смещение — после записи
+        pending.clear(); last_flush = time.monotonic()</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Почему инкремент одной строки не масштабируется.</li><li>Очередь и агрегирование пачками, задержка как допустимый компромисс.</li><li>Горячие ключи и шардированные счётчики.</li><li>Уникальные через HyperLogLog, защита от накруток, поведение при сбоях.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Синхронный UPDATE на каждый просмотр.</li><li>Требовать точного значения в реальном времени без необходимости.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/design-top-k/">Спроектируйте сервис «топ-100 популярных запросов» за последний час и за день.</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/hot-keys/">Что делать с горячими ключами, на которые приходится непропорционально большая нагрузка?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/hyperloglog/">Как посчитать число уникальных посетителей за день при миллиардах событий?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/backpressure/">Что такое backpressure и как его реализовать?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Спроектируйте счётчик просмотров для видео с миллионами просмотров в минуту.","acceptedAnswer":{"@type":"Answer","text":"Не делать UPDATE views = views + 1 на каждый просмотр: одна строка вирусного видео станет узким местом. События — в очередь, счётчики — агрегировать пачками в памяти и сбрасывать раз в секунды; показывать приблизительное значение. Шардированные счётчики для горячих ключей Уникальные — HyperLogLog на видео и период Защита от накруток: дедупликация по пользователю и окну, отложенная проверка Точность «в моменте» не нужна — допустима задержка в секунды и округление Требования: отображать число просмотров (и лайков) на странице видео, учитывать каждый просмотр, не считать накрутки, выдерживать вирусные пики. Обычно допустимо: значение отстаёт на секунды, «1,2 млн» вместо точного числа. Оценка: 50 000 просмотров в секунду в среднем, пики ×5; один вирусный ролик может давать 10% всех просмотров — 25 000 инкрементов в секунду одного ключа. Почему не прямой UPDATE: каждый инкремент берёт блокировку строки; одна строка выдерживает от сотен до пары тысяч обновлений в секунду, и очередь на блокировку растёт. Плюс WAL и репликация на каждое событие. Конвейер: 1. клиент или сервис раздачи отправляет событие просмотра (видео, пользователь, время, длительность) → балансировщик → приёмник, который сразу кладёт в Kafka (партиции по video_id) и отвечает; 2. агрегатор читает партиции, копит счётчики в памяти (video_id → +N) и раз в 1–5 секунд сбрасывает дельты…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

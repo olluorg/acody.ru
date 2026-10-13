@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Пулы потоков и ExecutorService — разбор для собеседования</title>
+<meta name="description" content="Зачем пул, параметры ThreadPoolExecutor, ловушки фабрик Executors, выбор размера и корректное завершение.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/executors/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/executors/">
+<meta property="og:title" content="Пулы потоков и ExecutorService — разбор для собеседования">
+<meta property="og:description" content="Зачем пул, параметры ThreadPoolExecutor, ловушки фабрик Executors, выбор размера и корректное завершение.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Пулы потоков и ExecutorService</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Пулы потоков и ExecutorService"}]}</script>
+  <h1>Пулы потоков и ExecutorService</h1>
+  <p class="lead">Зачем пул, параметры ThreadPoolExecutor, ловушки фабрик Executors, выбор размера и корректное завершение.</p>
+  <article class="md"><h2>Зачем пул</h2>
+<p>Создавать new Thread на каждую задачу опасно: потоки дороги, и при всплеске нагрузки их число (а с ним и память/переключения контекста) выходит из-под контроля. Пул переиспользует ограниченное число потоков и ставит избыточные задачи в очередь.</p>
+<p>ExecutorService отделяет ЧТО делать (задача Runnable/Callable) от ТОГО, как и где это выполняется (политика пула). Это и абстракция, и предохранитель.</p>
+<h2>Параметры ThreadPoolExecutor</h2>
+<p>ThreadPoolExecutor конфигурируется: <code>corePoolSize</code> (постоянные потоки), <code>maximumPoolSize</code> (потолок), <code>keepAliveTime</code> (через сколько лишние сверх core простаивающие потоки гибнут), <code>workQueue</code> (очередь задач), ThreadFactory (имена потоков, daemon) и RejectedExecutionHandler (что делать при переполнении).</p>
+<p>Логика приёма задачи: сначала заполняются core-потоки; когда они заняты — задачи копятся в очереди; только если очередь заполнена, создаются потоки до maximum; если и это исчерпано — срабатывает политика отказа (AbortPolicy по умолчанию бросает исключение, CallerRunsPolicy исполняет в вызывающем потоке, давая backpressure).</p>
+<pre class="lang-java"><code>// Так пул конфигурируют в проде: границы явные, отказ осознанный
+ExecutorService pool = new ThreadPoolExecutor(
+    8, 16,                                  // core / maximum потоков
+    60, TimeUnit.SECONDS,                   // сколько живёт лишний поток без работы
+    new ArrayBlockingQueue&lt;&gt;(1000),         // ОГРАНИЧЕННАЯ очередь — иначе OOM вместо отказа
+    new ThreadFactoryBuilder().setNameFormat(&quot;orders-%d&quot;).build(),
+    new ThreadPoolExecutor.CallerRunsPolicy() // перегрузка тормозит отправителя
+);
+
+// Порядок роста: сначала до core, потом в очередь, и только при полной очереди — до maximum</code></pre>
+<figure><img src="/articles/assets/thread-pool.webp" alt="Пул потоков: задачи поступают в ограниченную очередь, фиксированное число воркеров берёт их в работу; при переполнении очереди задача отклоняется (reject)." loading="lazy"><figcaption>Ограниченная очередь + фиксированное число воркеров; при переполнении срабатывает политика отказа.</figcaption></figure>
+<h2>Ловушки фабрик Executors</h2>
+<p>Удобные фабрики опасны в проде. <code>newFixedThreadPool</code> и <code>newSingleThreadExecutor</code> используют НЕограниченную LinkedBlockingQueue — при наплыве задачи копятся до OutOfMemoryError. <code>newCachedThreadPool</code> создаёт НЕограниченное число потоков — при всплеске исчерпает ресурсы.</p>
+<p>Поэтому в серьёзном коде создают ThreadPoolExecutor явно — с ограниченной очередью и осознанной политикой отказа, чтобы система деградировала предсказуемо, а не падала.</p>
+<h2>Выбор размера пула</h2>
+<p>Размер зависит от природы задач. CPU-bound: примерно число доступных ядер (<code>Runtime.availableProcessors()</code>) ± 1 — больше потоков лишь добавят переключений. IO-bound: потоков может быть значительно больше, потому что они в основном ждут; ориентир — число ядер × (1 + время_ожидания / время_счёта).</p>
+<p>Это отправная точка, которую подтверждают нагрузочным тестом, а не финальная формула.</p>
+<h2>Жизненный цикл и планирование</h2>
+<p>Пул нужно закрывать: <code>shutdown()</code> перестаёт принимать задачи и доисполняет очередь, <code>shutdownNow()</code> пытается прервать выполняемые и возвращает невыполненные; затем <code>awaitTermination</code> ждёт завершения. Незакрытый пул с не-daemon потоками не даст JVM завершиться.</p>
+<p><code>submit()</code> возвращает Future, <code>invokeAll()</code> запускает пачку задач. ScheduledExecutorService планирует отложенные и периодические задачи (<code>scheduleAtFixedRate</code>/<code>scheduleWithFixedDelay</code>) — современная замена <code>java.util.Timer</code>, который не переживал исключения и работал в одном потоке.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Объясните, как ThreadPoolExecutor принимает задачу (core → очередь → max → политика отказа), назовите ловушку фабрик (неограниченные очередь/потоки → OOM) и почему предпочитают явный пул с ограниченной очередью. Дайте ориентиры размера для CPU- и IO-bound и не забудьте про корректный shutdown/<code>awaitTermination</code>.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/thread-pool/">Почему задачи отдают в пул потоков, а не создают поток на каждую?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/executors-factories-danger/">Почему фабрики из класса Executors считают опасными в production-коде?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/thread-pool-sizing/">Сервис в основном ходит по сети: на каждую задачу примерно 90% времени — ожидание ответа и 10% — вычисления. Как выбрать размер пула потоков?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/submit-swallows-exception/">Задача, отправленная в пул через submit(), бросает RuntimeException, но в логах ничего нет. Почему?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/completablefuture/">Future и CompletableFuture</a><p>Ограничения Future, асинхронная композиция CompletableFuture, async-варианты с пулами и обработка ошибок.</p></li><li><a href="/articles/java/threads/">Потоки: создание, состояния и отмена</a><p>Thread и Runnable, стоимость платформенных потоков, состояния жизненного цикла, кооперативное прерывание и daemon-потоки.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Пулы потоков и ExecutorService","description":"Зачем пул, параметры ThreadPoolExecutor, ловушки фабрик Executors, выбор размера и корректное завершение.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/executors/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

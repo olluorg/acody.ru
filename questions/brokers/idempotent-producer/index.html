@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что даёт идемпотентный Kafka producer (enable.idempotence=true)? — вопрос с собеседования</title>
+<meta name="description" content="Продюсер получает producer id, нумерует пакеты по партициям; брокер отбрасывает повтор с уже записанным номером и не допускает пропусков. Дубли из-за…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/brokers/idempotent-producer/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/brokers/idempotent-producer/">
+<meta property="og:title" content="Что даёт идемпотентный Kafka producer (enable.idempotence=true)? — вопрос с собеседования">
+<meta property="og:description" content="Продюсер получает producer id, нумерует пакеты по партициям; брокер отбрасывает повтор с уже записанным номером и не допускает пропусков. Дубли из-за…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/brokers/">Брокеры сообщений</a> <span>/</span> <span>Что даёт идемпотентный Kafka producer (enable.idempotence=true)?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/questions/brokers/"},{"@type":"ListItem","position":3,"name":"Что даёт идемпотентный Kafka producer (enable.idempotence=true)?"}]}</script>
+  <h1>Что даёт идемпотентный Kafka producer (enable.idempotence=true)?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Kafka Producer</span><span class="chip">Kafka</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как Kafka защищается от дублей при повторах продюсера?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Продюсер получает <b>producer id</b>, нумерует пакеты <b>по партициям</b>; брокер отбрасывает повтор с уже записанным номером и не допускает пропусков. Дубли из-за повторов и перестановки исчезают.</p><ul><li>Включён по умолчанию с Kafka 3.0 (вместе с acks=all)</li><li>Работает в пределах сессии продюсера и партиции</li><li>Не защищает от повторной отправки самим приложением после перезапуска — для этого транзакции или идемпотентный потребитель</li></ul><p class="extra"><span>А ещё</span> Порядок сохраняется при max.in.flight.requests.per.connection ≤ 5</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Это полезно, когда отправка была успешна, но подтверждение потерялось. Broker видит повтор по producer id (PID) и sequence number и не пишет duplicate record. Ключевая граница: гарантия действует только в пределах одной producer-сессии — после рестарта продюсера брокер выдаёт новый PID, и старые дубли он уже не распознает (от этого защищает только transactional producer с заданным transactional.id или идемпотентность на стороне потребителя).</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механизм producer id и номеров последовательности.</li><li>Что защищает и что нет.</li><li>Связь с порядком сообщений.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать producer idempotence полной exactly-once гарантией всего приложения.</li><li>Думать, что защита от дублей переживает рестарт продюсера (PID меняется).</li><li>Отключать retries и терять сообщения вместо борьбы с дублями.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Сквозной end-to-end exactly-once между producer и consumer без дополнительных мер</li><li class="ok"><span class="mark">✓</span>PID + sequence number per partition: брокер отбрасывает дубли при ретраях — нет дублей в рамках одной producer-сессии и партиции</li><li class="no"><span class="mark">✗</span>Возможность редактировать уже отправленные сообщения</li><li class="no"><span class="mark">✗</span>Автоматическое шифрование payload</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что дают Kafka transactions?</li><li>Почему consumer всё равно должен быть идемпотентным?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/brokers/kafka-producer/">Kafka Producer</a><p>Запись и сериализация, выбор партиции, батчинг и сжатие, acks и долговечность, идемпотентный producer и транзакции.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/brokers/retries-and-ordering/">Producer настроен с retries и несколькими запросами в полёте одновременно. Чем это грозит порядку сообщений и как решается?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/delivery-semantics/">Чем отличаются at-most-once, at-least-once и exactly-once?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/producer-acks/">Что означают acks=0, acks=1 и acks=all у Kafka producer?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что даёт идемпотентный Kafka producer (enable.idempotence=true)?","acceptedAnswer":{"@type":"Answer","text":"Продюсер получает producer id, нумерует пакеты по партициям; брокер отбрасывает повтор с уже записанным номером и не допускает пропусков. Дубли из-за повторов и перестановки исчезают. Включён по умолчанию с Kafka 3.0 (вместе с acks=all) Работает в пределах сессии продюсера и партиции Не защищает от повторной отправки самим приложением после перезапуска — для этого транзакции или идемпотентный потребитель Порядок сохраняется при max.in.flight.requests.per.connection ≤ 5 Это полезно, когда отправка была успешна, но подтверждение потерялось. Broker видит повтор по producer id (PID) и sequence number и не пишет duplicate record. Ключевая граница: гарантия действует только в пределах одной producer-сессии — после рестарта продюсера брокер выдаёт новый PID, и старые дубли он уже не распознает (от этого защищает только transactional producer с заданным transactional.id или идемпотентность на стороне потребителя)."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

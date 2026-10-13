@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Алгоритмы и сложность — карта «ИИ-инженер»</title>
+<meta name="description" content="O-нотация, сортировки, бинарный поиск, рекурсия, обход графов — то, что спрашивают на алгоритмических секциях.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/common/algorithms/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/common/algorithms/">
+<meta property="og:title" content="Алгоритмы и сложность — карта «ИИ-инженер»">
+<meta property="og:description" content="O-нотация, сортировки, бинарный поиск, рекурсия, обход графов — то, что спрашивают на алгоритмических секциях.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/ai-engineer/#foundations">ИИ-инженер</a> <span>/</span> <a href="/roadmap/common/foundations/">База разработчика</a> <span>/</span> <span>Алгоритмы и сложность</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"ИИ-инженер","item":"https://learn.getsotto.ru/roadmap/ai-engineer/#foundations"},{"@type":"ListItem","position":3,"name":"База разработчика","item":"https://learn.getsotto.ru/roadmap/common/foundations/"},{"@type":"ListItem","position":4,"name":"Алгоритмы и сложность"}]}</script>
+  <h1>Алгоритмы и сложность</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">O-нотация, сортировки, бинарный поиск, рекурсия, обход графов — то, что спрашивают на алгоритмических секциях.</p>
+  <article class="md"><p><b>Сложность</b> описывает, как растёт время или память с ростом входных данных. O(n) на миллионе элементов — миллисекунды, O(n²) — минуты.</p>
+<div class="widget-in"><script type="module" src="/widgets/big-o.js"></script><sotto-big-o theme="dark"></sotto-big-o></div>
+<h3>Что важно знать</h3>
+<ul><li>Оценивать сложность своего кода: вложенный цикл по тем же данным — O(n²), поиск в хеш-таблице — O(1) в среднем, сортировка — O(n log n).</li><li><b>Сортировки</b>: как работают быстрая и слиянием, почему нижняя граница сравнивающих сортировок — n log n, что такое устойчивость. Встроенная сортировка языка почти всегда лучше своей.</li><li><b>Бинарный поиск</b> по отсортированным данным — O(log n), и его вариации («первый элемент не меньше x»).</li><li><b>Два указателя, скользящее окно, префиксные суммы</b> — приёмы, которые закрывают большую часть задач с массивами и строками.</li><li><b>Рекурсия и мемоизация</b>, основы динамического программирования.</li><li><b>Графы</b>: обход в ширину и в глубину, кратчайший путь.</li></ul>
+<div class="widget-in"><script type="module" src="/widgets/sorting.js"></script><sotto-sorting theme="dark"></sotto-sorting></div>
+<h3>Как готовиться</h3>
+<p>Решать задачи регулярно — 2–3 в неделю лучше, чем 50 перед собеседованием. Проговаривать решение вслух: на секции оценивают и рассуждение, и код, и проверку на граничных случаях.</p></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 40 ч</small></h3><ul><li>Оценивает сложность своего кода в O-нотации, включая вложенные циклы и операции со словарём</li><li>Объясняет, как работают быстрая сортировка и сортировка слиянием, и что такое устойчивость</li><li>Пишет бинарный поиск без ошибок на границах</li><li>Решает задачи на два указателя и скользящее окно уровня easy</li></ul><p class="rm-practice"><b>Практика.</b> Решить 30 задач уровня easy на массивы, строки, хеш-таблицы и бинарный поиск, у каждой записать сложность.</p></div><div class="rm-grade"><h3>Middle <small>≈ 30 ч</small></h3><ul><li>Решает задачи уровня medium на графы (BFS, DFS), рекурсию и динамическое программирование</li><li>Проговаривает решение вслух, оценивает сложность и проверяет граничные случаи до запуска</li></ul><p class="rm-practice"><b>Практика.</b> Решить 40 задач уровня medium и пройти 2 пробные алгоритмические секции по 45 минут с решением вслух.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/cs/big-o/">Что такое О-большое (Big O) и зачем оценивать сложность алгоритма?</a> <span class="lvl lvl-junior">Junior</span><p>О-большое описывает, как растёт время или память алгоритма с ростом входа n, отбрасывая константы и младшие слагаемые.</p></li><li><a href="/questions/cs/sorting-overview/">Какие алгоритмы сортировки вы знаете и чем они отличаются?</a> <span class="lvl lvl-junior">Junior</span><p>Простые — пузырьком, вставками, выбором — O(n²); эффективные — слиянием, быстрая, пирамидальная — O(n log n). Отличаются худшим случаем, памятью и устойчивостью.</p></li><li><a href="/questions/cs/binary-search/">Как работает бинарный поиск?</a> <span class="lvl lvl-junior">Junior</span><p>В отсортированном массиве сравниваем искомое с серединой и отбрасываем половину, где его быть не может: O(log n) шагов.</p></li><li><a href="/questions/cs/recursion-memoization/">Что такое рекурсия и мемоизация?</a> <span class="lvl lvl-junior">Junior</span><p>Рекурсия — функция вызывает саму себя для меньшей задачи и останавливается на базовом случае; мемоизация — кэш уже посчитанных результатов.</p></li><li><a href="/questions/cs/bfs-dfs/">Чем обход в ширину (BFS) отличается от обхода в глубину (DFS)?</a> <span class="lvl lvl-junior">Junior</span><p>BFS идёт по уровням через очередь и находит кратчайший путь по числу рёбер; DFS идёт вглубь до упора через стек или рекурсию.</p></li><li><a href="/questions/cs/dynamic-programming/">Что такое динамическое программирование?</a> <span class="lvl lvl-middle">Middle</span><p>Динамическое программирование — решать задачу через ответы на перекрывающиеся подзадачи, считая каждую один раз и сохраняя в таблицу.</p></li></ul></section><section class="block"><h2>Документация</h2><ul class="links"><li><a href="https://yandex.ru/yaintern/training/algorithm-training" rel="noopener" target="_blank">Яндекс: тренировки по алгоритмам ↗</a></li><li><a href="https://leetcode.com/problemset/" rel="noopener" target="_blank">LeetCode ↗</a></li></ul></section><div class="prep-links"><span>Есть в картах:</span> <a class="chip" href="/roadmap/ai-engineer/">ИИ-инженер</a> <a class="chip" href="/roadmap/backend/">Backend-разработчик</a> <a class="chip" href="/roadmap/frontend/">Frontend-разработчик</a> <a class="chip" href="/roadmap/data-science/">Data Scientist</a></div>
+  <nav class="rm-pager"><a href="/roadmap/common/terminal/">← Командная строка</a><a class="next" href="/roadmap/common/data-structures/">Структуры данных →</a></nav>
+  <p class="rm-back"><a href="/roadmap/ai-engineer/#foundations">← Вся карта «ИИ-инженер»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Алгоритмы и сложность","description":"O-нотация, сортировки, бинарный поиск, рекурсия, обход графов — то, что спрашивают на алгоритмических секциях.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/common/algorithms/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

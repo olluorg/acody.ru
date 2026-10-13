@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что даёт переменная типа ThreadLocal? — вопрос с собеседования</title>
+<meta name="description" content="ThreadLocal — своя ячейка значения для каждого потока: синхронизация не нужна, потому что значение никто не разделяет. Применение: контекст запроса…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/threadlocal/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/threadlocal/">
+<meta property="og:title" content="Что даёт переменная типа ThreadLocal? — вопрос с собеседования">
+<meta property="og:description" content="ThreadLocal — своя ячейка значения для каждого потока: синхронизация не нужна, потому что значение никто не разделяет. Применение: контекст запроса…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что даёт переменная типа ThreadLocal?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что даёт переменная типа ThreadLocal?"}]}</script>
+  <h1>Что даёт переменная типа ThreadLocal?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Многопоточность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Где используют ThreadLocal?</li><li>Почему ThreadLocal опасен в пуле потоков?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">ThreadLocal — <b>своя ячейка значения для каждого потока</b>: синхронизация не нужна, потому что значение никто не разделяет.</p><ul><li>Применение: контекст запроса, пользователь, транзакция, непотокобезопасный форматтер</li><li>В пуле потоки переиспользуются: не очищенное значение достанется следующему запросу и утечёт память</li></ul><p class="extra"><span>А ещё</span> Всегда remove() в finally; для виртуальных потоков есть ScopedValue</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><code>ThreadLocal&lt;T&gt;</code> хранит отдельное значение для каждого потока: <code>set()</code> и <code>get()</code> работают с ячейкой текущего потока, другие потоки её не видят. Раз значение не разделяется, синхронизация не нужна.</p>
+<p>Где используют:</p>
+<ul><li>контекст обработки запроса — id запроса для логов, текущий пользователь (так устроены <code>SecurityContextHolder</code> в Spring Security и MDC в логировании);</li><li>привязка транзакции или соединения к потоку;</li><li>непотокобезопасные объекты, которые дорого создавать, — например, старый <code>SimpleDateFormat</code>.</li></ul>
+<p>Главная опасность — пулы потоков. Поток в пуле живёт долго и обслуживает много задач. Если не очистить значение, следующая задача увидит чужой контекст (данные другого пользователя!), а объекты не будут собраны сборщиком — утечка памяти. Поэтому шаблон: <code>set</code> в начале обработки, <code>remove()</code> в <code>finally</code>.</p>
+<p>С виртуальными потоками (Java 21) их могут быть миллионы, и ThreadLocal становится дорогим по памяти; для передачи контекста появился <code>ScopedValue</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>private static final ThreadLocal&lt;String&gt; REQUEST_ID = new ThreadLocal&lt;&gt;();
+
+void handle(Request req) {
+    REQUEST_ID.set(req.id());
+    try {
+        process(req);
+    } finally {
+        REQUEST_ID.remove();   // обязательно в пуле потоков
+    }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Отдельное значение на поток, без синхронизации.</li><li>Примеры применения.</li><li>Проблема пулов: утечки и чужой контекст, remove в finally.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Не очищать значение после обработки в пуле потоков.</li><li>Рассчитывать, что значение перейдёт в порождённые задачи.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Отдельное значение для каждого потока: потоки не видят значений друг друга</li><li class="no"><span class="mark">✗</span>Общее значение, синхронизированное между всеми потоками</li><li class="no"><span class="mark">✗</span>Копию переменной, обновляемую при каждом переключении контекста</li><li class="no"><span class="mark">✗</span>Значение, доступное только главному потоку</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Почему это опасно при работе с пулом потоков?</li><li>Что происходит с таким значением при переходе в другой поток?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/threadlocal-forkjoin/">ThreadLocal и Fork/Join</a><p>Состояние на поток и утечки в пулах, InheritableThreadLocal, work-stealing в ForkJoinPool и общий пул parallel streams.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/parallel-stream-no-gain/">В каких случаях parallel stream, скорее всего, не даст выигрыша или окажется медленнее последовательного?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/parallel-stream-blocking/">В parallel stream выполняется обращение к внешнему HTTP-сервису. Почему это опасно для всего приложения?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/fork-join-work-stealing/">Что такое Fork/Join framework и work stealing?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/threadlocal-in-pool/">В чём опасность ThreadLocal в пуле потоков?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что даёт переменная типа ThreadLocal?","acceptedAnswer":{"@type":"Answer","text":"ThreadLocal — своя ячейка значения для каждого потока: синхронизация не нужна, потому что значение никто не разделяет. Применение: контекст запроса, пользователь, транзакция, непотокобезопасный форматтер В пуле потоки переиспользуются: не очищенное значение достанется следующему запросу и утечёт память Всегда remove() в finally; для виртуальных потоков есть ScopedValue ThreadLocal<T> хранит отдельное значение для каждого потока: set() и get() работают с ячейкой текущего потока, другие потоки её не видят. Раз значение не разделяется, синхронизация не нужна. Где используют: - контекст обработки запроса — id запроса для логов, текущий пользователь (так устроены SecurityContextHolder в Spring Security и MDC в логировании); - привязка транзакции или соединения к потоку; - непотокобезопасные объекты, которые дорого создавать, — например, старый SimpleDateFormat. Главная опасность — пулы потоков. Поток в пуле живёт долго и обслуживает много задач. Если не очистить значение, следующая задача увидит чужой контекст (данные другого пользователя!), а объекты не будут собраны сборщиком — утечка памяти. Поэтому шаблон: set в начале обработки, remove() в finally. С виртуальными потоками (Java 21) их могут быть миллионы, и ThreadLocal становится дорогим по памяти…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

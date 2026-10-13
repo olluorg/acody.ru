@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем HAVING отличается от WHERE? — вопрос с собеседования</title>
+<meta name="description" content="WHERE фильтрует строки до группировки, HAVING — группы после агрегации. Условие на count() или sum() — только в HAVING. Логический порядок: FROM →…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/having-vs-where/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/having-vs-where/">
+<meta property="og:title" content="Чем HAVING отличается от WHERE? — вопрос с собеседования">
+<meta property="og:description" content="WHERE фильтрует строки до группировки, HAVING — группы после агрегации. Условие на count() или sum() — только в HAVING. Логический порядок: FROM →…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Чем HAVING отличается от WHERE?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Чем HAVING отличается от WHERE?"}]}</script>
+  <h1>Чем HAVING отличается от WHERE?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">SQL-запросы</span><span class="chip">SQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как отфильтровать результат GROUP BY?</li><li>В каком порядке выполняется SELECT?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>WHERE</b> фильтрует строки <b>до</b> группировки, <b>HAVING</b> — группы <b>после</b> агрегации. Условие на <code>count()</code> или <code>sum()</code> — только в HAVING.</p><ul><li>Логический порядок: FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT</li><li>Поэтому в WHERE нельзя использовать агрегаты и псевдонимы из SELECT</li><li>Условия на обычные колонки лучше в WHERE — меньше строк попадёт в группировку</li></ul><p class="extra"><span>А ещё</span> HAVING без GROUP BY — вся таблица как одна группа</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Логический порядок выполнения SELECT:</b></p>
+<ol><li>FROM и JOIN — собрать строки;</li><li>WHERE — отфильтровать строки;</li><li>GROUP BY — сгруппировать;</li><li>HAVING — отфильтровать группы;</li><li>SELECT — вычислить выражения и псевдонимы;</li><li>ORDER BY — отсортировать;</li><li>LIMIT/OFFSET — обрезать.</li></ol>
+<p>Отсюда правила: в WHERE агрегатов ещё нет (группы не построены), поэтому <code>WHERE count(*) &gt; 5</code> — ошибка; в HAVING агрегаты доступны. Псевдонимы из SELECT в WHERE не видны (в ORDER BY — видны).</p>
+<p><b>Производительность:</b> условие на обычную колонку (<code>status = &#x27;paid&#x27;</code>) можно написать и в HAVING, но правильнее в WHERE — строки отсеются до группировки, и база сможет использовать индекс.</p>
+<p>Оптимизатор может менять физический порядок, но результат обязан совпадать с логическим.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-sql"><code>-- клиенты, сделавшие больше 5 оплаченных заказов в 2026 году
+SELECT customer_id, count(*) AS cnt
+FROM orders
+WHERE status = &#x27;paid&#x27; AND created_at &gt;= &#x27;2026-01-01&#x27;   -- строки
+GROUP BY customer_id
+HAVING count(*) &gt; 5;                                    -- группы</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>До и после группировки.</li><li>Логический порядок выполнения SELECT.</li><li>Почему агрегаты только в HAVING и где лучше простые условия.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Агрегат в WHERE.</li><li>Фильтрация обычных колонок в HAVING.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>HAVING фильтрует группы после GROUP BY и допускает агрегаты, а WHERE — строки до группировки</li><li class="no"><span class="mark">✗</span>HAVING фильтрует строки до группировки, а WHERE — после</li><li class="no"><span class="mark">✗</span>Это полные синонимы</li><li class="no"><span class="mark">✗</span>HAVING можно использовать только без GROUP BY</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Каков логический порядок выполнения SELECT?</li><li>Когда индекс поможет условию WHERE?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/sql-basics/">SQL: операторы, NULL и фильтрация</a><p>Группы команд, логический порядок SELECT, трёхзначная логика NULL, разница WHERE/HAVING и оконные функции — с ловушками, на которых валятся на собеседовании.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/databases/left-join/">Какой JOIN вернёт все строки левой таблицы и совпавшие из правой (NULL там, где совпадений нет)?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/databases/second-highest-salary/">Напиши SQL-запрос, возвращающий вторую по величине зарплату из таблицы employee(id, salary).</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем HAVING отличается от WHERE?","acceptedAnswer":{"@type":"Answer","text":"WHERE фильтрует строки до группировки, HAVING — группы после агрегации. Условие на count() или sum() — только в HAVING. Логический порядок: FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT Поэтому в WHERE нельзя использовать агрегаты и псевдонимы из SELECT Условия на обычные колонки лучше в WHERE — меньше строк попадёт в группировку HAVING без GROUP BY — вся таблица как одна группа Логический порядок выполнения SELECT: 1. FROM и JOIN — собрать строки; 2. WHERE — отфильтровать строки; 3. GROUP BY — сгруппировать; 4. HAVING — отфильтровать группы; 5. SELECT — вычислить выражения и псевдонимы; 6. ORDER BY — отсортировать; 7. LIMIT/OFFSET — обрезать. Отсюда правила: в WHERE агрегатов ещё нет (группы не построены), поэтому WHERE count() > 5 — ошибка; в HAVING агрегаты доступны. Псевдонимы из SELECT в WHERE не видны (в ORDER BY — видны). Производительность: условие на обычную колонку (status = 'paid') можно написать и в HAVING, но правильнее в WHERE — строки отсеются до группировки, и база сможет использовать индекс. Оптимизатор может менять физический порядок, но результат обязан совпадать с логическим."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

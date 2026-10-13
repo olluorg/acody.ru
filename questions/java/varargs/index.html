@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что верно про varargs? — вопрос с собеседования</title>
+<meta name="description" content="Varargs — сахар над массивом: внутри параметр — обычный массив, он единственный и последний, без аргументов приходит пустой массив, а не null. Каждый…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/varargs/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/varargs/">
+<meta property="og:title" content="Что верно про varargs? — вопрос с собеседования">
+<meta property="og:description" content="Varargs — сахар над массивом: внутри параметр — обычный массив, он единственный и последний, без аргументов приходит пустой массив, а не null. Каждый…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что верно про varargs?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что верно про varargs?"}]}</script>
+  <h1>Что верно про varargs?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Основы языка</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main">Varargs — <b>сахар над массивом</b>: внутри параметр — обычный массив, он единственный и <b>последний</b>, без аргументов приходит <b>пустой массив</b>, а не null. Каждый вызов выделяет массив — поэтому в JDK есть List.of с фиксированной арностью до 10.</p><ul><li>Можно передать готовый массив напрямую</li><li>foo(null) — неоднозначность: null-массив или массив из null</li><li>Varargs с дженериками — предупреждение heap pollution, @SafeVarargs</li></ul><p class="extra"><span>А ещё</span> Перегрузка с varargs выбирается в последнюю очередь</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Компилятор превращает вызов в создание массива, поэтому у varargs есть цена: на каждый вызов выделяется объект — в горячем коде для частых случаев обычно добавляют перегрузки с фиксированной арностью, что и сделано в JDK для List.of. Практические грабли: передача самого массива работает напрямую, а передача null или Object-аргумента даёт неоднозначность (например, вызов с одним null может быть истолкован как null-массив); сочетание varargs с дженериками порождает предупреждение о загрязнении кучи, которое подавляют аннотацией SafeVarargs на final- или static-методе.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Устройство и правила.</li><li>Цена и подводные камни.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ожидать null вместо пустого массива при вызове без аргументов.</li><li>Передавать null напрямую в varargs-параметр.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Несколько верных вариантов. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Внутри метода параметр является обычным массивом</li><li class="ok"><span class="mark">✓</span>Параметр с многоточием должен быть последним в списке параметров</li><li class="ok"><span class="mark">✓</span>При вызове без аргументов создаётся пустой массив, а не передаётся null</li><li class="no"><span class="mark">✗</span>Метод может иметь несколько varargs-параметров</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что означает предупреждение о heap pollution и зачем нужен SafeVarargs?</li><li>Почему в JDK у List.of есть перегрузки на разное число аргументов?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/method-semantics/">Методы: pass-by-value, перегрузка, varargs</a><p>Почему Java всегда pass-by-value, разрешение перегрузки на этапе компиляции и устройство varargs.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/list-remove-overload/">У списка есть перегрузки remove(int index) и remove(Object o). Что сделает list.remove(1) для List&lt;Integer&gt;?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что верно про varargs?","acceptedAnswer":{"@type":"Answer","text":"Varargs — сахар над массивом: внутри параметр — обычный массив, он единственный и последний, без аргументов приходит пустой массив, а не null. Каждый вызов выделяет массив — поэтому в JDK есть List.of с фиксированной арностью до 10. Можно передать готовый массив напрямую foo(null) — неоднозначность: null-массив или массив из null Varargs с дженериками — предупреждение heap pollution, @SafeVarargs Перегрузка с varargs выбирается в последнюю очередь Компилятор превращает вызов в создание массива, поэтому у varargs есть цена: на каждый вызов выделяется объект — в горячем коде для частых случаев обычно добавляют перегрузки с фиксированной арностью, что и сделано в JDK для List.of. Практические грабли: передача самого массива работает напрямую, а передача null или Object-аргумента даёт неоднозначность (например, вызов с одним null может быть истолкован как null-массив); сочетание varargs с дженериками порождает предупреждение о загрязнении кучи, которое подавляют аннотацией SafeVarargs на final- или static-методе."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

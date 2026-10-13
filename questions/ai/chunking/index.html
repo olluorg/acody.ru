@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как разбивать документы на фрагменты для RAG? — вопрос с собеседования</title>
+<meta name="description" content="Фрагмент должен быть самодостаточным по смыслу и достаточно коротким, чтобы точно находиться поиском; режут по структуре документа, а не по символам…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/chunking/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/chunking/">
+<meta property="og:title" content="Как разбивать документы на фрагменты для RAG? — вопрос с собеседования">
+<meta property="og:description" content="Фрагмент должен быть самодостаточным по смыслу и достаточно коротким, чтобы точно находиться поиском; режут по структуре документа, а не по символам…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как разбивать документы на фрагменты для RAG?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как разбивать документы на фрагменты для RAG?"}]}</script>
+  <h1>Как разбивать документы на фрагменты для RAG?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">RAG</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое chunking?</li><li>Какой размер чанка выбрать?</li><li>Зачем нужно перекрытие фрагментов?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Фрагмент должен быть <b>самодостаточным по смыслу</b> и <b>достаточно коротким</b>, чтобы точно находиться поиском; режут <b>по структуре документа</b>, а не по символам.</p><ul><li>Слишком мелко — теряется контекст; слишком крупно — эмбеддинг размывается, контекст забивается шумом</li><li>Перекрытие соседних фрагментов, заголовок раздела и метаданные в каждом</li></ul><p class="extra"><span>А ещё</span> Размер подбирают экспериментом на своих вопросах, а не по совету из статьи</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Почему это важно.</b> Поиск возвращает фрагменты, а не документы. Если ответ разрезан пополам или утонул в длинном куске, качество RAG падает, как бы хороша ни была модель.</p>
+<p><b>Стратегии:</b></p>
+<ul><li><b>фиксированный размер</b> (например, несколько сотен токенов) с перекрытием — просто, но режет посреди мысли;</li><li><b>по структуре</b> — заголовки, абзацы, пункты, строки таблиц; для кода — функции и классы. Обычно лучший вариант;</li><li><b>рекурсивное деление</b> — сначала по разделам, если кусок велик — по абзацам, затем по предложениям;</li><li><b>семантическое</b> — граница там, где меняется тема (по эмбеддингам предложений).</li></ul>
+<p><b>Что добавлять к фрагменту:</b></p>
+<ul><li>заголовок документа и раздела — иначе кусок «Срок — 30 дней» непонятен;</li><li>метаданные: источник, дата, версия, права доступа — для фильтров и ссылок;</li><li><b>перекрытие</b> с соседями, чтобы мысль на границе попала целиком.</li></ul>
+<p>Продвинутые приёмы: искать по маленьким фрагментам, а в контекст отдавать родительский раздел целиком; хранить для фрагмента сгенерированные вопросы или краткое описание.</p>
+<p><b>Как выбирать</b> — собрать набор вопросов с известными правильными фрагментами и сравнить варианты по полноте поиска (recall@k).</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Компромисс размера: точность поиска против полноты контекста.</li><li>Деление по структуре документа.</li><li>Перекрытие, заголовки, метаданные.</li><li>Подбор по метрикам на своих данных.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Резать по фиксированному числу символов без учёта структуры.</li><li>Терять заголовки, из-за чего фрагменты непонятны без контекста.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/ai/rag-quality/">Как улучшить качество RAG, если он отвечает плохо?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/what-is-rag/">Что такое RAG и как он устроен?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/tokens-context-window/">Что такое токены и контекстное окно LLM?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как разбивать документы на фрагменты для RAG?","acceptedAnswer":{"@type":"Answer","text":"Фрагмент должен быть самодостаточным по смыслу и достаточно коротким, чтобы точно находиться поиском; режут по структуре документа, а не по символам. Слишком мелко — теряется контекст; слишком крупно — эмбеддинг размывается, контекст забивается шумом Перекрытие соседних фрагментов, заголовок раздела и метаданные в каждом Размер подбирают экспериментом на своих вопросах, а не по совету из статьи Почему это важно. Поиск возвращает фрагменты, а не документы. Если ответ разрезан пополам или утонул в длинном куске, качество RAG падает, как бы хороша ни была модель. Стратегии: - фиксированный размер (например, несколько сотен токенов) с перекрытием — просто, но режет посреди мысли; - по структуре — заголовки, абзацы, пункты, строки таблиц; для кода — функции и классы. Обычно лучший вариант; - рекурсивное деление — сначала по разделам, если кусок велик — по абзацам, затем по предложениям; - семантическое — граница там, где меняется тема (по эмбеддингам предложений). Что добавлять к фрагменту: - заголовок документа и раздела — иначе кусок «Срок — 30 дней» непонятен; - метаданные: источник, дата, версия, права доступа — для фильтров и ссылок; - перекрытие с соседями, чтобы мысль на границе попала целиком. Продвинутые приёмы: искать по маленьким фрагментам, а в контекст отдавать…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

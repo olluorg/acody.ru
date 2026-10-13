@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работает unittest.mock.patch и почему патчить нужно там, где объект используется? — вопрос с собеседования</title>
+<meta name="description" content="patch временно заменяет атрибут по имени на Mock. Подменять нужно в модуле, где имя ищется, а не там, где оно определено: если orders.py сделал from…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/mock-patch/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/mock-patch/">
+<meta property="og:title" content="Как работает unittest.mock.patch и почему патчить нужно там, где объект используется? — вопрос с собеседования">
+<meta property="og:description" content="patch временно заменяет атрибут по имени на Mock. Подменять нужно в модуле, где имя ищется, а не там, где оно определено: если orders.py сделал from…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Как работает unittest.mock.patch и почему патчить нужно там, где объект используется?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Как работает unittest.mock.patch и почему патчить нужно там, где объект используется?"}]}</script>
+  <h1>Как работает unittest.mock.patch и почему патчить нужно там, где объект используется?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Тестирование</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему mock.patch не подменил функцию?</li><li>Когда моки вредят тестам?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">patch <b>временно заменяет атрибут по имени</b> на Mock. Подменять нужно <b>в модуле, где имя ищется</b>, а не там, где оно определено: если <code>orders.py</code> сделал <code>from payments import charge</code>, патчить <code>orders.charge</code>, а не <code>payments.charge</code>.</p><ul><li>autospec=True — мок с сигнатурой оригинала: неверный вызов падает</li><li>return_value, side_effect (исключение или последовательность), assert_called_once_with</li><li>Для async — AsyncMock</li></ul><p class="extra"><span>А ещё</span> Много моков — признак сильной связанности; лучше фейковые реализации и интеграционные тесты</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Почему «там, где используется».</b> <code>from payments import charge</code> создаёт в модуле <code>orders</code> своё имя <code>charge</code>, указывающее на функцию. Патч <code>payments.charge</code> меняет имя в модуле <code>payments</code>, а <code>orders</code> по-прежнему держит старую ссылку. Если же в <code>orders</code> написано <code>import payments</code> и вызывается <code>payments.charge(...)</code> — патчить <code>payments.charge</code>.</p>
+<p><b>autospec.</b> Обычный Mock принимает любые аргументы и любые атрибуты: опечатка <code>fake.assert_called_once_wiht()</code> раньше молча проходила. С <code>autospec=True</code> мок повторяет сигнатуру и набор атрибутов оригинала.</p>
+<p><b>Когда моки вредят.</b> Тест, проверяющий, какие методы вызваны в каком порядке, ломается при любом рефакторинге и не ловит ошибки интеграции. Мокают границы системы (HTTP, время, случайность), а внутренние классы — реальными объектами или простыми фейками.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code># orders.py
+from payments import charge
+def checkout(cart): return charge(cart.total)
+
+# test_orders.py
+from unittest.mock import patch
+def test_checkout():
+    with patch(&quot;orders.charge&quot;, autospec=True) as fake:
+        fake.return_value = &quot;ok&quot;
+        assert checkout(Cart(total=100)) == &quot;ok&quot;
+        fake.assert_called_once_with(100)</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Правило «где используется» с примером.</li><li>autospec и основные возможности Mock.</li><li>Риски избыточного мокирования.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/pytest-fixtures/">Как работают фикстуры pytest и что такое их scope?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работает unittest.mock.patch и почему патчить нужно там, где объект используется?","acceptedAnswer":{"@type":"Answer","text":"patch временно заменяет атрибут по имени на Mock. Подменять нужно в модуле, где имя ищется, а не там, где оно определено: если orders.py сделал from payments import charge, патчить orders.charge, а не payments.charge. autospec=True — мок с сигнатурой оригинала: неверный вызов падает return_value, side_effect (исключение или последовательность), assert_called_once_with Для async — AsyncMock Много моков — признак сильной связанности; лучше фейковые реализации и интеграционные тесты Почему «там, где используется». from payments import charge создаёт в модуле orders своё имя charge, указывающее на функцию. Патч payments.charge меняет имя в модуле payments, а orders по-прежнему держит старую ссылку. Если же в orders написано import payments и вызывается payments.charge(...) — патчить payments.charge. autospec. Обычный Mock принимает любые аргументы и любые атрибуты: опечатка fake.assert_called_once_wiht() раньше молча проходила. С autospec=True мок повторяет сигнатуру и набор атрибутов оригинала. Когда моки вредят. Тест, проверяющий, какие методы вызваны в каком порядке, ломается при любом рефакторинге и не ловит ошибки интеграции. Мокают границы системы (HTTP, время, случайность), а внутренние классы — реальными объектами или простыми фейками."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

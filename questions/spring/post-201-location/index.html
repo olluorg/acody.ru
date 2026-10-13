@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что произойдёт при создании ресурса через POST, если контроллер возвращает ResponseEntity со статусом 201? — вопрос с собеседования</title>
+<meta name="description" content="201 Created сопровождают заголовком Location с адресом созданного ресурса; тело — созданный ресурс или пусто. Spring сам Location не проставляет…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/post-201-location/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/post-201-location/">
+<meta property="og:title" content="Что произойдёт при создании ресурса через POST, если контроллер возвращает ResponseEntity со статусом 201? — вопрос с собеседования">
+<meta property="og:description" content="201 Created сопровождают заголовком Location с адресом созданного ресурса; тело — созданный ресурс или пусто. Spring сам Location не проставляет…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Что произойдёт при создании ресурса через POST, если контроллер возвращает ResponseEntity со статусом 201?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Что произойдёт при создании ресурса через POST, если контроллер возвращает ResponseEntity со статусом 201?"}]}</script>
+  <h1>Что произойдёт при создании ресурса через POST, если контроллер возвращает ResponseEntity со статусом 201?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Spring MVC и REST</span><span class="chip">Spring</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что возвращать при создании ресурса в REST?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>201 Created</b> сопровождают заголовком <b>Location</b> с адресом созданного ресурса; тело — созданный ресурс или пусто. Spring сам Location не проставляет.</p><ul><li><code>ResponseEntity.created(uri).body(dto)</code></li><li>URI — через ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")</li><li>Для асинхронной обработки — 202 Accepted со ссылкой на статус</li></ul><p class="extra"><span>А ещё</span> Повтор POST — ключ идемпотентности</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Удобный способ построить такой ответ — ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri() и затем ResponseEntity.created(uri). Тело при этом разрешено и обычно полезно — возвращают представление созданного ресурса, чтобы клиент не делал второй запрос. Идемпотентность к статусу отношения не имеет: POST не идемпотентен по определению, а защита от повторов строится отдельно, через ключ идемпотентности. Если создание асинхронное и ресурс ещё не готов, корректнее вернуть 202 Accepted со ссылкой на статус операции.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>201 и Location.</li><li>Как сформировать в Spring.</li><li>202 для асинхронного создания — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Возвращать 200 на создание ресурса.</li><li>Опускать Location и заставлять клиента угадывать адрес.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Правильно дополнить ответ заголовком Location с адресом созданного ресурса — это часть контракта 201</li><li class="no"><span class="mark">✗</span>Тело ответа обязано быть пустым при статусе 201</li><li class="no"><span class="mark">✗</span>Статус 201 требует, чтобы запрос был идемпотентным</li><li class="no"><span class="mark">✗</span>Spring сам подставит Location по имени метода контроллера</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Когда уместнее 202 вместо 201?</li><li>Как защититься от повторной отправки POST?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/rest-api/">REST API: статусы, согласование и семантика</a><p>Ресурсы и HTTP-глаголы, статус-коды как контракт, content negotiation и message converters, идемпотентность и версионирование.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/http-get-vs-post/">Чем HTTP GET отличается от POST?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/system-design/idempotency-key/">Клиент отправил POST для создания заказа, не дождался ответа из-за таймаута и повторил запрос. Как правильно не допустить второго заказа?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что произойдёт при создании ресурса через POST, если контроллер возвращает ResponseEntity со статусом 201?","acceptedAnswer":{"@type":"Answer","text":"201 Created сопровождают заголовком Location с адресом созданного ресурса; тело — созданный ресурс или пусто. Spring сам Location не проставляет. ResponseEntity.created(uri).body(dto) URI — через ServletUriComponentsBuilder.fromCurrentRequest().path(\"/{id}\") Для асинхронной обработки — 202 Accepted со ссылкой на статус Повтор POST — ключ идемпотентности Удобный способ построить такой ответ — ServletUriComponentsBuilder.fromCurrentRequest().path(\"/{id}\").buildAndExpand(id).toUri() и затем ResponseEntity.created(uri). Тело при этом разрешено и обычно полезно — возвращают представление созданного ресурса, чтобы клиент не делал второй запрос. Идемпотентность к статусу отношения не имеет: POST не идемпотентен по определению, а защита от повторов строится отдельно, через ключ идемпотентности. Если создание асинхронное и ресурс ещё не готов, корректнее вернуть 202 Accepted со ссылкой на статус операции."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

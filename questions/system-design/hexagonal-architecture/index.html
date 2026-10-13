@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое гексагональная архитектура (порты и адаптеры) и чем она отличается от слоистой? — вопрос с собеседования</title>
+<meta name="description" content="Домен в центре и не зависит ни от чего внешнего. Он объявляет порты — интерфейсы на своём языке: входящие (сценарии использования) и исходящие…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/hexagonal-architecture/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/hexagonal-architecture/">
+<meta property="og:title" content="Что такое гексагональная архитектура (порты и адаптеры) и чем она отличается от слоистой? — вопрос с собеседования">
+<meta property="og:description" content="Домен в центре и не зависит ни от чего внешнего. Он объявляет порты — интерфейсы на своём языке: входящие (сценарии использования) и исходящие…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Что такое гексагональная архитектура (порты и адаптеры) и чем она отличается от слоистой?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Что такое гексагональная архитектура (порты и адаптеры) и чем она отличается от слоистой?"}]}</script>
+  <h1>Что такое гексагональная архитектура (порты и адаптеры) и чем она отличается от слоистой?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Монолит и микросервисы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое чистая архитектура?</li><li>Зачем отделять домен от фреймворка и базы данных?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Домен в центре</b> и не зависит ни от чего внешнего. Он объявляет <b>порты</b> — интерфейсы на своём языке: входящие (сценарии использования) и исходящие (OrderRepository, PaymentGateway). <b>Адаптеры</b> снаружи реализуют их: REST-контроллер, JPA-репозиторий, клиент Kafka. Все зависимости направлены <b>внутрь</b>.</p><ul><li>Слоистая: контроллер → сервис → репозиторий, и бизнес-логика зависит от слоя данных</li><li>Гексагональная переворачивает эту стрелку через DIP</li><li>Домен тестируется без БД и фреймворка — подменой адаптеров</li></ul><p class="extra"><span>А ещё</span> Чистая и луковая архитектуры — варианты той же идеи</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Проблема слоистой архитектуры.</b> Сервис зависит от репозитория, а репозиторий — от ORM. Бизнес-правила обрастают аннотациями JPA, исключениями драйвера, DTO фреймворка. Сменить базу или протестировать логику без неё трудно.</p>
+<p><b>Порты и адаптеры (Алистер Кокберн):</b></p>
+<ul><li><b>домен</b> — сущности и правила, без импорта фреймворков;</li><li><b>входящие порты</b> — сценарии: <code>PlaceOrder</code>, <code>CancelOrder</code>;</li><li><b>исходящие порты</b> — что домену нужно от мира: <code>Orders</code>, <code>PaymentGateway</code>, <code>Clock</code>;</li><li><b>входящие адаптеры</b> вызывают сценарии: REST, консьюмер очереди, CLI, тесты;</li><li><b>исходящие адаптеры</b> реализуют исходящие порты: JPA, HTTP-клиент, Kafka-продюсер.</li></ul>
+<pre><code>[REST] → PlaceOrder → (домен) → Orders ← [JpaOrders]
+                               → PaymentGateway ← [StripeClient]</code></pre>
+<p><b>Плюсы:</b> домен тестируется быстрыми юнит-тестами с фейковыми адаптерами; инфраструктура заменяема; бизнес-код читается без шума.</p>
+<p><b>Цена:</b> больше интерфейсов и маппинга между доменными объектами и сущностями БД; для CRUD без правил это избыточно.</p>
+<p><b>Критерий хорошего порта:</b> он сформулирован в терминах домена — в нём нет слов SQL, JPA, HTTP, Entity.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Домен, порты, адаптеры и направление зависимостей.</li><li>Отличие от слоистой архитектуры.</li><li>Плюсы и цена, когда избыточно.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Называть гексагональной архитектурой просто интерфейс над репозиторием Spring Data.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/dip-ports/">Доменный сервис работает с базой напрямую через JPA-репозиторий Spring Data. Как применить Dependency Inversion Principle, и что именно здесь «инвертируется»?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/di-vs-dip/">Сервис получает через конструктор зависимость типа PostgresOrderRepository (конкретный класс), которую внедряет Spring. Что здесь верно?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/anemic-domain-model/">Что такое anemic domain model, чем она плоха и когда всё-таки допустима?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое гексагональная архитектура (порты и адаптеры) и чем она отличается от слоистой?","acceptedAnswer":{"@type":"Answer","text":"Домен в центре и не зависит ни от чего внешнего. Он объявляет порты — интерфейсы на своём языке: входящие (сценарии использования) и исходящие (OrderRepository, PaymentGateway). Адаптеры снаружи реализуют их: REST-контроллер, JPA-репозиторий, клиент Kafka. Все зависимости направлены внутрь. Слоистая: контроллер → сервис → репозиторий, и бизнес-логика зависит от слоя данных Гексагональная переворачивает эту стрелку через DIP Домен тестируется без БД и фреймворка — подменой адаптеров Чистая и луковая архитектуры — варианты той же идеи Проблема слоистой архитектуры. Сервис зависит от репозитория, а репозиторий — от ORM. Бизнес-правила обрастают аннотациями JPA, исключениями драйвера, DTO фреймворка. Сменить базу или протестировать логику без неё трудно. Порты и адаптеры (Алистер Кокберн): - домен — сущности и правила, без импорта фреймворков; - входящие порты — сценарии: PlaceOrder, CancelOrder; - исходящие порты — что домену нужно от мира: Orders, PaymentGateway, Clock; - входящие адаптеры вызывают сценарии: REST, консьюмер очереди, CLI, тесты; - исходящие адаптеры реализуют исходящие порты: JPA, HTTP-клиент, Kafka-продюсер. Плюсы: домен тестируется быстрыми юнит-тестами с фейковыми адаптерами; инфраструктура заменяема; бизнес-код читается без шума. Цена: больше интерфейсов и маппинга между доменными объектами и сущностями БД; для CRUD без правил это избыточно. Критерий хорошего порта: он сформулирован в терминах…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

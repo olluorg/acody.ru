@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Конкурентность — карта «Backend-разработчик»</title>
+<meta name="description" content="Гонки данных, мьютексы и семафоры, взаимные блокировки, атомарные операции и пулы потоков.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/backend/concurrency-basics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/backend/concurrency-basics/">
+<meta property="og:title" content="Конкурентность — карта «Backend-разработчик»">
+<meta property="og:description" content="Гонки данных, мьютексы и семафоры, взаимные блокировки, атомарные операции и пулы потоков.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/#cs">Backend-разработчик</a> <span>/</span> <a href="/roadmap/backend/cs/">Как работает компьютер и сеть</a> <span>/</span> <span>Конкурентность</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://learn.getsotto.ru/roadmap/backend/#cs"},{"@type":"ListItem","position":3,"name":"Как работает компьютер и сеть","item":"https://learn.getsotto.ru/roadmap/backend/cs/"},{"@type":"ListItem","position":4,"name":"Конкурентность"}]}</script>
+  <h1>Конкурентность</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Гонки данных, мьютексы и семафоры, взаимные блокировки, атомарные операции и пулы потоков.</p>
+  <article class="md"><div class="widget-in"><script type="module" src="/widgets/deadlock.js"></script><sotto-deadlock theme="dark"></sotto-deadlock></div>
+<h3>Что важно знать</h3>
+<ul><li><b>Гонка данных</b>: два потока читают и пишут одно значение без синхронизации — результат зависит от порядка выполнения.</li><li><b>Мьютекс</b> — один поток в критической секции; <b>семафор</b> — не больше N.</li><li><b>Взаимная блокировка</b>: потоки ждут ресурсы друг друга; лечится единым порядком захвата и таймаутами.</li><li><b>Атомарные операции</b> (CAS) — без блокировок для простых случаев.</li><li><b>Видимость</b>: без синхронизации поток может не увидеть запись другого потока.</li><li><b>Пул потоков</b> переиспользует потоки; размер зависит от того, ждут ли задачи ввода-вывода.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 8 ч</small></h3><ul><li>Объясняет состояние гонки на примере счётчика и исправляет его блокировкой</li><li>Объясняет взаимную блокировку и как её избежать порядком захвата</li></ul><p class="rm-practice"><b>Практика.</b> Написать программу с гонкой на общем счётчике, показать неверный результат и исправить двумя способами.</p></div><div class="rm-grade"><h3>Middle <small>≈ 8 ч</small></h3><ul><li>Выбирает между блокировкой, атомарной операцией и неизменяемыми данными</li><li>Подбирает размер пула потоков для задач с вычислениями и с ожиданием ввода-вывода</li></ul><p class="rm-practice"><b>Практика.</b> Реализовать потокобезопасный кэш с ограничением размера и нагрузочный тест на 16 потоков.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/cs/mutex-semaphore/">Чем мьютекс отличается от семафора?</a> <span class="lvl lvl-junior">Junior</span><p>Мьютекс — замок на одного: в критической секции один поток, отпустить может только владелец. Семафор — счётчик разрешений: одновременно до N потоков.</p></li><li><a href="/questions/cs/async-vs-threads/">Чем асинхронность отличается от многопоточности?</a> <span class="lvl lvl-middle">Middle</span><p>Многопоточность — несколько потоков ОС, их переключает ядро. Асинхронность — одна (или немного) нить выполнения переключается между задачами сама, в точках ожидания (await).</p></li><li><a href="/questions/cs/race-condition/">Что такое состояние гонки?</a> <span class="lvl lvl-junior">Junior</span><p>Гонка — результат зависит от того, в каком порядке потоки выполнили свои шаги. Классика: count++ — это три шага (прочитать, прибавить, записать), и два потока теряют обновления.</p></li><li><a href="/questions/cs/atomic-cas/">Что такое атомарные операции и CAS?</a> <span class="lvl lvl-middle">Middle</span><p>CAS (compare-and-swap) — инструкция процессора «если в ячейке ещё A, запиши B» за один неделимый шаг. На ней строят атомарные счётчики и структуры без блокировок.</p></li><li><a href="/questions/cs/deadlock/">Что такое взаимная блокировка и как её избежать?</a> <span class="lvl lvl-middle">Middle</span><p>Взаимная блокировка — потоки ждут друг друга по кругу: первый держит A и ждёт B, второй держит B и ждёт A. Никто не продвинется.</p></li><li><a href="/questions/cs/memory-visibility/">Почему один поток может не увидеть изменение, сделанное другим?</a> <span class="lvl lvl-middle">Middle</span><p>Компилятор, JIT и процессор переупорядочивают и кэшируют операции с памятью — для одного потока результат тот же, для другого нет. Без синхронизации запись может стать видна…</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/backend/os-processes/">← Процессы, потоки и память</a><a class="next" href="/roadmap/common/internet/">Как работает интернет →</a></nav>
+  <p class="rm-back"><a href="/roadmap/backend/#cs">← Вся карта «Backend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Конкурентность","description":"Гонки данных, мьютексы и семафоры, взаимные блокировки, атомарные операции и пулы потоков.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/backend/concurrency-basics/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

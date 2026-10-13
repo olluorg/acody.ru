@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем Pod, ReplicaSet и Deployment отличаются друг от друга? — вопрос с собеседования</title>
+<meta name="description" content="Pod — минимальная единица: один или несколько контейнеров с общей сетью (один IP, localhost) и томами; под смертен, его IP меняется. ReplicaSet…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/k8s-pod-deployment/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/k8s-pod-deployment/">
+<meta property="og:title" content="Чем Pod, ReplicaSet и Deployment отличаются друг от друга? — вопрос с собеседования">
+<meta property="og:description" content="Pod — минимальная единица: один или несколько контейнеров с общей сетью (один IP, localhost) и томами; под смертен, его IP меняется. ReplicaSet…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Чем Pod, ReplicaSet и Deployment отличаются друг от друга?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Чем Pod, ReplicaSet и Deployment отличаются друг от друга?"}]}</script>
+  <h1>Чем Pod, ReplicaSet и Deployment отличаются друг от друга?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Kubernetes</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему не создают поды напрямую?</li><li>Зачем в поде несколько контейнеров?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Pod</b> — минимальная единица: один или несколько контейнеров с общей сетью (один IP, localhost) и томами; под смертен, его IP меняется. <b>ReplicaSet</b> поддерживает заданное число одинаковых подов. <b>Deployment</b> управляет ReplicaSet-ами и даёт <b>обновления и откаты</b>: при смене образа создаёт новый ReplicaSet и постепенно переносит поды.</p><ul><li>Поды напрямую не создают — некому будет их пересоздать</li><li>Несколько контейнеров в поде — sidecar (прокси, сборщик логов) и init-контейнеры</li><li>Для stateful-сервисов — StatefulSet, для агента на каждом узле — DaemonSet, для разовых задач — Job/CronJob</li></ul><p class="extra"><span>А ещё</span> Обращаются к подам не по IP, а через Service</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Связь через метки.</b> ReplicaSet находит «свои» поды по <code>selector</code>. Service тоже выбирает поды по меткам. Метки — основной механизм связи объектов.</p>
+<p><b>Контроллеры рабочих нагрузок:</b></p>
+<div class="table"><table><thead><tr><th>объект</th><th>для чего</th></tr></thead><tbody><tr><td>Deployment</td><td>stateless-сервисы, обновления и откаты</td></tr><tr><td>StatefulSet</td><td>стабильные имена и свои тома (БД, Kafka)</td></tr><tr><td>DaemonSet</td><td>по поду на каждом узле (агенты логов, мониторинга)</td></tr><tr><td>Job / CronJob</td><td>задачи до завершения, по расписанию</td></tr></tbody></table></div>
+<p><b>Многоконтейнерный под.</b> Контейнеры пода делят сетевое пространство и могут делить тома. Init-контейнеры выполняются по порядку до основных (миграции, ожидание зависимостей). Sidecar добавляет функциональность, не меняя приложение.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-yaml"><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders
+spec:
+  replicas: 3
+  selector:
+    matchLabels: { app: orders }
+  template:
+    metadata:
+      labels: { app: orders }
+    spec:
+      containers:
+        - name: app
+          image: registry.example.com/orders:1.4.2
+          ports: [{ containerPort: 8080 }]</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Иерархия Deployment → ReplicaSet → Pod.</li><li>Почему поды не создают напрямую.</li><li>Другие контроллеры и многоконтейнерные поды.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/devops/k8s-architecture/">Из каких компонентов состоит кластер Kubernetes?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/k8s-rolling-update/">Как Deployment выполняет обновление и как откатить неудачную версию?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/k8s-statefulset/">Чем StatefulSet отличается от Deployment и стоит ли запускать базы данных в Kubernetes?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем Pod, ReplicaSet и Deployment отличаются друг от друга?","acceptedAnswer":{"@type":"Answer","text":"Pod — минимальная единица: один или несколько контейнеров с общей сетью (один IP, localhost) и томами; под смертен, его IP меняется. ReplicaSet поддерживает заданное число одинаковых подов. Deployment управляет ReplicaSet-ами и даёт обновления и откаты: при смене образа создаёт новый ReplicaSet и постепенно переносит поды. Поды напрямую не создают — некому будет их пересоздать Несколько контейнеров в поде — sidecar (прокси, сборщик логов) и init-контейнеры Для stateful-сервисов — StatefulSet, для агента на каждом узле — DaemonSet, для разовых задач — Job/CronJob Обращаются к подам не по IP, а через Service Связь через метки. ReplicaSet находит «свои» поды по selector. Service тоже выбирает поды по меткам. Метки — основной механизм связи объектов. Контроллеры рабочих нагрузок: | объект | для чего | | --- | --- | | Deployment | stateless-сервисы, обновления и откаты | | StatefulSet | стабильные имена и свои тома (БД, Kafka) | | DaemonSet | по поду на каждом узле (агенты логов, мониторинга) | | Job / CronJob | задачи до завершения, по расписанию | Многоконтейнерный под. Контейнеры пода делят сетевое пространство и могут делить тома. Init-контейнеры выполняются по порядку до основных (миграции, ожидание зависимостей). Sidecar добавляет функциональность, не меняя приложение."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

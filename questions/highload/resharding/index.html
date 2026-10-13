@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как перешардировать данные без простоя? — вопрос с собеседования</title>
+<meta name="description" content="Переносить данные по частям, пока система работает: копия + догоняющий поток изменений + переключение маршрутизации по одной части и проверка…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/resharding/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/resharding/">
+<meta property="og:title" content="Как перешардировать данные без простоя? — вопрос с собеседования">
+<meta property="og:description" content="Переносить данные по частям, пока система работает: копия + догоняющий поток изменений + переключение маршрутизации по одной части и проверка…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Как перешардировать данные без простоя?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Как перешардировать данные без простоя?"}]}</script>
+  <h1>Как перешардировать данные без простоя?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Шардирование и распределение данных</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как добавить шарды в работающую систему?</li><li>Как перенести данные между базами без остановки сервиса?</li><li>Что такое двойная запись при миграции?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Переносить данные по частям, пока система работает: <b>копия + догоняющий поток изменений + переключение</b> маршрутизации по одной части и проверка.</p><ul><li>Заранее много логических шардов (слотов) на мало физических — переносится слот целиком, а ключи не пересчитываются</li><li>Копия снимком, затем догоняющая репликация изменений (CDC, логическая репликация)</li><li>Короткое переключение: запрет записи на слот на секунды, дождаться догонки, сменить маршрут</li></ul><p class="extra"><span>А ещё</span> Двойная запись из приложения проще на словах, но с риском расхождений — нужна сверка</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Подготовка, которая делает решардинг дешёвым:</b> разбить данные на много <b>логических шардов</b> (слотов) — 1024, 16384 — и раскладывать их по небольшому числу физических серверов через таблицу «слот → сервер». Тогда рост — это перенос части слотов на новый сервер, а функция <code>ключ → слот</code> не меняется. Так устроены Redis Cluster, Vitess, Citus, Kafka с партициями. Без этого <code>hash % N</code> → <code>hash % 2N</code> требует переезда почти всего.</p>
+<p><b>Схема переноса одного слота (или диапазона):</b></p>
+<ol><li><b>снимок</b> — скопировать данные слота на новый узел, не останавливая запись в старый;</li><li><b>догонка</b> — применять изменения, произошедшие после снимка: поток из журнала базы (CDC, логическая репликация), с позиции, с которой делался снимок;</li><li><b>сверка</b> — сравнить объёмы и контрольные суммы по диапазонам;</li><li><b>переключение</b> — на короткое время запретить запись в слот (или поставить запросы на ожидание), дождаться, пока отставание станет нулевым, переключить маршрутизацию, снять запрет. Секунды недоступности записи для одного слота;</li><li><b>уборка</b> — удалить данные со старого узла после периода наблюдения; держать возможность отката.</li></ol>
+<p><b>Двойная запись из приложения</b> — писать в старое и новое хранилище одновременно, читать из старого, потом переключить чтение. Проблемы: нет атомарности между двумя хранилищами (одна запись прошла, другая — нет), гонки при параллельных изменениях одной записи, нужно отдельно переносить старые данные. Если выбирать её — с идемпотентными записями, фоновой сверкой и исправлением расхождений. Поток из журнала базы надёжнее: порядок изменений сохраняется.</p>
+<p><b>Маршрутизация во время переноса:</b> прокси или библиотека знает карту слотов и её версию; клиент с устаревшей картой получает ответ «перенаправление» (<code>MOVED</code>/<code>ASK</code> в Redis Cluster) и обновляет карту.</p>
+<p><b>Риски и защита:</b> нагрузка от копирования на рабочую базу (ограничивать скорость), рост отставания, дубли при повторах (идемпотентность), запросы, которые читали данные в момент переключения. Переносить по одному слоту, начиная с малонагруженных, с метриками и возможностью остановить.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>16 физических серверов, 4096 слотов (по 256 на сервер). Добавляем 4 сервера:
+переносим по ~51 слоту с каждого старого на новые — 20% данных.
+Слот: снимок → догонка по WAL → отставание &lt; 100 мс → запись в слот на паузе 1–2 с
+→ карта слотов v42 → v43 → снятие паузы → удаление копии через сутки.</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Логические шарды или слоты поверх физических как основа.</li><li>Этапы: снимок, поток изменений, сверка, короткое переключение.</li><li>Плюсы и риски двойной записи.</li><li>Маршрутизация с версией карты и перенаправлениями.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Предлагать остановить сервис на время переноса как единственный вариант.</li><li>Делать двойную запись без сверки и идемпотентности.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/consistent-hashing/">Как работает consistent hashing и зачем нужны виртуальные узлы?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/sharding-strategies/">Как выбрать ключ и стратегию шардирования?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/rename-column-zero-downtime/">Нужно переименовать колонку name в full_name без простоя при rolling-выкатке. Какая последовательность верна?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/wal/">Что такое журнал предзаписи (WAL) и зачем он нужен?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как перешардировать данные без простоя?","acceptedAnswer":{"@type":"Answer","text":"Переносить данные по частям, пока система работает: копия + догоняющий поток изменений + переключение маршрутизации по одной части и проверка. Заранее много логических шардов (слотов) на мало физических — переносится слот целиком, а ключи не пересчитываются Копия снимком, затем догоняющая репликация изменений (CDC, логическая репликация) Короткое переключение: запрет записи на слот на секунды, дождаться догонки, сменить маршрут Двойная запись из приложения проще на словах, но с риском расхождений — нужна сверка Подготовка, которая делает решардинг дешёвым: разбить данные на много логических шардов (слотов) — 1024, 16384 — и раскладывать их по небольшому числу физических серверов через таблицу «слот → сервер». Тогда рост — это перенос части слотов на новый сервер, а функция ключ → слот не меняется. Так устроены Redis Cluster, Vitess, Citus, Kafka с партициями. Без этого hash % N → hash % 2N требует переезда почти всего. Схема переноса одного слота (или диапазона): 1. снимок — скопировать данные слота на новый узел, не останавливая запись в старый; 2. догонка — применять изменения, произошедшие после снимка: поток из журнала базы (CDC, логическая репликация), с позиции, с которой делался снимок; 3. сверка — сравнить объёмы и контрольные суммы по диапазонам; 4. переключение — на короткое время запретить запись в слот (или поставить запросы на ожидание), дождаться, пока отставание станет нулевым…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

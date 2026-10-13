@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зачем нужен service discovery в системе из многих сервисов? — вопрос с собеседования</title>
+<meta name="description" content="Сервисы обращаются друг к другу по логическому имени, а не по жёстким адресам, которые меняются при каждом развёртывании и масштабировании…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/service-discovery-basic/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/service-discovery-basic/">
+<meta property="og:title" content="Зачем нужен service discovery в системе из многих сервисов? — вопрос с собеседования">
+<meta property="og:description" content="Сервисы обращаются друг к другу по логическому имени, а не по жёстким адресам, которые меняются при каждом развёртывании и масштабировании…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Зачем нужен service discovery в системе из многих сервисов?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Зачем нужен service discovery в системе из многих сервисов?"}]}</script>
+  <h1>Зачем нужен service discovery в системе из многих сервисов?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Spring Cloud</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Зачем сервисам реестр?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Сервисы обращаются друг к другу <b>по логическому имени</b>, а не по жёстким адресам, которые меняются при каждом развёртывании и масштабировании.</p><ul><li>Экземпляры регистрируются в реестре и шлют heartbeat</li><li>Eureka, Consul — или встроенный discovery Kubernetes (Service и DNS)</li><li>Вместе с discovery — клиентская или серверная балансировка</li></ul><p class="extra"><span>А ещё</span> В Kubernetes отдельный реестр обычно не нужен</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>В динамической среде экземпляры появляются и исчезают постоянно: автоскейл добавил под, выкатка заменила старый, узел упал. Прописать адреса в конфигурации невозможно — они устареют к следующему релизу. Реестр хранит актуальный список работающих экземпляров, а клиент запрашивает адрес по имени сервиса и заодно получает возможность балансировать нагрузку между экземплярами. Хранение настроек и ограничение частоты запросов — задачи других компонентов.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Зачем нужен discovery.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Прописывать адреса экземпляров в конфигурации.</li><li>Путать реестр сервисов с сервером конфигурации.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Чтобы сервисы находили друг друга по имени, а не по прописанным адресам, которые постоянно меняются при перезапуске и масштабировании</li><li class="no"><span class="mark">✗</span>Чтобы шифровать трафик между сервисами</li><li class="no"><span class="mark">✗</span>Чтобы хранить общую конфигурацию всех сервисов</li><li class="no"><span class="mark">✗</span>Чтобы ограничивать частоту запросов между сервисами</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как экземпляр исключается из реестра при отказе?</li><li>Чем шлюз отличается от реестра сервисов?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/cloud-platform/">Spring Cloud: config, discovery, gateway, tracing</a><p>Config Server, Eureka/DiscoveryClient, Spring Cloud Gateway и распределённая трассировка.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/service-discovery/">Что такое service discovery и где здесь Eureka?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Зачем нужен service discovery в системе из многих сервисов?","acceptedAnswer":{"@type":"Answer","text":"Сервисы обращаются друг к другу по логическому имени, а не по жёстким адресам, которые меняются при каждом развёртывании и масштабировании. Экземпляры регистрируются в реестре и шлют heartbeat Eureka, Consul — или встроенный discovery Kubernetes (Service и DNS) Вместе с discovery — клиентская или серверная балансировка В Kubernetes отдельный реестр обычно не нужен В динамической среде экземпляры появляются и исчезают постоянно: автоскейл добавил под, выкатка заменила старый, узел упал. Прописать адреса в конфигурации невозможно — они устареют к следующему релизу. Реестр хранит актуальный список работающих экземпляров, а клиент запрашивает адрес по имени сервиса и заодно получает возможность балансировать нагрузку между экземплярами. Хранение настроек и ограничение частоты запросов — задачи других компонентов."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зачем нужны Spring profiles? — вопрос с собеседования</title>
+<meta name="description" content="Профили включают разные бины и свойства под окружение: @Profile(&quot;dev&quot;) на бине, application-prod.yml для свойств, активация через…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/spring-profiles/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/spring-profiles/">
+<meta property="og:title" content="Зачем нужны Spring profiles? — вопрос с собеседования">
+<meta property="og:description" content="Профили включают разные бины и свойства под окружение: @Profile(&quot;dev&quot;) на бине, application-prod.yml для свойств, активация через…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Зачем нужны Spring profiles?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Зачем нужны Spring profiles?"}]}</script>
+  <h1>Зачем нужны Spring profiles?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">ApplicationContext и конфигурация</span><span class="chip">Spring Boot</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как настроить разные конфигурации для dev и prod?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Профили включают <b>разные бины и свойства</b> под окружение: <code>@Profile(&quot;dev&quot;)</code> на бине, <code>application-prod.yml</code> для свойств, активация через <code>spring.profiles.active</code>.</p><ul><li>application-{profile}.yml переопределяет application.yml</li><li>Активные профили: переменная SPRING_PROFILES_ACTIVE, аргумент, тест — @ActiveProfiles</li><li>Группы профилей (spring.profiles.group) с Spring Boot 2.4</li></ul><p class="extra"><span>А ещё</span> Секреты не кладут в профильные файлы — переменные окружения и менеджер секретов</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Бины по профилю:</b> <code>@Profile(&quot;dev&quot;)</code> на <code>@Component</code> или <code>@Bean</code> — бин создаётся, только если профиль активен; <code>@Profile(&quot;!prod&quot;)</code> — во всех, кроме prod. Пример: заглушка платёжного шлюза в dev, настоящий клиент в prod.</p>
+<p><b>Свойства по профилю:</b> <code>application-dev.yml</code>, <code>application-prod.yml</code> загружаются поверх <code>application.yml</code>, если профиль активен. В одном файле — несколько документов через <code>---</code> и <code>spring.config.activate.on-profile</code> (Spring Boot 2.4+).</p>
+<p><b>Активация:</b></p>
+<ul><li><code>spring.profiles.active=prod</code> в переменной окружения <code>SPRING_PROFILES_ACTIVE</code>, аргументе <code>--spring.profiles.active=prod</code>;</li><li>в тестах — <code>@ActiveProfiles(&quot;test&quot;)</code>;</li><li><code>spring.profiles.group.prod=prod-db,prod-mq</code> — группы.</li></ul>
+<p><b>Практика:</b> не плодить профили под каждый стенд — значения, которые различаются между окружениями (URL, пароли), передают переменными окружения, а профили используют для включения и выключения бинов и поведения. Секреты — не в репозитории.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Профили для бинов и для свойств.</li><li>Способы активации.</li><li>Практика: что в профили, а что в переменные окружения.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Хранить пароли prod в application-prod.yml в репозитории.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Ускорять старт приложения</li><li class="ok"><span class="mark">✓</span>Активировать разные наборы бинов и настроек под окружение (dev/test/prod)</li><li class="no"><span class="mark">✗</span>Управлять памятью JVM</li><li class="no"><span class="mark">✗</span>Полностью заменять Maven-профили</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как задать активный профиль?</li><li>Что такое application-{profile}.yml?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/context-config/">ApplicationContext и конфигурация</a><p>BeanFactory против ApplicationContext, способы конфигурации, @Configuration full/lite, профили и Environment, @Conditional.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/external-configuration/">Как Spring Boot работает с внешней конфигурацией?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/property-precedence/">Одно и то же свойство задано в application.yml, в переменной окружения и аргументом командной строки. Какое значение победит?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Зачем нужны Spring profiles?","acceptedAnswer":{"@type":"Answer","text":"Профили включают разные бины и свойства под окружение: @Profile(\"dev\") на бине, application-prod.yml для свойств, активация через spring.profiles.active. application-{profile}.yml переопределяет application.yml Активные профили: переменная SPRING_PROFILES_ACTIVE, аргумент, тест — @ActiveProfiles Группы профилей (spring.profiles.group) с Spring Boot 2.4 Секреты не кладут в профильные файлы — переменные окружения и менеджер секретов Бины по профилю: @Profile(\"dev\") на @Component или @Bean — бин создаётся, только если профиль активен; @Profile(\"!prod\") — во всех, кроме prod. Пример: заглушка платёжного шлюза в dev, настоящий клиент в prod. Свойства по профилю: application-dev.yml, application-prod.yml загружаются поверх application.yml, если профиль активен. В одном файле — несколько документов через --- и spring.config.activate.on-profile (Spring Boot 2.4+). Активация: - spring.profiles.active=prod в переменной окружения SPRING_PROFILES_ACTIVE, аргументе --spring.profiles.active=prod; - в тестах — @ActiveProfiles(\"test\"); - spring.profiles.group.prod=prod-db,prod-mq — группы. Практика: не плодить профили под каждый стенд — значения, которые различаются между окружениями (URL, пароли), передают переменными окружения, а профили используют для включения и выключения бинов и поведения. Секреты — не в репозитории."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

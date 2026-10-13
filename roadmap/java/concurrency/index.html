@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Многопоточность — карта «Java»</title>
+<meta name="description" content="Потоки и синхронизация, Java Memory Model, пулы, CompletableFuture, конкурентные коллекции и виртуальные потоки.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/java/concurrency/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/java/concurrency/">
+<meta property="og:title" content="Многопоточность — карта «Java»">
+<meta property="og:description" content="Потоки и синхронизация, Java Memory Model, пулы, CompletableFuture, конкурентные коллекции и виртуальные потоки.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/">Backend-разработчик</a> <span>/</span> <a href="/roadmap/java/#concurrency">Java</a> <span>/</span> <span>Многопоточность</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://learn.getsotto.ru/roadmap/backend/"},{"@type":"ListItem","position":3,"name":"Java","item":"https://learn.getsotto.ru/roadmap/java/#concurrency"},{"@type":"ListItem","position":4,"name":"Многопоточность"}]}</script>
+  <h1>Многопоточность</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span></div>
+  <p class="lead">Потоки и синхронизация, Java Memory Model, пулы, CompletableFuture, конкурентные коллекции и виртуальные потоки.</p>
+  <article class="md"><p>Многопоточность — вторая по частоте тема Java-собеседований и главный источник трудных багов в продакшене. Для middle ждут уверенного владения пулами, <code>CompletableFuture</code>, конкурентными коллекциями и понимания, почему нужен <code>volatile</code>. Для senior — Java Memory Model, диагностику взаимных блокировок и виртуальные потоки.</p></article>
+  <section class="block"><h2>Темы этапа</h2><ul class="links"><li><a href="/roadmap/java/threads-sync/">Потоки и синхронизация</a> <span class="rm-kind k-core">Основа</span><p>Создание и состояния потоков, synchronized, wait/notify, явные блокировки.</p></li><li><a href="/roadmap/java/jmm-atomics/">Java Memory Model и атомарность</a> <span class="rm-kind k-core">Основа</span><p>happens-before, volatile, атомарные классы и CAS.</p></li><li><a href="/roadmap/java/executors-futures/">Пулы потоков и CompletableFuture</a> <span class="rm-kind k-core">Основа</span><p>ExecutorService, размеры пулов, Future и CompletableFuture, ThreadLocal и Fork/Join.</p></li><li><a href="/roadmap/java/concurrent-utils/">Конкурентные коллекции и координация</a> <span class="rm-kind k-core">Основа</span><p>ConcurrentHashMap, CopyOnWrite, BlockingQueue, семафоры, защёлки и барьеры.</p></li><li><a href="/roadmap/java/virtual-threads/">Виртуальные потоки</a> <span class="rm-kind k-core">Основа</span><p>Project Loom — миллионы лёгких потоков для блокирующего кода.</p></li></ul></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/java/thread-runnable-callable/">Чем Thread, Runnable и Callable отличаются?</a> <span class="lvl lvl-junior">Junior</span><p>Thread — сам поток выполнения. Runnable — задача без результата (void run()), Callable&lt;V&gt; — задача с результатом V call(), которая может бросить проверяемое исключение.</p></li><li><a href="/questions/java/volatile/">Что гарантирует ключевое слово volatile для переменной?</a> <span class="lvl lvl-middle">Middle</span><p>volatile даёт видимость (запись сразу видна другим потокам) и запрет переупорядочивания вокруг обращения, но не атомарность: count++ на volatile-поле всё равно теряет обновления.</p></li><li><a href="/questions/java/fork-join-work-stealing/">Что такое Fork/Join framework и work stealing?</a> <span class="lvl lvl-senior">Senior</span><p>Fork/Join — рекурсивное деление задачи на подзадачи (fork) с последующим объединением результатов (join). Work stealing: у каждого рабочего потока своя двусторонняя очередь, а…</p></li><li><a href="/questions/java/thread-start-vs-run/">Чем вызов start() у потока отличается от прямого вызова run()?</a> <span class="lvl lvl-junior">Junior</span><p>start() создаёт новый поток, и уже он вызывает run(); прямой run() выполняется в текущем потоке, как обычный метод.</p></li><li><a href="/questions/java/volatile-vs-synchronized/">Чем volatile отличается от synchronized?</a> <span class="lvl lvl-middle">Middle</span><p>volatile — видимость и порядок для одной переменной без блокировки. synchronized — видимость плюс взаимное исключение: блок целиком выполняется одним потоком, поэтому составные…</p></li><li><a href="/questions/java/completablefuture-blocking-common-pool/">Почему опасно выполнять блокирующие операции в стадиях CompletableFuture без явного Executor?</a> <span class="lvl lvl-senior">Senior</span><p>Async-стадии без Executor выполняются в ForkJoinPool.commonPool — он общий на всю JVM и размером примерно число ядер − 1. Блокирующие вызовы (HTTP, БД, get чужого future) занимают…</p></li></ul></section><section class="block"><h2>Разборы темы</h2><ul class="links"><li><a href="/articles/java/atomics/">volatile, атомарность и CAS</a><p>Разница видимости и атомарности, atomic-классы, compare-and-swap и ABA, контеншн и LongAdder.</p></li><li><a href="/articles/java/completablefuture/">Future и CompletableFuture</a><p>Ограничения Future, асинхронная композиция CompletableFuture, async-варианты с пулами и обработка ошибок.</p></li><li><a href="/articles/java/coordination/">Координация: семафоры, защёлки и барьеры</a><p>Semaphore, CountDownLatch, CyclicBarrier, Phaser и Exchanger — что каждый делает и когда выбирать.</p></li><li><a href="/articles/java/executors/">Пулы потоков и ExecutorService</a><p>Зачем пул, параметры ThreadPoolExecutor, ловушки фабрик Executors, выбор размера и корректное завершение.</p></li><li><a href="/articles/java/locks/">Явные блокировки: ReentrantLock, RW и Condition</a><p>Когда synchronized мало, ReentrantLock с tryLock/fairness, ReadWriteLock и StampedLock, Condition вместо wait/notify.</p></li><li><a href="/articles/java/synchronized/">synchronized, мониторы и wait/notify</a><p>Взаимное исключение и видимость через монитор, reentrancy, guarded blocks с wait/notify и причины deadlock.</p></li><li><a href="/articles/java/threadlocal-forkjoin/">ThreadLocal и Fork/Join</a><p>Состояние на поток и утечки в пулах, InheritableThreadLocal, work-stealing в ForkJoinPool и общий пул parallel streams.</p></li><li><a href="/articles/java/threads/">Потоки: создание, состояния и отмена</a><p>Thread и Runnable, стоимость платформенных потоков, состояния жизненного цикла, кооперативное прерывание и daemon-потоки.</p></li><li><a href="/articles/java/virtual-threads/">Виртуальные потоки (Project Loom)</a><p>Лёгкие потоки JVM, монтирование на carrier, когда их применять, почему не пулят и проблема pinning.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/java/modern-java/">← Современная Java</a><a class="next" href="/roadmap/java/threads-sync/">Потоки и синхронизация →</a></nav>
+  <p class="rm-back"><a href="/roadmap/java/#concurrency">← Вся карта «Java»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Многопоточность","description":"Потоки и синхронизация, Java Memory Model, пулы, CompletableFuture, конкурентные коллекции и виртуальные потоки.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/java/concurrency/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

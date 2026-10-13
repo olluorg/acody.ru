@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spring Data JPA: репозитории и Hibernate — разбор для собеседования</title>
+<meta name="description" content="Абстракция репозитория, derived queries и @Query, persistence context и dirty checking, lazy/N+1 и почему DTO, а не entity.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/spring/data/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/spring/data/">
+<meta property="og:title" content="Spring Data JPA: репозитории и Hibernate — разбор для собеседования">
+<meta property="og:description" content="Абстракция репозитория, derived queries и @Query, persistence context и dirty checking, lazy/N+1 и почему DTO, а не entity.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#spring">Spring</a> <span>/</span> <span>Spring Data JPA: репозитории и Hibernate</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/articles/#spring"},{"@type":"ListItem","position":3,"name":"Spring Data JPA: репозитории и Hibernate"}]}</script>
+  <h1>Spring Data JPA: репозитории и Hibernate</h1>
+  <p class="lead">Абстракция репозитория, derived queries и @Query, persistence context и dirty checking, lazy/N+1 и почему DTO, а не entity.</p>
+  <article class="md"><h2>Абстракция репозитория</h2>
+<p>Достаточно объявить интерфейс-наследник <code>JpaRepository&lt;T, ID&gt;</code> — Spring Data на старте генерирует его реализацию (прокси) с CRUD, пагинацией и сортировкой. Своего кода доступа писать не нужно.</p>
+<p>Иерархия абстракций: Repository (маркер) → CrudRepository (CRUD) → PagingAndSortingRepository → JpaRepository (плюс JPA-специфика: flush, batch, <code>saveAll</code>). Выбирают самый узкий, достаточный для задачи.</p>
+<pre class="lang-java"><code>interface UserRepository extends JpaRepository&lt;User, Long&gt; {
+    Optional&lt;User&gt; findByEmail(String email);
+}</code></pre>
+<h2>Derived queries и @Query</h2>
+<p>Простые запросы выводятся из имени метода: <code>findByEmail</code>, <code>findByAgeGreaterThan</code>, <code>existsByLogin</code>, <code>countByStatus</code> — Spring парсит имя и строит JPQL. Удобно, но длинные имена-«простыни» — сигнал, что пора на <code>@Query</code>.</p>
+<p><code>@Query</code> задаёт запрос явно (JPQL или, с <code>nativeQuery</code>=true, нативный SQL); параметры связывают <code>@Param</code>; для изменяющих запросов нужен <code>@Modifying</code> (и транзакция). Пагинацию/сортировку передают параметром Pageable/Sort.</p>
+<h2>Persistence context и dirty checking</h2>
+<p>За репозиториями стоит JPA/Hibernate с EntityManager и его кэшем первого уровня — persistence context. В пределах транзакции загруженная сущность становится managed: Hibernate отслеживает изменения её полей и на flush сам выгружает UPDATE — без явного вызова save (это dirty checking).</p>
+<p>Отсюда практическое следствие: внутри транзакции достаточно загрузить сущность и поменять поля. <code>save()</code> нужен в основном для НОВЫХ сущностей. Вне транзакции/сессии сущность становится detached, и её изменения не отслеживаются.</p>
+<pre class="lang-java"><code>@Transactional
+void rename(long id, String name) {
+    User u = repo.findById(id).orElseThrow();
+    u.setName(name); // dirty checking сам сделает UPDATE на flush — save() не нужен
+}</code></pre>
+<h2>Lazy-связи и N+1</h2>
+<p>Коллекции (<code>@OneToMany</code>) по умолчанию lazy и подгружаются прокси при первом обращении; <code>@ManyToOne</code> по умолчанию eager. Обход lazy-коллекции в цикле порождает проблему N+1: 1 запрос за списком + по запросу на связь каждого элемента.</p>
+<p>Лечат тем же набором, что в разделе баз данных: JOIN FETCH, <code>@EntityGraph</code>, batch fetching (<code>hibernate.default_batch_fetch_size</code>), DTO-проекции. Отдельная боль — LazyInitializationException при обращении к lazy-связи уже вне транзакции; «лечить» это включением Open-Session-In-View — антипаттерн (он маскирует N+1 и держит соединение дольше).</p>
+<h2>DTO против entity</h2>
+<p>Сущности JPA не стоит возвращать прямо из контроллера: при сериализации Hibernate-прокси и lazy-связей легко получить лишние запросы, LazyInitializationException или бесконечную рекурсию по двусторонним связям. Плюс это завязывает API на модель хранения.</p>
+<p>Поэтому наружу отдают DTO/проекции (отдельные record-классы или интерфейсные проекции Spring Data), а entity остаётся внутренней моделью персистентности.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Объясните генерируемые репозитории и иерархию, derived queries vs <code>@Query</code>/<code>@Modifying</code>, и обязательно persistence context + dirty checking (managed-сущность сохраняется без save, save — для новых; detached вне сессии). Разберите lazy/eager и N+1 с лечением (JOIN FETCH/EntityGraph/batch), LazyInitializationException и почему Open-Session-In-View — антипаттерн. Завершите «DTO наружу, entity внутри».</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/spring/spring-data-jpa/">Что даёт Spring Data JPA?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/dirty-checking/">Почему изменение JPA-сущности внутри @Transactional сохраняется в БД без явного вызова save()?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/spring-n-plus-one/">Список из 100 заказов рендерится вместе с покупателем каждого, и в логе видно 101 SQL-запрос. Какие способы исправят проблему?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/open-in-view/">Что делает включённый по умолчанию в Spring Boot режим open-in-view и почему его считают спорным?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/jparepository-basic/">Что даёт объявление интерфейса, наследующего JpaRepository?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/spring/transactions/">@Transactional: propagation, isolation, rollback</a><p>Декларативные транзакции через прокси, ловушка self-invocation, уровни распространения, правила отката и readOnly/isolation.</p></li><li><a href="/articles/spring/aop/">AOP: прокси и аспекты</a><p>Сквозная функциональность, понятия aspect/advice/pointcut/join point, JDK против CGLIB прокси, self-invocation и что на AOP построено.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Spring Data JPA: репозитории и Hibernate","description":"Абстракция репозитория, derived queries и @Query, persistence context и dirty checking, lazy/N+1 и почему DTO, а не entity.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/spring/data/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

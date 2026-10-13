@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как в Spring Kafka обычно строят retry и dead letter topic? — вопрос с собеседования</title>
+<meta name="description" content="Два способа: блокирующий — DefaultErrorHandler с BackOff и DeadLetterPublishingRecoverer (повторы на месте, партиция ждёт); неблокирующий …">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/spring-kafka-retry-dlt/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/spring-kafka-retry-dlt/">
+<meta property="og:title" content="Как в Spring Kafka обычно строят retry и dead letter topic? — вопрос с собеседования">
+<meta property="og:description" content="Два способа: блокирующий — DefaultErrorHandler с BackOff и DeadLetterPublishingRecoverer (повторы на месте, партиция ждёт); неблокирующий …">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Как в Spring Kafka обычно строят retry и dead letter topic?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Как в Spring Kafka обычно строят retry и dead letter topic?"}]}</script>
+  <h1>Как в Spring Kafka обычно строят retry и dead letter topic?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Spring Kafka</span><span class="chip">Kafka</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое @RetryableTopic?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Два способа: <b>блокирующий</b> — <code>DefaultErrorHandler</code> с <code>BackOff</code> и <code>DeadLetterPublishingRecoverer</code> (повторы на месте, партиция ждёт); <b>неблокирующий</b> — <code>@RetryableTopic</code>: запись уходит в retry-топики с задержкой, а партиция продолжает обрабатываться.</p><ul><li>Постоянные ошибки (валидация, десериализация) — сразу в DLT без повторов</li><li>Неблокирующий повтор нарушает порядок для ключа</li><li>DLT — с заголовками причины, исходного топика и offset</li></ul><p class="extra"><span>А ещё</span> У DLT должен быть владелец, алерт и способ переиграть сообщения</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Блокирующий повтор:</b></p>
+<pre class="lang-java"><code>@Bean
+DefaultErrorHandler errorHandler(KafkaTemplate&lt;Object, Object&gt; t) {
+    var h = new DefaultErrorHandler(new DeadLetterPublishingRecoverer(t),
+                                    new ExponentialBackOff(1000, 2.0) {{ setMaxElapsedTime(30_000); }});
+    h.addNotRetryableExceptions(ValidationException.class);
+    return h;
+}</code></pre>
+<p>Запись повторяется на месте; пока идут повторы, остальные записи партиции ждут — порядок сохраняется, но долгая отсрочка задерживает поток. Повторы держат потребителя — нельзя ставить отсрочку длиннее <code>max.poll.interval.ms</code>.</p>
+<p><b>Неблокирующий повтор:</b></p>
+<pre class="lang-java"><code>@RetryableTopic(attempts = &quot;4&quot;, backoff = @Backoff(delay = 1000, multiplier = 10),
+                exclude = ValidationException.class)
+@KafkaListener(topics = &quot;payments&quot;)
+void handle(PaymentEvent e) { ... }</code></pre>
+<p>Spring создаёт топики <code>payments-retry-0</code>, <code>-retry-1</code>, … и <code>payments-dlt</code>. Упавшая запись публикуется в retry-топик и будет прочитана после задержки, а основная партиция обрабатывается дальше. Цена — потеря порядка для этого ключа и больше топиков.</p>
+<p><b>Что выбрать:</b> порядок важен (события одной сущности) — блокирующий с небольшим числом попыток; порядок не важен, важна пропускная способность — неблокирующий. В обоих случаях: неповторяемые исключения — сразу в DLT, десериализация — через <code>ErrorHandlingDeserializer</code>, мониторинг DLT.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Блокирующий и неблокирующий повтор, их компромиссы.</li><li>DeadLetterPublishingRecoverer и @RetryableTopic.</li><li>Неповторяемые ошибки и порядок.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Повторять ошибки валидации.</li><li>Отсрочка дольше max.poll.interval.ms в блокирующем режиме.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Бесконечно повторяют сообщение, пока не получится</li><li class="no"><span class="mark">✗</span>Удаляют сообщение при первой же ошибке</li><li class="no"><span class="mark">✗</span>Откатывают offset в начало топика</li><li class="ok"><span class="mark">✓</span>DefaultErrorHandler ретраит с backoff, а после исчерпания попыток публикует запись в DLT через DeadLetterPublishingRecoverer</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что хранить в DLT headers?</li><li>Когда retry topic лучше blocking retry?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/spring-kafka/">Spring Kafka</a><p>KafkaTemplate, @KafkaListener, listener containers, offset ack, error handling, retries и DLT.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/brokers/non-blocking-retries/">Чем неблокирующий повтор через отдельные retry-топики лучше повтора прямо в обработчике?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/retryable-errors/">Какие ошибки обработки сообщения имеет смысл повторять, а какие нет?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/dlq-design/">Что важно предусмотреть при проектировании dead letter queue?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/kafkalistener-container-commit/">Как @KafkaListener связан с listener container и offset commit?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как в Spring Kafka обычно строят retry и dead letter topic?","acceptedAnswer":{"@type":"Answer","text":"Два способа: блокирующий — DefaultErrorHandler с BackOff и DeadLetterPublishingRecoverer (повторы на месте, партиция ждёт); неблокирующий — @RetryableTopic: запись уходит в retry-топики с задержкой, а партиция продолжает обрабатываться. Постоянные ошибки (валидация, десериализация) — сразу в DLT без повторов Неблокирующий повтор нарушает порядок для ключа DLT — с заголовками причины, исходного топика и offset У DLT должен быть владелец, алерт и способ переиграть сообщения Блокирующий повтор: Запись повторяется на месте; пока идут повторы, остальные записи партиции ждут — порядок сохраняется, но долгая отсрочка задерживает поток. Повторы держат потребителя — нельзя ставить отсрочку длиннее max.poll.interval.ms. Неблокирующий повтор: Spring создаёт топики payments-retry-0, -retry-1, … и payments-dlt. Упавшая запись публикуется в retry-топик и будет прочитана после задержки, а основная партиция обрабатывается дальше. Цена — потеря порядка для этого ключа и больше топиков. Что выбрать: порядок важен (события одной сущности) — блокирующий с небольшим числом попыток; порядок не важен, важна пропускная способность — неблокирующий. В обоих случаях: неповторяемые исключения — сразу в DLT, десериализация — через ErrorHandlingDeserializer, мониторинг DLT."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

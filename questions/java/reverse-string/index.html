@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Реализуй метод reverse(String s), возвращающий строку в обратном порядке. — вопрос с собеседования</title>
+<meta name="description" content="Проще всего — new StringBuilder(s).reverse().toString(); вручную — обмен символов массива с двух концов. Обработайте null и пустую строку Вручную…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/reverse-string/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/reverse-string/">
+<meta property="og:title" content="Реализуй метод reverse(String s), возвращающий строку в обратном порядке. — вопрос с собеседования">
+<meta property="og:description" content="Проще всего — new StringBuilder(s).reverse().toString(); вручную — обмен символов массива с двух концов. Обработайте null и пустую строку Вручную…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Реализуй метод reverse(String s), возвращающий строку в обратном порядке.</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Реализуй метод reverse(String s), возвращающий строку в обратном порядке."}]}</script>
+  <h1>Реализуй метод reverse(String s), возвращающий строку в обратном порядке.</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Основы языка</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как развернуть строку в Java?</li><li>Напишите метод разворота строки без StringBuilder</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Проще всего — <code>new StringBuilder(s).reverse().toString()</code>; вручную — обмен символов массива с двух концов.</p><ul><li>Обработайте null и пустую строку</li><li>Вручную: два указателя, O(n) по времени</li></ul><p class="extra"><span>А ещё</span> StringBuilder.reverse корректно обрабатывает суррогатные пары (эмодзи), ручной обмен char — нет</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>На собеседовании обычно ждут два варианта: идиоматичный через стандартную библиотеку и ручной — чтобы проверить работу с массивами и индексами.</p>
+<p><b>Через StringBuilder.</b> Строки в Java неизменяемы, поэтому изменяемый <code>StringBuilder</code> разворачивает содержимое и возвращает новую строку. Метод <code>reverse()</code> правильно обрабатывает суррогатные пары — символы вне базовой плоскости Unicode (эмодзи), которые занимают два <code>char</code>.</p>
+<p><b>Вручную.</b> Превратить строку в массив символов и менять местами элементы с двух концов, двигая указатели к центру. Сложность O(n) по времени и O(n) по памяти на массив. Такой вариант разобьёт суррогатные пары — стоит сказать об этом вслух.</p>
+<p>Не забыть про граничные случаи: <code>null</code> (вернуть null или бросить исключение — уточнить у интервьюера) и пустую строку.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>static String reverse(String s) {
+    if (s == null) return null;
+    return new StringBuilder(s).reverse().toString();
+}
+
+static String reverseManual(String s) {
+    if (s == null) return null;
+    char[] chars = s.toCharArray();
+    for (int i = 0, j = chars.length - 1; i &lt; j; i++, j--) {
+        char tmp = chars[i];
+        chars[i] = chars[j];
+        chars[j] = tmp;
+    }
+    return new String(chars);
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Рабочий код хотя бы одним способом.</li><li>Обработка null и пустой строки.</li><li>Понимание неизменяемости String и роли StringBuilder.</li><li>Сложность и замечание про суррогатные пары — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Падение на null.</li><li>Конкатенация String в цикле вместо StringBuilder.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как развернуть с учётом графем?</li><li>Какая сложность у решения?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/strings/">Строки: неизменяемость, пул и StringBuilder</a><p>Почему String immutable, String pool и intern, конкатенация и StringBuilder, char/code points и compact strings.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/string-stringbuilder-stringbuffer/">Чем String, StringBuilder и StringBuffer отличаются?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/string-immutable/">Почему String в Java неизменяемый?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/string-equals-vs-double-equals/">Что вернут сравнения для new String(&quot;a&quot;) и new String(&quot;a&quot;) через == и через equals()?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Реализуй метод reverse(String s), возвращающий строку в обратном порядке.","acceptedAnswer":{"@type":"Answer","text":"Проще всего — new StringBuilder(s).reverse().toString(); вручную — обмен символов массива с двух концов. Обработайте null и пустую строку Вручную: два указателя, O(n) по времени StringBuilder.reverse корректно обрабатывает суррогатные пары (эмодзи), ручной обмен char — нет На собеседовании обычно ждут два варианта: идиоматичный через стандартную библиотеку и ручной — чтобы проверить работу с массивами и индексами. Через StringBuilder. Строки в Java неизменяемы, поэтому изменяемый StringBuilder разворачивает содержимое и возвращает новую строку. Метод reverse() правильно обрабатывает суррогатные пары — символы вне базовой плоскости Unicode (эмодзи), которые занимают два char. Вручную. Превратить строку в массив символов и менять местами элементы с двух концов, двигая указатели к центру. Сложность O(n) по времени и O(n) по памяти на массив. Такой вариант разобьёт суррогатные пары — стоит сказать об этом вслух. Не забыть про граничные случаи: null (вернуть null или бросить исключение — уточнить у интервьюера) и пустую строку."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

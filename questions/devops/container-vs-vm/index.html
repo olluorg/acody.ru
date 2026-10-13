@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем контейнер отличается от виртуальной машины? — вопрос с собеседования</title>
+<meta name="description" content="Виртуальная машина эмулирует оборудование и запускает собственное ядро ОС поверх гипервизора. Контейнер — обычный процесс хоста, изолированный…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/container-vs-vm/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/container-vs-vm/">
+<meta property="og:title" content="Чем контейнер отличается от виртуальной машины? — вопрос с собеседования">
+<meta property="og:description" content="Виртуальная машина эмулирует оборудование и запускает собственное ядро ОС поверх гипервизора. Контейнер — обычный процесс хоста, изолированный…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Чем контейнер отличается от виртуальной машины?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Чем контейнер отличается от виртуальной машины?"}]}</script>
+  <h1>Чем контейнер отличается от виртуальной машины?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Docker и контейнеры</span><span class="chip">Docker</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое namespaces и cgroups?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Виртуальная машина</b> эмулирует оборудование и запускает <b>собственное ядро</b> ОС поверх гипервизора. <b>Контейнер</b> — обычный процесс хоста, изолированный механизмами <b>общего ядра</b>: <b>namespaces</b> (свои PID, сеть, файловая система, пользователи) и <b>cgroups</b> (лимиты CPU и памяти). Контейнер стартует за доли секунды и весит мегабайты; изоляция слабее, чем у ВМ.</p><ul><li>Ядро общее — контейнер с Linux-ядром не запустить на Windows без ВМ</li><li>Уязвимость ядра затрагивает все контейнеры хоста</li><li>Для мультитенантности со строгой изоляцией — ВМ или песочницы (gVisor, Firecracker)</li></ul><p class="extra"><span>А ещё</span> Образ — шаблон файловой системы, контейнер — запущенный процесс из образа</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Namespaces:</b></p>
+<ul><li><b>pid</b> — свой PID 1 и дерево процессов;</li><li><b>net</b> — свои интерфейсы, IP, порты;</li><li><b>mnt</b> — своя файловая система (корень из образа);</li><li><b>uts</b> — имя хоста;</li><li><b>ipc</b>, <b>user</b> — разделяемая память, отображение пользователей.</li></ul>
+<p><b>Cgroups</b> ограничивают и учитывают ресурсы: CPU, память, ввод-вывод, число процессов. Отсюда OOMKilled в контейнере при свободной памяти хоста.</p>
+<p><b>Сравнение:</b></p>
+<div class="table"><table><thead><tr><th></th><th>виртуальная машина</th><th>контейнер</th></tr></thead><tbody><tr><td>ядро</td><td>своё</td><td>общее с хостом</td></tr><tr><td>запуск</td><td>десятки секунд</td><td>доли секунды</td></tr><tr><td>размер</td><td>гигабайты</td><td>мегабайты</td></tr><tr><td>изоляция</td><td>сильная</td><td>слабее</td></tr><tr><td>плотность</td><td>десятки на хост</td><td>сотни на хост</td></tr></tbody></table></div>
+<p>На практике их сочетают: контейнеры запускают внутри виртуальных машин облака.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Общее ядро против собственного.</li><li>Namespaces и cgroups.</li><li>Компромисс скорости и изоляции.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/devops/dockerfile-best-practices/">Как написать хороший Dockerfile?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/container-security/">Как сделать контейнер безопаснее?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем контейнер отличается от виртуальной машины?","acceptedAnswer":{"@type":"Answer","text":"Виртуальная машина эмулирует оборудование и запускает собственное ядро ОС поверх гипервизора. Контейнер — обычный процесс хоста, изолированный механизмами общего ядра: namespaces (свои PID, сеть, файловая система, пользователи) и cgroups (лимиты CPU и памяти). Контейнер стартует за доли секунды и весит мегабайты; изоляция слабее, чем у ВМ. Ядро общее — контейнер с Linux-ядром не запустить на Windows без ВМ Уязвимость ядра затрагивает все контейнеры хоста Для мультитенантности со строгой изоляцией — ВМ или песочницы (gVisor, Firecracker) Образ — шаблон файловой системы, контейнер — запущенный процесс из образа Namespaces: - pid — свой PID 1 и дерево процессов; - net — свои интерфейсы, IP, порты; - mnt — своя файловая система (корень из образа); - uts — имя хоста; - ipc, user — разделяемая память, отображение пользователей. Cgroups ограничивают и учитывают ресурсы: CPU, память, ввод-вывод, число процессов. Отсюда OOMKilled в контейнере при свободной памяти хоста. Сравнение: | | виртуальная машина | контейнер | | --- | --- | --- | | ядро | своё | общее с хостом | | запуск | десятки секунд | доли секунды | | размер | гигабайты | мегабайты | | изоляция | сильная | слабее | | плотность | десятки на хост | сотни на хост | На практике их сочетают: контейнеры запускают внутри виртуальных машин облака."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kafka: topic, partition, offset — разбор для собеседования</title>
+<meta name="description" content="Распределённый append-only лог, партиция как единица масштаба и упорядоченности, ключ и порядок, retention и log compaction, replay.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/brokers/kafka-core/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/brokers/kafka-core/">
+<meta property="og:title" content="Kafka: topic, partition, offset — разбор для собеседования">
+<meta property="og:description" content="Распределённый append-only лог, партиция как единица масштаба и упорядоченности, ключ и порядок, retention и log compaction, replay.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#brokers">Брокеры сообщений</a> <span>/</span> <span>Kafka: topic, partition, offset</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/articles/#brokers"},{"@type":"ListItem","position":3,"name":"Kafka: topic, partition, offset"}]}</script>
+  <h1>Kafka: topic, partition, offset</h1>
+  <p class="lead">Распределённый append-only лог, партиция как единица масштаба и упорядоченности, ключ и порядок, retention и log compaction, replay.</p>
+  <article class="md"><h2>Распределённый append-only лог</h2>
+<p>Концептуально Kafka — это не классическая очередь, а РЕПЛИЦИРОВАННЫЙ append-only лог. Сообщения пишутся в topic, topic делится на partitions, каждая партиция — упорядоченный лог на диске, а consumer читает с конкретного offset (порядковый номер записи в партиции).</p>
+<p>Offset уникален ТОЛЬКО внутри одной партиции — глобального offset «на весь topic» не существует. Поэтому большинство гарантий и характеристик Kafka формулируются именно в терминах партиции, а не темы целиком.</p>
+<h2>Партиция — единица всего</h2>
+<p>Партиция — единица сразу нескольких вещей. Единица распределения: партиции разъезжаются по брокерам кластера. Единица репликации: у каждой партиции есть leader и followers с фактором replication factor. Единица упорядоченности: порядок есть только внутри одной партиции.</p>
+<p>Главное практическое следствие — параллелизм consumer group ограничен ЧИСЛОМ партиций. Если в группе consumer'ов больше, чем партиций, лишние будут простаивать без работы. Поэтому число партиций — главный параметр пропускной способности группы.</p>
+<figure><img src="/articles/assets/kafka-topic-partition.webp" alt="Топик из нескольких партиций-логов; продюсер дописывает записи в конец, консьюмер читает по своему оффсету." loading="lazy"><figcaption>Топик делится на партиции — упорядоченные append-only логи; позиция чтения — это оффсет.</figcaption></figure>
+<h2>Ключ и порядок</h2>
+<p>Порядок гарантируется внутри партиции. Чтобы события одного бизнес-агрегата шли последовательно, им задают одинаковый key — дефолтный partitioner кладёт их в одну и ту же партицию: <code>hash(key)</code> % <code>numPartitions</code>.</p>
+<p>Ловушка: если потом увеличить число партиций, формула партиции по ключу поменяется, и НОВЫЕ сообщения того же ключа могут попасть в другую партицию (старые останутся в прежней). Это может разорвать порядок по ключу. Поэтому число партиций планируют заранее с запасом — лишние партиции дёшевы, а изменить их позже — больно.</p>
+<h2>Retention: time и size</h2>
+<p>Kafka хранит данные по политике retention. Чаще всего — по времени (<code>retention.ms</code>, по умолчанию ~7 дней) или по размеру (<code>retention.bytes</code>). Можно объединять — что наступит раньше, то и сработает.</p>
+<p>Удаление работает СЕГМЕНТАМИ файлов лога, а не отдельными сообщениями: Kafka закрывает заполнившийся сегмент и периодически удаляет целые старые сегменты. Отсюда дешёвые крупноблочные операции и невозможность «удалить одно конкретное сообщение».</p>
+<h2>Log compaction</h2>
+<p>Альтернативный режим retention для key-value тем — log compaction: для каждого ключа Kafka хранит только ПОСЛЕДНЕЕ значение, более старые версии этого ключа удаляются при компакции. Запись с null-значением (tombstone) удаляет ключ полностью.</p>
+<p>Это превращает compacted topic в распределённый снимок состояния: чтение с начала восстанавливает текущую картину по ключам. Используется для конфигурационных тем, текущих состояний агрегатов и Kafka Streams state stores.</p>
+<h2>Replay и offset reset</h2>
+<p>Поскольку лог хранится, можно перечитать любой диапазон: по offset или по времени (<code>offsetsForTimes</code>). Это даёт replay — мощный инструмент для пересборки состояния consumer'а, миграции, дебага и появления новых подписчиков на исторические данные.</p>
+<p>У consumer'а без сохранённого offset поведение задаёт <code>auto.offset.reset</code>: earliest (с начала лога — для bootstrap новой группы), latest (только новые сообщения), none (бросить ошибку). Выбор — это уже про намерение: догнать историю или подключиться «с момента запуска».</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Опишите Kafka как распределённый append-only лог: topic → partitions → offset (offset только в партиции). Подчеркните роль партиции как единицы распределения/репликации/порядка и связку «параллелизм группы ≤ число партиций». Объясните ключ и hash-партиционирование, и ловушку добавления партиций (распределение по ключу меняется → возможный разрыв порядка). Различите time/size retention и log compaction (последнее значение по ключу + tombstone). Назовите replay и <code>auto.offset.reset</code> как основу пересборки состояния.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/brokers/topic-partition-offset/">Что такое topic, partition и offset в Kafka?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/brokers/when-kafka/">Когда стоит выбирать Kafka?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/kafka-components/">Какие основные компоненты Kafka?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/kafka-ordering/">Какая гарантия порядка в Kafka является базовой?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/brokers/offset-basic/">Что такое offset в Kafka?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/brokers/kafka-producer/">Kafka Producer</a><p>Запись и сериализация, выбор партиции, батчинг и сжатие, acks и долговечность, идемпотентный producer и транзакции.</p></li><li><a href="/articles/brokers/kafka-consumer/">Kafka Consumer и consumer group</a><p>Группа и распределение партиций, poll-цикл, heartbeat и таймауты, модели commit offset, ребаланс и роль идемпотентности.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Kafka: topic, partition, offset","description":"Распределённый append-only лог, партиция как единица масштаба и упорядоченности, ключ и порядок, retention и log compaction, replay.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/brokers/kafka-core/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

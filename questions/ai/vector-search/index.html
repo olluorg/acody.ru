@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как устроен векторный поиск? — вопрос с собеседования</title>
+<meta name="description" content="Векторный поиск находит ближайшие векторы к вектору запроса; на больших объёмах используют приближённый поиск (ANN) с индексами вроде HNSW. Точный…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/vector-search/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/vector-search/">
+<meta property="og:title" content="Как устроен векторный поиск? — вопрос с собеседования">
+<meta property="og:description" content="Векторный поиск находит ближайшие векторы к вектору запроса; на больших объёмах используют приближённый поиск (ANN) с индексами вроде HNSW. Точный…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как устроен векторный поиск?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как устроен векторный поиск?"}]}</script>
+  <h1>Как устроен векторный поиск?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Эмбеддинги и векторный поиск</span><span class="chip">pgvector</span><span class="chip">FAISS</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое векторная база данных?</li><li>Что такое ANN и HNSW?</li><li>Зачем нужен гибридный поиск?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Векторный поиск находит <b>ближайшие векторы к вектору запроса</b>; на больших объёмах используют <b>приближённый поиск (ANN)</b> с индексами вроде HNSW.</p><ul><li>Точный перебор — O(n), ANN — быстро ценой небольшой потери полноты</li><li>Хранилища: pgvector в PostgreSQL, FAISS, специализированные векторные базы</li></ul><p class="extra"><span>А ещё</span> Гибридный поиск: векторный + полнотекстовый (BM25) — ловит и смысл, и точные термины, коды, артикулы</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Задача</b> — по вектору запроса вернуть k самых близких векторов документов.</p>
+<ul><li><b>Точный поиск (kNN)</b> — посчитать сходство со всеми векторами. Подходит для тысяч и десятков тысяч записей.</li><li><b>Приближённый (ANN)</b> — индекс позволяет проверить лишь часть векторов. Популярные подходы:<ul><li><b>HNSW</b> — многоуровневый граф ближайших соседей, быстрый поиск и хорошая полнота, но индекс занимает память;</li><li><b>IVF</b> — векторы разбиты на кластеры, поиск идёт в нескольких ближайших;</li><li>квантизация (PQ) — сжатие векторов ради памяти. Параметры индекса — компромисс между скоростью, памятью и полнотой (recall).</li></ul></li></ul>
+<p><b>Где хранить:</b> pgvector — расширение PostgreSQL, удобно, если данные и так в Postgres; FAISS — библиотека для поиска в памяти; отдельные векторные базы — когда нужен масштаб, фильтрация и управление коллекциями.</p>
+<p><b>Гибридный поиск.</b> Эмбеддинги хорошо ловят смысл, но плохо — точные совпадения: номера, коды ошибок, редкие термины, имена. Полнотекстовый поиск (BM25) — наоборот. Результаты объединяют (например, reciprocal rank fusion) и часто доуточняют реранкером.</p>
+<p><b>Фильтры по метаданным</b> (раздел, дата, права доступа) применяют вместе с векторным поиском — иначе пользователь найдёт то, что ему видеть нельзя.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Постановка задачи: ближайшие соседи по вектору.</li><li>Точный поиск против ANN, идея HNSW.</li><li>Варианты хранилищ.</li><li>Гибридный поиск и фильтры по метаданным.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что векторный поиск всегда лучше полнотекстового.</li><li>Забыть про фильтрацию по правам доступа.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/ai/rag-quality/">Как улучшить качество RAG, если он отвечает плохо?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/embeddings/">Что такое эмбеддинги?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/what-is-rag/">Что такое RAG и как он устроен?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как устроен векторный поиск?","acceptedAnswer":{"@type":"Answer","text":"Векторный поиск находит ближайшие векторы к вектору запроса; на больших объёмах используют приближённый поиск (ANN) с индексами вроде HNSW. Точный перебор — O(n), ANN — быстро ценой небольшой потери полноты Хранилища: pgvector в PostgreSQL, FAISS, специализированные векторные базы Гибридный поиск: векторный + полнотекстовый (BM25) — ловит и смысл, и точные термины, коды, артикулы Задача — по вектору запроса вернуть k самых близких векторов документов. - Точный поиск (kNN) — посчитать сходство со всеми векторами. Подходит для тысяч и десятков тысяч записей. - Приближённый (ANN) — индекс позволяет проверить лишь часть векторов. Популярные подходы: - HNSW — многоуровневый граф ближайших соседей, быстрый поиск и хорошая полнота, но индекс занимает память; - IVF — векторы разбиты на кластеры, поиск идёт в нескольких ближайших; - квантизация (PQ) — сжатие векторов ради памяти. Параметры индекса — компромисс между скоростью, памятью и полнотой (recall). Где хранить: pgvector — расширение PostgreSQL, удобно, если данные и так в Postgres; FAISS — библиотека для поиска в памяти; отдельные векторные базы — когда нужен масштаб, фильтрация и управление коллекциями. Гибридный поиск. Эмбеддинги хорошо ловят смысл, но плохо — точные совпадения: номера, коды ошибок, редкие…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

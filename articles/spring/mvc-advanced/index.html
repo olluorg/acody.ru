@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Валидация и обработка ошибок — разбор для собеседования</title>
+<meta name="description" content="Bean Validation и @Valid/@Validated, превращение ошибок в ответ, @ControllerAdvice и единый контракт, ProblemDetail (RFC 7807), multipart и…">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/spring/mvc-advanced/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/spring/mvc-advanced/">
+<meta property="og:title" content="Валидация и обработка ошибок — разбор для собеседования">
+<meta property="og:description" content="Bean Validation и @Valid/@Validated, превращение ошибок в ответ, @ControllerAdvice и единый контракт, ProblemDetail (RFC 7807), multipart и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#spring">Spring</a> <span>/</span> <span>Валидация и обработка ошибок</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/articles/#spring"},{"@type":"ListItem","position":3,"name":"Валидация и обработка ошибок"}]}</script>
+  <h1>Валидация и обработка ошибок</h1>
+  <p class="lead">Bean Validation и @Valid/@Validated, превращение ошибок в ответ, @ControllerAdvice и единый контракт, ProblemDetail (RFC 7807), multipart и interceptors.</p>
+  <article class="md"><h2>Bean Validation</h2>
+<p>Декларативную валидацию даёт Bean Validation (<code>jakarta.validation</code>): аннотации <code>@NotNull</code>, <code>@NotBlank</code>, <code>@Size</code>, <code>@Email</code>, <code>@Pattern</code>, <code>@Min</code>/<code>@Max</code> и собственные constraints прямо на полях DTO. В контроллере валидацию запускает <code>@Valid</code> на <code>@RequestBody</code>-параметре.</p>
+<p><code>@Validated</code> (на классе/параметре) добавляет группы валидации — разные правила для create и update. Вложенные объекты валидируются каскадно, если поле помечено <code>@Valid</code>. Важно: DTO входа отделяют от JPA-сущности — контракт API и модель хранения меняются по разным причинам и не должны быть связаны.</p>
+<h2>Как ошибка валидации становится ответом</h2>
+<p>Если <code>@Valid</code> <code>@RequestBody</code> не проходит проверки, Spring бросает MethodArgumentNotValidException, который по умолчанию превращается в 400 Bad Request. Детали (какие поля и почему не прошли) лежат в BindingResult и их собирают в ответ.</p>
+<p>Поэтому валидацию НЕ пишут вручную в начале каждого метода — её декларируют аннотациями, а единый обработчик формирует понятный ответ со списком ошибок по полям.</p>
+<pre class="lang-java"><code>record CreateUser(@NotBlank String name, @Email String email, @Min(18) int age) {}
+
+@PostMapping
+User create(@Valid @RequestBody CreateUser req) { /* при ошибке — 400 */ }</code></pre>
+<h2>@ExceptionHandler и @ControllerAdvice</h2>
+<p><code>@ExceptionHandler</code> обрабатывает исключение в пределах одного контроллера, а <code>@RestControllerAdvice</code> выносит обработку на всё приложение — это место для единого error-contract.</p>
+<p>Хороший контракт ошибки стабилен и машиночитаем: статус, код ошибки, сообщение, ошибки по полям, correlation id для поиска в логах. Stacktrace и внутренние детали наружу не отдают — это и неудобно клиенту, и риск утечки информации.</p>
+<pre class="lang-java"><code>@RestControllerAdvice
+class ApiErrors {
+    @ExceptionHandler(EntityNotFoundException.class)
+    ProblemDetail notFound(EntityNotFoundException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+}</code></pre>
+<h2>ProblemDetail (RFC 7807)</h2>
+<p>Вместо самодельного ErrorDto современный стандарт ответа об ошибке — ProblemDetail по RFC 7807 (media type application/problem+json) с полями type, title, status, detail, instance и произвольными расширениями.</p>
+<p>Spring 6 / Boot 3 поддерживают его из коробки (класс ProblemDetail, базовый ResponseEntityExceptionHandler уже отдаёт ошибки в этом формате). Единый стандартный формат удобнее клиентам и инструментам, чем зоопарк кастомных структур.</p>
+<h2>Multipart, локализация и перехватчики</h2>
+<p>Загрузку файлов (multipart/form-data) принимают через MultipartFile; для больших файлов настраивают лимиты и стриминг, чтобы не читать всё в память. MessageSource + LocaleResolver дают локализованные сообщения (locale, например, из Accept-Language).</p>
+<p>Сквозную логику вокруг обработчика (correlation id, аудит, tenant context) вешают на HandlerInterceptor (работает внутри MVC, вокруг handler), а более низкоуровневую — на Servlet Filter (срабатывает раньше, до DispatcherServlet). Их разницу разбираем в уроке про сервлеты.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Объясните декларативную валидацию (<code>@Valid</code>/<code>@Validated</code> + группы, каскад, отдельный DTO от entity) и путь ошибки: MethodArgumentNotValidException → 400 с field errors. Расскажите про <code>@RestControllerAdvice</code> как единую точку error-contract (status/code/message/field errors/correlation id, без stacktrace) и про современный ProblemDetail (RFC 7807) из Boot 3. Различите Interceptor (вокруг handler) и Filter (ниже, до DispatcherServlet).</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/spring/dto-validation/">Как в Spring MVC обычно обрабатывают ошибки и валидацию входных DTO?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/validated-vs-valid/">Чем @Validated отличается от @Valid?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/invalid-request-body/">В контроллере стоит @Valid @RequestBody CreateUserRequest, и клиент прислал невалидное тело. Что произойдёт по умолчанию?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/controlleradvice-scope/">Чем @ControllerAdvice отличается от @ExceptionHandler внутри контроллера?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/valid-basic/">Зачем нужна аннотация @Valid на теле запроса в контроллере?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/spring/web/">Spring MVC: DispatcherServlet и обработка запроса</a><p>Конвейер обработки запроса, @Controller против @RestController, маппинги, извлечение данных и контроль ответа.</p></li><li><a href="/articles/spring/rest-api/">REST API: статусы, согласование и семантика</a><p>Ресурсы и HTTP-глаголы, статус-коды как контракт, content negotiation и message converters, идемпотентность и версионирование.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Валидация и обработка ошибок","description":"Bean Validation и @Valid/@Validated, превращение ошибок в ответ, @ControllerAdvice и единый контракт, ProblemDetail (RFC 7807), multipart и interceptors.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/spring/mvc-advanced/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

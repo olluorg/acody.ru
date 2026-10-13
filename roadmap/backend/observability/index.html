@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Наблюдаемость — карта «Backend-разработчик»</title>
+<meta name="description" content="Логи, метрики и трассировка, SLO и алерты — как видеть, что происходит с сервисом.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/backend/observability/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/backend/observability/">
+<meta property="og:title" content="Наблюдаемость — карта «Backend-разработчик»">
+<meta property="og:description" content="Логи, метрики и трассировка, SLO и алерты — как видеть, что происходит с сервисом.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/#observability">Backend-разработчик</a> <span>/</span> <span>Наблюдаемость</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://learn.getsotto.ru/roadmap/backend/#observability"},{"@type":"ListItem","position":3,"name":"Наблюдаемость"}]}</script>
+  <h1>Наблюдаемость</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Логи, метрики и трассировка, SLO и алерты — как видеть, что происходит с сервисом.</p>
+  <article class="md"><h3>Что важно знать</h3>
+<ul><li><b>Логи</b> — что произошло, в JSON, с идентификатором запроса.</li><li><b>Метрики</b> — сколько и как быстро: запросы, ошибки, задержки (p50, p95, p99), насыщение ресурсов.</li><li><b>Трассировка</b> — путь запроса через сервисы, где тратится время.</li><li><b>OpenTelemetry</b> — единый стандарт сбора.</li><li><b>SLO и бюджет ошибок</b> — основа для алертов по симптомам, а не по «CPU 90%».</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 4 ч</small></h3><ul><li>Пишет структурированные логи с уровнями и идентификатором запроса</li></ul><p class="rm-practice"><b>Практика.</b> Перевести логи сервиса в JSON с trace_id и уровнем.</p></div><div class="rm-grade"><h3>Middle <small>≈ 8 ч</small></h3><ul><li>Экспортирует метрики RED (запросы, ошибки, задержки) и строит дашборд</li><li>Подключает распределённую трассировку через OpenTelemetry</li><li>Объясняет, почему задержку измеряют перцентилями</li></ul><p class="rm-practice"><b>Практика.</b> Добавить в сервис метрики Prometheus, трассировку OpenTelemetry и дашборд в Grafana; найти по трассе самый медленный участок запроса.</p></div><div class="rm-grade"><h3>Senior <small>≈ 6 ч</small></h3><ul><li>Определяет SLO сервиса и настраивает алерты по скорости сжигания бюджета ошибок</li></ul><p class="rm-practice"><b>Практика.</b> Определить SLO для двух эндпоинтов, настроить алерты по burn rate и проверить их на учебном инциденте.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/devops/prometheus-metrics/">Как работает Prometheus и какие типы метрик в нём есть?</a> <span class="lvl lvl-middle">Middle</span><p>Prometheus сам опрашивает (pull) эндпоинты /metrics целей, найденных через service discovery, и хранит временные ряды. Типы: counter — только растёт (запросы, ошибки), смотрят…</p></li><li><a href="/questions/devops/logging-pipeline/">Как организовать сбор логов из множества сервисов?</a> <span class="lvl lvl-middle">Middle</span><p>Приложения пишут структурированные логи (JSON) в stdout; агент на узле (Fluent Bit, Vector, Promtail) собирает их, добавляет метаданные (под, namespace, сервис) и отправляет в…</p></li><li><a href="/questions/devops/alerting-slo/">Как настроить алерты, чтобы дежурные не выгорали, а реальные проблемы не пропускались?</a> <span class="lvl lvl-senior">Senior</span><p>Алерт должен означать «пользователям плохо или скоро будет плохо, и человеку нужно действовать». Будить по симптомам (ошибки, задержки, доступность глазами пользователя), а не по…</p></li><li><a href="/questions/highload/latency-percentiles/">Почему время ответа измеряют перцентилями, а не средним?</a> <span class="lvl lvl-middle">Middle</span><p>Распределение задержек сильно скошено: большинство запросов быстрые, но есть длинный хвост. Среднее его прячет, а p95/p99 показывает, что видят самые невезучие пользователи.</p></li><li><a href="/questions/system-design/three-pillars/">Какие три сигнала составляют основу наблюдаемости?</a> <span class="lvl lvl-junior">Junior</span><p>Метрики — дешёвые агрегаты для алертов и трендов; логи — подробности событий; трейсы — путь одного запроса через сервисы.</p></li><li><a href="/questions/system-design/observability-vs-monitoring/">Чем наблюдаемость (observability) отличается от мониторинга?</a> <span class="lvl lvl-middle">Middle</span><p>Мониторинг отвечает на заранее известные вопросы (дашборды и алерты под известные отказы). Наблюдаемость — свойство системы отвечать на непредусмотренные вопросы по её телеметрии.</p></li></ul></section><section class="block"><h2>Разборы темы</h2><ul class="links"><li><a href="/articles/system-design/observability/">Наблюдаемость: метрики, логи, трассировка и SLO</a><p>Чем наблюдаемость отличается от мониторинга, три сигнала и что каждый умеет, RED и USE, почему среднее врёт, взрыв кардинальности, SLI/SLO/error budget и алерты на симптомы.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/backend/kubernetes/">← Kubernetes для разработчика</a><a class="next" href="/roadmap/backend/security/">Безопасность приложения →</a></nav>
+  <p class="rm-back"><a href="/roadmap/backend/#observability">← Вся карта «Backend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Наблюдаемость","description":"Логи, метрики и трассировка, SLO и алерты — как видеть, что происходит с сервисом.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/backend/observability/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

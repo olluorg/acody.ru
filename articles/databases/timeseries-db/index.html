@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Базы данных временных рядов — разбор для собеседования</title>
+<meta name="description" content="Чем особенны time-series, модель measurement/tags/fields, сжатие и chunking, downsampling/retention и когда хватит обычной БД.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/databases/timeseries-db/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/databases/timeseries-db/">
+<meta property="og:title" content="Базы данных временных рядов — разбор для собеседования">
+<meta property="og:description" content="Чем особенны time-series, модель measurement/tags/fields, сжатие и chunking, downsampling/retention и когда хватит обычной БД.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>Базы данных временных рядов</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"Базы данных временных рядов"}]}</script>
+  <h1>Базы данных временных рядов</h1>
+  <p class="lead">Чем особенны time-series, модель measurement/tags/fields, сжатие и chunking, downsampling/retention и когда хватит обычной БД.</p>
+  <article class="md"><h2>Что особенного во временных рядах</h2>
+<p>Временной ряд — поток измерений с метками времени: метрики серверов, IoT-датчики, цены, события. У такой нагрузки специфический профиль: запись почти всегда append (новые точки в конце), данные приходят в порядке времени и в огромном объёме, обновления и удаления точек редки.</p>
+<p>Запросы тоже специфичны: агрегаты по временным окнам («среднее за 5 минут за сутки»), а свежие данные нужны точно, старые — обычно в сжатом виде.</p>
+<h2>Модель данных</h2>
+<p>Типичная модель (InfluxDB): measurement (что измеряем, напр. cpu), tags (индексируемые метки-измерения: host, region), fields (сами значения) и timestamp. Tags задают, как ряд разрезается и фильтруется, поэтому их кардинальность критична.</p>
+<p>Высокая кардинальность тегов (например, уникальный id запроса в теге) взрывает число рядов и убивает производительность — классическая ошибка проектирования time-series.</p>
+<h2>Хранение и сжатие</h2>
+<p>Точки хранят чанками по времени (time-based partitioning), что делает запросы по диапазону и удаление старых данных дешёвыми — удаляется целый чанк, а не миллионы строк.</p>
+<p>Time-series сильно сжимаются специальными алгоритмами: delta/delta-of-delta для возрастающих timestamp и Gorilla-кодирование для значений. Похожие данные рядом + специализированное сжатие дают на порядок меньший объём, чем в обычной БД.</p>
+<h2>Downsampling и retention</h2>
+<p>Хранить посекундные данные годами бессмысленно. Retention policy автоматически удаляет данные старше срока, а continuous queries / downsampling заранее считают агрегаты пониженного разрешения (секунды → минуты → часы).</p>
+<p>Так свежие данные детальны, а исторические — компактны, что и нужно для дашбордов и трендов.</p>
+<h2>TimescaleDB и когда хватит обычной БД</h2>
+<p>Не всегда нужна отдельная система: TimescaleDB — расширение PostgreSQL, которое добавляет hypertable (автопартиционирование по времени), сжатие и continuous aggregates, сохраняя полноценный SQL и экосистему Postgres.</p>
+<p>Если объём метрик умеренный и хочется не плодить технологии — обычная реляционная БД с партиционированием по времени и правильными индексами вполне справится. Специализированный TSDB оправдан на больших потоках и при потребности в сильном сжатии.</p>
+<p>Практический ориентир для выбора: считайте не только объём, но и профиль. Если данные пишутся потоком, читаются почти всегда агрегатами по окнам, а старые точки не нужны в исходном разрешении — специализированное хранилище окупится сжатием и retention. Если же метрики нужно соединять со справочниками и бизнес-сущностями, ценность полноценного SQL обычно перевешивает.</p>
+<pre class="lang-sql"><code>-- TimescaleDB: обычная таблица превращается в hypertable
+create table metrics (
+  ts     timestamptz not null,
+  host   text        not null,
+  cpu    double precision
+);
+select create_hypertable(&#x27;metrics&#x27;, &#x27;ts&#x27;);   -- автопартиционирование по времени
+
+-- агрегат по временным окнам: среднее за 5 минут
+select time_bucket(&#x27;5 minutes&#x27;, ts) as bucket,
+       host,
+       avg(cpu)
+from metrics
+where ts &gt; now() - interval &#x27;1 day&#x27;
+group by bucket, host
+order by bucket desc;
+
+-- retention: удаляется целый чанк, а не миллионы строк
+select add_retention_policy(&#x27;metrics&#x27;, interval &#x27;90 days&#x27;);</code></pre>
+<h2>Как отвечать на собеседовании</h2>
+<p>Сильный ответ: опишите профиль (append-heavy, time-ordered, агрегаты по окнам), назовите риск высокой кардинальности тегов, объясните time-chunking + сжатие и роль retention/downsampling, и упомяните TimescaleDB как мост от обычного SQL.</p>
+<p>Начинайте с профиля нагрузки, а не с названий продуктов: запись почти всегда append в конец, данные приходят упорядоченными по времени и в большом объёме, обновления и удаления отдельных точек редки, а читают почти всегда агрегатами по окнам. Именно этот профиль оправдывает отдельный класс хранилищ.</p>
+<p>Кардинальность тегов — любимый вопрос. Формулируйте так: теги задают, как ряд разрезается, и каждая уникальная комбинация тегов порождает отдельный ряд. Положить в тег request_id или user_id значит взорвать число рядов и убить производительность. Это самая частая ошибка проектирования, и знание её сразу выделяет кандидата.</p>
+<p>Про хранение свяжите два механизма с их выгодой: чанки по времени делают дешёвыми и запросы по диапазону, и удаление старого (дропаем чанк целиком вместо DELETE на миллионы строк), а специализированное сжатие (delta-of-delta для timestamp, Gorilla для значений) даёт на порядок меньший объём.</p>
+<p>Retention и downsampling объясняйте одной мыслью: хранить посекундные данные годами бессмысленно, поэтому свежее держим детальным, а старое заранее агрегируем до минут и часов.</p>
+<p>Завершите зрелой оговоркой: отдельный TSDB нужен не всегда. При умеренном объёме обычный PostgreSQL с партиционированием по времени справится, а TimescaleDB даёт середину — hypertable, сжатие и continuous aggregates без ухода из SQL и экосистемы Postgres.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/databases/tsdb-cardinality/">Какая ошибка моделирования сильнее всего вредит базе временных рядов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/tsdb-downsampling/">Зачем во временных рядах нужен downsampling?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/timeseries-compression/">Почему данные временных рядов сжимаются заметно лучше обычных?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/metrics-long-retention/">Как обычно организуют хранение метрик на длинном горизонте?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/timeseries-traits/">Что характерно для данных временных рядов?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/databases/nosql-overview/">NoSQL: семейства и когда их выбирать</a><p>Почему появился NoSQL, моделирование от access patterns, четыре семейства хранилищ, BASE против ACID и горизонтальное масштабирование.</p></li><li><a href="/articles/databases/wide-column-db/">Колоночные БД: wide-column и аналитические</a><p>Разница между wide-column (Cassandra) и column-oriented OLAP (ClickHouse), partition/clustering keys, LSM-дерево и зачем хранить по колонкам.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Базы данных временных рядов","description":"Чем особенны time-series, модель measurement/tags/fields, сжатие и chunking, downsampling/retention и когда хватит обычной БД.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/databases/timeseries-db/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

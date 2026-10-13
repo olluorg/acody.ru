@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое О-большое (Big O) и зачем оценивать сложность алгоритма? — вопрос с собеседования</title>
+<meta name="description" content="О-большое описывает, как растёт время или память алгоритма с ростом входа n, отбрасывая константы и младшие слагаемые. Основные классы: O(1) &lt; O(log…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/big-o/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/big-o/">
+<meta property="og:title" content="Что такое О-большое (Big O) и зачем оценивать сложность алгоритма? — вопрос с собеседования">
+<meta property="og:description" content="О-большое описывает, как растёт время или память алгоритма с ростом входа n, отбрасывая константы и младшие слагаемые. Основные классы: O(1) &lt; O(log…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Что такое О-большое (Big O) и зачем оценивать сложность алгоритма?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Что такое О-большое (Big O) и зачем оценивать сложность алгоритма?"}]}</script>
+  <h1>Что такое О-большое (Big O) и зачем оценивать сложность алгоритма?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Сложность алгоритмов</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое асимптотическая сложность?</li><li>Какие классы сложности вы знаете?</li><li>Чем O(n) отличается от O(log n)?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">О-большое описывает, <b>как растёт время или память</b> алгоритма с ростом входа <b>n</b>, отбрасывая константы и младшие слагаемые.</p><ul><li>Основные классы: O(1) &lt; O(log n) &lt; O(n) &lt; O(n log n) &lt; O(n²) &lt; O(2ⁿ)</li><li>Обычно говорят о худшем случае; средний и лучший называют отдельно</li></ul><p class="extra"><span>А ещё</span> Константы важны на малых n, но на больших данных решает класс роста</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Рост функций сложности</p><script type="module" src="/widgets/big-o.js"></script><sotto-big-o theme="dark"></sotto-big-o></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Точное время работы зависит от компьютера, языка и компилятора, поэтому алгоритмы сравнивают по тому, как растёт число операций при росте размера входа n. Запись O(f(n)) означает: начиная с некоторого n, затраты растут не быстрее, чем f(n), умноженная на константу.</p>
+<p>При оценке:</p>
+<ul><li><b>константы отбрасывают</b> — O(2n) и O(n) один класс;</li><li><b>младшие слагаемые отбрасывают</b> — O(n² + n) это O(n²);</li><li><b>разные входы обозначают разными буквами</b> — обход двух массивов O(n + m), вложенный цикл по ним O(n·m).</li></ul>
+<p>Классы на примерах:</p>
+<ul><li><b>O(1)</b> — доступ к элементу массива по индексу, поиск в хеш-таблице в среднем;</li><li><b>O(log n)</b> — бинарный поиск: каждый шаг делит задачу пополам;</li><li><b>O(n)</b> — один проход по массиву;</li><li><b>O(n log n)</b> — хорошие сортировки сравнением;</li><li><b>O(n²)</b> — вложенный цикл по тем же данным, сортировка пузырьком;</li><li><b>O(2ⁿ)</b> — перебор всех подмножеств.</li></ul>
+<p>Разница огромная: при n = 1 000 000 алгоритм O(n log n) делает около 20 миллионов операций, а O(n²) — триллион.</p>
+<p>Рядом с O используют Ω (оценка снизу) и Θ (точная оценка), но на собеседованиях чаще всего говорят «O» в смысле «как растёт в худшем случае».</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>def has_duplicates_slow(a):      # O(n²): сравниваем каждую пару
+    return any(a[i] == a[j] for i in range(len(a)) for j in range(i + 1, len(a)))
+
+def has_duplicates_fast(a):      # O(n): множество с проверкой за O(1) в среднем
+    return len(set(a)) != len(a)</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определение через рост затрат с ростом n.</li><li>Правила: отбрасываем константы и младшие слагаемые.</li><li>Классы сложности с примерами алгоритмов.</li><li>Понимание практической разницы на больших n.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что O(n) всегда быстрее O(n²) на любых данных — на малых n решают константы.</li><li>Путать сложность по времени и по памяти.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/amortized-complexity/">Что такое амортизированная сложность?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/time-vs-memory/">Что такое компромисс между временем и памятью?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/binary-search/">Как работает бинарный поиск?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/sorting-overview/">Какие алгоритмы сортировки вы знаете и чем они отличаются?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое О-большое (Big O) и зачем оценивать сложность алгоритма?","acceptedAnswer":{"@type":"Answer","text":"О-большое описывает, как растёт время или память алгоритма с ростом входа n, отбрасывая константы и младшие слагаемые. Основные классы: O(1) < O(log n) < O(n) < O(n log n) < O(n²) < O(2ⁿ) Обычно говорят о худшем случае; средний и лучший называют отдельно Константы важны на малых n, но на больших данных решает класс роста Точное время работы зависит от компьютера, языка и компилятора, поэтому алгоритмы сравнивают по тому, как растёт число операций при росте размера входа n. Запись O(f(n)) означает: начиная с некоторого n, затраты растут не быстрее, чем f(n), умноженная на константу. При оценке: - константы отбрасывают — O(2n) и O(n) один класс; - младшие слагаемые отбрасывают — O(n² + n) это O(n²); - разные входы обозначают разными буквами — обход двух массивов O(n + m), вложенный цикл по ним O(nm). Классы на примерах: - O(1) — доступ к элементу массива по индексу, поиск в хеш-таблице в среднем; - O(log n) — бинарный поиск: каждый шаг делит задачу пополам; - O(n) — один проход по массиву; - O(n log n) — хорошие сортировки сравнением; - O(n²) — вложенный цикл по тем же данным, сортировка пузырьком; - O(2ⁿ) — перебор всех подмножеств. Разница огромная: при n = 1 000 000 алгоритм O(n log n) делает около 20…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

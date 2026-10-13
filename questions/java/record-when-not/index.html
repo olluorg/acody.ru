@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Когда record — неудачный выбор? — вопрос с собеседования</title>
+<meta name="description" content="Record прозрачен: компоненты — публичный контракт. Не подходит для изменяемых сущностей со скрытым представлением и охраняемыми инвариантами, для…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/record-when-not/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/record-when-not/">
+<meta property="og:title" content="Когда record — неудачный выбор? — вопрос с собеседования">
+<meta property="og:description" content="Record прозрачен: компоненты — публичный контракт. Не подходит для изменяемых сущностей со скрытым представлением и охраняемыми инвариантами, для…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Когда record — неудачный выбор?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Когда record — неудачный выбор?"}]}</script>
+  <h1>Когда record — неудачный выбор?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Современная Java</span><span class="chip ver">Java &gt;=16</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main">Record <b>прозрачен</b>: компоненты — публичный контракт. Не подходит для <b>изменяемых сущностей со скрытым представлением</b> и охраняемыми инвариантами, для <b>JPA-сущностей</b> (нужны конструктор без аргументов, изменяемость, прокси), для иерархий наследования.</p><ul><li>Удачно: DTO, ответы API, ключи составных карт, значения (Money, Range), кортежи результатов</li><li>Сменить внутреннее представление позже нельзя без смены API</li><li>Equals по всем компонентам — не всегда нужная семантика</li></ul><p class="extra"><span>А ещё</span> JPA допускает record для @Embeddable (Hibernate 6.2+) и проекций</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Record описывает данные, а не поведение с охраняемыми инвариантами. Он неизменяем и публикует компоненты аксессорами, поэтому свободы поменять внутреннее представление позже у вас не будет — а это как раз то, ради чего существует инкапсуляция. Типичные удачные применения: DTO, ключи составных карт, промежуточные результаты в стримах, value objects домена вроде Money или OrderId. Неудачные: JPA-сущности с изменяемым состоянием и требованием конструктора без аргументов, а также классы, где представление хочется скрыть. При этом ключом карты record быть отлично умеет, интерфейсы реализует, а любой сгенерированный метод при желании можно переопределить вручную.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Принцип прозрачности.</li><li>Неудачные и удачные применения.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Пытаться использовать record как JPA-сущность.</li><li>Считать, что у record нельзя переопределить сгенерированные методы.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Когда нужна сущность с изменяемым состоянием и инкапсуляцией внутреннего представления — record публикует свои компоненты как часть контракта</li><li class="no"><span class="mark">✗</span>Когда объект нужно использовать в качестве ключа HashMap</li><li class="no"><span class="mark">✗</span>Когда требуется реализовать интерфейс</li><li class="no"><span class="mark">✗</span>Когда нужно переопределить toString</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Почему record плохо подходит на роль JPA-сущности?</li><li>Как record сочетается с sealed-иерархиями?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/records/">Records: компактные носители данных</a><p>Что генерирует record, канонический и компактный конструкторы, ограничения и когда применять.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/record-features/">Что верно про record в Java?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/encapsulation-getters-setters/">Класс сделал все поля private и добавил к каждому геттер и сеттер. Достигнута ли инкапсуляция?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Когда record — неудачный выбор?","acceptedAnswer":{"@type":"Answer","text":"Record прозрачен: компоненты — публичный контракт. Не подходит для изменяемых сущностей со скрытым представлением и охраняемыми инвариантами, для JPA-сущностей (нужны конструктор без аргументов, изменяемость, прокси), для иерархий наследования. Удачно: DTO, ответы API, ключи составных карт, значения (Money, Range), кортежи результатов Сменить внутреннее представление позже нельзя без смены API Equals по всем компонентам — не всегда нужная семантика JPA допускает record для @Embeddable (Hibernate 6.2+) и проекций Record описывает данные, а не поведение с охраняемыми инвариантами. Он неизменяем и публикует компоненты аксессорами, поэтому свободы поменять внутреннее представление позже у вас не будет — а это как раз то, ради чего существует инкапсуляция. Типичные удачные применения: DTO, ключи составных карт, промежуточные результаты в стримах, value objects домена вроде Money или OrderId. Неудачные: JPA-сущности с изменяемым состоянием и требованием конструктора без аргументов, а также классы, где представление хочется скрыть. При этом ключом карты record быть отлично умеет, интерфейсы реализует, а любой сгенерированный метод при желании можно переопределить вручную."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

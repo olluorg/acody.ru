@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему нельзя использовать изменяемый объект как значение аргумента по умолчанию? — вопрос с собеседования</title>
+<meta name="description" content="Значение по умолчанию вычисляется один раз — при определении функции, а не при каждом вызове. Изменяемый объект ([], {}) тогда общий для всех вызовов…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/mutable-default-arg/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/mutable-default-arg/">
+<meta property="og:title" content="Почему нельзя использовать изменяемый объект как значение аргумента по умолчанию? — вопрос с собеседования">
+<meta property="og:description" content="Значение по умолчанию вычисляется один раз — при определении функции, а не при каждом вызове. Изменяемый объект ([], {}) тогда общий для всех вызовов…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Почему нельзя использовать изменяемый объект как значение аргумента по умолчанию?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Почему нельзя использовать изменяемый объект как значение аргумента по умолчанию?"}]}</script>
+  <h1>Почему нельзя использовать изменяемый объект как значение аргумента по умолчанию?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Функции</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что не так с def f(x=[])?</li><li>Почему список в аргументе по умолчанию накапливает значения?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Значение по умолчанию вычисляется <b>один раз</b> — при определении функции, а не при каждом вызове.</p><ul><li>Изменяемый объект (<code>[]</code>, <code>{}</code>) тогда общий для всех вызовов и копит изменения</li><li>Правильно: <code>def f(items=None)</code> и внутри <code>if items is None: items = []</code></li></ul><p class="extra"><span>А ещё</span> Иногда этим пользуются намеренно — как простым кэшем, но это лучше явно оформить</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Когда Python выполняет строку <code>def</code>, он создаёт объект функции и в этот же момент вычисляет значения по умолчанию. Они сохраняются в атрибуте <code>__defaults__</code> и переиспользуются при каждом вызове, где аргумент не передан.</p>
+<p>Для неизменяемых значений (<code>0</code>, <code>None</code>, строка) это незаметно. Но если по умолчанию стоит список или словарь и функция его меняет, изменения остаются в том же объекте и видны в следующих вызовах.</p>
+<p>Стандартное решение — сентинел <code>None</code>: в сигнатуре <code>None</code>, а новый список создаётся внутри функции при каждом вызове. Если <code>None</code> — допустимое значение аргумента, используют собственный сентинел: <code>_missing = object()</code>.</p>
+<p>Та же логика касается любых выражений по умолчанию: <code>def log(t=time.time())</code> запомнит время определения функции, а не вызова.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>def add(item, items=[]):
+    items.append(item)
+    return items
+
+add(1)   # [1]
+add(2)   # [1, 2] — тот же список!
+
+def add(item, items=None):
+    if items is None:
+        items = []
+    items.append(item)
+    return items</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Причина: значение вычисляется один раз при <code>def</code>.</li><li>Решение через <code>None</code> и создание объекта внутри.</li><li>Понимание, что проблема только при изменении объекта.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Объяснять «Python так кэширует списки» без указания момента вычисления.</li><li>Решение <code>items = items or []</code>: оно подменит и переданный пустой список, что может быть неожиданно для вызывающего.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/args-passing/">Как передаются аргументы в функцию — по значению или по ссылке?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/closures/">Что такое замыкание?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/mutable-immutable/">Чем изменяемые типы отличаются от неизменяемых?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему нельзя использовать изменяемый объект как значение аргумента по умолчанию?","acceptedAnswer":{"@type":"Answer","text":"Значение по умолчанию вычисляется один раз — при определении функции, а не при каждом вызове. Изменяемый объект ([], {}) тогда общий для всех вызовов и копит изменения Правильно: def f(items=None) и внутри if items is None: items = [] Иногда этим пользуются намеренно — как простым кэшем, но это лучше явно оформить Когда Python выполняет строку def, он создаёт объект функции и в этот же момент вычисляет значения по умолчанию. Они сохраняются в атрибуте __defaults__ и переиспользуются при каждом вызове, где аргумент не передан. Для неизменяемых значений (0, None, строка) это незаметно. Но если по умолчанию стоит список или словарь и функция его меняет, изменения остаются в том же объекте и видны в следующих вызовах. Стандартное решение — сентинел None: в сигнатуре None, а новый список создаётся внутри функции при каждом вызове. Если None — допустимое значение аргумента, используют собственный сентинел: _missing = object(). Та же логика касается любых выражений по умолчанию: def log(t=time.time()) запомнит время определения функции, а не вызова."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

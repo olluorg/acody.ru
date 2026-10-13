@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работает DNS? — вопрос с собеседования</title>
+<meta name="description" content="DNS — распределённая иерархическая база «имя → адрес». Рекурсивный резолвер спрашивает по цепочке: корневые серверы → серверы зоны .ru → авторитетный…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/dns/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/dns/">
+<meta property="og:title" content="Как работает DNS? — вопрос с собеседования">
+<meta property="og:description" content="DNS — распределённая иерархическая база «имя → адрес». Рекурсивный резолвер спрашивает по цепочке: корневые серверы → серверы зоны .ru → авторитетный…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Как работает DNS?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Как работает DNS?"}]}</script>
+  <h1>Как работает DNS?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Сети</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что происходит, когда браузер ищет IP-адрес домена?</li><li>Что такое TTL у DNS-записи?</li><li>Какие бывают DNS-записи?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">DNS — распределённая иерархическая база «имя → адрес». Рекурсивный резолвер спрашивает по цепочке: корневые серверы → серверы зоны .ru → авторитетный сервер домена.</p><ul><li>Ответы кэшируются везде — в браузере, ОС, резолвере — на время TTL</li><li>Записи: A/AAAA — адрес, CNAME — псевдоним, MX — почта, TXT — проверки, NS — кто отвечает за зону</li><li>Обычно UDP порт 53; DoH/DoT — DNS поверх HTTPS/TLS</li></ul><p class="extra"><span>А ещё</span> TTL решает, как быстро разойдётся смена адреса — перед переездом его снижают</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Иерархия.</b> Имя <code>api.shop.ru.</code> читается справа налево: корень <code>.</code>, зона верхнего уровня <code>ru</code>, зона <code>shop.ru</code>, имя <code>api</code>. За каждую зону отвечают свои авторитетные серверы, и родитель знает, кому делегирована дочерняя зона (записи NS).</p>
+<p><b>Разрешение имени:</b></p>
+<ol><li>приложение спрашивает ОС (<code>getaddrinfo</code>), та смотрит свой кэш и <code>/etc/hosts</code>;</li><li>запрос уходит <b>рекурсивному резолверу</b> — провайдера, компании или публичному (1.1.1.1, 8.8.8.8, 77.88.8.8);</li><li>если ответа нет в кэше, резолвер идёт <b>итеративно</b>: корневой сервер говорит «за .ru отвечают эти», сервер .ru — «за shop.ru — эти», авторитетный сервер shop.ru даёт адрес;</li><li>ответ кэшируется на время <b>TTL</b> из записи и возвращается клиенту.</li></ol>
+<p><b>Типы записей:</b> <code>A</code> — IPv4, <code>AAAA</code> — IPv6, <code>CNAME</code> — имя-псевдоним (нельзя на корне домена), <code>MX</code> — почтовые серверы, <code>TXT</code> — проверка владения, SPF и DKIM для почты, <code>NS</code> — делегирование, <code>SRV</code> — сервисы с портами, <code>CAA</code> — кто может выпускать сертификаты.</p>
+<p><b>TTL и переезды.</b> Пока не истёк TTL, клиенты используют старый адрес. Поэтому перед сменой адреса TTL заранее уменьшают (скажем, с суток до минуты), а после переезда возвращают. Некоторые клиенты кэшируют дольше TTL — JVM исторически кэшировала навсегда при менеджере безопасности; настройка <code>networkaddress.cache.ttl</code>.</p>
+<p><b>DNS как инструмент:</b> простая балансировка — несколько A-записей (round-robin), географическая — разные ответы по региону клиента (GeoDNS), переключение при отказе. Ограничение — кэширование: быстро увести трафик только DNS-ом нельзя.</p>
+<p><b>Сбои.</b> DNS — частая причина «всё сломалось»: истёк домен, ошибка в зоне, недоступен резолвер, исчерпан лимит запросов. В Kubernetes <code>ndots:5</code> заставляет пробовать несколько суффиксов на каждое имя — лишние запросы и задержка.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>$ dig +trace api.shop.ru
+.             518400  IN NS  a.root-servers.net.
+ru.           172800  IN NS  a.dns.ripn.net.
+shop.ru.      345600  IN NS  ns1.shop-hosting.ru.
+api.shop.ru.     300  IN A   93.184.216.34      # TTL 5 минут</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Иерархия зон и роль рекурсивного резолвера.</li><li>Цепочка запросов: корень → TLD → авторитетный.</li><li>Кэширование и TTL, практический смысл при смене адреса.</li><li>Основные типы записей.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что браузер сам ходит к корневым серверам.</li><li>Ожидать, что смена A-записи сразу видна всем.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/what-happens-url/">Что происходит, когда вы вводите адрес сайта в браузере и нажимаете Enter?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/tcp-vs-udp/">Чем TCP отличается от UDP?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/system-design/cdn/">Что делает CDN?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работает DNS?","acceptedAnswer":{"@type":"Answer","text":"DNS — распределённая иерархическая база «имя → адрес». Рекурсивный резолвер спрашивает по цепочке: корневые серверы → серверы зоны .ru → авторитетный сервер домена. Ответы кэшируются везде — в браузере, ОС, резолвере — на время TTL Записи: A/AAAA — адрес, CNAME — псевдоним, MX — почта, TXT — проверки, NS — кто отвечает за зону Обычно UDP порт 53; DoH/DoT — DNS поверх HTTPS/TLS TTL решает, как быстро разойдётся смена адреса — перед переездом его снижают Иерархия. Имя api.shop.ru. читается справа налево: корень ., зона верхнего уровня ru, зона shop.ru, имя api. За каждую зону отвечают свои авторитетные серверы, и родитель знает, кому делегирована дочерняя зона (записи NS). Разрешение имени: 1. приложение спрашивает ОС (getaddrinfo), та смотрит свой кэш и /etc/hosts; 2. запрос уходит рекурсивному резолверу — провайдера, компании или публичному (1.1.1.1, 8.8.8.8, 77.88.8.8); 3. если ответа нет в кэше, резолвер идёт итеративно: корневой сервер говорит «за .ru отвечают эти», сервер .ru — «за shop.ru — эти», авторитетный сервер shop.ru даёт адрес; 4. ответ кэшируется на время TTL из записи и возвращается клиенту. Типы записей: A — IPv4, AAAA — IPv6, CNAME — имя-псевдоним (нельзя на корне домена), MX — почтовые серверы, TXT — проверка владения, SPF и DKIM для почты, NS — делегирование, SRV — сервисы с портами, CAA — кто может выпускать…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

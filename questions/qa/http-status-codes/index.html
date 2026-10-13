@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие коды ответа HTTP вы знаете? — вопрос с собеседования</title>
+<meta name="description" content="Пять групп: 1xx информационные, 2xx успех, 3xx перенаправление, 4xx ошибка клиента, 5xx ошибка сервера. Частые: 200, 201, 204, 301/302, 400, 401…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/qa/http-status-codes/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/qa/http-status-codes/">
+<meta property="og:title" content="Какие коды ответа HTTP вы знаете? — вопрос с собеседования">
+<meta property="og:description" content="Пять групп: 1xx информационные, 2xx успех, 3xx перенаправление, 4xx ошибка клиента, 5xx ошибка сервера. Частые: 200, 201, 204, 301/302, 400, 401…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/qa/">Тестирование (QA)</a> <span>/</span> <span>Какие коды ответа HTTP вы знаете?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Тестирование (QA)","item":"https://learn.getsotto.ru/questions/qa/"},{"@type":"ListItem","position":3,"name":"Какие коды ответа HTTP вы знаете?"}]}</script>
+  <h1>Какие коды ответа HTTP вы знаете?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Клиент-сервер и веб</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем 401 отличается от 403?</li><li>Что значат коды 4xx и 5xx?</li><li>Что означает ошибка 500?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Пять групп: <b>1xx</b> информационные, <b>2xx</b> успех, <b>3xx</b> перенаправление, <b>4xx</b> ошибка клиента, <b>5xx</b> ошибка сервера.</p><ul><li>Частые: 200, 201, 204, 301/302, 400, 401, 403, 404, 409, 422, 500, 502, 503, 504</li><li>401 — не аутентифицирован (кто вы?), 403 — нет прав (знаем, кто вы, но нельзя)</li></ul><p class="extra"><span>А ещё</span> 4xx — проблема в запросе, 5xx — на сервере: это сразу подсказывает, кому баг</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Главное — понимать группы и уметь различить частые коды.</p>
+<ul><li><b>2xx — успех.</b> 200 OK — запрос выполнен; 201 Created — ресурс создан (ответ на POST); 204 No Content — успех без тела (часто на DELETE).</li><li><b>3xx — перенаправление.</b> 301 — постоянный редирект, 302 — временный, 304 Not Modified — можно взять из кэша.</li><li><b>4xx — ошибка клиента.</b> 400 Bad Request — неверный формат запроса; 401 Unauthorized — нужна аутентификация; 403 Forbidden — прав недостаточно; 404 Not Found — ресурса нет; 405 — метод не поддерживается; 409 Conflict — конфликт состояния (такой email уже есть); 422 — данные не прошли проверку; 429 — слишком много запросов.</li><li><b>5xx — ошибка сервера.</b> 500 Internal Server Error — необработанная ошибка в приложении; 502 Bad Gateway — прокси получил плохой ответ от сервиса; 503 Service Unavailable — сервис недоступен или перегружен; 504 Gateway Timeout — сервис не ответил вовремя.</li></ul>
+<p>Для тестировщика коды — подсказка, где искать причину, и сами по себе объект проверки: неверные данные должны давать 4xx с понятным сообщением, а не 500.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Пять групп и смысл каждой.</li><li>Частые коды с примерами ситуаций.</li><li>Разница 401 и 403.</li><li>Ошибка ввода не должна давать 5xx.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Путать 401 и 403.</li><li>Считать любую ошибку проблемой бэкенда — 4xx часто означает ошибку в запросе клиента.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/qa/api-testing/">Как тестировать REST API?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/qa/devtools/">Как вы используете DevTools при тестировании?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/qa/http-methods/">Какие HTTP-методы вы знаете? Чем GET отличается от POST?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/qa/auth-authorization/">Чем аутентификация отличается от авторизации?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие коды ответа HTTP вы знаете?","acceptedAnswer":{"@type":"Answer","text":"Пять групп: 1xx информационные, 2xx успех, 3xx перенаправление, 4xx ошибка клиента, 5xx ошибка сервера. Частые: 200, 201, 204, 301/302, 400, 401, 403, 404, 409, 422, 500, 502, 503, 504 401 — не аутентифицирован (кто вы?), 403 — нет прав (знаем, кто вы, но нельзя) 4xx — проблема в запросе, 5xx — на сервере: это сразу подсказывает, кому баг Главное — понимать группы и уметь различить частые коды. - 2xx — успех. 200 OK — запрос выполнен; 201 Created — ресурс создан (ответ на POST); 204 No Content — успех без тела (часто на DELETE). - 3xx — перенаправление. 301 — постоянный редирект, 302 — временный, 304 Not Modified — можно взять из кэша. - 4xx — ошибка клиента. 400 Bad Request — неверный формат запроса; 401 Unauthorized — нужна аутентификация; 403 Forbidden — прав недостаточно; 404 Not Found — ресурса нет; 405 — метод не поддерживается; 409 Conflict — конфликт состояния (такой email уже есть); 422 — данные не прошли проверку; 429 — слишком много запросов. - 5xx — ошибка сервера. 500 Internal Server Error — необработанная ошибка в приложении; 502 Bad Gateway — прокси получил плохой ответ от сервиса; 503 Service Unavailable — сервис недоступен или перегружен; 504 Gateway Timeout — сервис не ответил вовремя. Для тестировщика…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

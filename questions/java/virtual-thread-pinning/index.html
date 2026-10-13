@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое pinning виртуального потока и в каких случаях он всё ещё возможен в актуальных версиях Java? — вопрос с собеседования</title>
+<meta name="description" content="Pinning — виртуальный поток при блокировке не может отцепиться от несущего, и тот простаивает. До JDK 24 главная причина — блокировка внутри…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/virtual-thread-pinning/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/virtual-thread-pinning/">
+<meta property="og:title" content="Что такое pinning виртуального потока и в каких случаях он всё ещё возможен в актуальных версиях Java? — вопрос с собеседования">
+<meta property="og:description" content="Pinning — виртуальный поток при блокировке не может отцепиться от несущего, и тот простаивает. До JDK 24 главная причина — блокировка внутри…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что такое pinning виртуального потока и в каких случаях он всё ещё возможен в актуальных версиях Java?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что такое pinning виртуального потока и в каких случаях он всё ещё возможен в актуальных версиях Java?"}]}</script>
+  <h1>Что такое pinning виртуального потока и в каких случаях он всё ещё возможен в актуальных версиях Java?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Многопоточность</span><span class="chip ver">Java &gt;=21</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Pinning</b> — виртуальный поток при блокировке не может отцепиться от несущего, и тот простаивает. До JDK 24 главная причина — блокировка внутри <b>synchronized</b>; JEP 491 (JDK 24) это убрал. Остаются <b>нативные кадры</b> (JNI, вызовы через Foreign API) в стеке.</p><ul><li>На JDK 21 — заменять synchronized вокруг ввода-вывода на ReentrantLock</li><li>Найти: событие JFR jdk.VirtualThreadPinned</li><li>Несущих потоков по числу ядер — несколько закреплённых могут встать всем</li></ul><p class="extra"><span>А ещё</span> Короткий synchronized без блокировок — не проблема</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Обычно виртуальный поток при блокировке отцепляется от несущего платформенного, освобождая его для других задач. Pinning — ситуация, когда отцепиться нельзя, и платформенный поток простаивает вместе с виртуальным; при малом пуле несущих потоков это способно застопорить приложение. Исторически главной причиной был synchronized, из-за чего рекомендовали заменять его на ReentrantLock. JEP 491 в JDK 24 это исправил: владение монитором теперь отслеживается по виртуальному потоку. Остались нативные методы и Foreign Function &amp; Memory API. Знание того, что рекомендация про ReentrantLock устарела, хорошо отличает актуальные знания от прочитанных пару лет назад.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Что такое pinning и почему опасен.</li><li>Изменения в JDK 24.</li><li>Как найти и обойти.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Повторять устаревший совет «замените synchronized на ReentrantLock ради виртуальных потоков» без оговорки о версии.</li><li>Путать pinning с привязкой к ядру процессора.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Виртуальный поток не может отцепиться от несущего; после JEP 491 в JDK 24 synchronized больше не закрепляет, но нативные вызовы и Foreign Function &amp; Memory API — по-прежнему</li><li class="no"><span class="mark">✗</span>Виртуальный поток навсегда привязывается к одному ядру процессора</li><li class="no"><span class="mark">✗</span>Pinning возникает при любом блокирующем вводе-выводе</li><li class="no"><span class="mark">✗</span>Pinning — это закрепление потока за конкретным ThreadLocal</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как обнаружить pinning в работающем приложении?</li><li>Почему при pinning важен размер пула несущих потоков?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/virtual-threads/">Виртуальные потоки (Project Loom)</a><p>Лёгкие потоки JVM, монтирование на carrier, когда их применять, почему не пулят и проблема pinning.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/virtual-threads-practice/">Что верно про практическое применение виртуальных потоков?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/virtual-thread-unmount/">Что происходит с виртуальным потоком, когда он выполняет блокирующий сетевой вызов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/virtual-threads/">Чем виртуальный поток отличается от обычного платформенного?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое pinning виртуального потока и в каких случаях он всё ещё возможен в актуальных версиях Java?","acceptedAnswer":{"@type":"Answer","text":"Pinning — виртуальный поток при блокировке не может отцепиться от несущего, и тот простаивает. До JDK 24 главная причина — блокировка внутри synchronized; JEP 491 (JDK 24) это убрал. Остаются нативные кадры (JNI, вызовы через Foreign API) в стеке. На JDK 21 — заменять synchronized вокруг ввода-вывода на ReentrantLock Найти: событие JFR jdk.VirtualThreadPinned Несущих потоков по числу ядер — несколько закреплённых могут встать всем Короткий synchronized без блокировок — не проблема Обычно виртуальный поток при блокировке отцепляется от несущего платформенного, освобождая его для других задач. Pinning — ситуация, когда отцепиться нельзя, и платформенный поток простаивает вместе с виртуальным; при малом пуле несущих потоков это способно застопорить приложение. Исторически главной причиной был synchronized, из-за чего рекомендовали заменять его на ReentrantLock. JEP 491 в JDK 24 это исправил: владение монитором теперь отслеживается по виртуальному потоку. Остались нативные методы и Foreign Function & Memory API. Знание того, что рекомендация про ReentrantLock устарела, хорошо отличает актуальные знания от прочитанных пару лет назад."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как вы проводите разведочный анализ данных (EDA)? — вопрос с собеседования</title>
+<meta name="description" content="Цель EDA — понять данные до модели: структура (строки, столбцы, типы, единицы, что такое одна строка), качество (пропуски, дубли, выбросы, ошибки…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/eda/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/eda/">
+<meta property="og:title" content="Как вы проводите разведочный анализ данных (EDA)? — вопрос с собеседования">
+<meta property="og:description" content="Цель EDA — понять данные до модели: структура (строки, столбцы, типы, единицы, что такое одна строка), качество (пропуски, дубли, выбросы, ошибки…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как вы проводите разведочный анализ данных (EDA)?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как вы проводите разведочный анализ данных (EDA)?"}]}</script>
+  <h1>Как вы проводите разведочный анализ данных (EDA)?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Основы машинного обучения</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>С чего начать работу с новым датасетом?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Цель EDA — понять данные до модели: <b>структура</b> (строки, столбцы, типы, единицы, что такое одна строка), <b>качество</b> (пропуски, дубли, выбросы, ошибки ввода), <b>распределения</b> признаков и целевой переменной, <b>связи</b> между признаками и с целевой, <b>время</b> (тренды, сезонность, сдвиги), подозрения на <b>утечку</b>. Итог — список гипотез и решений по очистке и признакам, а не сотня графиков.</p><ul><li>Сначала понять, как данные собирались и что означает каждая колонка</li><li>Баланс классов и распределение целевой — определяют метрику и валидацию</li><li>Слишком сильная связь признака с целевой — проверить на утечку</li></ul><p class="extra"><span>А ещё</span> Хорошая практика — записывать находки и решения, чтобы их можно было повторить</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Шаги:</b></p>
+<ol><li>Обзор: <code>df.info()</code>, <code>df.describe()</code>, примеры строк, уникальные значения категорий.</li><li>Качество: доля пропусков по колонкам и их причина, дубли, невозможные значения (возраст 200, отрицательная цена).</li><li>Одномерный анализ: гистограммы, логарифмическая шкала для длинных хвостов.</li><li>Связи: корреляции, графики признак — целевая, группировки.</li><li>Время: динамика, сезонность, изменения в сборе данных.</li><li>Выводы: что чистить, какие признаки строить, какая валидация.</li></ol>
+<p><b>Ловушки:</b> признаки, известные только после события; смена логики сбора данных в середине периода; выводы по малым группам.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Системный порядок от структуры к связям.</li><li>Качество данных и понимание их происхождения.</li><li>Выводы для моделирования, включая утечки.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/missing-values/">Как работать с пропущенными значениями в данных?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/outliers/">Как обнаруживать и обрабатывать выбросы в данных?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/data-leakage/">Что такое утечка данных (data leakage) в машинном обучении?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/feature-engineering/">Как вы строите признаки для модели?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как вы проводите разведочный анализ данных (EDA)?","acceptedAnswer":{"@type":"Answer","text":"Цель EDA — понять данные до модели: структура (строки, столбцы, типы, единицы, что такое одна строка), качество (пропуски, дубли, выбросы, ошибки ввода), распределения признаков и целевой переменной, связи между признаками и с целевой, время (тренды, сезонность, сдвиги), подозрения на утечку. Итог — список гипотез и решений по очистке и признакам, а не сотня графиков. Сначала понять, как данные собирались и что означает каждая колонка Баланс классов и распределение целевой — определяют метрику и валидацию Слишком сильная связь признака с целевой — проверить на утечку Хорошая практика — записывать находки и решения, чтобы их можно было повторить Шаги: 1. Обзор: df.info(), df.describe(), примеры строк, уникальные значения категорий. 2. Качество: доля пропусков по колонкам и их причина, дубли, невозможные значения (возраст 200, отрицательная цена). 3. Одномерный анализ: гистограммы, логарифмическая шкала для длинных хвостов. 4. Связи: корреляции, графики признак — целевая, группировки. 5. Время: динамика, сезонность, изменения в сборе данных. 6. Выводы: что чистить, какие признаки строить, какая валидация. Ловушки: признаки, известные только после события; смена логики сбора данных в середине периода; выводы по малым группам."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

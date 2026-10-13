@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сервис A не может подключиться к сервису B. Как вы будете искать причину? — вопрос с собеседования</title>
+<meta name="description" content="Идти по уровням снизу вверх: DNS (dig b.internal — резолвится ли и в тот ли адрес) → маршрут и доступность (ping, traceroute/mtr) → порт (nc -zv host…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/network-debugging/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/network-debugging/">
+<meta property="og:title" content="Сервис A не может подключиться к сервису B. Как вы будете искать причину? — вопрос с собеседования">
+<meta property="og:description" content="Идти по уровням снизу вверх: DNS (dig b.internal — резолвится ли и в тот ли адрес) → маршрут и доступность (ping, traceroute/mtr) → порт (nc -zv host…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Сервис A не может подключиться к сервису B. Как вы будете искать причину?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Сервис A не может подключиться к сервису B. Как вы будете искать причину?"}]}</script>
+  <h1>Сервис A не может подключиться к сервису B. Как вы будете искать причину?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Сети и прокси</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Какими утилитами проверить сеть?</li><li>Connection refused или timeout — в чём разница?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Идти по уровням снизу вверх: <b>DNS</b> (<code>dig b.internal</code> — резолвится ли и в тот ли адрес) → <b>маршрут и доступность</b> (<code>ping</code>, <code>traceroute</code>/<code>mtr</code>) → <b>порт</b> (<code>nc -zv host 8080</code>) → <b>TLS</b> (<code>openssl s_client</code>) → <b>HTTP</b> (<code>curl -v</code>). Характер ошибки подсказывает уровень: <b>connection refused</b> — хост доступен, но порт никто не слушает; <b>timeout</b> — пакеты теряются, чаще всего <b>файрвол</b> или маршрутизация.</p><ul><li>На стороне B: ss -tlnp — слушает ли сервис и на каком адресе (127.0.0.1 или 0.0.0.0)</li><li>ping может быть запрещён, а TCP работать — не делать выводов по одному ping</li><li>tcpdump — последний аргумент: видно, доходят ли пакеты</li></ul><p class="extra"><span>А ещё</span> В Kubernetes: Service, метки, Endpoints, NetworkPolicy, DNS внутри пода</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Команды по шагам:</b></p>
+<pre class="lang-bash"><code>dig +short b.internal                  # DNS
+nc -zv b.internal 8080                 # TCP-порт
+curl -v --max-time 5 http://b.internal:8080/health
+openssl s_client -connect b.internal:443 -servername b.internal
+ss -tlnp | grep 8080                   # на хосте B: кто слушает
+sudo tcpdump -i any port 8080 -nn      # доходят ли пакеты</code></pre>
+<p><b>Разбор симптомов:</b></p>
+<div class="table"><table><thead><tr><th>симптом</th><th>вероятная причина</th></tr></thead><tbody><tr><td>не резолвится имя</td><td>DNS, опечатка, search-домены</td></tr><tr><td>connection refused</td><td>процесс не запущен, слушает не тот интерфейс</td></tr><tr><td>timeout</td><td>файрвол, security group, маршрутизация</td></tr><tr><td>TLS-ошибка</td><td>истёк сертификат, нет SNI, не доверен CA</td></tr><tr><td>4xx/5xx</td><td>соединение есть, проблема в приложении или прокси</td></tr></tbody></table></div>
+<p><b>Что ещё проверить:</b> прокси-переменные окружения (HTTP_PROXY), кэш DNS в приложении, MTU в туннелях и VPN (большие пакеты теряются, мелкие проходят), исчерпание исходящих портов или пула соединений.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Последовательный разбор по уровням.</li><li>Различие refused и timeout.</li><li>Конкретные утилиты и что они показывают.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/dns/">Как работает DNS?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/osi-tcp-ip/">Расскажите про модель OSI и стек TCP/IP.</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/linux-troubleshooting-commands/">Какими командами вы диагностируете проблему на Linux-сервере?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/firewall-ports/">Как ограничивать сетевой доступ к серверам и сервисам?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Сервис A не может подключиться к сервису B. Как вы будете искать причину?","acceptedAnswer":{"@type":"Answer","text":"Идти по уровням снизу вверх: DNS (dig b.internal — резолвится ли и в тот ли адрес) → маршрут и доступность (ping, traceroute/mtr) → порт (nc -zv host 8080) → TLS (openssl s_client) → HTTP (curl -v). Характер ошибки подсказывает уровень: connection refused — хост доступен, но порт никто не слушает; timeout — пакеты теряются, чаще всего файрвол или маршрутизация. На стороне B: ss -tlnp — слушает ли сервис и на каком адресе (127.0.0.1 или 0.0.0.0) ping может быть запрещён, а TCP работать — не делать выводов по одному ping tcpdump — последний аргумент: видно, доходят ли пакеты В Kubernetes: Service, метки, Endpoints, NetworkPolicy, DNS внутри пода Команды по шагам: Разбор симптомов: | симптом | вероятная причина | | --- | --- | | не резолвится имя | DNS, опечатка, search-домены | | connection refused | процесс не запущен, слушает не тот интерфейс | | timeout | файрвол, security group, маршрутизация | | TLS-ошибка | истёк сертификат, нет SNI, не доверен CA | | 4xx/5xx | соединение есть, проблема в приложении или прокси | Что ещё проверить: прокси-переменные окружения (HTTP_PROXY), кэш DNS в приложении, MTU в туннелях и VPN (большие пакеты теряются, мелкие проходят), исчерпание исходящих портов или пула соединений."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

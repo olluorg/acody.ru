@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как реализовать схему производитель — потребитель? — вопрос с собеседования</title>
+<meta name="description" content="Производители кладут задачи в ограниченную блокирующую очередь, потребители забирают. Полная очередь останавливает производителя, пустая …">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/producer-consumer/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/producer-consumer/">
+<meta property="og:title" content="Как реализовать схему производитель — потребитель? — вопрос с собеседования">
+<meta property="og:description" content="Производители кладут задачи в ограниченную блокирующую очередь, потребители забирают. Полная очередь останавливает производителя, пустая …">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Как реализовать схему производитель — потребитель?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Как реализовать схему производитель — потребитель?"}]}</script>
+  <h1>Как реализовать схему производитель — потребитель?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Конкурентность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое блокирующая очередь?</li><li>Как передавать задачи между потоками?</li><li>Что делать, если производитель быстрее потребителя?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Производители кладут задачи в <b>ограниченную блокирующую очередь</b>, потребители забирают. Полная очередь останавливает производителя, пустая — потребителя.</p><ul><li>Готовые: BlockingQueue в Java, queue.Queue и asyncio.Queue в Python, каналы в Go</li><li>Своя реализация: мьютекс + две условные переменные «не пусто» и «не полно»</li><li>Ограниченная ёмкость — это backpressure: быстрый производитель не съест память</li></ul><p class="extra"><span>А ещё</span> Остановка: «ядовитая пилюля» или закрытие канала</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Схема развязывает тех, кто создаёт работу, и тех, кто её выполняет: их можно масштабировать отдельно, а очередь сглаживает всплески.</p>
+<p><b>Готовые очереди:</b></p>
+<ul><li>Java: <code>ArrayBlockingQueue</code> (ограниченная, на массиве), <code>LinkedBlockingQueue</code> (по умолчанию <b>неограниченная</b> — задайте ёмкость), <code>SynchronousQueue</code> (без буфера — передача из рук в руки); методы <code>put</code>/<code>take</code> блокируют, <code>offer</code>/<code>poll</code> с таймаутом;</li><li>Python: <code>queue.Queue(maxsize=...)</code> для потоков, <code>asyncio.Queue</code> для корутин;</li><li>Go: буферизованный канал <code>make(chan Task, 100)</code>.</li></ul>
+<p><b>Реализация на мониторе</b> — классическое упражнение на собеседовании: мьютекс и две условные переменные. <code>put</code> ждёт, пока очередь полна, кладёт и будит потребителей; <code>take</code> ждёт, пока пусто, забирает и будит производителей. Ждать — в цикле <code>while</code>, а не <code>if</code>: при пробуждении условие мог перехватить другой поток.</p>
+<p><b>Ограниченная ёмкость.</b> Если производитель быстрее, неограниченная очередь растёт до исчерпания памяти, а каждая задача ждёт всё дольше. Ограничение заставляет производителя ждать или получить отказ — это и есть <b>backpressure</b>: замедление распространяется к источнику. Альтернативы — отбрасывать старые или новые элементы (для метрик и телеметрии), масштабировать потребителей.</p>
+<p><b>Остановка.</b> Потребители висят на <code>take</code>. Варианты: положить в очередь специальный маркер — «ядовитую пилюлю» (по одной на потребителя); прерывание потоков; закрытие канала в Go (<code>range</code> по каналу завершится).</p>
+<p><b>Масштаб выше.</b> Та же схема между сервисами — брокер сообщений (Kafka, RabbitMQ): очередь переживает перезапуски, потребителей можно добавлять, но появляются вопросы гарантий доставки и идемпотентности.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import threading
+from collections import deque
+
+class BoundedQueue:
+    def __init__(self, capacity):
+        self.items, self.capacity = deque(), capacity
+        lock = threading.Lock()
+        self.not_empty = threading.Condition(lock)
+        self.not_full = threading.Condition(lock)
+
+    def put(self, item):
+        with self.not_full:
+            while len(self.items) &gt;= self.capacity:
+                self.not_full.wait()
+            self.items.append(item)
+            self.not_empty.notify()
+
+    def take(self):
+        with self.not_empty:
+            while not self.items:
+                self.not_empty.wait()
+            item = self.items.popleft()
+            self.not_full.notify()
+            return item</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Ограниченная блокирующая очередь как основа.</li><li>Реализация на мьютексе и двух условиях, ожидание в цикле.</li><li>Зачем ограничивать ёмкость — backpressure.</li><li>Корректная остановка потребителей.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li><code>if</code> вместо <code>while</code> при ожидании условия.</li><li><code>LinkedBlockingQueue</code> без ёмкости и удивление OOM.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/backpressure/">Что такое backpressure и как его реализовать?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/mutex-semaphore/">Чем мьютекс отличается от семафора?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/thread-pool/">Зачем нужен пул потоков и как выбрать его размер?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как реализовать схему производитель — потребитель?","acceptedAnswer":{"@type":"Answer","text":"Производители кладут задачи в ограниченную блокирующую очередь, потребители забирают. Полная очередь останавливает производителя, пустая — потребителя. Готовые: BlockingQueue в Java, queue.Queue и asyncio.Queue в Python, каналы в Go Своя реализация: мьютекс + две условные переменные «не пусто» и «не полно» Ограниченная ёмкость — это backpressure: быстрый производитель не съест память Остановка: «ядовитая пилюля» или закрытие канала Схема развязывает тех, кто создаёт работу, и тех, кто её выполняет: их можно масштабировать отдельно, а очередь сглаживает всплески. Готовые очереди: - Java: ArrayBlockingQueue (ограниченная, на массиве), LinkedBlockingQueue (по умолчанию неограниченная — задайте ёмкость), SynchronousQueue (без буфера — передача из рук в руки); методы put/take блокируют, offer/poll с таймаутом; - Python: queue.Queue(maxsize=...) для потоков, asyncio.Queue для корутин; - Go: буферизованный канал make(chan Task, 100). Реализация на мониторе — классическое упражнение на собеседовании: мьютекс и две условные переменные. put ждёт, пока очередь полна, кладёт и будит потребителей; take ждёт, пока пусто, забирает и будит производителей. Ждать — в цикле while, а не if: при пробуждении условие мог перехватить другой поток. Ограниченная ёмкость. Если производитель быстрее, неограниченная очередь растёт до…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

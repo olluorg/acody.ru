@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Спроектируйте сервис «топ-100 популярных запросов» за последний час и за день. — вопрос с собеседования</title>
+<meta name="description" content="Две дорожки: быстрая приближённая — потоковые агрегаторы считают топ по минутным окнам (count-min sketch + куча или Space-Saving) и сливают в топ за…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/design-top-k/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/design-top-k/">
+<meta property="og:title" content="Спроектируйте сервис «топ-100 популярных запросов» за последний час и за день. — вопрос с собеседования">
+<meta property="og:description" content="Две дорожки: быстрая приближённая — потоковые агрегаторы считают топ по минутным окнам (count-min sketch + куча или Space-Saving) и сливают в топ за…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Спроектируйте сервис «топ-100 популярных запросов» за последний час и за день.</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Спроектируйте сервис «топ-100 популярных запросов» за последний час и за день."}]}</script>
+  <h1>Спроектируйте сервис «топ-100 популярных запросов» за последний час и за день.</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Задачи на проектирование</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как посчитать трендовые хештеги?</li><li>Как найти самые популярные товары в реальном времени?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Две дорожки: <b>быстрая приближённая</b> — потоковые агрегаторы считают топ по минутным окнам (count-min sketch + куча или Space-Saving) и сливают в топ за час; <b>медленная точная</b> — пакетный подсчёт по сырым событиям для дня и отчётов.</p><ul><li>Поток в Kafka, партиционирование по ключу запроса — один ключ считает один агрегатор</li><li>Окно часа = 60 минутных корзин, старые выбрасываются</li><li>Результат — готовый список в кэше, чтение мгновенное</li></ul><p class="extra"><span>А ещё</span> Нормализация запросов (регистр, опечатки) важнее алгоритма</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Требования:</b> топ-100 поисковых запросов за последний час (обновление раз в минуту) и за день; допустима небольшая неточность для часового; чтение топа — тысячи раз в секунду. Оценка: 100 000 запросов в секунду, сотни миллионов разных строк в день.</p>
+<p><b>Ввод:</b> события поиска → Kafka. Предварительно — нормализация (регистр, пробелы, синонимы, отсев ботов и мусора).</p>
+<p><b>Быстрая дорожка:</b></p>
+<ol><li>партиционирование событий <b>по хешу запроса</b> — все события одного запроса попадают к одному агрегатору, и его счётчик точен в пределах узла (иначе нужно сливать частичные топы с запасом);</li><li>агрегатор держит счётчики за текущую минуту. Если различных ключей слишком много — count-min sketch + мин-куча на K (или Space-Saving на несколько тысяч элементов);</li><li>раз в минуту агрегатор отдаёт свой локальный топ (с запасом, например 1000) и закрывает минутную корзину;</li><li>сервис слияния хранит 60 минутных топов каждого агрегатора, складывает по ключам и берёт топ-100 за час. Поскольку ключи разделены по агрегаторам, слияние — просто объединение;</li><li>результат — в Redis/кэш: <code>top:hour</code> — готовый список.</li></ol>
+<p><b>Медленная дорожка:</b> сырые события → ClickHouse/хранилище; раз в час и раз в сутки точный <code>GROUP BY query ORDER BY count DESC LIMIT 100</code> (или <code>topK</code>). Дневной топ берётся отсюда; часовой можно сверять.</p>
+<p><b>Горячие ключи:</b> один запрос («погода») может давать заметную долю трафика и перегрузить свой агрегатор. Предагрегирование на приёмниках (локальные счётчики за секунду) снижает число событий в разы.</p>
+<p><b>Тренды</b> — не самые частые, а самые <b>выросшие</b>: сравнение частоты в текущем окне с базовой (вчера в это же время, среднее за неделю) с порогом и сглаживанием, иначе в трендах всегда «погода» и «ютуб».</p>
+<p><b>Отказы:</b> агрегатор упал — перечитать партицию с последнего зафиксированного смещения; состояние окна можно восстанавливать из снимков (Flink, Kafka Streams делают это сами).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>Kafka &quot;searches&quot; (64 партиции, ключ = нормализованный запрос)
+→ 64 агрегатора: минутная корзина {query: count} → локальный топ-1000
+→ merge: окно 60 минут × 64 топа → топ-100 → Redis top:hour (TTL 2 мин)
+→ API GET /top?window=hour → из Redis, p99 &lt; 5 мс
+Параллельно: ClickHouse, точный топ за сутки каждый час.</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Разделение на приближённую потоковую и точную пакетную обработку.</li><li>Партиционирование по ключу и слияние локальных топов.</li><li>Скользящее окно из минутных корзин.</li><li>Count-min / Space-Saving при большом числе ключей, горячие ключи.</li><li>Тренды как отличие от базовой частоты — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Сливать топы с узлов, где один ключ мог считаться на нескольких, без запаса.</li><li>Хранить счётчик каждого запроса за всё время в одной базе и сортировать на лету.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/count-min-top-k/">Как найти самые популярные элементы в бесконечном потоке событий?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/design-view-counter/">Спроектируйте счётчик просмотров для видео с миллионами просмотров в минуту.</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/heap-priority-queue/">Что такое двоичная куча и очередь с приоритетом?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/highload/hot-keys/">Что делать с горячими ключами, на которые приходится непропорционально большая нагрузка?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Спроектируйте сервис «топ-100 популярных запросов» за последний час и за день.","acceptedAnswer":{"@type":"Answer","text":"Две дорожки: быстрая приближённая — потоковые агрегаторы считают топ по минутным окнам (count-min sketch + куча или Space-Saving) и сливают в топ за час; медленная точная — пакетный подсчёт по сырым событиям для дня и отчётов. Поток в Kafka, партиционирование по ключу запроса — один ключ считает один агрегатор Окно часа = 60 минутных корзин, старые выбрасываются Результат — готовый список в кэше, чтение мгновенное Нормализация запросов (регистр, опечатки) важнее алгоритма Требования: топ-100 поисковых запросов за последний час (обновление раз в минуту) и за день; допустима небольшая неточность для часового; чтение топа — тысячи раз в секунду. Оценка: 100 000 запросов в секунду, сотни миллионов разных строк в день. Ввод: события поиска → Kafka. Предварительно — нормализация (регистр, пробелы, синонимы, отсев ботов и мусора). Быстрая дорожка: 1. партиционирование событий по хешу запроса — все события одного запроса попадают к одному агрегатору, и его счётчик точен в пределах узла (иначе нужно сливать частичные топы с запасом); 2. агрегатор держит счётчики за текущую минуту. Если различных ключей слишком много — count-min sketch + мин-куча на K (или Space-Saving на несколько тысяч элементов); 3. раз в минуту агрегатор отдаёт свой локальный топ (с запасом, например 1000) и закрывает минутную корзину; 4. сервис слияния хранит 60 минутных топов каждого…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

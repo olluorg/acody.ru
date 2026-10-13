@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>В parallel stream выполняется обращение к внешнему HTTP-сервису. Почему это опасно для всего приложения? — вопрос с собеседования</title>
+<meta name="description" content="Parallel stream выполняется в общем ForkJoinPool.commonPool — одном на JVM, размером «ядра − 1». Блокирующий HTTP-вызов занимает его потоки, и встают…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/parallel-stream-blocking/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/parallel-stream-blocking/">
+<meta property="og:title" content="В parallel stream выполняется обращение к внешнему HTTP-сервису. Почему это опасно для всего приложения? — вопрос с собеседования">
+<meta property="og:description" content="Parallel stream выполняется в общем ForkJoinPool.commonPool — одном на JVM, размером «ядра − 1». Блокирующий HTTP-вызов занимает его потоки, и встают…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>В parallel stream выполняется обращение к внешнему HTTP-сервису. Почему это опасно для всего приложения?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"В parallel stream выполняется обращение к внешнему HTTP-сервису. Почему это опасно для всего приложения?"}]}</script>
+  <h1>В parallel stream выполняется обращение к внешнему HTTP-сервису. Почему это опасно для всего приложения?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Многопоточность</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Parallel stream</b> выполняется в общем <b>ForkJoinPool.commonPool</b> — одном на JVM, размером «ядра − 1». Блокирующий HTTP-вызов занимает его потоки, и <b>встают все parallel stream и async-стадии</b> приложения, включая чужие библиотеки.</p><ul><li>Сетевые вызовы — свой executor и CompletableFuture или виртуальные потоки</li><li>Отладить трудно: тормозит код, который не менялся</li><li>Запуск внутри своего ForkJoinPool — недокументированный трюк</li></ul><p class="extra"><span>А ещё</span> Parallel stream — только для CPU-bound и больших объёмов</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Общий ForkJoinPool задумывался под короткие вычислительные задачи, которые никогда не блокируются. Стоит поместить туда сетевой вызов на секунду — и все остальные параллельные стримы приложения, включая чужие библиотеки, встают в очередь. Отладить это тяжело: тормозит код, который вы не меняли. Варианты решения: не использовать parallel stream для блокирующих операций вовсе; выполнить стрим внутри задачи, отправленной в собственный ForkJoinPool (известный обходной приём); либо взять ExecutorService или виртуальные потоки, которые для такой нагрузки подходят гораздо лучше. Общее правило: parallel stream — инструмент для CPU-bound обработки больших объёмов данных в памяти, и никак не для ввода-вывода.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Общий пул и его размер.</li><li>Последствия блокировки.</li><li>Правильная альтернатива.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Добавлять .parallel() ради ускорения операций ввода-вывода.</li><li>Не учитывать, что общий пул разделяется со всем приложением.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Parallel stream по умолчанию использует общий ForkJoinPool.commonPool, и блокирующие задачи в нём тормозят все параллельные стримы приложения</li><li class="no"><span class="mark">✗</span>Parallel stream создаёт новый поток на каждый элемент</li><li class="no"><span class="mark">✗</span>HTTP-клиенты нельзя вызывать из нескольких потоков</li><li class="no"><span class="mark">✗</span>Ничего страшного: пул автоматически расширится под нагрузкой</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как задать собственный пул для parallel stream?</li><li>Чему равен параллелизм общего пула по умолчанию?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/threadlocal-forkjoin/">ThreadLocal и Fork/Join</a><p>Состояние на поток и утечки в пулах, InheritableThreadLocal, work-stealing в ForkJoinPool и общий пул parallel streams.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/completablefuture-blocking-common-pool/">Почему опасно выполнять блокирующие операции в стадиях CompletableFuture без явного Executor?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/parallel-stream-no-gain/">В каких случаях parallel stream, скорее всего, не даст выигрыша или окажется медленнее последовательного?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/fork-join-work-stealing/">Что такое Fork/Join framework и work stealing?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"В parallel stream выполняется обращение к внешнему HTTP-сервису. Почему это опасно для всего приложения?","acceptedAnswer":{"@type":"Answer","text":"Parallel stream выполняется в общем ForkJoinPool.commonPool — одном на JVM, размером «ядра − 1». Блокирующий HTTP-вызов занимает его потоки, и встают все parallel stream и async-стадии приложения, включая чужие библиотеки. Сетевые вызовы — свой executor и CompletableFuture или виртуальные потоки Отладить трудно: тормозит код, который не менялся Запуск внутри своего ForkJoinPool — недокументированный трюк Parallel stream — только для CPU-bound и больших объёмов Общий ForkJoinPool задумывался под короткие вычислительные задачи, которые никогда не блокируются. Стоит поместить туда сетевой вызов на секунду — и все остальные параллельные стримы приложения, включая чужие библиотеки, встают в очередь. Отладить это тяжело: тормозит код, который вы не меняли. Варианты решения: не использовать parallel stream для блокирующих операций вовсе; выполнить стрим внутри задачи, отправленной в собственный ForkJoinPool (известный обходной приём); либо взять ExecutorService или виртуальные потоки, которые для такой нагрузки подходят гораздо лучше. Общее правило: parallel stream — инструмент для CPU-bound обработки больших объёмов данных в памяти, и никак не для ввода-вывода."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Когда использовать defaultdict, Counter, deque и OrderedDict? — вопрос с собеседования</title>
+<meta name="description" content="defaultdict(list) — значение по умолчанию для нового ключа (группировка без проверок). Counter — подсчёт: most_common, сложение и вычитание…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/collections-module/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/collections-module/">
+<meta property="og:title" content="Когда использовать defaultdict, Counter, deque и OrderedDict? — вопрос с собеседования">
+<meta property="og:description" content="defaultdict(list) — значение по умолчанию для нового ключа (группировка без проверок). Counter — подсчёт: most_common, сложение и вычитание…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Когда использовать defaultdict, Counter, deque и OrderedDict?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Когда использовать defaultdict, Counter, deque и OrderedDict?"}]}</script>
+  <h1>Когда использовать defaultdict, Counter, deque и OrderedDict?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Коллекции</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что есть в модуле collections?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>defaultdict(list)</b> — значение по умолчанию для нового ключа (группировка без проверок). <b>Counter</b> — подсчёт: most_common, сложение и вычитание счётчиков. <b>deque</b> — двусторонняя очередь с O(1) по краям и maxlen (скользящее окно). <b>OrderedDict</b> — move_to_end и popitem(last=False), равенство с учётом порядка.</p><ul><li>list.pop(0) — O(n), deque.popleft() — O(1)</li><li>Обычный dict хранит порядок вставки с 3.7 — OrderedDict нужен редко</li><li>defaultdict создаёт ключ даже при чтении d[k] — неожиданно растёт</li></ul><p class="extra"><span>А ещё</span> ChainMap — несколько словарей как один (настройки по слоям)</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>defaultdict</b> вызывает фабрику при обращении к отсутствующему ключу и кладёт результат в словарь. Удобно для группировки и подсчёта, но <code>if d[key]:</code> тоже создаст пустую запись — для проверки использовать <code>key in d</code> или <code>get</code>.</p>
+<p><b>Counter</b> — словарь «элемент → количество»: <code>Counter(&quot;abracadabra&quot;)</code>, <code>most_common(n)</code>, арифметика <code>c1 + c2</code>, <code>c1 - c2</code> (отрицательные отбрасываются), <code>total()</code> (3.10).</p>
+<p><b>deque</b> — кольцевая структура из блоков: <code>append</code>, <code>appendleft</code>, <code>pop</code>, <code>popleft</code> за O(1), <code>rotate</code>. Индексация в середину — O(n). С <code>maxlen</code> — ограниченный буфер. Потокобезопасна для append и popleft — часто используется как простая очередь.</p>
+<p><b>OrderedDict</b> после 3.7 нужен для <code>move_to_end</code> (LRU-кэш вручную), <code>popitem(last=False)</code> и сравнения с учётом порядка.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>from collections import defaultdict, Counter, deque
+
+by_city = defaultdict(list)
+for u in users: by_city[u.city].append(u)
+
+Counter(words).most_common(3)
+
+last_5 = deque(maxlen=5)
+for x in stream: last_5.append(x)     # старые вытесняются сами</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Назначение каждого.</li><li>deque против list для очереди.</li><li>Когда OrderedDict ещё нужен.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/dict-how-it-works/">Как устроен словарь в Python?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/stack-queue/">Чем стек отличается от очереди и где они применяются?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/complexity-list-dict/">Какая сложность у основных операций со списком, словарём и множеством?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Когда использовать defaultdict, Counter, deque и OrderedDict?","acceptedAnswer":{"@type":"Answer","text":"defaultdict(list) — значение по умолчанию для нового ключа (группировка без проверок). Counter — подсчёт: most_common, сложение и вычитание счётчиков. deque — двусторонняя очередь с O(1) по краям и maxlen (скользящее окно). OrderedDict — move_to_end и popitem(last=False), равенство с учётом порядка. list.pop(0) — O(n), deque.popleft() — O(1) Обычный dict хранит порядок вставки с 3.7 — OrderedDict нужен редко defaultdict создаёт ключ даже при чтении d[k] — неожиданно растёт ChainMap — несколько словарей как один (настройки по слоям) defaultdict вызывает фабрику при обращении к отсутствующему ключу и кладёт результат в словарь. Удобно для группировки и подсчёта, но if d[key]: тоже создаст пустую запись — для проверки использовать key in d или get. Counter — словарь «элемент → количество»: Counter(\"abracadabra\"), most_common(n), арифметика c1 + c2, c1 - c2 (отрицательные отбрасываются), total() (3.10). deque — кольцевая структура из блоков: append, appendleft, pop, popleft за O(1), rotate. Индексация в середину — O(n). С maxlen — ограниченный буфер. Потокобезопасна для append и popleft — часто используется как простая очередь. OrderedDict после 3.7 нужен для move_to_end (LRU-кэш вручную), popitem(last=False) и сравнения с учётом порядка."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

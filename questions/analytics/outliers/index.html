@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как обнаруживать и обрабатывать выбросы в данных? — вопрос с собеседования</title>
+<meta name="description" content="Сначала понять природу выброса: ошибка данных (тестовый заказ, бот, сбой трекинга, неверные единицы) — исправить или исключить; реальное редкое…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/outliers/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/outliers/">
+<meta property="og:title" content="Как обнаруживать и обрабатывать выбросы в данных? — вопрос с собеседования">
+<meta property="og:description" content="Сначала понять природу выброса: ошибка данных (тестовый заказ, бот, сбой трекинга, неверные единицы) — исправить или исключить; реальное редкое…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Как обнаруживать и обрабатывать выбросы в данных?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Как обнаруживать и обрабатывать выбросы в данных?"}]}</script>
+  <h1>Как обнаруживать и обрабатывать выбросы в данных?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Статистика</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Можно ли просто удалить выбросы?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Сначала понять <b>природу</b> выброса: <b>ошибка данных</b> (тестовый заказ, бот, сбой трекинга, неверные единицы) — исправить или исключить; <b>реальное редкое значение</b> (оптовый клиент) — часть распределения, удалять нельзя, но можно ограничить влияние: медиана, логарифм, винзоризация, отдельный сегмент.</p><ul><li>Обнаружение: правило 1,5·IQR, z-оценка, графики, бизнес-ограничения (возраст 250 лет)</li><li>Правило обработки выбросов в A/B-тесте фиксируют до эксперимента</li><li>Удалять «неудобные» точки после просмотра результатов — подгонка</li></ul><p class="extra"><span>А ещё</span> Иногда выбросы и есть цель: антифрод, поиск аномалий</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Методы обнаружения:</b></p>
+<ul><li><b>IQR</b>: значения за пределами Q1 − 1,5·IQR и Q3 + 1,5·IQR;</li><li><b>z-оценка</b>: дальше 3 стандартных отклонений — для примерно нормальных данных;</li><li><b>бизнес-правила</b>: отрицательная цена, заказ в 1 000 000 рублей от нового пользователя, сессия длиной 30 часов;</li><li><b>визуально</b>: гистограмма, ящик с усами, временной ряд.</li></ul>
+<p><b>Обработка:</b></p>
+<ul><li>ошибки — исправить в источнике или исключить с документированным правилом;</li><li>реальные хвосты — устойчивые статистики (медиана), логарифм, винзоризация (заменить значения выше 99-го перцентиля самим перцентилем), анализ сегмента отдельно.</li></ul>
+<p><b>В экспериментах</b> один оптовый заказ может сделать выручку в группе «значимо» выше. Поэтому заранее фиксируют порог винзоризации или используют устойчивые метрики.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Различение ошибки и реального значения.</li><li>Методы обнаружения.</li><li>Способы ограничить влияние и правило фиксировать заранее.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/central-tendency/">Чем отличаются среднее, медиана и мода и когда что использовать?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/ratio-metrics-bootstrap/">Как анализировать метрики-отношения (средний чек, CTR) и метрики с длинным хвостом в A/B-тесте?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как обнаруживать и обрабатывать выбросы в данных?","acceptedAnswer":{"@type":"Answer","text":"Сначала понять природу выброса: ошибка данных (тестовый заказ, бот, сбой трекинга, неверные единицы) — исправить или исключить; реальное редкое значение (оптовый клиент) — часть распределения, удалять нельзя, но можно ограничить влияние: медиана, логарифм, винзоризация, отдельный сегмент. Обнаружение: правило 1,5IQR, z-оценка, графики, бизнес-ограничения (возраст 250 лет) Правило обработки выбросов в A/B-тесте фиксируют до эксперимента Удалять «неудобные» точки после просмотра результатов — подгонка Иногда выбросы и есть цель: антифрод, поиск аномалий Методы обнаружения: - IQR: значения за пределами Q1 − 1,5IQR и Q3 + 1,5IQR; - z-оценка: дальше 3 стандартных отклонений — для примерно нормальных данных; - бизнес-правила: отрицательная цена, заказ в 1 000 000 рублей от нового пользователя, сессия длиной 30 часов; - визуально: гистограмма, ящик с усами, временной ряд. Обработка: - ошибки — исправить в источнике или исключить с документированным правилом; - реальные хвосты — устойчивые статистики (медиана), логарифм, винзоризация (заменить значения выше 99-го перцентиля самим перцентилем), анализ сегмента отдельно. В экспериментах один оптовый заказ может сделать выручку в группе «значимо» выше. Поэтому заранее фиксируют порог винзоризации или используют устойчивые метрики."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

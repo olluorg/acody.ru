@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как устроены дженерики в Go и когда их использовать? — вопрос с собеседования</title>
+<meta name="description" content="С Go 1.18 функции и типы принимают параметры типов с ограничениями — интерфейсами, которые могут перечислять допустимые типы: func Max[T…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/go/generics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/go/generics/">
+<meta property="og:title" content="Как устроены дженерики в Go и когда их использовать? — вопрос с собеседования">
+<meta property="og:description" content="С Go 1.18 функции и типы принимают параметры типов с ограничениями — интерфейсами, которые могут перечислять допустимые типы: func Max[T…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/go/">Go</a> <span>/</span> <span>Как устроены дженерики в Go и когда их использовать?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Go","item":"https://learn.getsotto.ru/questions/go/"},{"@type":"ListItem","position":3,"name":"Как устроены дженерики в Go и когда их использовать?"}]}</script>
+  <h1>Как устроены дженерики в Go и когда их использовать?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Методы и интерфейсы</span><span class="chip ver">Go &gt;=1.21</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое ограничения типов (constraints) в Go?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">С Go 1.18 функции и типы принимают <b>параметры типов</b> с <b>ограничениями</b> — интерфейсами, которые могут перечислять допустимые типы: <code>func Max[T cmp.Ordered](a, b T) T</code>. Применение — <b>контейнеры и алгоритмы над разными типами</b> (пакеты slices, maps). Для поведения по-прежнему лучше обычные интерфейсы.</p><ul><li>~int в ограничении — любой тип с базовым int</li><li>comparable — типы, поддерживающие ==</li><li>Методы не могут иметь собственных параметров типов</li></ul><p class="extra"><span>А ещё</span> Не заменять дженериками интерфейсы там, где нужна динамическая диспетчеризация</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>До дженериков</b> обобщённый код писали через <code>interface{}</code> с приведениями типов (теряли проверку на компиляции) или генерацией кода.</p>
+<p><b>Ограничения</b> — интерфейсы, которые описывают либо методы, либо набор типов (<code>int | float64</code>), либо и то и другое. Тильда <code>~int</code> включает именованные типы с базовым int (<code>type Celsius int</code>). Готовые ограничения: <code>any</code>, <code>comparable</code>, <code>cmp.Ordered</code>.</p>
+<p><b>Стандартная библиотека</b> после 1.21: <code>slices.Sort</code>, <code>slices.Contains</code>, <code>maps.Keys</code>, <code>min</code>/<code>max</code> встроены.</p>
+<p><b>Когда не стоит:</b> если функции нужно лишь вызывать методы аргумента — обычный интерфейс проще. Дженерики хороши для структур данных (стек, кэш, множество) и функций над срезами и мапами.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-go"><code>func Map[T, U any](xs []T, f func(T) U) []U {
+    out := make([]U, 0, len(xs))
+    for _, x := range xs { out = append(out, f(x)) }
+    return out
+}
+
+type Number interface{ ~int | ~int64 | ~float64 }
+func Sum[T Number](xs []T) T {
+    var s T
+    for _, x := range xs { s += x }
+    return s
+}
+
+type Stack[T any] struct{ items []T }
+func (s *Stack[T]) Push(x T) { s.items = append(s.items, x) }</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Параметры типов и ограничения.</li><li>Где применять, а где лучше интерфейсы.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/any-type-assertion/">Что такое any, type assertion и type switch?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/typing-generics/">Как в аннотациях Python описать обобщённые типы — TypeVar, Generic, Protocol?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/generics-wildcards/">Что такое generics в Java и зачем нужен wildcard ? extends / ? super?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как устроены дженерики в Go и когда их использовать?","acceptedAnswer":{"@type":"Answer","text":"С Go 1.18 функции и типы принимают параметры типов с ограничениями — интерфейсами, которые могут перечислять допустимые типы: func Max[T cmp.Ordered](a, b T) T. Применение — контейнеры и алгоритмы над разными типами (пакеты slices, maps). Для поведения по-прежнему лучше обычные интерфейсы. ~int в ограничении — любой тип с базовым int comparable — типы, поддерживающие == Методы не могут иметь собственных параметров типов Не заменять дженериками интерфейсы там, где нужна динамическая диспетчеризация До дженериков обобщённый код писали через interface{} с приведениями типов (теряли проверку на компиляции) или генерацией кода. Ограничения — интерфейсы, которые описывают либо методы, либо набор типов (int | float64), либо и то и другое. Тильда ~int включает именованные типы с базовым int (type Celsius int). Готовые ограничения: any, comparable, cmp.Ordered. Стандартная библиотека после 1.21: slices.Sort, slices.Contains, maps.Keys, min/max встроены. Когда не стоит: если функции нужно лишь вызывать методы аргумента — обычный интерфейс проще. Дженерики хороши для структур данных (стек, кэш, множество) и функций над срезами и мапами."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

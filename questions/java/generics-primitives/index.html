@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему нельзя объявить List&lt;int&gt; и что пишут вместо этого? — вопрос с собеседования</title>
+<meta name="description" content="Параметр дженерика может быть только ссылочным типом, поэтому пишут List&lt;Integer&gt; с автоупаковкой. Причина — стирание типов: в байткоде параметр…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/generics-primitives/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/generics-primitives/">
+<meta property="og:title" content="Почему нельзя объявить List&lt;int&gt; и что пишут вместо этого? — вопрос с собеседования">
+<meta property="og:description" content="Параметр дженерика может быть только ссылочным типом, поэтому пишут List&lt;Integer&gt; с автоупаковкой. Причина — стирание типов: в байткоде параметр…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Почему нельзя объявить List&lt;int&gt; и что пишут вместо этого?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Почему нельзя объявить List<int> и что пишут вместо этого?"}]}</script>
+  <h1>Почему нельзя объявить List&lt;int&gt; и что пишут вместо этого?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Основы языка</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему в дженериках нельзя использовать примитивы?</li><li>Что такое автоупаковка?</li><li>Чем List&lt;Integer&gt; хуже int[]?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Параметр дженерика может быть только <b>ссылочным типом</b>, поэтому пишут <code>List&lt;Integer&gt;</code> с <b>автоупаковкой</b>.</p><ul><li>Причина — стирание типов: в байткоде параметр становится Object</li><li>Цена боксинга: объекты в куче, лишняя память и работа GC</li></ul><p class="extra"><span>А ещё</span> Для больших объёмов чисел — int[], IntStream или специализированные коллекции</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Песочница: == против equals и кэш Integer</p><script type="module" src="/widgets/integer-cache.js"></script><sotto-integer-cache theme="dark"></sotto-integer-cache></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Дженерики в Java реализованы через <b>стирание типов</b>: после компиляции параметр типа заменяется на его границу, обычно <code>Object</code>. Примитив <code>int</code> не является объектом, поэтому <code>List&lt;int&gt;</code> не компилируется.</p>
+<p>Вместо него используют класс-обёртку <code>List&lt;Integer&gt;</code>. Компилятор сам превращает <code>int</code> в <code>Integer</code> при добавлении (автоупаковка, <code>valueOf</code>) и обратно при чтении (распаковка, <code>intValue</code>).</p>
+<p>У этого есть цена: каждое число — отдельный объект в куче с заголовком, коллекция хранит ссылки, а не значения. На миллионах элементов это заметно по памяти и скорости, плюс нагрузка на сборщик мусора. Поэтому в горячем коде используют массивы примитивов, <code>IntStream</code>/<code>LongStream</code> и специализированные библиотеки коллекций примитивов.</p>
+<p>Ловушки автоупаковки: <code>NullPointerException</code> при распаковке <code>null</code>, сравнение обёрток через <code>==</code>, а также <code>list.remove(1)</code> у <code>List&lt;Integer&gt;</code> — удаляет элемент по индексу 1, а не значение 1.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>List&lt;Integer&gt; nums = new ArrayList&lt;&gt;();
+nums.add(5);                 // автоупаковка: Integer.valueOf(5)
+int first = nums.get(0);     // распаковка
+
+nums.remove(Integer.valueOf(5)); // удалить значение 5, а не индекс
+
+int sum = IntStream.rangeClosed(1, 1_000_000).sum(); // без боксинга</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Дженерики работают только со ссылочными типами — используют обёртку.</li><li>Связь со стиранием типов.</li><li>Автоупаковка и её стоимость.</li><li>Альтернативы для производительности и ловушки — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что обёртка и примитив взаимозаменяемы без накладных расходов.</li><li>Забывать про скрытый боксинг при вставке в List&lt;Integer&gt;.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Дженерики и коллекции работают только со ссылочными типами, поэтому берут обёртку — List&lt;Integer&gt; (с автоупаковкой при вставке)</li><li class="no"><span class="mark">✗</span>Можно: List&lt;int&gt; допустим начиная с Java 8</li><li class="no"><span class="mark">✗</span>int нельзя хранить в коллекциях вообще — только массив int[]</li><li class="no"><span class="mark">✗</span>List&lt;int&gt; работает, но без автоупаковки</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое стирание типов и при чём тут это ограничение?</li><li>Когда вместо List&lt;Integer&gt; взять int[]?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/primitives/">Примитивы, обёртки и Integer cache</a><p>Восемь примитивов и их диапазоны, autoboxing, кэш Integer и ловушка ==, NPE при распаковке и цена боксинга.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/int-array-vs-list-integer/">Чем int[] на миллион чисел выгоднее List&lt;Integer&gt; того же размера?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/autoboxing-pitfalls/">Что такое autoboxing и какие ловушки он приносит?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/ternary-unboxing-npe/">Почему int v = flag ? map.get(key) : 0 (map.get может вернуть null) способно бросить NPE?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/unboxing-null-npe/">Что произойдёт при выполнении: Integer x = null; int y = x;?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему нельзя объявить List<int> и что пишут вместо этого?","acceptedAnswer":{"@type":"Answer","text":"Параметр дженерика может быть только ссылочным типом, поэтому пишут List<Integer> с автоупаковкой. Причина — стирание типов: в байткоде параметр становится Object Цена боксинга: объекты в куче, лишняя память и работа GC Для больших объёмов чисел — int[], IntStream или специализированные коллекции Дженерики в Java реализованы через стирание типов: после компиляции параметр типа заменяется на его границу, обычно Object. Примитив int не является объектом, поэтому List<int> не компилируется. Вместо него используют класс-обёртку List<Integer>. Компилятор сам превращает int в Integer при добавлении (автоупаковка, valueOf) и обратно при чтении (распаковка, intValue). У этого есть цена: каждое число — отдельный объект в куче с заголовком, коллекция хранит ссылки, а не значения. На миллионах элементов это заметно по памяти и скорости, плюс нагрузка на сборщик мусора. Поэтому в горячем коде используют массивы примитивов, IntStream/LongStream и специализированные библиотеки коллекций примитивов. Ловушки автоупаковки: NullPointerException при распаковке null, сравнение обёрток через ==, а также list.remove(1) у List<Integer> — удаляет элемент по индексу 1, а не значение 1."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

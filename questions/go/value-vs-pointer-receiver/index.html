@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Когда метод должен иметь получатель-указатель, а когда — значение? — вопрос с собеседования</title>
+<meta name="description" content="Указатель func (s Svc) — если метод меняет получателя, структура большая или содержит то, что нельзя копировать (sync.Mutex). Значение func (p Point)…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/go/value-vs-pointer-receiver/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/go/value-vs-pointer-receiver/">
+<meta property="og:title" content="Когда метод должен иметь получатель-указатель, а когда — значение? — вопрос с собеседования">
+<meta property="og:description" content="Указатель func (s Svc) — если метод меняет получателя, структура большая или содержит то, что нельзя копировать (sync.Mutex). Значение func (p Point)…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/go/">Go</a> <span>/</span> <span>Когда метод должен иметь получатель-указатель, а когда — значение?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Go","item":"https://learn.getsotto.ru/questions/go/"},{"@type":"ListItem","position":3,"name":"Когда метод должен иметь получатель-указатель, а когда — значение?"}]}</script>
+  <h1>Когда метод должен иметь получатель-указатель, а когда — значение?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Методы и интерфейсы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему структура не удовлетворяет интерфейсу, хотя метод есть?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Указатель</b> <code>func (s *Svc)</code> — если метод <b>меняет</b> получателя, структура <b>большая</b> или содержит то, что нельзя копировать (sync.Mutex). <b>Значение</b> <code>func (p Point)</code> — для маленьких неизменяемых типов. Получатели одного типа делают <b>единообразными</b>.</p><ul><li>Методы с получателем-указателем входят в набор методов только *T, а не T</li><li>Поэтому T не удовлетворяет интерфейсу, если нужный метод объявлен на *T</li><li>Вызов p.Method() на адресуемой переменной Go сам возьмёт адрес</li></ul><p class="extra"><span>А ещё</span> Копирование структуры с мьютексом — go vet предупредит (copylocks)</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Получатель-значение</b> получает копию: изменения внутри метода не видны снаружи. Для <code>Point{X, Y}</code> это естественно и безопасно.</p>
+<p><b>Получатель-указатель</b> работает с оригиналом. Нужен, когда метод меняет состояние, когда структура большая (копирование при каждом вызове), когда в ней мьютекс или другие поля, которые нельзя копировать.</p>
+<p><b>Наборы методов.</b> У типа <code>T</code> — методы с получателем <code>T</code>; у <code>*T</code> — и <code>T</code>, и <code>*T</code>. Значение в интерфейсе неадресуемо, поэтому Go не может взять его адрес, чтобы вызвать метод указателя, — отсюда ошибка компиляции «does not implement (method has pointer receiver)».</p>
+<p><b>Правило единообразия:</b> если хотя бы один метод требует указателя, все методы типа обычно объявляют на указателе.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-go"><code>type Counter struct{ n int }
+func (c *Counter) Inc()      { c.n++ }      // меняет — указатель
+func (c Counter) Value() int { return c.n }
+
+type Incer interface{ Inc() }
+var _ Incer = &amp;Counter{}    // ок
+var _ Incer = Counter{}     // ошибка: Inc объявлен на *Counter</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Критерии выбора.</li><li>Наборы методов и интерфейсы.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/pointers-pass-by-value/">Как в Go передаются аргументы и зачем нужны указатели?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/go/interfaces-implicit/">Как работают интерфейсы в Go и что значит неявная реализация?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Когда метод должен иметь получатель-указатель, а когда — значение?","acceptedAnswer":{"@type":"Answer","text":"Указатель func (s Svc) — если метод меняет получателя, структура большая или содержит то, что нельзя копировать (sync.Mutex). Значение func (p Point) — для маленьких неизменяемых типов. Получатели одного типа делают единообразными. Методы с получателем-указателем входят в набор методов только T, а не T Поэтому T не удовлетворяет интерфейсу, если нужный метод объявлен на T Вызов p.Method() на адресуемой переменной Go сам возьмёт адрес Копирование структуры с мьютексом — go vet предупредит (copylocks) Получатель-значение получает копию: изменения внутри метода не видны снаружи. Для Point{X, Y} это естественно и безопасно. Получатель-указатель работает с оригиналом. Нужен, когда метод меняет состояние, когда структура большая (копирование при каждом вызове), когда в ней мьютекс или другие поля, которые нельзя копировать. Наборы методов. У типа T — методы с получателем T; у T — и T, и T. Значение в интерфейсе неадресуемо, поэтому Go не может взять его адрес, чтобы вызвать метод указателя, — отсюда ошибка компиляции «does not implement (method has pointer receiver)». Правило единообразия: если хотя бы один метод требует указателя, все методы типа обычно объявляют на указателе."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

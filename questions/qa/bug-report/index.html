@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Из чего состоит баг-репорт? — вопрос с собеседования</title>
+<meta name="description" content="Баг-репорт — описание дефекта, по которому разработчик воспроизведёт его без вопросов: заголовок, шаги, фактический и ожидаемый результат, окружение…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/qa/bug-report/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/qa/bug-report/">
+<meta property="og:title" content="Из чего состоит баг-репорт? — вопрос с собеседования">
+<meta property="og:description" content="Баг-репорт — описание дефекта, по которому разработчик воспроизведёт его без вопросов: заголовок, шаги, фактический и ожидаемый результат, окружение…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/qa/">Тестирование (QA)</a> <span>/</span> <span>Из чего состоит баг-репорт?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Тестирование (QA)","item":"https://learn.getsotto.ru/questions/qa/"},{"@type":"ListItem","position":3,"name":"Из чего состоит баг-репорт?"}]}</script>
+  <h1>Из чего состоит баг-репорт?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Дефекты и баг-репорты</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как правильно оформить дефект?</li><li>Что должно быть в баг-репорте?</li><li>Как написать хороший заголовок бага?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Баг-репорт — описание дефекта, по которому разработчик <b>воспроизведёт</b> его без вопросов: <b>заголовок, шаги, фактический и ожидаемый результат, окружение, вложения</b>.</p><ul><li>Заголовок по формуле «что — где — при каком условии»</li><li>Плюс серьёзность, приоритет, версия сборки</li></ul><p class="extra"><span>А ещё</span> Один баг — один репорт; шаги — минимальные, чтобы воспроизвести</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Основные поля:</p>
+<ul><li><b>Заголовок</b> — коротко и конкретно: что не работает, где и при каком условии. «Не применяется промокод при оплате картой в мобильной версии» — а не «Ошибка в корзине».</li><li><b>Шаги воспроизведения</b> — нумерованные, минимальные, с конкретными данными: какой логин, какой промокод, на какую кнопку нажать.</li><li><b>Фактический результат</b> — что произошло, с текстом ошибки.</li><li><b>Ожидаемый результат</b> — что должно было произойти, со ссылкой на требование, если есть.</li><li><b>Окружение</b> — стенд, версия сборки, браузер или устройство и ОС.</li><li><b>Вложения</b> — скриншот, видео, логи, ответ сервера из DevTools.</li><li><b>Серьёзность и приоритет.</b></li><li>Дополнительно: предусловия, частота воспроизведения, ссылка на задачу.</li></ul>
+<p>Принципы хорошего репорта: один дефект на репорт, воспроизводимость, нейтральный тон без оценок («кто-то сломал»), проверка перед заведением — нет ли уже такого бага.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><p><b>Заголовок:</b> Итоговая сумма не уменьшается после применения промокода SALE10 в корзине (Android)</p>
+<p><b>Окружение:</b> stage, сборка 2.14.0 (512), Android 14, Pixel 7</p>
+<p><b>Шаги:</b></p>
+<ol><li>Войти как test_user01.</li><li>Добавить в корзину товар за 2000 ₽.</li><li>Ввести промокод SALE10, нажать «Применить».</li></ol>
+<p><b>Фактический результат:</b> появляется «Промокод применён», итог — 2000 ₽. <b>Ожидаемый результат:</b> итог — 1800 ₽ (скидка 10 %, требование PRJ-311). <b>Вложения:</b> видео, ответ <code>/api/cart</code> с <code>discount: 0</code>.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Все ключевые поля и зачем каждое нужно.</li><li>Требования к заголовку и шагам.</li><li>Принципы: воспроизводимость, один дефект на репорт, проверка дублей.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Заголовок без конкретики: «Не работает».</li><li>Нет ожидаемого результата или окружения.</li><li>Несколько дефектов в одном репорте.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/qa/severity-vs-priority/">Чем серьёзность бага отличается от приоритета?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/qa/bug-lifecycle/">Какой жизненный цикл у бага?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/qa/devtools/">Как вы используете DevTools при тестировании?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Из чего состоит баг-репорт?","acceptedAnswer":{"@type":"Answer","text":"Баг-репорт — описание дефекта, по которому разработчик воспроизведёт его без вопросов: заголовок, шаги, фактический и ожидаемый результат, окружение, вложения. Заголовок по формуле «что — где — при каком условии» Плюс серьёзность, приоритет, версия сборки Один баг — один репорт; шаги — минимальные, чтобы воспроизвести Основные поля: - Заголовок — коротко и конкретно: что не работает, где и при каком условии. «Не применяется промокод при оплате картой в мобильной версии» — а не «Ошибка в корзине». - Шаги воспроизведения — нумерованные, минимальные, с конкретными данными: какой логин, какой промокод, на какую кнопку нажать. - Фактический результат — что произошло, с текстом ошибки. - Ожидаемый результат — что должно было произойти, со ссылкой на требование, если есть. - Окружение — стенд, версия сборки, браузер или устройство и ОС. - Вложения — скриншот, видео, логи, ответ сервера из DevTools. - Серьёзность и приоритет. - Дополнительно: предусловия, частота воспроизведения, ссылка на задачу. Принципы хорошего репорта: один дефект на репорт, воспроизводимость, нейтральный тон без оценок («кто-то сломал»), проверка перед заведением — нет ли уже такого бага."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

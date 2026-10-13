@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем стек отличается от очереди и где они применяются? — вопрос с собеседования</title>
+<meta name="description" content="Стек — последним пришёл, первым ушёл (LIFO); очередь — первым пришёл, первым ушёл (FIFO). Основные операции — O(1). Стек: вызовы функций, отмена…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/stack-queue/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/stack-queue/">
+<meta property="og:title" content="Чем стек отличается от очереди и где они применяются? — вопрос с собеседования">
+<meta property="og:description" content="Стек — последним пришёл, первым ушёл (LIFO); очередь — первым пришёл, первым ушёл (FIFO). Основные операции — O(1). Стек: вызовы функций, отмена…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Чем стек отличается от очереди и где они применяются?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Чем стек отличается от очереди и где они применяются?"}]}</script>
+  <h1>Чем стек отличается от очереди и где они применяются?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Структуры данных</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое LIFO и FIFO?</li><li>Как сделать очередь на двух стеках?</li><li>Где используется стек вызовов?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Стек</b> — последним пришёл, первым ушёл (LIFO); <b>очередь</b> — первым пришёл, первым ушёл (FIFO). Основные операции — O(1).</p><ul><li>Стек: вызовы функций, отмена действий, проверка скобок, обход в глубину</li><li>Очередь: обработка задач по порядку, буферы, обход в ширину</li></ul><p class="extra"><span>А ещё</span> Дек (deque) умеет оба конца и заменяет обе структуры</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Стек</b> поддерживает <code>push</code> (положить наверх), <code>pop</code> (снять верхний) и <code>peek</code> (посмотреть верхний). Где используется:</p>
+<ul><li><b>стек вызовов</b> — при вызове функции её локальные переменные и адрес возврата кладутся на стек, при выходе снимаются. Слишком глубокая рекурсия переполняет его;</li><li>отмена действий (undo), история браузера «назад»;</li><li>проверка парности скобок, разбор выражений;</li><li>обход графа в глубину (DFS) без рекурсии.</li></ul>
+<p><b>Очередь</b> поддерживает <code>enqueue</code> (в конец) и <code>dequeue</code> (из начала):</p>
+<ul><li>обработка задач в порядке поступления, очереди сообщений;</li><li>буферы ввода-вывода;</li><li>обход графа в ширину (BFS).</li></ul>
+<p>Реализация: стек — на динамическом массиве (операции с концом). Очередь на массиве с удалением из начала даёт O(n) на операцию — поэтому используют кольцевой буфер или связный список, а на практике — <b>дек</b> (<code>deque</code> в Python, <code>ArrayDeque</code> в Java), который добавляет и удаляет с обоих концов за O(1).</p>
+<p>Классическая задача — <b>очередь на двух стеках</b>: кладём во входной стек, забираем из выходного; когда выходной пуст, перекладываем туда всё из входного. Каждый элемент перекладывается один раз, поэтому операции амортизированно O(1).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>def balanced(s):
+    pairs = {&quot;)&quot;: &quot;(&quot;, &quot;]&quot;: &quot;[&quot;, &quot;}&quot;: &quot;{&quot;}
+    stack = []
+    for ch in s:
+        if ch in &quot;([{&quot;:
+            stack.append(ch)
+        elif ch in pairs:
+            if not stack or stack.pop() != pairs[ch]:
+                return False
+    return not stack
+
+balanced(&quot;{[()]}&quot;)   # True
+balanced(&quot;([)]&quot;)     # False</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>LIFO и FIFO, основные операции и их сложность.</li><li>Примеры применения каждой структуры.</li><li>Почему очередь не делают на массиве с удалением из начала.</li><li>Очередь на двух стеках — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Реализовать очередь через удаление первого элемента массива — O(n).</li><li>Путать очередь и очередь с приоритетом.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/bfs-dfs/">Чем обход в ширину (BFS) отличается от обхода в глубину (DFS)?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/recursion-memoization/">Что такое рекурсия и мемоизация?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/array-vs-linked-list/">Чем массив отличается от связного списка?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/heap-priority-queue/">Что такое двоичная куча и очередь с приоритетом?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем стек отличается от очереди и где они применяются?","acceptedAnswer":{"@type":"Answer","text":"Стек — последним пришёл, первым ушёл (LIFO); очередь — первым пришёл, первым ушёл (FIFO). Основные операции — O(1). Стек: вызовы функций, отмена действий, проверка скобок, обход в глубину Очередь: обработка задач по порядку, буферы, обход в ширину Дек (deque) умеет оба конца и заменяет обе структуры Стек поддерживает push (положить наверх), pop (снять верхний) и peek (посмотреть верхний). Где используется: - стек вызовов — при вызове функции её локальные переменные и адрес возврата кладутся на стек, при выходе снимаются. Слишком глубокая рекурсия переполняет его; - отмена действий (undo), история браузера «назад»; - проверка парности скобок, разбор выражений; - обход графа в глубину (DFS) без рекурсии. Очередь поддерживает enqueue (в конец) и dequeue (из начала): - обработка задач в порядке поступления, очереди сообщений; - буферы ввода-вывода; - обход графа в ширину (BFS). Реализация: стек — на динамическом массиве (операции с концом). Очередь на массиве с удалением из начала даёт O(n) на операцию — поэтому используют кольцевой буфер или связный список, а на практике — дек (deque в Python, ArrayDeque в Java), который добавляет и удаляет с обоих концов за O(1). Классическая задача…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

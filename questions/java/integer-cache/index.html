@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integer a=127, b=127, c=128, d=128. Что вернут a==b и c==d? — вопрос с собеседования</title>
+<meta name="description" content="a==b → true, c==d → false: Integer.valueOf() кэширует значения от −128 до 127. Автоупаковка вызывает valueOf — в диапазоне кэша ссылки совпадают Для…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/integer-cache/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/integer-cache/">
+<meta property="og:title" content="Integer a=127, b=127, c=128, d=128. Что вернут a==b и c==d? — вопрос с собеседования">
+<meta property="og:description" content="a==b → true, c==d → false: Integer.valueOf() кэширует значения от −128 до 127. Автоупаковка вызывает valueOf — в диапазоне кэша ссылки совпадают Для…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Integer a=127, b=127, c=128, d=128. Что вернут a==b и c==d?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Integer a=127, b=127, c=128, d=128. Что вернут a==b и c==d?"}]}</script>
+  <h1>Integer a=127, b=127, c=128, d=128. Что вернут a==b и c==d?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Основы языка</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему Integer 127 == 127 true, а 128 == 128 false?</li><li>Что такое кэш Integer?</li><li>Как правильно сравнивать Integer?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><code>a==b</code> → <b>true</b>, <code>c==d</code> → <b>false</b>: <code>Integer.valueOf()</code> кэширует значения <b>от −128 до 127</b>.</p><ul><li>Автоупаковка вызывает valueOf — в диапазоне кэша ссылки совпадают</li><li>Для 128 создаются разные объекты, <code>==</code> сравнивает ссылки</li></ul><p class="extra"><span>А ещё</span> Обёртки сравнивают через <code>equals()</code>, а осторожнее всего — с распаковкой null</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Песочница: == против equals и кэш Integer</p><script type="module" src="/widgets/integer-cache.js"></script><sotto-integer-cache theme="dark"></sotto-integer-cache></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p>При присваивании <code>Integer a = 127</code> срабатывает автоупаковка: компилятор вызывает <code>Integer.valueOf(127)</code>. Этот метод для значений от −128 до 127 возвращает заранее созданные объекты из кэша, поэтому <code>a</code> и <code>b</code> ссылаются на один объект и <code>a == b</code> даёт <code>true</code>.</p>
+<p>Для 128 кэш не используется, создаются два разных объекта, а <code>==</code> для ссылочных типов сравнивает ссылки — результат <code>false</code>. Верхнюю границу кэша можно увеличить параметром JVM (<code>-XX:AutoBoxCacheMax</code>), что показывает: поведение <code>==</code> зависит от настроек, а не от значений.</p>
+<p>Отсюда правило: значения обёрток сравнивают через <code>equals()</code> или распаковывают в примитивы. Похожие кэши есть у <code>Short</code>, <code>Byte</code>, <code>Long</code>, <code>Character</code> (небольшой диапазон) и <code>Boolean</code>.</p>
+<p>Вторая ловушка обёрток — распаковка <code>null</code>: <code>Integer x = null; int y = x;</code> бросает <code>NullPointerException</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>Integer a = 127, b = 127, c = 128, d = 128;
+System.out.println(a == b);       // true — один объект из кэша
+System.out.println(c == d);       // false — разные объекты
+System.out.println(c.equals(d));  // true</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Верный ответ: true и false.</li><li>Причина — кэш Integer в диапазоне −128..127 при автоупаковке через valueOf.</li><li><code>==</code> сравнивает ссылки, значения сравнивают через <code>equals()</code>.</li><li>Знание про NPE при распаковке null — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Сравнивать обёртки через ==.</li><li>Думать, что кэш бесконечен.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Оба true</li><li class="ok"><span class="mark">✓</span>a==b → true, c==d → false</li><li class="no"><span class="mark">✗</span>Оба false</li><li class="no"><span class="mark">✗</span>a==b → false, c==d → true</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Зачем нужен Integer cache?</li><li>Чем отличается int от Integer при сравнении?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/primitives/">Примитивы, обёртки и Integer cache</a><p>Восемь примитивов и их диапазоны, autoboxing, кэш Integer и ловушка ==, NPE при распаковке и цена боксинга.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/primitive-types-char/">Сколько в Java примитивных типов и что хранит char?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/int-overflow/">Чему равно Integer.MAX_VALUE + 1 и бросит ли это исключение?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/double-precision-money/">Что выведет System.out.println(0.1 + 0.2 == 0.3) и что брать для денег?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/unboxing-null-npe/">Что произойдёт при выполнении: Integer x = null; int y = x;?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Integer a=127, b=127, c=128, d=128. Что вернут a==b и c==d?","acceptedAnswer":{"@type":"Answer","text":"a==b → true, c==d → false: Integer.valueOf() кэширует значения от −128 до 127. Автоупаковка вызывает valueOf — в диапазоне кэша ссылки совпадают Для 128 создаются разные объекты, == сравнивает ссылки Обёртки сравнивают через equals(), а осторожнее всего — с распаковкой null При присваивании Integer a = 127 срабатывает автоупаковка: компилятор вызывает Integer.valueOf(127). Этот метод для значений от −128 до 127 возвращает заранее созданные объекты из кэша, поэтому a и b ссылаются на один объект и a == b даёт true. Для 128 кэш не используется, создаются два разных объекта, а == для ссылочных типов сравнивает ссылки — результат false. Верхнюю границу кэша можно увеличить параметром JVM (-XX:AutoBoxCacheMax), что показывает: поведение == зависит от настроек, а не от значений. Отсюда правило: значения обёрток сравнивают через equals() или распаковывают в примитивы. Похожие кэши есть у Short, Byte, Long, Character (небольшой диапазон) и Boolean. Вторая ловушка обёрток — распаковка null: Integer x = null; int y = x; бросает NullPointerException."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

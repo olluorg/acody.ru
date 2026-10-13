@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Протестируйте карандаш (ручку, лифт, кружку) — вопрос с собеседования</title>
+<meta name="description" content="Начните с вопросов о требованиях: для кого предмет и как его используют — затем структурируйте проверки по видам. Функциональные: пишет ли, какой…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/qa/test-pencil/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/qa/test-pencil/">
+<meta property="og:title" content="Протестируйте карандаш (ручку, лифт, кружку) — вопрос с собеседования">
+<meta property="og:description" content="Начните с вопросов о требованиях: для кого предмет и как его используют — затем структурируйте проверки по видам. Функциональные: пишет ли, какой…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/qa/">Тестирование (QA)</a> <span>/</span> <span>Протестируйте карандаш (ручку, лифт, кружку)</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Тестирование (QA)","item":"https://learn.getsotto.ru/questions/qa/"},{"@type":"ListItem","position":3,"name":"Протестируйте карандаш (ручку, лифт, кружку)"}]}</script>
+  <h1>Протестируйте карандаш (ручку, лифт, кружку)</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Тест-дизайн</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как протестировать лифт?</li><li>Как бы вы протестировали ручку?</li><li>Протестируйте любой предмет на столе</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Начните с <b>вопросов о требованиях</b>: для кого предмет и как его используют — затем <b>структурируйте проверки</b> по видам.</p><ul><li>Функциональные: пишет ли, какой линией, стирается ли</li><li>Нефункциональные: удобство, прочность, безопасность, совместимость с точилками</li></ul><p class="extra"><span>А ещё</span> Покажите позитивные и негативные проверки и что вы спросите у «заказчика»</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Задача проверяет не знание карандашей, а то, как вы думаете как тестировщик: выясняете ли требования, структурируете ли проверки, помните ли о нефункциональных и негативных сценариях.</p>
+<p>Хороший ответ:</p>
+<ol><li><b>Уточнить требования.</b> Для кого карандаш: для школьника, художника, чертёжника? Простой или механический? Твёрдость? Есть ли ластик? От этого зависят проверки — без требований нельзя сказать, что считать дефектом.</li><li><b>Функциональные проверки.</b> Пишет на бумаге, линия заданной толщины и насыщенности, след стирается ластиком, затачивается.</li><li><b>Нефункциональные.</b> Удобство захвата, вес, прочность (не ломается грифель при обычном нажиме, падение со стола), безопасность (краска без токсичных веществ — важно для детей), совместимость с точилками, внешний вид, маркировка.</li><li><b>Негативные.</b> Сильный нажим, письмо на мокрой или глянцевой бумаге, хранение в жаре, заточка «до конца».</li><li><b>Приоритеты.</b> Сначала критичное для пользователя — пишет ли вообще.</li></ol>
+<p>Про лифт — та же логика, но с упором на безопасность: перегрузка, двери, аварийная кнопка, обесточивание.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><p>«Сначала уточню: это простой карандаш для школьников, твёрдость HB, с ластиком? Тогда начну с основного — пишет ли он на обычной бумаге ровной линией и стирается ли ластиком без следов. Дальше нефункциональное: безопасная краска, удобство для детской руки, прочность грифеля при падении. Негативные проверки — сильный нажим, заточка разными точилками».</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Вопросы о требованиях и пользователе перед проверками.</li><li>Структура: функциональные, нефункциональные, негативные.</li><li>Расстановка приоритетов.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Сразу перечислять случайные проверки без уточнений.</li><li>Забыть о безопасности и нефункциональных свойствах.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/qa/functional-vs-nonfunctional/">Чем функциональное тестирование отличается от нефункционального?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/qa/requirements-testing/">Как тестировать требования?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/qa/positive-negative-testing/">Чем позитивное тестирование отличается от негативного?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Протестируйте карандаш (ручку, лифт, кружку)","acceptedAnswer":{"@type":"Answer","text":"Начните с вопросов о требованиях: для кого предмет и как его используют — затем структурируйте проверки по видам. Функциональные: пишет ли, какой линией, стирается ли Нефункциональные: удобство, прочность, безопасность, совместимость с точилками Покажите позитивные и негативные проверки и что вы спросите у «заказчика» Задача проверяет не знание карандашей, а то, как вы думаете как тестировщик: выясняете ли требования, структурируете ли проверки, помните ли о нефункциональных и негативных сценариях. Хороший ответ: 1. Уточнить требования. Для кого карандаш: для школьника, художника, чертёжника? Простой или механический? Твёрдость? Есть ли ластик? От этого зависят проверки — без требований нельзя сказать, что считать дефектом. 2. Функциональные проверки. Пишет на бумаге, линия заданной толщины и насыщенности, след стирается ластиком, затачивается. 3. Нефункциональные. Удобство захвата, вес, прочность (не ломается грифель при обычном нажиме, падение со стола), безопасность (краска без токсичных веществ — важно для детей), совместимость с точилками, внешний вид, маркировка. 4. Негативные. Сильный нажим, письмо на мокрой или глянцевой бумаге, хранение в жаре, заточка «до конца». 5. Приоритеты. Сначала…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Добавь эндпоинт GET /users/{id}, возвращающий User по идентификатору. — вопрос с собеседования</title>
+<meta name="description" content="@RestController с @GetMapping(&quot;/users/{id}&quot;) и @PathVariable; сервис возвращает Optional → 200 с DTO или 404; наружу отдавать DTO, а не сущность JPA…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/get-user-endpoint/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/get-user-endpoint/">
+<meta property="og:title" content="Добавь эндпоинт GET /users/{id}, возвращающий User по идентификатору. — вопрос с собеседования">
+<meta property="og:description" content="@RestController с @GetMapping(&quot;/users/{id}&quot;) и @PathVariable; сервис возвращает Optional → 200 с DTO или 404; наружу отдавать DTO, а не сущность JPA…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Добавь эндпоинт GET /users/{id}, возвращающий User по идентификатору.</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Добавь эндпоинт GET /users/{id}, возвращающий User по идентификатору."}]}</script>
+  <h1>Добавь эндпоинт GET /users/{id}, возвращающий User по идентификатору.</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Spring MVC и REST</span><span class="chip">Spring</span><span class="chip">Spring Boot</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Напишите REST-контроллер для получения пользователя.</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><code>@RestController</code> с <code>@GetMapping(&quot;/users/{id}&quot;)</code> и <code>@PathVariable</code>; сервис возвращает Optional → <b>200 с DTO</b> или <b>404</b>; наружу отдавать <b>DTO</b>, а не сущность JPA.</p><ul><li>Внедрение сервиса через конструктор</li><li>404 — ResponseEntity.of(optional) или исключение + @RestControllerAdvice</li><li>DTO не раскрывает пароль и ленивые связи</li></ul><p class="extra"><span>А ещё</span> Тест — @WebMvcTest с MockMvc</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Что ожидают увидеть</b> — аккуратный минимум:</p>
+<ul><li>контроллер тонкий: только HTTP — разбор запроса и формирование ответа;</li><li>сервис внедрён через конструктор;</li><li>отсутствие пользователя — 404, а не 200 с null и не 500;</li><li>ответ — DTO (record) с нужными полями. Отдавать сущность JPA — риск утечки полей (хеш пароля), <code>LazyInitializationException</code> и циклов при сериализации;</li><li>тип идентификатора — <code>long</code> или <code>UUID</code>, Spring сам преобразует строку пути; неверный формат — 400.</li></ul>
+<p><b>Обработка 404</b> — два способа: <code>ResponseEntity.of(optional)</code> (вернёт 404 для пустого Optional) или бросить своё <code>UserNotFoundException</code> и превратить его в ProblemDetail в <code>@RestControllerAdvice</code>. Второй лучше, когда таких мест много.</p>
+<p><b>Плюсы, которые стоит проговорить:</b> проверка прав (может ли текущий пользователь видеть этого), тест на <code>@WebMvcTest</code> с MockMvc и <code>@MockitoBean</code> для сервиса (Spring Boot 3.4+; раньше <code>@MockBean</code>).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>@RestController
+@RequestMapping(&quot;/users&quot;)
+class UserController {
+    private final UserService users;
+    UserController(UserService users) { this.users = users; }
+
+    @GetMapping(&quot;/{id}&quot;)
+    ResponseEntity&lt;UserDto&gt; get(@PathVariable long id) {
+        return ResponseEntity.of(users.find(id).map(UserDto::from));   // 200 или 404
+    }
+}
+
+record UserDto(long id, String name, String email) {
+    static UserDto from(User u) { return new UserDto(u.getId(), u.getName(), u.getEmail()); }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Аннотации контроллера и параметр пути.</li><li>404 при отсутствии.</li><li>DTO вместо сущности.</li><li>Тест через MockMvc — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Возвращать сущность JPA.</li><li>Возвращать null с кодом 200.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как вернуть 404?</li><li>Чем @PathVariable отличается от @RequestParam?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/rest-api/">REST API: статусы, согласование и семантика</a><p>Ресурсы и HTTP-глаголы, статус-коды как контракт, content negotiation и message converters, идемпотентность и версионирование.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/restcontroller/">Какая аннотация объединяет @Controller и @ResponseBody, чтобы методы возвращали данные прямо в тело ответа?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/spring/http-401-403-404/">Чем ответы 401, 403 и 404 отличаются и что возвращать на запрос чужого ресурса?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/spring/problem-detail-errors/">Как в Spring Boot 3 возвращать ошибки REST API в едином формате?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Добавь эндпоинт GET /users/{id}, возвращающий User по идентификатору.","acceptedAnswer":{"@type":"Answer","text":"@RestController с @GetMapping(\"/users/{id}\") и @PathVariable; сервис возвращает Optional → 200 с DTO или 404; наружу отдавать DTO, а не сущность JPA. Внедрение сервиса через конструктор 404 — ResponseEntity.of(optional) или исключение + @RestControllerAdvice DTO не раскрывает пароль и ленивые связи Тест — @WebMvcTest с MockMvc Что ожидают увидеть — аккуратный минимум: - контроллер тонкий: только HTTP — разбор запроса и формирование ответа; - сервис внедрён через конструктор; - отсутствие пользователя — 404, а не 200 с null и не 500; - ответ — DTO (record) с нужными полями. Отдавать сущность JPA — риск утечки полей (хеш пароля), LazyInitializationException и циклов при сериализации; - тип идентификатора — long или UUID, Spring сам преобразует строку пути; неверный формат — 400. Обработка 404 — два способа: ResponseEntity.of(optional) (вернёт 404 для пустого Optional) или бросить своё UserNotFoundException и превратить его в ProblemDetail в @RestControllerAdvice. Второй лучше, когда таких мест много. Плюсы, которые стоит проговорить: проверка прав (может ли текущий пользователь видеть этого), тест на @WebMvcTest с MockMvc и @MockitoBean для сервиса (Spring Boot 3.4+; раньше @MockBean)."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

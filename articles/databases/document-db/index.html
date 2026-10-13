@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Документоориентированные БД (MongoDB) — разбор для собеседования</title>
+<meta name="description" content="Модель документа, embedding против referencing, индексы, aggregation pipeline, атомарность документа и шардирование.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/databases/document-db/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/databases/document-db/">
+<meta property="og:title" content="Документоориентированные БД (MongoDB) — разбор для собеседования">
+<meta property="og:description" content="Модель документа, embedding против referencing, индексы, aggregation pipeline, атомарность документа и шардирование.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>Документоориентированные БД (MongoDB)</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"Документоориентированные БД (MongoDB)"}]}</script>
+  <h1>Документоориентированные БД (MongoDB)</h1>
+  <p class="lead">Модель документа, embedding против referencing, индексы, aggregation pipeline, атомарность документа и шардирование.</p>
+  <article class="md"><h2>Модель документа</h2>
+<p>Документная БД хранит данные как самодостаточные документы (в MongoDB — BSON, бинарный JSON с типами и датами). Документы группируют в коллекции, схема гибкая: в одной коллекции документы могут отличаться полями.</p>
+<p>Гибкость не значит «без схемы»: схема просто живёт в коде и в соглашениях. Без дисциплины коллекция превращается в свалку разнородных документов, которую тяжело поддерживать.</p>
+<h2>Embedding против referencing</h2>
+<p>Главное решение моделирования — вкладывать связанные данные в документ (embedding) или хранить ссылки на другие документы (referencing). Embedding даёт чтение агрегата одним запросом и атомарность изменений, но раздувает документ и дублирует данные.</p>
+<p>Эмпирика: вкладывайте данные, которые читаются вместе с родителем и принадлежат ему («содержит»), и ссылайтесь на сущности с собственной жизнью, разделяемые многими, или растущие без предела.</p>
+<p>Антипаттерн — unbounded array: вкладывать в документ коллекцию, которая растёт неограниченно (например, все комментарии к посту). Документ упрётся в лимит размера и станет дорогим для обновления.</p>
+<pre><code>// embedding: адрес читается всегда вместе с пользователем
+{ _id: 1, name: &quot;Ann&quot;, address: { city: &quot;Riga&quot;, zip: &quot;LV-1001&quot; } }
+
+// referencing: заказы живут своей жизнью и растут — ссылка
+{ _id: 1, name: &quot;Ann&quot; }
+{ _id: 99, userId: 1, total: 4200 }</code></pre>
+<h2>Индексы</h2>
+<p>Как и в SQL, без индексов запросы делают полный скан коллекции. Есть single-field, compound (с тем же правилом левого префикса, что у B-tree), multikey (по элементам массива), text и geo индексы.</p>
+<p>Индексы ускоряют чтение и фильтрацию, но замедляют запись и едят память — баланс тот же, что в реляционных БД. План запроса смотрят через <code>explain()</code>.</p>
+<h2>Aggregation pipeline</h2>
+<p>Сложные выборки и аналитику делают через aggregation pipeline — конвейер стадий ($match, $group, $sort, $lookup и др.), где документы текут от стадии к стадии.</p>
+<p>$match ставят как можно раньше (аналог раннего WHERE), чтобы сократить поток и задействовать индексы. $lookup умеет джойнить коллекции, но это не дешёвая операция и не замена правильной модели.</p>
+<pre class="lang-js"><code>db.orders.aggregate([
+  { $match: { status: &quot;PAID&quot; } },     // раньше = дешевле
+  { $group: { _id: &quot;$userId&quot;, total: { $sum: &quot;$amount&quot; } } },
+  { $sort: { total: -1 } }
+])</code></pre>
+<h2>Атомарность и транзакции</h2>
+<p>Операция над одним документом атомарна — это базовая гарантия MongoDB, и грамотный embedding часто позволяет уложить инвариант в один документ и обойтись без многодокументных транзакций.</p>
+<p>Многодокументные транзакции существуют, но они дороже и медленнее; полагаться на них как в реляционной БД — признак того, что модель документов спроектирована не под задачу.</p>
+<h2>Шардирование</h2>
+<p>При горизонтальном масштабировании коллекцию шардируют по shard key. Хороший ключ даёт равномерное распределение и направляет частые запросы в одну партицию; плохой создаёт горячие чанки и заставляет запрос обходить все шарды (scatter-gather).</p>
+<p>Монотонно растущий ключ (например, время) — классическая ошибка: вся свежая запись льётся в один шард.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Сильный ответ: объясните выбор embedding/referencing через «читается вместе/принадлежит» и предел роста, упомяните атомарность документа как способ избежать транзакций, и назовите риск unbounded array и плохого shard key.</p>
+<p>Начните с честной оговорки про «schema-less»: схема есть всегда, она просто переезжает из базы в код и соглашения. Гибкость означает, что базой она больше не проверяется, — а значит, дисциплина нужна большая, а не меньшая. Такое начало сразу снимает подозрение, что кандидат выбирает MongoDB «чтобы не думать о схеме».</p>
+<p>Ключевой вопрос моделирования формулируйте как выбор с критерием: вкладываем то, что читается вместе с родителем и принадлежит ему, ссылаемся на сущности с собственной жизнью, разделяемые многими или растущие без предела. И назовите антипаттерн unbounded array (все комментарии внутри поста) — документ упирается в лимит размера и дорожает на каждом обновлении.</p>
+<p>Про транзакции дайте неочевидную связку: операция над ОДНИМ документом атомарна, поэтому удачный embedding часто позволяет уложить инвариант в один документ и вообще не понадобиться многодокументным транзакциям. Они существуют, но дороже, и постоянная нужда в них — сигнал, что модель спроектирована не под задачу.</p>
+<p>Отметьте, что базовые принципы не отменяются: индексы работают по тому же правилу левого префикса, план смотрят через <code>explain()</code>, а $match в pipeline ставят как можно раньше — это тот же ранний WHERE.</p>
+<p>Завершите шардированием: хороший shard key даёт равномерное распределение и направляет частые запросы в одну партицию, плохой порождает scatter-gather по всем шардам. И назовите классическую ошибку — монотонно растущий ключ вроде времени, из-за которого вся свежая запись льётся в один шард.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/databases/mongodb-embed-vs-reference/">Когда в документной БД (MongoDB) выгоднее embedding (вложение), а когда referencing (ссылки)?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/document-db-query-driven/">Почему в документных БД схему проектируют от запросов, а не нормализуют как в реляционной?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/mongodb-atomicity/">На каком уровне документная база вроде MongoDB даёт атомарность по умолчанию?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/unbounded-array/">В документе пользователя хранится массив всех его действий, который постоянно пополняется. Чем плоха такая модель?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/document-basics/">Что представляет собой документ в документоориентированной базе?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/databases/nosql-overview/">NoSQL: семейства и когда их выбирать</a><p>Почему появился NoSQL, моделирование от access patterns, четыре семейства хранилищ, BASE против ACID и горизонтальное масштабирование.</p></li><li><a href="/articles/databases/data-modeling/">Моделирование данных и целостность</a><p>Ключи и constraints, нормальные формы простыми словами, осознанная денормализация и каскадные действия.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Документоориентированные БД (MongoDB)","description":"Модель документа, embedding против referencing, индексы, aggregation pipeline, атомарность документа и шардирование.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/databases/document-db/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

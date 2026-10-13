@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Спроектируйте ленту новостей социальной сети. — вопрос с собеседования</title>
+<meta name="description" content="Главный выбор — когда собирать ленту. Fan-out on write: при публикации положить id поста в ленты всех подписчиков — чтение мгновенное. Fan-out on…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/design-news-feed/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/design-news-feed/">
+<meta property="og:title" content="Спроектируйте ленту новостей социальной сети. — вопрос с собеседования">
+<meta property="og:description" content="Главный выбор — когда собирать ленту. Fan-out on write: при публикации положить id поста в ленты всех подписчиков — чтение мгновенное. Fan-out on…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Спроектируйте ленту новостей социальной сети.</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Спроектируйте ленту новостей социальной сети."}]}</script>
+  <h1>Спроектируйте ленту новостей социальной сети.</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Задачи на проектирование</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Fan-out on write или fan-out on read?</li><li>Как построить ленту подписок для миллионов пользователей?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Главный выбор — когда собирать ленту. <b>Fan-out on write</b>: при публикации положить id поста в ленты всех подписчиков — чтение мгновенное. <b>Fan-out on read</b>: собирать при открытии из постов подписок — дорогое чтение. На практике <b>гибрид</b>: обычные авторы — на записи, знаменитости — на чтении.</p><ul><li>Лента в кэше — список id постов (Redis sorted set по времени), посты — отдельно</li><li>Пагинация курсором, а не OFFSET</li><li>Ранжирование — отдельный этап поверх кандидатов</li></ul><p class="extra"><span>А ещё</span> Неактивным пользователям ленту не раскладывать — собрать при входе</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Требования:</b> публикация постов, лента из постов подписок в обратном хронологическом порядке (или ранжированная), бесконечная прокрутка, лента открывается быстро (&lt; 200 мс). Оценка: 200 млн пользователей в день, каждый открывает ленту 10 раз — 2 млрд чтений в день (~25 000/с, пик ×3); публикаций 50 млн в день (~600/с); в среднем 200 подписчиков, у знаменитостей — десятки миллионов.</p>
+<p><b>Модель данных:</b> посты (<code>post_id, author, created, content</code>) — шардированное хранилище по post_id или автору; граф подписок (<code>follower → followees</code>, <code>followee → followers</code>); лента — список id.</p>
+<p><b>Fan-out on write (push).</b> При публикации воркер читает подписчиков автора и добавляет post_id в их ленты (Redis sorted set с score = время, обрезанный до 500–1000 элементов). Чтение — взять верх списка и подгрузить посты пачкой (из кэша постов). Плюсы — быстрое чтение. Минусы — пост знаменитости с 50 млн подписчиков = 50 млн записей, задержка доставки и шторм нагрузки; место на ленты неактивных пользователей.</p>
+<p><b>Fan-out on read (pull).</b> При открытии ленты взять подписки, последние посты каждой и слить (k-way merge кучей). Плюсы — запись дешёвая. Минусы — чтение дорогое при сотнях подписок и частых открытиях.</p>
+<p><b>Гибрид</b> — так делают крупные сети: посты обычных авторов раскладываются при записи; посты авторов с огромной аудиторией не раскладываются, а подмешиваются при чтении (их немного у каждого пользователя, и их последние посты горячо кэшируются). Ленты раскладываются только активным пользователям; вернувшемуся после долгого перерыва ленту строят при входе.</p>
+<p><b>Чтение и пагинация:</b> курсор — score последнего показанного элемента (<code>ZREVRANGEBYSCORE ... &lt; cursor LIMIT 20</code>), а не OFFSET: новые посты не сдвигают страницы и не дают дублей. Посты — пачкой из кэша по id (multi-get).</p>
+<p><b>Ранжирование:</b> из ленты берутся кандидаты (сотни), модель ранжирования оценивает и сортирует; результат кэшируется на короткое время.</p>
+<p><b>Остальное:</b> удаление и редактирование поста (ленты хранят id — удалённый пост отфильтровывается при подгрузке), приватность (проверка при показе), медиа — в объектном хранилище и CDN, счётчики лайков — отдельный сервис (агрегирование), уведомления — отдельный конвейер.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-text"><code>Публикация (автор с 300 подписчиками):
+  POST /posts → posts DB → событие в Kafka → fan-out воркер
+  → для каждого активного подписчика: ZADD feed:{user} &lt;ts&gt; &lt;post_id&gt;; ZREMRANGEBYRANK feed:{user} 0 -1001
+Публикация знаменитости (20 млн): только в posts + кэш «последние посты автора».
+Чтение: ZREVRANGE feed:{me} + последние посты моих знаменитостей → слияние → MGET post:{id}... → ранжирование.</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Оценка нагрузки и асимметрия чтения и записи.</li><li>Fan-out on write и on read, их плюсы и минусы.</li><li>Гибрид для знаменитостей и неактивных пользователей.</li><li>Хранение ленты как списка id, пагинация курсором, ранжирование.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Делать JOIN подписок и постов в реляционной базе на каждое открытие ленты.</li><li>Раскладывать посты знаменитостей всем подписчикам синхронно.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/feed-estimation-questions/">Вас просят спроектировать ленту новостей. С чего вы начнёте оценку и какие вопросы зададите до выбора архитектуры?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/hot-keys/">Что делать с горячими ключами, на которые приходится непропорционально большая нагрузка?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/cache-hit-ratio/">Как оценить, насколько кэш разгружает базу, и что будет, если он упадёт?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/offset-vs-keyset-pagination/">Лента с бесконечной прокруткой использует LIMIT 20 OFFSET N. С ростом N страницы отдаются всё медленнее, а пользователи жалуются на дубли. В чём причина и что делать?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Спроектируйте ленту новостей социальной сети.","acceptedAnswer":{"@type":"Answer","text":"Главный выбор — когда собирать ленту. Fan-out on write: при публикации положить id поста в ленты всех подписчиков — чтение мгновенное. Fan-out on read: собирать при открытии из постов подписок — дорогое чтение. На практике гибрид: обычные авторы — на записи, знаменитости — на чтении. Лента в кэше — список id постов (Redis sorted set по времени), посты — отдельно Пагинация курсором, а не OFFSET Ранжирование — отдельный этап поверх кандидатов Неактивным пользователям ленту не раскладывать — собрать при входе Требования: публикация постов, лента из постов подписок в обратном хронологическом порядке (или ранжированная), бесконечная прокрутка, лента открывается быстро (< 200 мс). Оценка: 200 млн пользователей в день, каждый открывает ленту 10 раз — 2 млрд чтений в день (~25 000/с, пик ×3); публикаций 50 млн в день (~600/с); в среднем 200 подписчиков, у знаменитостей — десятки миллионов. Модель данных: посты (post_id, author, created, content) — шардированное хранилище по post_id или автору; граф подписок (follower → followees, followee → followers); лента — список id. Fan-out on write (push). При публикации воркер читает подписчиков автора и добавляет post_id в их ленты (Redis sorted set с score = время, обрезанный до 500–1000 элементов). Чтение — взять верх списка и подгрузить посты пачкой (из кэша постов). Плюсы — быстрое чтение. Минусы — пост знаменитости с 50 млн подписчиков = 50 млн…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

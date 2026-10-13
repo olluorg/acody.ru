@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем список отличается от кортежа? — вопрос с собеседования</title>
+<meta name="description" content="Список изменяемый, кортеж — нет; отсюда остальные различия. Кортеж может быть ключом словаря (если элементы хешируемы) Кортеж чуть легче по памяти и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/list-vs-tuple/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/list-vs-tuple/">
+<meta property="og:title" content="Чем список отличается от кортежа? — вопрос с собеседования">
+<meta property="og:description" content="Список изменяемый, кортеж — нет; отсюда остальные различия. Кортеж может быть ключом словаря (если элементы хешируемы) Кортеж чуть легче по памяти и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Чем список отличается от кортежа?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Чем список отличается от кортежа?"}]}</script>
+  <h1>Чем список отличается от кортежа?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Коллекции</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>В чём разница между list и tuple?</li><li>Когда использовать кортеж вместо списка?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Список <b>изменяемый</b>, кортеж — <b>нет</b>; отсюда остальные различия.</p><ul><li>Кортеж может быть ключом словаря (если элементы хешируемы)</li><li>Кортеж чуть легче по памяти и быстрее создаётся</li></ul><p class="extra"><span>А ещё</span> Смысл: список — набор однотипных элементов, кортеж — запись с фиксированной структурой</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Оба — упорядоченные последовательности с доступом по индексу и срезами. Главное отличие — изменяемость.</p>
+<p><b>Список</b> (<code>list</code>) можно менять: <code>append</code>, <code>insert</code>, <code>remove</code>, <code>sort</code>, присваивание по индексу. Python выделяет ему память с запасом, чтобы <code>append</code> был быстрым.</p>
+<p><b>Кортеж</b> (<code>tuple</code>) после создания не меняется. Из этого следует:</p>
+<ul><li>он хешируем, если хешируемы все элементы, — значит, годится в ключ <code>dict</code> и в <code>set</code>;</li><li>занимает немного меньше памяти и создаётся быстрее; кортежи из констант компилятор может создать заранее;</li><li>его безопасно отдавать наружу: никто не изменит его содержимое.</li></ul>
+<p>По смыслу: список — коллекция однородных элементов переменной длины («список пользователей»), кортеж — запись, где позиция имеет значение («координаты (x, y)», «строка из базы»). Для записей с именованными полями есть <code>collections.namedtuple</code> и <code>typing.NamedTuple</code>.</p>
+<p>Кортеж из одного элемента пишется с запятой: <code>(1,)</code>. Без неё <code>(1)</code> — просто число в скобках.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>point = (10, 20)
+x, y = point                    # распаковка
+cache = {point: &quot;клетка&quot;}       # кортеж как ключ
+
+items = [3, 1, 2]
+items.sort()                    # список меняется на месте
+
+single = (1,)                   # кортеж из одного элемента
+not_tuple = (1)                 # это int
+
+from typing import NamedTuple
+class User(NamedTuple):
+    id: int
+    name: str</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Изменяемость как корень различий.</li><li>Хешируемость кортежа и использование в ключах словаря.</li><li>Различие по смыслу: однородная коллекция против записи.</li><li>Знание <code>namedtuple</code> и записи <code>(1,)</code>.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Кортеж намного быстрее списка» — разница небольшая, выбирают по смыслу.</li><li>Забыть запятую в кортеже из одного элемента.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/mutable-immutable/">Чем изменяемые типы отличаются от неизменяемых?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/dict-how-it-works/">Как устроен словарь в Python?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/set/">Что такое множество (set) и когда его использовать?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/slices/">Как работают срезы в Python?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем список отличается от кортежа?","acceptedAnswer":{"@type":"Answer","text":"Список изменяемый, кортеж — нет; отсюда остальные различия. Кортеж может быть ключом словаря (если элементы хешируемы) Кортеж чуть легче по памяти и быстрее создаётся Смысл: список — набор однотипных элементов, кортеж — запись с фиксированной структурой Оба — упорядоченные последовательности с доступом по индексу и срезами. Главное отличие — изменяемость. Список (list) можно менять: append, insert, remove, sort, присваивание по индексу. Python выделяет ему память с запасом, чтобы append был быстрым. Кортеж (tuple) после создания не меняется. Из этого следует: - он хешируем, если хешируемы все элементы, — значит, годится в ключ dict и в set; - занимает немного меньше памяти и создаётся быстрее; кортежи из констант компилятор может создать заранее; - его безопасно отдавать наружу: никто не изменит его содержимое. По смыслу: список — коллекция однородных элементов переменной длины («список пользователей»), кортеж — запись, где позиция имеет значение («координаты (x, y)», «строка из базы»). Для записей с именованными полями есть collections.namedtuple и typing.NamedTuple. Кортеж из одного элемента пишется с запятой: (1,). Без неё (1) …"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

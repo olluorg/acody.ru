@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Actuator и наблюдаемость — разбор для собеседования</title>
+<meta name="description" content="Production-эндпоинты, health-проверки и probes, метрики через Micrometer, трассировка и безопасность эндпоинтов.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/spring/actuator/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/spring/actuator/">
+<meta property="og:title" content="Actuator и наблюдаемость — разбор для собеседования">
+<meta property="og:description" content="Production-эндпоинты, health-проверки и probes, метрики через Micrometer, трассировка и безопасность эндпоинтов.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#spring">Spring</a> <span>/</span> <span>Actuator и наблюдаемость</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/articles/#spring"},{"@type":"ListItem","position":3,"name":"Actuator и наблюдаемость"}]}</script>
+  <h1>Actuator и наблюдаемость</h1>
+  <p class="lead">Production-эндпоинты, health-проверки и probes, метрики через Micrometer, трассировка и безопасность эндпоинтов.</p>
+  <article class="md"><h2>Что такое Actuator</h2>
+<p>spring-boot-starter-actuator добавляет готовые production-эндпоинты под /actuator: health (состояние), info (метаданные), metrics (метрики), env (свойства), beans, mappings, threaddump, heapdump, loggers и др. Это «приборная панель» приложения без написания кода.</p>
+<p>По умолчанию наружу (по HTTP) выставлен минимум; что показывать, настраивают через <code>management.endpoints.web.exposure.include</code> — выставлять всё подряд небезопасно.</p>
+<h2>Health checks и probes</h2>
+<p>/actuator/health — составной статус из отдельных HealthIndicator'ов (БД, диск, брокер, внешние сервисы); можно писать свои. Статус агрегируется в UP/DOWN.</p>
+<p>Для Kubernetes Actuator отдаёт liveness и readiness probes: liveness («жив ли процесс» — иначе перезапуск) и readiness («готов ли принимать трафик» — иначе исключают из балансировки). Их разделение критично для корректного деплоя без потери запросов.</p>
+<h2>Метрики и Micrometer</h2>
+<p>Метрики Boot собирает через Micrometer — это фасад метрик (как SLF4J для логов): код пишет метрики против Micrometer, а экспортёр отправляет их в конкретную систему (Prometheus, Graphite, CloudWatch).</p>
+<p>Основные типы: counter (монотонный счётчик), gauge (мгновенное значение), timer (длительность + частота). Из коробки собираются JVM/HTTP/датасорс-метрики; свои добавляют через MeterRegistry или аннотацию <code>@Timed</code>.</p>
+<pre class="lang-java"><code>@Timed(&quot;orders.create&quot;) // длительность и частота вызова как метрика
+@PostMapping(&quot;/orders&quot;)
+Order create(@RequestBody NewOrder req) { /* ... */ }</code></pre>
+<h2>Логи и трассировка</h2>
+<p>Actuator позволяет менять уровни логирования в рантайме (эндпоинт loggers) — удобно для диагностики без перезапуска. Это часть наблюдаемости вместе с метриками.</p>
+<p>Третий столп — распределённая трассировка: Micrometer Tracing (с OpenTelemetry/Zipkin) проставляет trace/span id и связывает запрос через цепочку сервисов. Логи + метрики + трейсы вместе дают полную картину поведения системы.</p>
+<h2>Безопасность эндпоинтов</h2>
+<p>Actuator-эндпоинты содержат чувствительное: env раскрывает свойства (включая возможные секреты), heapdump/threaddump — внутренности процесса. Их нельзя выставлять в публичный интернет без защиты.</p>
+<p>Практика: наружу отдавать только health (и то ограниченно), остальное — на отдельном порту/сети и под аутентификацией (Spring Security). Управляют экспозицией и доступом раздельно для web и для отдельных эндпоинтов.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Назовите Actuator как набор production-эндпоинтов и подчеркните управление экспозицией. Разберите health + разницу liveness/readiness probes (перезапуск vs балансировка) для Kubernetes. Объясните Micrometer как фасад метрик (counter/gauge/timer, экспортёр Prometheus) и упомяните трассировку (trace/span). Обязательно — безопасность: env/heapdump не выставлять наружу.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/spring/liveness-vs-readiness/">Чем liveness probe отличается от readiness probe?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/micrometer-latency-percentiles/">Как в Spring Boot собрать перцентили времени ответа HTTP-запросов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/actuator-exposure/">Что важно учесть при выставлении наружу эндпоинтов Actuator?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/readiness-external-dependency/">Сервис зависит от внешнего платёжного API. Стоит ли включать проверку его доступности в readiness-пробу?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/actuator-health-basic/">Для чего нужен эндпоинт /actuator/health?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/spring/boot/">Spring Boot: автоконфигурация и starters</a><p>@SpringBootApplication и starters, механизм автоконфигурации по условиям, переопределение через @ConditionalOnMissingBean, внешняя конфигурация и её приоритеты.</p></li><li><a href="/articles/spring/resilience-observability/">Resilience: таймауты, ретраи и circuit breaker</a><p>Защита от каскадных отказов: таймауты, безопасные ретраи, состояния circuit breaker, bulkhead и rate limiter, fallback и порядок паттернов.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Actuator и наблюдаемость","description":"Production-эндпоинты, health-проверки и probes, метрики через Micrometer, трассировка и безопасность эндпоинтов.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/spring/actuator/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

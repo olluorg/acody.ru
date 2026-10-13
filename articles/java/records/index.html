@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Records: компактные носители данных — разбор для собеседования</title>
+<meta name="description" content="Что генерирует record, канонический и компактный конструкторы, ограничения и когда применять.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/records/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/records/">
+<meta property="og:title" content="Records: компактные носители данных — разбор для собеседования">
+<meta property="og:description" content="Что генерирует record, канонический и компактный конструкторы, ограничения и когда применять.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Records: компактные носители данных</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Records: компактные носители данных"}]}</script>
+  <h1>Records: компактные носители данных</h1>
+  <p class="lead">Что генерирует record, канонический и компактный конструкторы, ограничения и когда применять.</p>
+  <article class="md"><h2>Что такое record</h2>
+<p>record (Java 16) — компактная форма неизменяемого носителя данных. Из объявления record <code>Point(int x, int y)</code> компилятор генерирует: private final поля-компоненты, канонический конструктор, аксессоры (<code>x()</code>, <code>y()</code> — без префикса get), а также equals/<code>hashCode</code>/<code>toString</code> строго по компонентам.</p>
+<p>Это убирает горы шаблонного кода у DTO/value-объектов и делает их корректными по умолчанию (правильные equals/<code>hashCode</code> из коробки).</p>
+<pre class="lang-java"><code>record Point(int x, int y) {}
+// сгенерировано: поля, конструктор, x()/y(), equals/hashCode/toString</code></pre>
+<h2>Канонический и компактный конструкторы</h2>
+<p>Канонический конструктор принимает все компоненты. Для валидации/нормализации удобен компактный конструктор — без списка параметров: в нём проверяют аргументы и при необходимости нормализуют их перед неявным присваиванием полей.</p>
+<p>Можно добавлять и дополнительные конструкторы (они обязаны делегировать в канонический), статические фабрики и методы. Важная связка с неизменяемостью: record не делает защитных копий за вас — если компонент изменяемый (List, массив), его нужно скопировать в компактном конструкторе и при выдаче, иначе «неизменяемая» запись протекает.</p>
+<pre class="lang-java"><code>record Period(LocalDate from, List&lt;Event&gt; events) {
+    Period {                       // компактный конструктор
+        if (from == null) throw new IllegalArgumentException(&quot;from&quot;);
+        events = List.copyOf(events); // защитная копия изменяемого компонента
+    }
+}</code></pre>
+<h2>Ограничения</h2>
+<p>record неявно final и не может наследовать класс (extends запрещён), но может реализовывать интерфейсы. Всё состояние задаётся компонентами — нельзя добавить произвольное instance-поле (только static).</p>
+<p>Эти ограничения — следствие сути: record моделирует «прозрачный» агрегат данных, у которого идентичность определяется значениями компонентов, а не ссылкой.</p>
+<h2>Когда применять</h2>
+<p>Records идеальны для DTO, value-объектов, составных ключей Map, возврата нескольких значений из метода и как варианты в sealed-иерархиях для pattern matching.</p>
+<p>Не подходят там, где нужна изменяемость или identity-семантика (JPA-сущности с жизненным циклом, объекты с поведением и инкапсулированным изменяемым состоянием) — для них обычный класс.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Перечислите, что генерирует record (final-поля, конструктор, аксессоры без get, equals/<code>hashCode</code>/<code>toString</code> по компонентам), покажите компактный конструктор для валидации и обязательно — что record НЕ делает защитных копий (изменяемый компонент надо копировать сам). Назовите ограничения (final, нет extends, состояние только из компонентов) и уместные сценарии (DTO/value/ключи/варианты sealed).</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/record/">Для чего предназначен record?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/record-features/">Что верно про record в Java?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/record-when-not/">Когда record — неудачный выбор?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/record-array-equals/">Что произойдёт, если объявить record с полем-массивом и сравнить два таких объекта с одинаковым содержимым массива?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/immutability/">Проектирование неизменяемых классов</a><p>Зачем нужна неизменяемость, рецепт immutable-класса, защитные копии, безопасная публикация и records.</p></li><li><a href="/articles/java/sealed-pattern/">Sealed-типы и pattern matching</a><p>Закрытые иерархии через sealed, pattern matching в instanceof и switch, деконструкция записей и проверка исчерпываемости.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Records: компактные носители данных","description":"Что генерирует record, канонический и компактный конструкторы, ограничения и когда применять.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/records/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем Spring MVC отличается от Spring WebFlux? — вопрос с собеседования</title>
+<meta name="description" content="Spring MVC — сервлетная модель «поток на запрос», блокирующий код. WebFlux — неблокирующая модель на event loop (Netty) с Reactor: малое число…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/mvc-vs-webflux/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/mvc-vs-webflux/">
+<meta property="og:title" content="Чем Spring MVC отличается от Spring WebFlux? — вопрос с собеседования">
+<meta property="og:description" content="Spring MVC — сервлетная модель «поток на запрос», блокирующий код. WebFlux — неблокирующая модель на event loop (Netty) с Reactor: малое число…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Чем Spring MVC отличается от Spring WebFlux?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Чем Spring MVC отличается от Spring WebFlux?"}]}</script>
+  <h1>Чем Spring MVC отличается от Spring WebFlux?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Reactive и WebFlux</span><span class="chip">Spring</span><span class="chip">WebFlux</span><span class="chip ver">Spring Boot &gt;=3.2</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Когда выбирать WebFlux вместо Spring MVC?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Spring MVC</b> — сервлетная модель «поток на запрос», блокирующий код. <b>WebFlux</b> — неблокирующая модель на event loop (Netty) с Reactor: малое число потоков обслуживает много соединений, но весь путь обязан быть неблокирующим.</p><ul><li>WebFlux выгоден при большом числе одновременных ожидающих соединений: шлюзы, стриминг, SSE</li><li>Блокирующий вызов (JDBC, RestTemplate) в WebFlux останавливает event loop</li><li>Java 21 и Boot 3.2: MVC на виртуальных потоках (<code>spring.threads.virtual.enabled=true</code>) масштабируется без реактивного кода</li></ul><p class="extra"><span>А ещё</span> Для большинства CRUD-сервисов MVC проще и достаточен</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Spring MVC:</b> запрос обрабатывает поток из пула Tomcat (по умолчанию 200). Пока код ждёт базу или внешний сервис, поток занят. Простой последовательный код и огромная экосистема (JPA, JDBC, большинство библиотек блокирующие). Предел — число потоков: при медленных зависимостях пул кончается.</p>
+<p><b>Spring WebFlux:</b> работает на Netty с несколькими потоками event loop по числу ядер. Обработчики возвращают <code>Mono</code>/<code>Flux</code>, вся цепочка неблокирующая: WebClient для HTTP, R2DBC для баз, реактивные драйверы. Плюсы — тысячи одновременных соединений при малом числе потоков, естественный стриминг и backpressure. Минусы — сложнее код, отладка, тесты; любой блокирующий вызов в цепочке (JDBC, <code>block()</code>, тяжёлые вычисления) замораживает event loop и все соединения на нём.</p>
+<p><b>Виртуальные потоки (Java 21, Spring Boot 3.2+):</b> <code>spring.threads.virtual.enabled=true</code> — Tomcat обрабатывает каждый запрос в виртуальном потоке. Код остаётся простым и блокирующим, а ожидание не держит поток ОС. Для многих сервисов это снимает главный аргумент в пользу WebFlux.</p>
+<p><b>Выбор:</b> обычный сервис с базой через JPA — MVC (с виртуальными потоками при большом числе ожиданий); API-шлюз, стриминг, SSE/WebSocket, агрегирование многих внешних вызовов — WebFlux; смешивать оба стека в одном приложении не стоит.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Модели потоков и их ограничения.</li><li>Требование неблокирующего пути в WebFlux.</li><li>Виртуальные потоки как альтернатива.</li><li>Критерии выбора.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Использовать JDBC или RestTemplate внутри WebFlux.</li><li>Переходить на WebFlux ради скорости обычного CRUD.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое event loop?</li><li>Как работать с blocking кодом в WebFlux?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/reactive-webflux/">Reactive и Spring WebFlux</a><p>Неблокирующая модель и event loop, Reactive Streams и Reactor (Mono/Flux), backpressure, реактивный стек целиком, выбор MVC/WebFlux и цена сложности.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/reactive-backpressure/">Что такое reactive programming и backpressure?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/jdbc-in-webflux/">В реактивной цепочке WebFlux внутри map() выполняется синхронный JDBC-запрос. Чем это опасно?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/cs/async-vs-threads/">Чем асинхронность отличается от многопоточности?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/c10k-event-loop/">Как один сервер держит сотни тысяч одновременных соединений?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем Spring MVC отличается от Spring WebFlux?","acceptedAnswer":{"@type":"Answer","text":"Spring MVC — сервлетная модель «поток на запрос», блокирующий код. WebFlux — неблокирующая модель на event loop (Netty) с Reactor: малое число потоков обслуживает много соединений, но весь путь обязан быть неблокирующим. WebFlux выгоден при большом числе одновременных ожидающих соединений: шлюзы, стриминг, SSE Блокирующий вызов (JDBC, RestTemplate) в WebFlux останавливает event loop Java 21 и Boot 3.2: MVC на виртуальных потоках (spring.threads.virtual.enabled=true) масштабируется без реактивного кода Для большинства CRUD-сервисов MVC проще и достаточен Spring MVC: запрос обрабатывает поток из пула Tomcat (по умолчанию 200). Пока код ждёт базу или внешний сервис, поток занят. Простой последовательный код и огромная экосистема (JPA, JDBC, большинство библиотек блокирующие). Предел — число потоков: при медленных зависимостях пул кончается. Spring WebFlux: работает на Netty с несколькими потоками event loop по числу ядер. Обработчики возвращают Mono/Flux, вся цепочка неблокирующая: WebClient для HTTP, R2DBC для баз, реактивные драйверы. Плюсы — тысячи одновременных соединений при малом числе потоков, естественный стриминг и backpressure. Минусы — сложнее код, отладка, тесты; любой блокирующий вызов в цепочке (JDBC, block(), тяжёлые вычисления) замораживает event loop и все соединения на нём. Виртуальные потоки (Java 21, Spring Boot 3.2+): spring.threads.virtual.enabled=true — Tomcat обрабатывает каждый запрос в виртуальном потоке. Код…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

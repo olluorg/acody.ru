@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Веб-слой — карта «Spring»</title>
+<meta name="description" content="Spring MVC, сервлеты и фильтры, REST-контроллеры, валидация и обработка ошибок.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/spring/web/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/spring/web/">
+<meta property="og:title" content="Веб-слой — карта «Spring»">
+<meta property="og:description" content="Spring MVC, сервлеты и фильтры, REST-контроллеры, валидация и обработка ошибок.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/">Backend-разработчик</a> <span>/</span> <a href="/roadmap/java/">Java</a> <span>/</span> <a href="/roadmap/spring/#web">Spring</a> <span>/</span> <span>Веб-слой</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://learn.getsotto.ru/roadmap/backend/"},{"@type":"ListItem","position":3,"name":"Java","item":"https://learn.getsotto.ru/roadmap/java/"},{"@type":"ListItem","position":4,"name":"Spring","item":"https://learn.getsotto.ru/roadmap/spring/#web"},{"@type":"ListItem","position":5,"name":"Веб-слой"}]}</script>
+  <h1>Веб-слой</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span></div>
+  <p class="lead">Spring MVC, сервлеты и фильтры, REST-контроллеры, валидация и обработка ошибок.</p>
+  <article class="md"><p>Веб-слой принимает HTTP-запросы и превращает их в вызовы сервисов: маршрутизация, преобразование JSON, валидация, обработка ошибок, фильтры. Понимание пути запроса через DispatcherServlet помогает отлаживать «почему не вызвался мой контроллер».</p></article>
+  <section class="block"><h2>Темы этапа</h2><ul class="links"><li><a href="/roadmap/spring/mvc/">Spring MVC и REST-контроллеры</a> <span class="rm-kind k-core">Основа</span><p>Путь запроса через DispatcherServlet, контроллеры, преобразование JSON, фильтры и перехватчики.</p></li><li><a href="/roadmap/spring/validation-errors/">Валидация и обработка ошибок</a> <span class="rm-kind k-core">Основа</span><p>Bean Validation, @ControllerAdvice и единый формат ошибок.</p></li></ul></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/spring/restcontroller/">Какая аннотация объединяет @Controller и @ResponseBody, чтобы методы возвращали данные прямо в тело ответа?</a> <span class="lvl lvl-junior">Junior</span><p>@RestController = @Controller + @ResponseBody: возвращаемое значение каждого метода сериализуется в тело ответа (обычно JSON через Jackson), а не трактуется как имя представления.</p></li><li><a href="/questions/spring/problem-detail-errors/">Как в Spring Boot 3 возвращать ошибки REST API в едином формате?</a> <span class="lvl lvl-middle">Middle</span><p>@RestControllerAdvice с @ExceptionHandler централизует обработку, а ответ — ProblemDetail (стандарт RFC 9457, application/problem+json): type, title, status, detail, instance и…</p></li><li><a href="/questions/spring/http-get-vs-post/">Чем HTTP GET отличается от POST?</a> <span class="lvl lvl-junior">Junior</span><p>GET — получить ресурс: безопасный (не меняет состояние) и идемпотентный, параметры в URL, ответ кэшируется. POST — отправить данные на обработку или создать ресурс: не…</p></li><li><a href="/questions/spring/post-redirect-get/">Что такое Post/Redirect/Get и как сделать его в Spring MVC?</a> <span class="lvl lvl-middle">Middle</span><p>PRG: после успешного POST сервер отвечает редиректом на GET-страницу результата. Обновление страницы повторит безопасный GET, а не POST — заказ не создастся дважды.</p></li><li><a href="/questions/spring/http-401-403-404/">Чем ответы 401, 403 и 404 отличаются и что возвращать на запрос чужого ресурса?</a> <span class="lvl lvl-junior">Junior</span><p>401 Unauthorized — личность не установлена: нет токена или он неверный. 403 Forbidden — личность известна, но прав нет. 404 Not Found — ресурс не найден.</p></li><li><a href="/questions/spring/rest-vs-soap/">Чем REST отличается от SOAP?</a> <span class="lvl lvl-middle">Middle</span><p>REST — архитектурный стиль поверх HTTP: ресурсы, методы, обычно JSON, кэширование, простота. SOAP — протокол обмена XML-сообщениями со строгим контрактом WSDL, стандартами…</p></li></ul></section><section class="block"><h2>Разборы темы</h2><ul class="links"><li><a href="/articles/spring/rest-api/">REST API: статусы, согласование и семантика</a><p>Ресурсы и HTTP-глаголы, статус-коды как контракт, content negotiation и message converters, идемпотентность и версионирование.</p></li><li><a href="/articles/spring/web/">Spring MVC: DispatcherServlet и обработка запроса</a><p>Конвейер обработки запроса, @Controller против @RestController, маппинги, извлечение данных и контроль ответа.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/spring/boot/">← Spring Boot</a><a class="next" href="/roadmap/spring/mvc/">Spring MVC и REST-контроллеры →</a></nav>
+  <p class="rm-back"><a href="/roadmap/spring/#web">← Вся карта «Spring»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Веб-слой","description":"Spring MVC, сервлеты и фильтры, REST-контроллеры, валидация и обработка ошибок.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/spring/web/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

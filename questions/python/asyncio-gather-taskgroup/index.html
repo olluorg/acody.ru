@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем asyncio.gather отличается от TaskGroup и как в них обрабатываются ошибки? — вопрос с собеседования</title>
+<meta name="description" content="Оба запускают корутины конкурентно. gather при первой ошибке пробрасывает её, но остальные задачи продолжают работать брошенными (если не…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/asyncio-gather-taskgroup/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/asyncio-gather-taskgroup/">
+<meta property="og:title" content="Чем asyncio.gather отличается от TaskGroup и как в них обрабатываются ошибки? — вопрос с собеседования">
+<meta property="og:description" content="Оба запускают корутины конкурентно. gather при первой ошибке пробрасывает её, но остальные задачи продолжают работать брошенными (если не…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Чем asyncio.gather отличается от TaskGroup и как в них обрабатываются ошибки?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Чем asyncio.gather отличается от TaskGroup и как в них обрабатываются ошибки?"}]}</script>
+  <h1>Чем asyncio.gather отличается от TaskGroup и как в них обрабатываются ошибки?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Конкурентность</span><span class="chip">asyncio</span><span class="chip ver">Python &gt;=3.11</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как запустить несколько корутин параллельно в asyncio?</li><li>Что такое ExceptionGroup и except*?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Оба запускают корутины конкурентно. <b>gather</b> при первой ошибке <b>пробрасывает её, но остальные задачи продолжают работать</b> брошенными (если не return_exceptions=True). <b>TaskGroup</b> (3.11) — структурная конкурентность: ошибка в одной задаче <b>отменяет остальные</b>, блок ждёт завершения всех, ошибки приходят <b>ExceptionGroup</b>.</p><ul><li>except* разбирает ExceptionGroup по типам</li><li>gather(return_exceptions=True) — исключения возвращаются в списке результатов</li><li>TaskGroup не оставляет задач-сирот после выхода из блока</li></ul><p class="extra"><span>А ещё</span> Для лимита параллелизма — Semaphore поверх любого из них</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>gather:</b></p>
+<pre class="lang-python"><code>results = await asyncio.gather(fetch(a), fetch(b), fetch(c))</code></pre>
+<p>Результаты — в порядке аргументов. Если <code>fetch(b)</code> упал, <code>await gather</code> бросит это исключение, но <code>fetch(a)</code> и <code>fetch(c)</code> <b>не отменяются</b> и продолжают работать в фоне; их ошибки могут потеряться («Task exception was never retrieved»).</p>
+<p>С <code>return_exceptions=True</code> gather не бросает, а кладёт исключения в список результатов — удобно, когда нужно собрать всё, что получилось.</p>
+<p><b>TaskGroup (Python 3.11):</b></p>
+<pre class="lang-python"><code>async with asyncio.TaskGroup() as tg:
+    ta = tg.create_task(fetch(a))
+    tb = tg.create_task(fetch(b))
+print(ta.result(), tb.result())</code></pre>
+<ul><li>выход из блока — только когда все задачи завершены;</li><li>первая ошибка отменяет остальные задачи группы;</li><li>все ошибки собираются в <code>ExceptionGroup</code>.</li></ul>
+<p><b>Обработка ExceptionGroup:</b></p>
+<pre class="lang-python"><code>try:
+    async with asyncio.TaskGroup() as tg: ...
+except* TimeoutError as eg:
+    log.warning(&quot;таймауты: %s&quot;, eg.exceptions)
+except* ValueError:
+    ...</code></pre>
+<p><b>Выбор:</b> новые проекты — TaskGroup: нет утечки задач и потерянных ошибок. gather — когда нужны частичные результаты при ошибках (<code>return_exceptions=True</code>) или код под Python &lt; 3.11.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Поведение gather при ошибке.</li><li>Структурная конкурентность TaskGroup.</li><li>ExceptionGroup и except*.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что gather отменяет остальные задачи при ошибке.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/asyncio-cancellation/">Как в asyncio работают отмена задач и таймауты?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/asyncio-event-loop/">Как устроен event loop в asyncio?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/exception-chaining/">Что такое цепочки исключений (raise from) и как правильно создавать свои исключения?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем asyncio.gather отличается от TaskGroup и как в них обрабатываются ошибки?","acceptedAnswer":{"@type":"Answer","text":"Оба запускают корутины конкурентно. gather при первой ошибке пробрасывает её, но остальные задачи продолжают работать брошенными (если не return_exceptions=True). TaskGroup (3.11) — структурная конкурентность: ошибка в одной задаче отменяет остальные, блок ждёт завершения всех, ошибки приходят ExceptionGroup. except разбирает ExceptionGroup по типам gather(return_exceptions=True) — исключения возвращаются в списке результатов TaskGroup не оставляет задач-сирот после выхода из блока Для лимита параллелизма — Semaphore поверх любого из них gather: Результаты — в порядке аргументов. Если fetch(b) упал, await gather бросит это исключение, но fetch(a) и fetch(c) не отменяются и продолжают работать в фоне; их ошибки могут потеряться («Task exception was never retrieved»). С return_exceptions=True gather не бросает, а кладёт исключения в список результатов — удобно, когда нужно собрать всё, что получилось. TaskGroup (Python 3.11): - выход из блока — только когда все задачи завершены; - первая ошибка отменяет остальные задачи группы; - все ошибки собираются в ExceptionGroup. Обработка ExceptionGroup: Выбор: новые проекты — TaskGroup: нет утечки задач и потерянных ошибок. gather — когда нужны частичные результаты при ошибках (return_exceptions=True) или код под Python < 3.11."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

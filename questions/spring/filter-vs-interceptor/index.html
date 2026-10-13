@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем Servlet Filter отличается от HandlerInterceptor? — вопрос с собеседования</title>
+<meta name="description" content="Filter — уровень сервлетного контейнера: работает до DispatcherServlet и видит любой запрос, включая статику и ошибки. HandlerInterceptor — внутри…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/filter-vs-interceptor/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/filter-vs-interceptor/">
+<meta property="og:title" content="Чем Servlet Filter отличается от HandlerInterceptor? — вопрос с собеседования">
+<meta property="og:description" content="Filter — уровень сервлетного контейнера: работает до DispatcherServlet и видит любой запрос, включая статику и ошибки. HandlerInterceptor — внутри…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Чем Servlet Filter отличается от HandlerInterceptor?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Чем Servlet Filter отличается от HandlerInterceptor?"}]}</script>
+  <h1>Чем Servlet Filter отличается от HandlerInterceptor?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Сервлеты и фильтры</span><span class="chip">Spring</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Где добавить логирование всех запросов в Spring?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Filter</b> — уровень сервлетного контейнера: работает <b>до DispatcherServlet</b> и видит любой запрос, включая статику и ошибки. <b>HandlerInterceptor</b> — внутри Spring MVC, знает <b>обработчик</b> (контроллер и метод) и вызывается вокруг него.</p><ul><li>Filter: безопасность (Spring Security — цепочка фильтров), CORS, сжатие, корреляционный id, логирование всех запросов</li><li>Interceptor: проверки, зависящие от контроллера, атрибуты модели, замер времени обработчика</li><li>Interceptor: preHandle, postHandle (не вызывается при исключении), afterCompletion</li></ul><p class="extra"><span>А ещё</span> Для сквозной логики вокруг методов бинов — AOP</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Filter</b> (<code>jakarta.servlet.Filter</code>, в Spring — <code>OncePerRequestFilter</code>) регистрируется в контейнере и оборачивает весь запрос: <code>chain.doFilter(req, res)</code> передаёт управление дальше. Видит сырой запрос и ответ, может их обернуть (кэшировать тело для логирования), отклонить запрос до Spring. Не знает, какой контроллер обработает запрос.</p>
+<p><b>HandlerInterceptor</b> вызывается DispatcherServlet после выбора обработчика:</p>
+<ul><li><code>preHandle(req, res, handler)</code> — до контроллера; <code>false</code> — прервать;</li><li><code>postHandle(...)</code> — после контроллера, до рендеринга представления (при исключении не вызывается, а для <code>@ResponseBody</code> ответ уже записан);</li><li><code>afterCompletion(..., ex)</code> — после завершения, в том числе при ошибке.</li></ul>
+<p>Получает <code>HandlerMethod</code> — можно читать аннотации метода контроллера. Регистрация: <code>WebMvcConfigurer.addInterceptors</code> с путями.</p>
+<p><b>Что куда:</b></p>
+<ul><li>безопасность, CORS, корреляционный идентификатор в MDC, логирование всех запросов, ограничение частоты — фильтр;</li><li>логика, зависящая от аннотаций контроллера, замер времени обработчика, общие атрибуты модели — interceptor;</li><li>транзакции, кэширование, аудит методов сервисов — AOP.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Уровни: контейнер против Spring MVC.</li><li>Что видит каждый и методы interceptor.</li><li>Примеры применения.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ожидать postHandle при исключении в контроллере.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Interceptor работает до DispatcherServlet, Filter — после</li><li class="no"><span class="mark">✗</span>Это одно и то же</li><li class="no"><span class="mark">✗</span>Filter применим только к статическим ресурсам</li><li class="ok"><span class="mark">✓</span>Filter работает на уровне контейнера до DispatcherServlet (цепочка); Interceptor — внутри MVC, вокруг выбранного handler</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое Listener?</li><li>Где живёт Spring Security filter chain?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/servlet-runtime/">Сервлеты, фильтры и встроенный контейнер</a><p>Сервлет и встроенный Tomcat, модель thread-per-request, потокобезопасность контроллеров, Filter против Interceptor и forward/redirect.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/servlet-lifecycle/">Каков жизненный цикл сервлета?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/security-filter-chain/">Как устроена SecurityFilterChain в Spring Security?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/dispatcherservlet/">Что делает DispatcherServlet в Spring MVC?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем Servlet Filter отличается от HandlerInterceptor?","acceptedAnswer":{"@type":"Answer","text":"Filter — уровень сервлетного контейнера: работает до DispatcherServlet и видит любой запрос, включая статику и ошибки. HandlerInterceptor — внутри Spring MVC, знает обработчик (контроллер и метод) и вызывается вокруг него. Filter: безопасность (Spring Security — цепочка фильтров), CORS, сжатие, корреляционный id, логирование всех запросов Interceptor: проверки, зависящие от контроллера, атрибуты модели, замер времени обработчика Interceptor: preHandle, postHandle (не вызывается при исключении), afterCompletion Для сквозной логики вокруг методов бинов — AOP Filter (jakarta.servlet.Filter, в Spring — OncePerRequestFilter) регистрируется в контейнере и оборачивает весь запрос: chain.doFilter(req, res) передаёт управление дальше. Видит сырой запрос и ответ, может их обернуть (кэшировать тело для логирования), отклонить запрос до Spring. Не знает, какой контроллер обработает запрос. HandlerInterceptor вызывается DispatcherServlet после выбора обработчика: - preHandle(req, res, handler) — до контроллера; false — прервать; - postHandle(...) — после контроллера, до рендеринга представления (при исключении не вызывается, а для @ResponseBody ответ уже записан); - afterCompletion(..., ex) — после завершения, в том числе при ошибке. Получает HandlerMethod — можно читать аннотации метода контроллера. Регистрация: WebMvcConfigurer.addInterceptors с путями. Что куда: - безопасность, CORS, корреляционный идентификатор в MDC, логирование всех запросов…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

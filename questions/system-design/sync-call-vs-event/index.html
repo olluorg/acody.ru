@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какой вопрос лучше всего определяет выбор между синхронным вызовом и событием через брокер? — вопрос с собеседования</title>
+<meta name="description" content="Главный вопрос: нужен ли ответ немедленно, чтобы продолжить? Нужен — синхронный вызов (REST, gRPC). Не нужен — событие через брокер. События снижают…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/sync-call-vs-event/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/sync-call-vs-event/">
+<meta property="og:title" content="Какой вопрос лучше всего определяет выбор между синхронным вызовом и событием через брокер? — вопрос с собеседования">
+<meta property="og:description" content="Главный вопрос: нужен ли ответ немедленно, чтобы продолжить? Нужен — синхронный вызов (REST, gRPC). Не нужен — событие через брокер. События снижают…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Какой вопрос лучше всего определяет выбор между синхронным вызовом и событием через брокер?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Какой вопрос лучше всего определяет выбор между синхронным вызовом и событием через брокер?"}]}</script>
+  <h1>Какой вопрос лучше всего определяет выбор между синхронным вызовом и событием через брокер?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Проектирование API</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Когда использовать REST, а когда брокер сообщений?</li><li>Синхронное или асинхронное взаимодействие сервисов?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Главный вопрос: <b>нужен ли ответ немедленно</b>, чтобы продолжить? Нужен — синхронный вызов (REST, gRPC). Не нужен — событие через брокер.</p><ul><li>События снижают связанность: издатель не знает потребителей и работает, даже когда они лежат</li><li>Цена событий: согласованность в конечном счёте, нет немедленного ответа, обработка должна быть идемпотентной</li><li>Частая ошибка — синхронный вызов там, где хватило бы события: доступности перемножаются</li></ul><p class="extra"><span>А ещё</span> Внутри синхронного: REST — наружу и в браузер, gRPC — между сервисами</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Синхронный вызов</b> — клиент ждёт ответа. Нужен, когда результат требуется для продолжения: проверить остаток перед оформлением, получить цену, авторизовать платёж. Цена — временная связанность: если вызываемый сервис недоступен или медленный, страдает вызывающий; в цепочках доступности перемножаются.</p>
+<p><b>Событие через брокер</b> — издатель сообщает «произошло X» и продолжает. Потребители обрабатывают в своём темпе. Подходит для реакций, которые не нужны для ответа: отправить письмо, начислить бонусы, обновить поиск, аналитику. Плюсы: издатель не знает потребителей, новых можно добавлять без его изменения, отказ потребителя не мешает издателю, брокер сглаживает пики. Цена:</p>
+<ul><li>согласованность в конечном счёте;</li><li>доставка обычно «хотя бы один раз» — обработка обязана быть идемпотентной;</li><li>сложнее отлаживать и прослеживать (нужна трассировка через брокер);</li><li>публикация события должна быть согласована с изменением данных — outbox.</li></ul>
+<p><b>Третий вариант — команда через очередь</b> (асинхронный запрос с ответом позже): длительные задачи, например генерация отчёта.</p>
+<p><b>REST или gRPC</b> для синхронного: REST — для внешних клиентов и браузера, понятный и кэшируемый; gRPC — между сервисами: бинарный протокол, строгая схема, потоковая передача, HTTP/2, но хуже для браузера и отладки руками.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Критерий: нужен ли ответ немедленно.</li><li>Плюсы событий для связанности и надёжности.</li><li>Цена: итоговая согласованность, идемпотентность, outbox.</li><li>REST против gRPC для синхронных вызовов — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Делать синхронными все вызовы «для простоты».</li><li>Использовать события там, где пользователю нужен результат сразу.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Нужен ли вызывающему ответ прямо сейчас, чтобы продолжить работу</li><li class="no"><span class="mark">✗</span>Какой объём данных передаётся</li><li class="no"><span class="mark">✗</span>На каком языке написан вызываемый сервис</li><li class="no"><span class="mark">✗</span>Есть ли у команды опыт работы с Kafka</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем gRPC выигрывает у REST внутри периметра?</li><li>Почему при событиях обработка обязана быть идемпотентной?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/api-design/">Проектирование API: REST, gRPC и события</a><p>Выбор стиля взаимодействия, семантика и идемпотентность HTTP, формат ошибок, курсорная пагинация против offset, версионирование и обратная совместимость, контрактное тестирование.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/availability-chain/">Пользовательский сценарий последовательно вызывает пять сервисов, доступность каждого 99,9%. Какова примерная доступность сценария и что из этого следует?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/database-per-service/">Почему действует правило «одна база данных на сервис»?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/backpressure/">Что такое backpressure и как его реализовать?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какой вопрос лучше всего определяет выбор между синхронным вызовом и событием через брокер?","acceptedAnswer":{"@type":"Answer","text":"Главный вопрос: нужен ли ответ немедленно, чтобы продолжить? Нужен — синхронный вызов (REST, gRPC). Не нужен — событие через брокер. События снижают связанность: издатель не знает потребителей и работает, даже когда они лежат Цена событий: согласованность в конечном счёте, нет немедленного ответа, обработка должна быть идемпотентной Частая ошибка — синхронный вызов там, где хватило бы события: доступности перемножаются Внутри синхронного: REST — наружу и в браузер, gRPC — между сервисами Синхронный вызов — клиент ждёт ответа. Нужен, когда результат требуется для продолжения: проверить остаток перед оформлением, получить цену, авторизовать платёж. Цена — временная связанность: если вызываемый сервис недоступен или медленный, страдает вызывающий; в цепочках доступности перемножаются. Событие через брокер — издатель сообщает «произошло X» и продолжает. Потребители обрабатывают в своём темпе. Подходит для реакций, которые не нужны для ответа: отправить письмо, начислить бонусы, обновить поиск, аналитику. Плюсы: издатель не знает потребителей, новых можно добавлять без его изменения, отказ потребителя не мешает издателю, брокер сглаживает пики. Цена: - согласованность в конечном счёте; - доставка обычно «хотя бы один раз» — обработка обязана быть идемпотентной; - сложнее отлаживать и прослеживать (нужна трассировка через брокер); - публикация события должна быть согласована…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

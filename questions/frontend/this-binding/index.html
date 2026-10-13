@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как определяется this в JavaScript и чем стрелочные функции отличаются от обычных? — вопрос с собеседования</title>
+<meta name="description" content="В обычной функции this определяется в момент вызова: obj.method() — obj; простой вызов f() — undefined в строгом режиме; new F() — новый объект…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/this-binding/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/this-binding/">
+<meta property="og:title" content="Как определяется this в JavaScript и чем стрелочные функции отличаются от обычных? — вопрос с собеседования">
+<meta property="og:description" content="В обычной функции this определяется в момент вызова: obj.method() — obj; простой вызов f() — undefined в строгом режиме; new F() — новый объект…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Как определяется this в JavaScript и чем стрелочные функции отличаются от обычных?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Как определяется this в JavaScript и чем стрелочные функции отличаются от обычных?"}]}</script>
+  <h1>Как определяется this в JavaScript и чем стрелочные функции отличаются от обычных?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Основы JavaScript</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем call, apply и bind отличаются друг от друга?</li><li>Почему this потерялся в колбэке?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">В обычной функции <b>this определяется в момент вызова</b>: <code>obj.method()</code> — obj; простой вызов <code>f()</code> — undefined в строгом режиме; <code>new F()</code> — новый объект; <code>call/apply/bind</code> — заданный явно. <b>Стрелочная функция своего this не имеет</b> — берёт его из окружения, где создана.</p><ul><li>call(ctx, a, b) и apply(ctx, [a, b]) вызывают сразу, bind возвращает новую функцию</li><li>Метод, переданный колбэком (setTimeout(obj.m)), теряет this</li><li>Стрелки нельзя вызвать через new, у них нет arguments</li></ul><p class="extra"><span>А ещё</span> В классах обработчики часто объявляют стрелками в полях класса</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Правила по приоритету:</b></p>
+<ol><li><code>new F()</code> — this = новый объект;</li><li>явная привязка — <code>call</code>, <code>apply</code>, <code>bind</code>;</li><li>вызов как метода <code>obj.f()</code> — this = obj;</li><li>простой вызов <code>f()</code> — undefined в строгом режиме (в модулях и классах он всегда строгий), иначе глобальный объект.</li></ol>
+<p><b>Потеря контекста:</b> <code>button.addEventListener(&quot;click&quot;, this.onClick)</code> передаёт функцию без объекта. Решения: <code>this.onClick.bind(this)</code>, стрелочная обёртка, метод-стрелка в поле класса.</p>
+<p><b>Стрелочные функции</b> лексически захватывают <code>this</code> и <code>arguments</code> внешней функции. Поэтому их удобно использовать в колбэках внутри методов, но нельзя делать методами объектов, которым нужен свой this.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-js"><code>const user = {
+  name: &quot;Аня&quot;,
+  hi() { return this.name; },
+  hiLater() { setTimeout(() =&gt; console.log(this.name)); },  // стрелка — this от hiLater
+};
+user.hi();             // &quot;Аня&quot;
+const f = user.hi;
+f();                   // undefined или ошибка — this потерян
+const g = user.hi.bind(user);
+g();                   // &quot;Аня&quot;</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Правила определения this.</li><li>Отличие стрелочных функций.</li><li>call, apply, bind и потеря контекста.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/prototypes/">Как работает прототипное наследование и что такое class в JavaScript?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/closures/">Что такое замыкание в JavaScript и где оно применяется?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как определяется this в JavaScript и чем стрелочные функции отличаются от обычных?","acceptedAnswer":{"@type":"Answer","text":"В обычной функции this определяется в момент вызова: obj.method() — obj; простой вызов f() — undefined в строгом режиме; new F() — новый объект; call/apply/bind — заданный явно. Стрелочная функция своего this не имеет — берёт его из окружения, где создана. call(ctx, a, b) и apply(ctx, [a, b]) вызывают сразу, bind возвращает новую функцию Метод, переданный колбэком (setTimeout(obj.m)), теряет this Стрелки нельзя вызвать через new, у них нет arguments В классах обработчики часто объявляют стрелками в полях класса Правила по приоритету: 1. new F() — this = новый объект; 2. явная привязка — call, apply, bind; 3. вызов как метода obj.f() — this = obj; 4. простой вызов f() — undefined в строгом режиме (в модулях и классах он всегда строгий), иначе глобальный объект. Потеря контекста: button.addEventListener(\"click\", this.onClick) передаёт функцию без объекта. Решения: this.onClick.bind(this), стрелочная обёртка, метод-стрелка в поле класса. Стрелочные функции лексически захватывают this и arguments внешней функции. Поэтому их удобно использовать в колбэках внутри методов, но нельзя делать методами объектов, которым нужен свой this."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

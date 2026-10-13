@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Java Memory Model: happens-before и volatile — разбор для собеседования</title>
+<meta name="description" content="Зачем нужна модель памяти, видимость и переупорядочивание, отношение happens-before, семантика volatile и final, гонки данных.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/jmm/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/jmm/">
+<meta property="og:title" content="Java Memory Model: happens-before и volatile — разбор для собеседования">
+<meta property="og:description" content="Зачем нужна модель памяти, видимость и переупорядочивание, отношение happens-before, семантика volatile и final, гонки данных.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Java Memory Model: happens-before и volatile</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Java Memory Model: happens-before и volatile"}]}</script>
+  <h1>Java Memory Model: happens-before и volatile</h1>
+  <p class="lead">Зачем нужна модель памяти, видимость и переупорядочивание, отношение happens-before, семантика volatile и final, гонки данных.</p>
+  <article class="md"><h2>Зачем нужна модель памяти</h2>
+<p>На многоядерных процессорах каждый поток может работать с кэшированными версиями данных, а компилятор и процессор вправе переупорядочивать инструкции ради скорости. Без правил один поток мог бы не увидеть запись другого или увидеть её «не в том порядке».</p>
+<p>Java Memory Model (JMM) — это контракт, который определяет, какие записи одного потока гарантированно видны другому и в каком порядке. Он абстрагирует железо: пишете по правилам JMM — код корректен на любой платформе.</p>
+<h2>Три проблемы: видимость, упорядочивание, атомарность</h2>
+<p>Видимость: увидит ли поток B значение, записанное потоком A. Упорядочивание: в каком порядке B видит несколько записей A. Атомарность: выполняется ли операция неделимо (например, i++ — это read-modify-write, не атомарно).</p>
+<p>Это три РАЗНЫХ свойства, и их часто путают. volatile решает видимость и упорядочивание, но НЕ делает составные операции атомарными.</p>
+<h2>Отношение happens-before</h2>
+<p>JMM формулируется через happens-before: если действие A happens-before B, то эффект A виден B. Основные источники: порядок внутри одного потока (program order); разблокировка монитора happens-before его последующего захвата; запись volatile happens-before последующего чтения той же переменной; <code>Thread.start()</code> happens-before кода потока; код потока happens-before возврата из <code>join()</code>.</p>
+<p>Если между двумя обращениями к общим данным нет цепочки happens-before — это гонка данных, и поведение не гарантировано.</p>
+<figure><img src="/articles/assets/happens-before.webp" alt="Две таймлинии потоков: запись volatile в потоке A связана стрелкой happens-before с чтением volatile в потоке B, что делает все предыдущие записи A видимыми для B." loading="lazy"><figcaption>happens-before: запись volatile в одном потоке делает предшествующие ей записи видимыми для читающего потока.</figcaption></figure>
+<h2>Семантика volatile и final</h2>
+<p>Чтение/запись volatile-поля атомарны (включая long/double) и устанавливают happens-before: всё, что поток записал до записи volatile, становится видно потоку, который затем прочитал это volatile. Поэтому volatile годится для флагов и публикации ссылок, но не для счётчиков (count++ — не атомарно; нужны Atomic-классы или synchronized).</p>
+<p>Корректно инициализированные final-поля имеют гарантию безопасной публикации: другой поток, получивший ссылку на объект, увидит правильно установленные final-поля без дополнительной синхронизации. Это основа неизменяемых объектов как потокобезопасных.</p>
+<pre class="lang-java"><code>volatile boolean running = true; // флаг остановки — корректно
+void stop() { running = false; }  // видно другому потоку
+// но: volatile int n; n++; — НЕ атомарно (read-modify-write)</code></pre>
+<h2>Как отвечать на собеседовании</h2>
+<p>Разделите видимость/упорядочивание/атомарность, объясните happens-before и его источники (volatile, monitor lock, start/join), и точно сформулируйте volatile: даёт видимость и запрет переупорядочивания, но не атомарность составных операций (для счётчиков — Atomic/synchronized). Добавьте про безопасную публикацию через final — это уровень, на котором видно глубокое понимание конкурентности.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/volatile/">Что гарантирует ключевое слово volatile для переменной?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/happens-before/">Какие пары действий образуют отношение happens-before?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/double-checked-locking/">Почему в double-checked locking поле instance обязано быть volatile?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/volatile-visibility/">Один поток в цикле читает обычное поле-флаг, другой его меняет, но цикл не завершается. Почему?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/jvm-memory/">Память JVM и устройство объекта</a><p>Runtime data areas, стек против кучи, заголовок объекта и выравнивание, compressed oops и metaspace.</p></li><li><a href="/articles/java/threads/">Потоки: создание, состояния и отмена</a><p>Thread и Runnable, стоимость платформенных потоков, состояния жизненного цикла, кооперативное прерывание и daemon-потоки.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Java Memory Model: happens-before и volatile","description":"Зачем нужна модель памяти, видимость и переупорядочивание, отношение happens-before, семантика volatile и final, гонки данных.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/jmm/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

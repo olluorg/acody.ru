@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как найти самые популярные элементы в бесконечном потоке событий? — вопрос с собеседования</title>
+<meta name="description" content="Count-min sketch — таблица d × w счётчиков и d хеш-функций: при событии увеличиваем по одному счётчику в каждой строке, оценка частоты — минимум из d…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/count-min-top-k/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/count-min-top-k/">
+<meta property="og:title" content="Как найти самые популярные элементы в бесконечном потоке событий? — вопрос с собеседования">
+<meta property="og:description" content="Count-min sketch — таблица d × w счётчиков и d хеш-функций: при событии увеличиваем по одному счётчику в каждой строке, оценка частоты — минимум из d…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Как найти самые популярные элементы в бесконечном потоке событий?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Как найти самые популярные элементы в бесконечном потоке событий?"}]}</script>
+  <h1>Как найти самые популярные элементы в бесконечном потоке событий?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Вероятностные структуры</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое count-min sketch?</li><li>Как посчитать топ-100 поисковых запросов за последний час?</li><li>Как найти горячие ключи в потоке запросов?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Count-min sketch</b> — таблица d × w счётчиков и d хеш-функций: при событии увеличиваем по одному счётчику в каждой строке, оценка частоты — <b>минимум</b> из d счётчиков. Только <b>завышает</b>, с ошибкой ≈ поток / w.</p><ul><li>Память фиксированная, независимо от числа разных элементов</li><li>Топ-K: скетч + куча на K элементов с наибольшими оценками</li><li>Альтернатива — Space-Saving / Misra-Gries: K счётчиков, точнее для самых частых</li></ul><p class="extra"><span>А ещё</span> Скользящее окно: скетчи по минутам, сумма за последние 60; или распределённо — частичные топы с запасом и слияние</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Задача.</b> Поток из миллиардов событий (запросы, клики, ключи кэша), различных элементов — сотни миллионов. Хранить счётчик на каждый — слишком много памяти. Нужна частота популярных и топ-K.</p>
+<p><b>Count-min sketch.</b> Матрица из d строк по w счётчиков, у каждой строки своя хеш-функция.</p>
+<ul><li><b>событие x</b> — в каждой строке i увеличить счётчик <code>hᵢ(x) mod w</code>;</li><li><b>оценка частоты x</b> — минимум из d счётчиков.</li></ul>
+<p>Каждый счётчик — это частота x плюс частоты всех, кто попал в ту же ячейку, поэтому оценка никогда не меньше истины. Минимум по строкам выбирает ячейку с наименьшим «мусором». Гарантия: с вероятностью 1 − δ ошибка не больше ε·N, где w = e/ε, d = ln(1/δ). Например, w = 2000, d = 5 — ошибка до 0,14% потока с вероятностью 99%, памяти 10 000 счётчиков. Для редких элементов оценка бесполезна, для частых — точна.</p>
+<p><b>Топ-K.</b> Рядом со скетчем держим мин-кучу на K элементов: после обновления оцениваем x, и если оценка больше минимума кучи — заменяем. Итог — K самых частых с приближёнными частотами.</p>
+<p><b>Space-Saving</b> — K счётчиков; новый элемент при заполнении вытесняет элемент с минимальным счётчиком и наследует его значение + 1. Простая, точная для «тяжёлых» элементов, используется во многих системах мониторинга. Misra-Gries — похожий детерминированный вариант.</p>
+<p><b>Окна времени.</b> «Топ за последний час» — хранить скетчи по минутам, складывать последние 60 (count-min складываются поячеечно) и выкидывать старые. Или затухание: счётчики периодически умножать на коэффициент.</p>
+<p><b>Распределённо.</b> Каждый узел считает свой топ, координатор сливает. Ловушка: элемент может быть 101-м на всех узлах и первым в сумме. Поэтому узлы отдают топ с запасом (например, 10·K) или скетчи целиком — скетчи складываются. Точный топ — пакетно: MapReduce, ClickHouse <code>topK</code> (приближённый) или точная агрегация по ночам.</p>
+<p><b>Применения:</b> популярные запросы и тренды, горячие ключи кэша (W-TinyLFU в Caffeine использует count-min как частотный фильтр), обнаружение DDoS по источникам, тяжёлые пользователи API.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import random
+
+class CountMin:
+    def __init__(self, w=2000, d=5, seed=1):
+        rnd = random.Random(seed)
+        self.w, self.rows = w, [[0] * w for _ in range(d)]
+        self.salts = [rnd.getrandbits(64) for _ in range(d)]
+
+    def add(self, x, c=1):
+        for row, s in zip(self.rows, self.salts):
+            row[hash((s, x)) % self.w] += c
+
+    def estimate(self, x):
+        return min(row[hash((s, x)) % self.w] for row, s in zip(self.rows, self.salts))</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Почему точный подсчёт дорог.</li><li>Устройство count-min: матрица, d хешей, минимум; только завышение.</li><li>Топ-K через кучу; Space-Saving как альтернатива.</li><li>Окна времени и слияние распределённых топов.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что count-min может недооценить частоту.</li><li>Сливать распределённые топ-K без запаса.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/design-top-k/">Спроектируйте сервис «топ-100 популярных запросов» за последний час и за день.</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/hyperloglog/">Как посчитать число уникальных посетителей за день при миллиардах событий?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/bloom-filter/">Что такое фильтр Блума и где он применяется?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/heap-priority-queue/">Что такое двоичная куча и очередь с приоритетом?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/highload/hot-keys/">Что делать с горячими ключами, на которые приходится непропорционально большая нагрузка?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как найти самые популярные элементы в бесконечном потоке событий?","acceptedAnswer":{"@type":"Answer","text":"Count-min sketch — таблица d × w счётчиков и d хеш-функций: при событии увеличиваем по одному счётчику в каждой строке, оценка частоты — минимум из d счётчиков. Только завышает, с ошибкой ≈ поток / w. Память фиксированная, независимо от числа разных элементов Топ-K: скетч + куча на K элементов с наибольшими оценками Альтернатива — Space-Saving / Misra-Gries: K счётчиков, точнее для самых частых Скользящее окно: скетчи по минутам, сумма за последние 60; или распределённо — частичные топы с запасом и слияние Задача. Поток из миллиардов событий (запросы, клики, ключи кэша), различных элементов — сотни миллионов. Хранить счётчик на каждый — слишком много памяти. Нужна частота популярных и топ-K. Count-min sketch. Матрица из d строк по w счётчиков, у каждой строки своя хеш-функция. - событие x — в каждой строке i увеличить счётчик hᵢ(x) mod w; - оценка частоты x — минимум из d счётчиков. Каждый счётчик — это частота x плюс частоты всех, кто попал в ту же ячейку, поэтому оценка никогда не меньше истины. Минимум по строкам выбирает ячейку с наименьшим «мусором». Гарантия: с вероятностью 1 − δ ошибка не больше εN, где w = e/ε, d = ln(1/δ). Например, w = 2000, d = 5 — ошибка до 0,14% потока с вероятностью 99%, памяти 10 000 счётчиков. Для редких элементов оценка бесполезна, для частых — точна. Топ-K. Рядом со скетчем держим мин-кучу на K элементов: после обновления оцениваем x, и если оценка…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что означает запись 10.0.0.0/16 и как разбить сеть на подсети? — вопрос с собеседования</title>
+<meta name="description" content="CIDR: адрес и число бит префикса сети. /16 — первые 16 бит фиксированы, остаётся 32 − 16 = 16 бит на адреса: 65 536 адресов (10.0.0.0–10.0.255.255)…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/cidr-subnets/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/cidr-subnets/">
+<meta property="og:title" content="Что означает запись 10.0.0.0/16 и как разбить сеть на подсети? — вопрос с собеседования">
+<meta property="og:description" content="CIDR: адрес и число бит префикса сети. /16 — первые 16 бит фиксированы, остаётся 32 − 16 = 16 бит на адреса: 65 536 адресов (10.0.0.0–10.0.255.255)…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Что означает запись 10.0.0.0/16 и как разбить сеть на подсети?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Что означает запись 10.0.0.0/16 и как разбить сеть на подсети?"}]}</script>
+  <h1>Что означает запись 10.0.0.0/16 и как разбить сеть на подсети?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Сети и прокси</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое CIDR и маска подсети?</li><li>Какие диапазоны IP — частные?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">CIDR: адрес и <b>число бит префикса сети</b>. <code>/16</code> — первые 16 бит фиксированы, остаётся 32 − 16 = 16 бит на адреса: 65 536 адресов (10.0.0.0–10.0.255.255). <code>/24</code> — 256 адресов, <code>/32</code> — один адрес. Каждый шаг префикса делит сеть пополам. <b>Частные диапазоны</b>: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16.</p><ul><li>В подсети первый адрес — сеть, последний — broadcast; облака резервируют ещё несколько</li><li>Пересекающиеся диапазоны не соединить через VPN или пиринг — планировать заранее</li><li>Kubernetes забирает отдельные диапазоны под поды и сервисы</li></ul><p class="extra"><span>А ещё</span> 0.0.0.0/0 в правиле — «весь интернет»</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Расчёт:</b> число адресов = 2^(32 − префикс).</p>
+<div class="table"><table><thead><tr><th>префикс</th><th>адресов</th><th>маска</th></tr></thead><tbody><tr><td>/8</td><td>16 777 216</td><td>255.0.0.0</td></tr><tr><td>/16</td><td>65 536</td><td>255.255.0.0</td></tr><tr><td>/20</td><td>4 096</td><td>255.255.240.0</td></tr><tr><td>/24</td><td>256</td><td>255.255.255.0</td></tr><tr><td>/28</td><td>16</td><td>255.255.255.240</td></tr></tbody></table></div>
+<p><b>Разбиение VPC 10.0.0.0/16 по зонам:</b></p>
+<ul><li>10.0.0.0/20, 10.0.16.0/20, 10.0.32.0/20 — приватные подсети приложений в трёх зонах;</li><li>10.0.48.0/24, 10.0.49.0/24, 10.0.50.0/24 — публичные подсети для балансировщиков и NAT.</li></ul>
+<p><b>Планирование:</b> у каждого окружения и региона свой непересекающийся диапазон; запас под рост (подсети Kubernetes расходуют адреса быстро — каждый под получает IP); документировать распределение.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Смысл префикса и расчёт числа адресов.</li><li>Частные диапазоны.</li><li>Планирование подсетей и пересечения.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/devops/firewall-ports/">Как ограничивать сетевой доступ к серверам и сервисам?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/osi-tcp-ip/">Расскажите про модель OSI и стек TCP/IP.</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что означает запись 10.0.0.0/16 и как разбить сеть на подсети?","acceptedAnswer":{"@type":"Answer","text":"CIDR: адрес и число бит префикса сети. /16 — первые 16 бит фиксированы, остаётся 32 − 16 = 16 бит на адреса: 65 536 адресов (10.0.0.0–10.0.255.255). /24 — 256 адресов, /32 — один адрес. Каждый шаг префикса делит сеть пополам. Частные диапазоны: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16. В подсети первый адрес — сеть, последний — broadcast; облака резервируют ещё несколько Пересекающиеся диапазоны не соединить через VPN или пиринг — планировать заранее Kubernetes забирает отдельные диапазоны под поды и сервисы 0.0.0.0/0 в правиле — «весь интернет» Расчёт: число адресов = 2^(32 − префикс). | префикс | адресов | маска | | --- | --- | --- | | /8 | 16 777 216 | 255.0.0.0 | | /16 | 65 536 | 255.255.0.0 | | /20 | 4 096 | 255.255.240.0 | | /24 | 256 | 255.255.255.0 | | /28 | 16 | 255.255.255.240 | Разбиение VPC 10.0.0.0/16 по зонам: - 10.0.0.0/20, 10.0.16.0/20, 10.0.32.0/20 — приватные подсети приложений в трёх зонах; - 10.0.48.0/24, 10.0.49.0/24, 10.0.50.0/24 — публичные подсети для балансировщиков и NAT. Планирование: у каждого окружения и региона свой непересекающийся диапазон; запас под рост (подсети Kubernetes расходуют адреса быстро — каждый под получает IP); документировать распределение."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

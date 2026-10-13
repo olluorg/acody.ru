@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое тестирование и зачем оно нужно? — вопрос с собеседования</title>
+<meta name="description" content="Тестирование — проверка, что продукт работает как ожидается и решает задачу пользователя; цель — дать информацию о качестве и снизить риски…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/qa/what-is-testing/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/qa/what-is-testing/">
+<meta property="og:title" content="Что такое тестирование и зачем оно нужно? — вопрос с собеседования">
+<meta property="og:description" content="Тестирование — проверка, что продукт работает как ожидается и решает задачу пользователя; цель — дать информацию о качестве и снизить риски…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/qa/">Тестирование (QA)</a> <span>/</span> <span>Что такое тестирование и зачем оно нужно?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Тестирование (QA)","item":"https://learn.getsotto.ru/questions/qa/"},{"@type":"ListItem","position":3,"name":"Что такое тестирование и зачем оно нужно?"}]}</script>
+  <h1>Что такое тестирование и зачем оно нужно?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Основы тестирования</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Зачем нужен тестировщик?</li><li>Чем верификация отличается от валидации?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Тестирование — проверка, что продукт <b>работает как ожидается</b> и решает задачу пользователя; цель — дать <b>информацию о качестве</b> и снизить риски.</p><ul><li>Верификация — «делаем продукт правильно» (соответствие требованиям)</li><li>Валидация — «делаем правильный продукт» (решает ли задачу пользователя)</li></ul><p class="extra"><span>А ещё</span> Тестирование показывает наличие дефектов, но не доказывает их отсутствие</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Тестирование — процесс исследования продукта, чтобы сравнить его фактическое поведение с ожидаемым. Ожидаемое берётся из требований, макетов, здравого смысла и опыта пользователей.</p>
+<p>Зачем оно нужно бизнесу:</p>
+<ul><li><b>найти дефекты раньше пользователей</b> — ошибка, пойманная до релиза, стоит в разы дешевле, чем исправление в продакшене;</li><li><b>дать информацию для решений</b> — можно ли выпускать релиз, какие риски остаются;</li><li><b>предотвращать дефекты</b> — тестировщик участвует в обсуждении требований и находит противоречия ещё до того, как написан код.</li></ul>
+<p>Два понятия, о которых часто спрашивают:</p>
+<ul><li><b>верификация</b> — проверка, что продукт соответствует спецификации: кнопка делает то, что написано в требованиях;</li><li><b>валидация</b> — проверка, что продукт решает реальную задачу пользователя: даже если всё по требованиям, пользоваться может быть неудобно или бесполезно.</li></ul>
+<p>Важно понимать границу: тестирование не может доказать, что дефектов нет — только найти те, что есть, и снизить вероятность пропустить важные.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><p>Требование: «Форма регистрации принимает пароль от 8 символов». Верификация — проверить, что пароль из 7 символов отклоняется, а из 8 — принимается. Валидация — заметить, что пользователю не показывают, какие требования к паролю, и он не понимает, почему регистрация не проходит.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Цель тестирования — информация о качестве и снижение рисков, а не «найти все баги».</li><li>Разница верификации и валидации своими словами с примером.</li><li>Понимание, что раннее тестирование дешевле.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Тестирование — это поиск всех ошибок» — все найти невозможно.</li><li>Путать верификацию и валидацию местами.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/qa/qa-vs-qc/">Чем QA отличается от QC и тестирования?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/qa/testing-principles/">Какие принципы тестирования вы знаете?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/qa/sdlc-stlc/">Какое место занимает тестирование в жизненном цикле разработки?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое тестирование и зачем оно нужно?","acceptedAnswer":{"@type":"Answer","text":"Тестирование — проверка, что продукт работает как ожидается и решает задачу пользователя; цель — дать информацию о качестве и снизить риски. Верификация — «делаем продукт правильно» (соответствие требованиям) Валидация — «делаем правильный продукт» (решает ли задачу пользователя) Тестирование показывает наличие дефектов, но не доказывает их отсутствие Тестирование — процесс исследования продукта, чтобы сравнить его фактическое поведение с ожидаемым. Ожидаемое берётся из требований, макетов, здравого смысла и опыта пользователей. Зачем оно нужно бизнесу: - найти дефекты раньше пользователей — ошибка, пойманная до релиза, стоит в разы дешевле, чем исправление в продакшене; - дать информацию для решений — можно ли выпускать релиз, какие риски остаются; - предотвращать дефекты — тестировщик участвует в обсуждении требований и находит противоречия ещё до того, как написан код. Два понятия, о которых часто спрашивают: - верификация — проверка, что продукт соответствует спецификации: кнопка делает то, что написано в требованиях; - валидация — проверка, что продукт решает реальную задачу пользователя: даже если всё по требованиям, пользоваться может быть неудобно или бесполезно. Важно понимать границу: тестирование не может доказать, что…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

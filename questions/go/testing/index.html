@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как пишут тесты в Go — табличные тесты, моки, бенчмарки? — вопрос с собеседования</title>
+<meta name="description" content="Тесты — функции TestXxx(t testing.T) в файлах _test.go, запуск go test ./.... Идиома — табличные тесты: срез случаев и t.Run для каждого. Зависимости…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/go/testing/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/go/testing/">
+<meta property="og:title" content="Как пишут тесты в Go — табличные тесты, моки, бенчмарки? — вопрос с собеседования">
+<meta property="og:description" content="Тесты — функции TestXxx(t testing.T) в файлах _test.go, запуск go test ./.... Идиома — табличные тесты: срез случаев и t.Run для каждого. Зависимости…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/go/">Go</a> <span>/</span> <span>Как пишут тесты в Go — табличные тесты, моки, бенчмарки?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Go","item":"https://learn.getsotto.ru/questions/go/"},{"@type":"ListItem","position":3,"name":"Как пишут тесты в Go — табличные тесты, моки, бенчмарки?"}]}</script>
+  <h1>Как пишут тесты в Go — табличные тесты, моки, бенчмарки?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Модули, тесты и инструменты</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое table-driven tests?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Тесты — функции <b>TestXxx(t *testing.T)</b> в файлах _test.go, запуск <b>go test ./...</b>. Идиома — <b>табличные тесты</b>: срез случаев и t.Run для каждого. Зависимости подменяют через <b>маленькие интерфейсы</b> и рукописные фейки. Бенчмарки — <b>BenchmarkXxx(b *testing.B)</b>, <code>go test -bench</code>.</p><ul><li>t.Parallel — параллельные подтесты</li><li>httptest — тестовый HTTP-сервер и ResponseRecorder</li><li>go test -race -cover — гонки и покрытие</li></ul><p class="extra"><span>А ещё</span> testify — популярная библиотека утверждений, но стандартного testing хватает</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Табличные тесты</b> делают добавление случая одной строкой и дают понятные имена подтестов в выводе.</p>
+<p><b>Подмена зависимостей.</b> В Go нет популярных «магических» моков: сервис принимает интерфейс <code>Store</code>, в тесте передаётся простая структура-фейк. Генераторы моков (mockgen, mockery) используют, когда интерфейсы большие.</p>
+<p><b>Интеграционные тесты</b> — Testcontainers для Go, тег сборки <code>//go:build integration</code>, <code>TestMain</code> для общей подготовки.</p>
+<p><b>Бенчмарки:</b> цикл <code>for b.Loop()</code> (Go 1.24) или <code>for i := 0; i &lt; b.N; i++</code>, <code>-benchmem</code> показывает аллокации. Фаззинг — <code>FuzzXxx</code> (Go 1.18).</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-go"><code>func TestParse(t *testing.T) {
+    tests := []struct {
+        name    string
+        in      string
+        want    int
+        wantErr bool
+    }{
+        {&quot;число&quot;, &quot;42&quot;, 42, false},
+        {&quot;пробелы&quot;, &quot; 7 &quot;, 7, false},
+        {&quot;мусор&quot;, &quot;x&quot;, 0, true},
+    }
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            got, err := Parse(tt.in)
+            if (err != nil) != tt.wantErr {
+                t.Fatalf(&quot;err = %v&quot;, err)
+            }
+            if got != tt.want {
+                t.Errorf(&quot;got %d, want %d&quot;, got, tt.want)
+            }
+        })
+    }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Структура тестов и go test.</li><li>Табличные тесты.</li><li>Подмена зависимостей через интерфейсы.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/race-detector/">Что такое гонка данных в Go и как её найти?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/pytest-fixtures/">Как работают фикстуры pytest и что такое их scope?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/unit-vs-integration-tests/">Чем unit-тест отличается от integration-теста?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как пишут тесты в Go — табличные тесты, моки, бенчмарки?","acceptedAnswer":{"@type":"Answer","text":"Тесты — функции TestXxx(t testing.T) в файлах _test.go, запуск go test ./.... Идиома — табличные тесты: срез случаев и t.Run для каждого. Зависимости подменяют через маленькие интерфейсы и рукописные фейки. Бенчмарки — BenchmarkXxx(b testing.B), go test -bench. t.Parallel — параллельные подтесты httptest — тестовый HTTP-сервер и ResponseRecorder go test -race -cover — гонки и покрытие testify — популярная библиотека утверждений, но стандартного testing хватает Табличные тесты делают добавление случая одной строкой и дают понятные имена подтестов в выводе. Подмена зависимостей. В Go нет популярных «магических» моков: сервис принимает интерфейс Store, в тесте передаётся простая структура-фейк. Генераторы моков (mockgen, mockery) используют, когда интерфейсы большие. Интеграционные тесты — Testcontainers для Go, тег сборки //go:build integration, TestMain для общей подготовки. Бенчмарки: цикл for b.Loop() (Go 1.24) или for i := 0; i < b.N; i++, -benchmem показывает аллокации. Фаззинг — FuzzXxx (Go 1.18)."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

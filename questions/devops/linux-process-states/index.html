@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие состояния бывают у процесса в Linux и что такое зомби и сироты? — вопрос с собеседования</title>
+<meta name="description" content="В ps видно состояние: R — выполняется или ждёт CPU, S — спит в ожидании события (норма для большинства), D — непрерываемый сон в ожидании…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/linux-process-states/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/linux-process-states/">
+<meta property="og:title" content="Какие состояния бывают у процесса в Linux и что такое зомби и сироты? — вопрос с собеседования">
+<meta property="og:description" content="В ps видно состояние: R — выполняется или ждёт CPU, S — спит в ожидании события (норма для большинства), D — непрерываемый сон в ожидании…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Какие состояния бывают у процесса в Linux и что такое зомби и сироты?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Какие состояния бывают у процесса в Linux и что такое зомби и сироты?"}]}</script>
+  <h1>Какие состояния бывают у процесса в Linux и что такое зомби и сироты?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Linux и диагностика</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что значит состояние D в ps?</li><li>Как убить процесс-зомби?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">В <code>ps</code> видно состояние: <b>R</b> — выполняется или ждёт CPU, <b>S</b> — спит в ожидании события (норма для большинства), <b>D</b> — непрерываемый сон в ожидании ввода-вывода (не реагирует даже на SIGKILL), <b>T</b> — остановлен, <b>Z</b> — <b>зомби</b>: процесс завершился, но родитель не забрал код выхода через <code>wait</code>. Зомби не занимает память, только запись в таблице процессов; убить его нельзя — нужно исправить или перезапустить <b>родителя</b>.</p><ul><li>Сирота — родитель умер раньше, процесс усыновляет PID 1 (или subreaper)</li><li>Много процессов в D — проблема с диском или сетевой ФС (NFS); они поднимают load average</li><li>Тысячи зомби исчерпывают лимит PID — новые процессы не создаются</li></ul><p class="extra"><span>А ещё</span> В контейнере без init зомби некому собирать — отсюда tini</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Как смотреть:</b></p>
+<pre class="lang-bash"><code>ps -eo pid,ppid,stat,cmd --forest   # дерево с состояниями
+ps -eo stat,ppid | awk &#x27;$1 ~ /^Z/&#x27;  # зомби и их родители
+cat /proc/PID/status                # State, родитель, потоки</code></pre>
+<p><b>Зомби.</b> После завершения ядро хранит код выхода, пока родитель не вызовет <code>wait</code>. Если родитель забыл (ошибка в коде, запускает дочерние процессы и не ждёт их), зомби копятся. Лечение — исправить родителя или завершить его: тогда зомби перейдут к PID 1, который их соберёт.</p>
+<p><b>D-состояние.</b> Процесс ждёт ответа устройства внутри ядра и не может быть прерван. Зависшее NFS-хранилище или умирающий диск дают «неубиваемые» процессы и высокий load average при пустом CPU.</p>
+<p><b>Сироты и PID 1.</b> Обычный init собирает усыновлённых сирот. В контейнере PID 1 — само приложение, которое этого не умеет, поэтому используют <code>tini</code> или <code>--init</code>.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Основные состояния процесса.</li><li>Природа зомби и почему их не убить.</li><li>Связь D-состояния с load average, роль PID 1.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/signals-shutdown/">Чем SIGTERM отличается от SIGKILL и как правильно завершать сервис?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/process-vs-thread/">Чем процесс отличается от потока?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/container-pid1-shutdown/">Почему контейнер не останавливается корректно и «висит» до SIGKILL?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие состояния бывают у процесса в Linux и что такое зомби и сироты?","acceptedAnswer":{"@type":"Answer","text":"В ps видно состояние: R — выполняется или ждёт CPU, S — спит в ожидании события (норма для большинства), D — непрерываемый сон в ожидании ввода-вывода (не реагирует даже на SIGKILL), T — остановлен, Z — зомби: процесс завершился, но родитель не забрал код выхода через wait. Зомби не занимает память, только запись в таблице процессов; убить его нельзя — нужно исправить или перезапустить родителя. Сирота — родитель умер раньше, процесс усыновляет PID 1 (или subreaper) Много процессов в D — проблема с диском или сетевой ФС (NFS); они поднимают load average Тысячи зомби исчерпывают лимит PID — новые процессы не создаются В контейнере без init зомби некому собирать — отсюда tini Как смотреть: Зомби. После завершения ядро хранит код выхода, пока родитель не вызовет wait. Если родитель забыл (ошибка в коде, запускает дочерние процессы и не ждёт их), зомби копятся. Лечение — исправить родителя или завершить его: тогда зомби перейдут к PID 1, который их соберёт. D-состояние. Процесс ждёт ответа устройства внутри ядра и не может быть прерван. Зависшее NFS-хранилище или умирающий диск дают «неубиваемые» процессы и высокий load average при пустом CPU. Сироты и PID 1. Обычный init собирает усыновлённых сирот. В контейнере PID 1 — само приложение, которое этого не умеет, поэтому используют tini или --init."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

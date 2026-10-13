@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>После массовой загрузки данных запросы, работавшие быстро, резко замедлились, хотя индексы на месте. Наиболее вероятная причина? — вопрос с собеседования</title>
+<meta name="description" content="Планировщик стоимостный: он опирается на статистику (число строк, распределение значений). После массовой загрузки она устарела — оценки неверны…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/stale-statistics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/stale-statistics/">
+<meta property="og:title" content="После массовой загрузки данных запросы, работавшие быстро, резко замедлились, хотя индексы на месте. Наиболее вероятная причина? — вопрос с собеседования">
+<meta property="og:description" content="Планировщик стоимостный: он опирается на статистику (число строк, распределение значений). После массовой загрузки она устарела — оценки неверны…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>После массовой загрузки данных запросы, работавшие быстро, резко замедлились, хотя индексы на месте. Наиболее вероятная причина?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"После массовой загрузки данных запросы, работавшие быстро, резко замедлились, хотя индексы на месте. Наиболее вероятная причина?"}]}</script>
+  <h1>После массовой загрузки данных запросы, работавшие быстро, резко замедлились, хотя индексы на месте. Наиболее вероятная причина?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Оптимизация запросов</span><span class="chip">PostgreSQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему после загрузки данных запросы стали медленными?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Планировщик <b>стоимостный</b>: он опирается на <b>статистику</b> (число строк, распределение значений). После массовой загрузки она устарела — оценки неверны, выбирается плохой план.</p><ul><li>Лечение: <code>ANALYZE таблица</code> после больших загрузок</li><li>Autovacuum обновит статистику позже, но не сразу</li><li>Признак в EXPLAIN ANALYZE: оценка rows сильно отличается от фактической</li></ul><p class="extra"><span>А ещё</span> Для коррелированных колонок — расширенная статистика (CREATE STATISTICS)</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Оценка числа строк определяет выбор способа соединения и доступа. Если статистика говорит о тысяче строк, а их стало десять миллионов, планировщик выберет вложенные циклы там, где нужно хеш-соединение, и запрос замедлится на порядки. Автоматический сбор статистики обычно есть, но он срабатывает по порогу и с задержкой — после массовой загрузки её собирают явно. Смежные причины того же класса: раздувание таблицы из-за накопившихся мёртвых версий строк и индексы, которые полезно перестроить после большой загрузки. Диагностика одна и та же — сравнить в фактическом плане оценку и реальность.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Роль статистики в выборе плана.</li><li>ANALYZE как исправление.</li><li>Как увидеть проблему в плане.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Начинать с добавления индексов, не посмотрев план.</li><li>Забывать про статистику после массовых операций и миграций.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Устарела статистика распределения данных, и планировщик строит планы по неверным оценкам — нужен пересбор статистики</li><li class="no"><span class="mark">✗</span>Индексы автоматически удаляются при массовой вставке</li><li class="no"><span class="mark">✗</span>Превышен лимит соединений</li><li class="no"><span class="mark">✗</span>Требуется перезапуск СУБД для применения индексов</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как автоматический сбор статистики решает, когда сработать?</li><li>Что такое раздувание таблицы и почему оно замедляет чтение?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/query-performance/">Практика оптимизации запросов</a><p>EXPLAIN и чтение плана, порядок колонок индекса, keyset-пагинация и ловушки, мешающие индексу.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/databases/explain/">Что делает EXPLAIN для SQL-запроса?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/explain-analyze/">Чем EXPLAIN ANALYZE отличается от обычного EXPLAIN?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/mvcc/">Что такое MVCC и как он позволяет читать без блокировок?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"После массовой загрузки данных запросы, работавшие быстро, резко замедлились, хотя индексы на месте. Наиболее вероятная причина?","acceptedAnswer":{"@type":"Answer","text":"Планировщик стоимостный: он опирается на статистику (число строк, распределение значений). После массовой загрузки она устарела — оценки неверны, выбирается плохой план. Лечение: ANALYZE таблица после больших загрузок Autovacuum обновит статистику позже, но не сразу Признак в EXPLAIN ANALYZE: оценка rows сильно отличается от фактической Для коррелированных колонок — расширенная статистика (CREATE STATISTICS) Оценка числа строк определяет выбор способа соединения и доступа. Если статистика говорит о тысяче строк, а их стало десять миллионов, планировщик выберет вложенные циклы там, где нужно хеш-соединение, и запрос замедлится на порядки. Автоматический сбор статистики обычно есть, но он срабатывает по порогу и с задержкой — после массовой загрузки её собирают явно. Смежные причины того же класса: раздувание таблицы из-за накопившихся мёртвых версий строк и индексы, которые полезно перестроить после большой загрузки. Диагностика одна и та же — сравнить в фактическом плане оценку и реальность."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

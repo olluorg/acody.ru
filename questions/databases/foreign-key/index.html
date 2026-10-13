@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что обеспечивает foreign key? — вопрос с собеседования</title>
+<meta name="description" content="Внешний ключ гарантирует ссылочную целостность: нельзя сослаться на несуществующую строку и нельзя удалить строку, на которую ссылаются (если не…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/foreign-key/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/foreign-key/">
+<meta property="og:title" content="Что обеспечивает foreign key? — вопрос с собеседования">
+<meta property="og:description" content="Внешний ключ гарантирует ссылочную целостность: нельзя сослаться на несуществующую строку и нельзя удалить строку, на которую ссылаются (если не…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Что обеспечивает foreign key?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Что обеспечивает foreign key?"}]}</script>
+  <h1>Что обеспечивает foreign key?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">JOIN, ключи и ограничения</span><span class="chip">SQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Зачем нужен внешний ключ?</li><li>Что такое ссылочная целостность?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Внешний ключ</b> гарантирует <b>ссылочную целостность</b>: нельзя сослаться на несуществующую строку и нельзя удалить строку, на которую ссылаются (если не задано иное).</p><ul><li><code>orders.customer_id REFERENCES customers(id)</code> — заказ без клиента не вставить</li><li>При удалении родителя: RESTRICT/NO ACTION (запрет), CASCADE (удалить детей), SET NULL</li><li>Индекс на ссылающейся колонке не создаётся автоматически в PostgreSQL — нужен для JOIN и удаления родителя</li></ul><p class="extra"><span>А ещё</span> В шардированных и микросервисных системах FK между базами невозможны — целостность обеспечивает приложение</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Что проверяет база:</b></p>
+<ul><li>при вставке и обновлении дочерней строки — что родитель с таким ключом существует (или значение NULL);</li><li>при удалении и изменении ключа родителя — что делать с детьми.</li></ul>
+<p><b>Действия при удалении/обновлении родителя:</b></p>
+<ul><li><code>NO ACTION</code> / <code>RESTRICT</code> — запретить, пока есть ссылки (по умолчанию);</li><li><code>CASCADE</code> — удалить или обновить дочерние строки;</li><li><code>SET NULL</code> / <code>SET DEFAULT</code> — обнулить ссылку.</li></ul>
+<p><b>Практика:</b></p>
+<ul><li>внешний ключ — бесплатная защита от «висячих» ссылок, которые иначе неизбежно появятся из-за багов и ручных правок;</li><li><b>индекс на колонке внешнего ключа</b> — PostgreSQL его не создаёт сам. Без него JOIN медленный, а удаление родителя проверяет детей полным просмотром дочерней таблицы;</li><li>проверка FK стоит при записи — на очень нагруженных таблицах иногда отказываются от FK осознанно;</li><li>CASCADE опасен: одно удаление может каскадно удалить много данных.</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-sql"><code>CREATE TABLE orders (
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  customer_id bigint NOT NULL REFERENCES customers(id) ON DELETE RESTRICT
+);
+CREATE INDEX ON orders (customer_id);   -- для JOIN и проверки при удалении клиента</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Ссылочная целостность: что проверяется при вставке и удалении.</li><li>Действия ON DELETE.</li><li>Индекс на колонке внешнего ключа.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Не создавать индекс на ссылающейся колонке.</li><li>Ставить CASCADE не задумываясь.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Ссылочную целостность: нельзя сослаться на несуществующую строку другой таблицы</li><li class="no"><span class="mark">✗</span>Уникальность всех значений столбца</li><li class="no"><span class="mark">✗</span>Ускорение любых запросов к таблице</li><li class="no"><span class="mark">✗</span>Автоматическое шифрование связанных данных</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Когда cascade delete опасен?</li><li>Нужно ли индексировать foreign key?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/joins-keys/">JOIN, ключи и ограничения</a><p>INNER/OUTER/CROSS JOIN, ловушка ON vs WHERE, первичные/внешние/уникальные ключи и ссылочная целостность.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/databases/on-delete-cascade-risk/">Чем опасно объявление внешнего ключа с ON DELETE CASCADE?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/foreign-key-basic/">Что обеспечивает внешний ключ (foreign key)?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/databases/primary-key-vs-unique/">Чем primary key отличается от unique-ограничения?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что обеспечивает foreign key?","acceptedAnswer":{"@type":"Answer","text":"Внешний ключ гарантирует ссылочную целостность: нельзя сослаться на несуществующую строку и нельзя удалить строку, на которую ссылаются (если не задано иное). orders.customer_id REFERENCES customers(id) — заказ без клиента не вставить При удалении родителя: RESTRICT/NO ACTION (запрет), CASCADE (удалить детей), SET NULL Индекс на ссылающейся колонке не создаётся автоматически в PostgreSQL — нужен для JOIN и удаления родителя В шардированных и микросервисных системах FK между базами невозможны — целостность обеспечивает приложение Что проверяет база: - при вставке и обновлении дочерней строки — что родитель с таким ключом существует (или значение NULL); - при удалении и изменении ключа родителя — что делать с детьми. Действия при удалении/обновлении родителя: - NO ACTION / RESTRICT — запретить, пока есть ссылки (по умолчанию); - CASCADE — удалить или обновить дочерние строки; - SET NULL / SET DEFAULT — обнулить ссылку. Практика: - внешний ключ — бесплатная защита от «висячих» ссылок, которые иначе неизбежно появятся из-за багов и ручных правок; - индекс на колонке внешнего ключа — PostgreSQL его не создаёт сам. Без него JOIN медленный, а удаление родителя проверяет детей полным просмотром дочерней таблицы; - проверка FK стоит при записи — на очень нагруженных таблицах иногда отказываются от FK осознанно; - CASCADE опасен: одно удаление может каскадно удалить много данных."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

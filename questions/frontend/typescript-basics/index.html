@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зачем нужен TypeScript и чем any отличается от unknown? — вопрос с собеседования</title>
+<meta name="description" content="TypeScript добавляет к JavaScript статические типы, которые проверяются при компиляции и стираются в итоговом JS. Польза: ошибки до запуска…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/typescript-basics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/typescript-basics/">
+<meta property="og:title" content="Зачем нужен TypeScript и чем any отличается от unknown? — вопрос с собеседования">
+<meta property="og:description" content="TypeScript добавляет к JavaScript статические типы, которые проверяются при компиляции и стираются в итоговом JS. Польза: ошибки до запуска…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Зачем нужен TypeScript и чем any отличается от unknown?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Зачем нужен TypeScript и чем any отличается от unknown?"}]}</script>
+  <h1>Зачем нужен TypeScript и чем any отличается от unknown?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">TypeScript</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Проверяет ли TypeScript типы во время выполнения?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">TypeScript добавляет к JavaScript <b>статические типы</b>, которые проверяются <b>при компиляции</b> и <b>стираются</b> в итоговом JS. Польза: ошибки до запуска, автодополнение, безопасный рефакторинг, типы как документация. <b>any</b> отключает проверку; <b>unknown</b> — «что угодно», но перед использованием тип нужно <b>сузить</b> проверкой.</p><ul><li>Данные из сети типы не гарантируют — проверять схемой (zod, valibot)</li><li>strict: true — обязательно в новых проектах</li><li>never — значение, которого не бывает: исчерпывающая проверка switch</li></ul><p class="extra"><span>А ещё</span> Вывод типов: явные аннотации нужны в основном на границах функций</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Структурная типизация.</b> Совместимость определяется формой объекта, а не именем типа: объект с нужными полями подходит, даже если объявлен иначе.</p>
+<p><b>any vs unknown:</b> <code>any</code> позволяет всё — и молча распространяется дальше, превращая проверки в формальность. <code>unknown</code> безопасен: к значению нельзя обратиться, пока проверка (<code>typeof</code>, <code>instanceof</code>, <code>in</code>, пользовательский type guard) не сузит тип.</p>
+<p><b>Сужение и размеченные объединения</b> — главный приём: объединение вариантов с полем-дискриминатором (<code>kind</code>), и в каждой ветке switch TypeScript знает точный тип.</p>
+<p><b>Границы системы.</b> Ответ API типизируют, но фактически сервер может вернуть что угодно — валидация схемой во время выполнения.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-ts"><code>function parse(input: unknown): number {
+  if (typeof input === &quot;number&quot;) return input;      // сужение
+  if (typeof input === &quot;string&quot;) return Number(input);
+  throw new Error(&quot;bad input&quot;);
+}
+
+type Shape = { kind: &quot;circle&quot;; r: number } | { kind: &quot;square&quot;; a: number };
+function area(s: Shape): number {
+  switch (s.kind) {
+    case &quot;circle&quot;: return Math.PI * s.r ** 2;
+    case &quot;square&quot;: return s.a ** 2;
+    default: const _exhaustive: never = s; return _exhaustive;
+  }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Статическая проверка и стирание типов.</li><li>any против unknown, сужение.</li><li>Проверка внешних данных.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/typescript-interface-type/">Чем interface отличается от type в TypeScript и что такое утилитарные типы?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/type-hints/">Что такое аннотации типов и проверяются ли они при выполнении?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Зачем нужен TypeScript и чем any отличается от unknown?","acceptedAnswer":{"@type":"Answer","text":"TypeScript добавляет к JavaScript статические типы, которые проверяются при компиляции и стираются в итоговом JS. Польза: ошибки до запуска, автодополнение, безопасный рефакторинг, типы как документация. any отключает проверку; unknown — «что угодно», но перед использованием тип нужно сузить проверкой. Данные из сети типы не гарантируют — проверять схемой (zod, valibot) strict: true — обязательно в новых проектах never — значение, которого не бывает: исчерпывающая проверка switch Вывод типов: явные аннотации нужны в основном на границах функций Структурная типизация. Совместимость определяется формой объекта, а не именем типа: объект с нужными полями подходит, даже если объявлен иначе. any vs unknown: any позволяет всё — и молча распространяется дальше, превращая проверки в формальность. unknown безопасен: к значению нельзя обратиться, пока проверка (typeof, instanceof, in, пользовательский type guard) не сузит тип. Сужение и размеченные объединения — главный приём: объединение вариантов с полем-дискриминатором (kind), и в каждой ветке switch TypeScript знает точный тип. Границы системы. Ответ API типизируют, но фактически сервер может вернуть что угодно — валидация схемой во время выполнения."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

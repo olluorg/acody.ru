@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие эффекты искажают результаты A/B-тестов — новизна, сетевые эффекты, сезонность? — вопрос с собеседования</title>
+<meta name="description" content="Эффект новизны — пользователи активно пробуют новое, и эффект угасает; эффект привыкания (primacy) — наоборот, сначала сопротивление. Сетевые эффекты…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/ab-pitfalls/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/ab-pitfalls/">
+<meta property="og:title" content="Какие эффекты искажают результаты A/B-тестов — новизна, сетевые эффекты, сезонность? — вопрос с собеседования">
+<meta property="og:description" content="Эффект новизны — пользователи активно пробуют новое, и эффект угасает; эффект привыкания (primacy) — наоборот, сначала сопротивление. Сетевые эффекты…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Какие эффекты искажают результаты A/B-тестов — новизна, сетевые эффекты, сезонность?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Какие эффекты искажают результаты A/B-тестов — новизна, сетевые эффекты, сезонность?"}]}</script>
+  <h1>Какие эффекты искажают результаты A/B-тестов — новизна, сетевые эффекты, сезонность?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">A/B-тесты</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему результат эксперимента не повторился после выкатки?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Эффект новизны</b> — пользователи активно пробуют новое, и эффект угасает; <b>эффект привыкания</b> (primacy) — наоборот, сначала сопротивление. <b>Сетевые эффекты и интерференция</b> — группы влияют друг на друга (маркетплейс, соцсеть, такси): рандомизация по пользователям даёт смещённый результат. <b>Сезонность и внешние события</b> — короткий тест в нетипичный период не обобщается.</p><ul><li>Против новизны — смотреть динамику эффекта по дням и на новых пользователях</li><li>Против интерференции — рандомизация по кластерам, городам или времени (switchback)</li><li>Долгосрочный эффект проверяют удерживающей группой (holdout)</li></ul><p class="extra"><span>А ещё</span> Обучающиеся системы (рекомендации) меняют данные под себя — тесты моделей сложнее</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Новизна и привыкание.</b> Новая кнопка яркого цвета получает больше кликов первые дни просто потому, что заметна. Смотрят график эффекта по дням теста и отдельно по пользователям, впервые увидевшим продукт уже в новой версии.</p>
+<p><b>Интерференция.</b> В маркетплейсе скидка для группы B забирает товар у группы A — B «выигрывает» частично за счёт A, и после выкатки на всех эффекта нет. В такси больше заказов в одной группе уменьшает свободных водителей для другой. Решения:</p>
+<ul><li><b>кластерная рандомизация</b> — по городам, магазинам, группам друзей;</li><li><b>switchback</b> — весь город переключается между вариантами по временным интервалам;</li><li>оценка эффекта на уровне рынка.</li></ul>
+<p><b>Holdout.</b> Небольшая доля пользователей надолго остаётся без изменений, чтобы измерить накопленный долгосрочный эффект серии выкатов.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Эффекты новизны и привыкания.</li><li>Интерференция и способы рандомизации.</li><li>Сезонность и долгосрочный holdout.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/ab-test-design/">Как спроектировать A/B-тест от гипотезы до решения?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/ab-testing-models/">Почему хорошая офлайн-метрика модели не гарантирует успех в продакшене и как проверить модель онлайн?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/analytics/quasi-experiments/">Как оценить эффект изменения, если A/B-тест провести нельзя?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие эффекты искажают результаты A/B-тестов — новизна, сетевые эффекты, сезонность?","acceptedAnswer":{"@type":"Answer","text":"Эффект новизны — пользователи активно пробуют новое, и эффект угасает; эффект привыкания (primacy) — наоборот, сначала сопротивление. Сетевые эффекты и интерференция — группы влияют друг на друга (маркетплейс, соцсеть, такси): рандомизация по пользователям даёт смещённый результат. Сезонность и внешние события — короткий тест в нетипичный период не обобщается. Против новизны — смотреть динамику эффекта по дням и на новых пользователях Против интерференции — рандомизация по кластерам, городам или времени (switchback) Долгосрочный эффект проверяют удерживающей группой (holdout) Обучающиеся системы (рекомендации) меняют данные под себя — тесты моделей сложнее Новизна и привыкание. Новая кнопка яркого цвета получает больше кликов первые дни просто потому, что заметна. Смотрят график эффекта по дням теста и отдельно по пользователям, впервые увидевшим продукт уже в новой версии. Интерференция. В маркетплейсе скидка для группы B забирает товар у группы A — B «выигрывает» частично за счёт A, и после выкатки на всех эффекта нет. В такси больше заказов в одной группе уменьшает свободных водителей для другой. Решения: - кластерная рандомизация — по городам, магазинам, группам друзей; - switchback — весь город переключается между вариантами по временным интервалам; - оценка эффекта на уровне рынка. Holdout. Небольшая доля пользователей надолго остаётся без изменений, чтобы измерить накопленный долгосрочный эффект серии выкатов."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

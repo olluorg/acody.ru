@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем TRUNCATE отличается от DELETE и DROP? — вопрос с собеседования</title>
+<meta name="description" content="DELETE удаляет строки (можно с WHERE), построчно, с триггерами; TRUNCATE очищает таблицу целиком и быстро; DROP удаляет саму таблицу со структурой…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/truncate-delete-drop/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/truncate-delete-drop/">
+<meta property="og:title" content="Чем TRUNCATE отличается от DELETE и DROP? — вопрос с собеседования">
+<meta property="og:description" content="DELETE удаляет строки (можно с WHERE), построчно, с триггерами; TRUNCATE очищает таблицу целиком и быстро; DROP удаляет саму таблицу со структурой…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Чем TRUNCATE отличается от DELETE и DROP?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Чем TRUNCATE отличается от DELETE и DROP?"}]}</script>
+  <h1>Чем TRUNCATE отличается от DELETE и DROP?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">SQL-запросы</span><span class="chip">SQL</span><span class="chip">PostgreSQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как быстро очистить таблицу?</li><li>Можно ли откатить TRUNCATE?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>DELETE</b> удаляет строки (можно с WHERE), построчно, с триггерами; <b>TRUNCATE</b> очищает таблицу целиком и быстро; <b>DROP</b> удаляет саму таблицу со структурой.</p><ul><li>DELETE — DML: пишет каждую строку в журнал, запускает row-триггеры, медленный на больших таблицах</li><li>TRUNCATE — DDL: освобождает страницы целиком, сбрасывает последовательности (RESTART IDENTITY), берёт эксклюзивную блокировку</li><li>Откат TRUNCATE зависит от СУБД: в PostgreSQL — да, в MySQL и Oracle — нет (неявный коммит)</li></ul><p class="extra"><span>А ещё</span> После массового DELETE в PostgreSQL место освобождает VACUUM, а не сам DELETE</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>DELETE</b> — команда DML. Удаляет строки по условию, для каждой срабатывают триггеры и проверки внешних ключей, каждая строка попадает в журнал. Полностью транзакционна. В PostgreSQL строки лишь помечаются удалёнными (MVCC), место освобождает VACUUM — после удаления половины таблицы файл не уменьшится.</p>
+<p><b>TRUNCATE</b> — команда DDL. Не перебирает строки, а освобождает страницы таблицы целиком — мгновенно даже для миллиардов строк. Особенности: нет WHERE, не срабатывают построчные триггеры, берётся эксклюзивная блокировка таблицы, последовательности можно сбросить (<code>RESTART IDENTITY</code>), нельзя выполнить на таблице, на которую ссылаются внешние ключи, без <code>CASCADE</code>. В PostgreSQL TRUNCATE транзакционен и откатывается; в MySQL и Oracle вызывает неявный коммит.</p>
+<p><b>DROP</b> — удаляет таблицу вместе со структурой, индексами, ограничениями и правами.</p>
+<p><b>Для больших объёмов</b> удаляют не DELETE на всю таблицу, а: TRUNCATE, если нужно всё; удаление пачками по индексу; или партиционирование по времени — старая партиция отключается и удаляется мгновенно (<code>DETACH</code> + <code>DROP</code>).</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Различия: строки, содержимое целиком, структура.</li><li>Скорость, триггеры, журнал, блокировки.</li><li>Откатываемость в разных СУБД.</li><li>Удаление больших объёмов через партиции — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что DELETE сразу освобождает место на диске.</li><li>Делать DELETE на миллиард строк одной транзакцией.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>TRUNCATE быстро очищает все строки таблицы, DELETE удаляет выбранные строки, DROP удаляет саму таблицу</li><li class="no"><span class="mark">✗</span>TRUNCATE удаляет таблицу, а DROP очищает строки</li><li class="no"><span class="mark">✗</span>DELETE и TRUNCATE полностью идентичны</li><li class="no"><span class="mark">✗</span>DROP удаляет только данные, оставляя структуру таблицы</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Можно ли откатить TRUNCATE?</li><li>Что происходит с identity/sequence при TRUNCATE?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/sql-basics/">SQL: операторы, NULL и фильтрация</a><p>Группы команд, логический порядок SELECT, трёхзначная логика NULL, разница WHERE/HAVING и оконные функции — с ловушками, на которых валятся на собеседовании.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/databases/sql-command-groups/">К какой группе SQL-команд относятся SELECT, INSERT, UPDATE, DELETE?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем TRUNCATE отличается от DELETE и DROP?","acceptedAnswer":{"@type":"Answer","text":"DELETE удаляет строки (можно с WHERE), построчно, с триггерами; TRUNCATE очищает таблицу целиком и быстро; DROP удаляет саму таблицу со структурой. DELETE — DML: пишет каждую строку в журнал, запускает row-триггеры, медленный на больших таблицах TRUNCATE — DDL: освобождает страницы целиком, сбрасывает последовательности (RESTART IDENTITY), берёт эксклюзивную блокировку Откат TRUNCATE зависит от СУБД: в PostgreSQL — да, в MySQL и Oracle — нет (неявный коммит) После массового DELETE в PostgreSQL место освобождает VACUUM, а не сам DELETE DELETE — команда DML. Удаляет строки по условию, для каждой срабатывают триггеры и проверки внешних ключей, каждая строка попадает в журнал. Полностью транзакционна. В PostgreSQL строки лишь помечаются удалёнными (MVCC), место освобождает VACUUM — после удаления половины таблицы файл не уменьшится. TRUNCATE — команда DDL. Не перебирает строки, а освобождает страницы таблицы целиком — мгновенно даже для миллиардов строк. Особенности: нет WHERE, не срабатывают построчные триггеры, берётся эксклюзивная блокировка таблицы, последовательности можно сбросить (RESTART IDENTITY), нельзя выполнить на таблице, на которую ссылаются внешние ключи, без CASCADE. В PostgreSQL TRUNCATE транзакционен и откатывается; в MySQL и Oracle вызывает неявный коммит. DROP — удаляет таблицу вместе со структурой, индексами, ограничениями и правами. Для больших объёмов удаляют не DELETE на всю таблицу, а: TRUNCATE…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

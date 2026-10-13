@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие меры безопасности вы заложите при проектировании публичного REST API с личным кабинетом пользователя? — вопрос с собеседования</title>
+<meta name="description" content="По слоям: контроль доступа → аутентификация → ввод и транспорт → что отдаём наружу → эксплуатация. Доступ: проверка владения в каждом запросе, запрет…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/secure-public-api/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/secure-public-api/">
+<meta property="og:title" content="Какие меры безопасности вы заложите при проектировании публичного REST API с личным кабинетом пользователя? — вопрос с собеседования">
+<meta property="og:description" content="По слоям: контроль доступа → аутентификация → ввод и транспорт → что отдаём наружу → эксплуатация. Доступ: проверка владения в каждом запросе, запрет…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Какие меры безопасности вы заложите при проектировании публичного REST API с личным кабинетом пользователя?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Какие меры безопасности вы заложите при проектировании публичного REST API с личным кабинетом пользователя?"}]}</script>
+  <h1>Какие меры безопасности вы заложите при проектировании публичного REST API с личным кабинетом пользователя?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Безопасность приложения</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как обеспечить безопасность REST API?</li><li>Какие меры защиты нужны личному кабинету?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">По слоям: <b>контроль доступа → аутентификация → ввод и транспорт → что отдаём наружу → эксплуатация</b>.</p><ul><li>Доступ: проверка владения в каждом запросе, запрет по умолчанию, различие 401 и 403</li><li>Аутентификация: argon2/bcrypt, короткий access и отзываемый refresh, лимит попыток входа, 2FA</li><li>Ввод: параметризованные запросы, валидация, лимиты размера и частоты, TLS</li></ul><p class="extra"><span>А ещё</span> Наружу — код ошибки и correlation id вместо стектрейса; одинаковое сообщение при неверном логине и пароле</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Контроль доступа</b> — самая частая уязвимость. Проверка владения ресурсом на сервере в каждом запросе (лучше в выборке из базы), модель запрета по умолчанию, централизованные политики для ролей. 401 — не аутентифицирован, 403 — нет прав (а для чужих ресурсов часто 404).</p>
+<p><b>Аутентификация:</b> пароли — argon2id или bcrypt с солью; короткоживущие access-токены и отзываемые refresh; фиксированный алгоритм подписи; ограничение попыток входа и защита от перебора (задержки, капча); двухфакторная аутентификация; безопасное восстановление пароля (одноразовые токены с коротким сроком).</p>
+<p><b>Ввод и транспорт:</b> параметризованные запросы против инъекций; валидация схемы и размера тела; ограничение частоты по ключу и IP; только HTTPS, HSTS; внутри периметра — mTLS; CORS только для своих источников; защита cookie: <code>HttpOnly</code>, <code>Secure</code>, <code>SameSite</code>.</p>
+<p><b>Что отдаём:</b> ошибки без стектрейсов и SQL — код и correlation id; одинаковый ответ на «нет пользователя» и «неверный пароль»; не отдавать лишние поля (массовое присвоение и раскрытие данных — явные DTO).</p>
+<p><b>Эксплуатация:</b> секреты в менеджере с ротацией; проверка зависимостей в сборке; журналирование событий безопасности (входы, смены пароля, отказы доступа) и алерты на аномалии; регулярные тесты на проникновение.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Структурированный ответ по слоям.</li><li>Контроль доступа как главный риск.</li><li>Конкретные меры аутентификации и защиты ввода.</li><li>Утечки через ошибки и эксплуатационные меры.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Перечислять OWASP Top 10 без привязки к API.</li><li>Забыть про контроль доступа к объектам.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как вы обнаружите, что API уже атакуют?</li><li>Что такое zero trust и зачем mTLS внутри периметра?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/security/">Безопасность приложения: OWASP, доступ и секреты</a><p>OWASP Top 10 в редакции 2025, разница аутентификации и авторизации, ловушки JWT против сессий, хранение паролей и секретов, безопасность цепочки поставок.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/idor-access-control/">Эндпоинт GET /orders/{id} проверяет, что пользователь аутентифицирован, и возвращает заказ по идентификатору. Что здесь не так?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/jwt-pitfalls/">Что верно про использование JWT для аутентификации?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/password-hashing-kdf/">Чем bcrypt и argon2 принципиально отличаются от SHA-256 применительно к хранению паролей?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/sql-injection/">Что такое SQL-инъекция и как от неё защититься?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/xss/">Что такое XSS и как от неё защищаться?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/csrf-cors/">Что такое CSRF и как он связан с CORS?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/rate-limiting/">Какие алгоритмы ограничения частоты запросов вы знаете?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие меры безопасности вы заложите при проектировании публичного REST API с личным кабинетом пользователя?","acceptedAnswer":{"@type":"Answer","text":"По слоям: контроль доступа → аутентификация → ввод и транспорт → что отдаём наружу → эксплуатация. Доступ: проверка владения в каждом запросе, запрет по умолчанию, различие 401 и 403 Аутентификация: argon2/bcrypt, короткий access и отзываемый refresh, лимит попыток входа, 2FA Ввод: параметризованные запросы, валидация, лимиты размера и частоты, TLS Наружу — код ошибки и correlation id вместо стектрейса; одинаковое сообщение при неверном логине и пароле Контроль доступа — самая частая уязвимость. Проверка владения ресурсом на сервере в каждом запросе (лучше в выборке из базы), модель запрета по умолчанию, централизованные политики для ролей. 401 — не аутентифицирован, 403 — нет прав (а для чужих ресурсов часто 404). Аутентификация: пароли — argon2id или bcrypt с солью; короткоживущие access-токены и отзываемые refresh; фиксированный алгоритм подписи; ограничение попыток входа и защита от перебора (задержки, капча); двухфакторная аутентификация; безопасное восстановление пароля (одноразовые токены с коротким сроком). Ввод и транспорт: параметризованные запросы против инъекций; валидация схемы и размера тела; ограничение частоты по ключу и IP; только HTTPS, HSTS; внутри периметра — mTLS; CORS только для своих источников; защита cookie: HttpOnly, Secure, SameSite. Что отдаём: ошибки без стектрейсов и SQL — код и correlation id; одинаковый…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

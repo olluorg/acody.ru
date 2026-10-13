@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое ROC-AUC и PR-AUC и когда какую метрику использовать? — вопрос с собеседования</title>
+<meta name="description" content="ROC-кривая — зависимость доли найденных положительных (TPR) от доли ложных тревог (FPR) при всех порогах; ROC-AUC — площадь под ней, вероятность…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/roc-pr-auc/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/roc-pr-auc/">
+<meta property="og:title" content="Что такое ROC-AUC и PR-AUC и когда какую метрику использовать? — вопрос с собеседования">
+<meta property="og:description" content="ROC-кривая — зависимость доли найденных положительных (TPR) от доли ложных тревог (FPR) при всех порогах; ROC-AUC — площадь под ней, вероятность…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Что такое ROC-AUC и PR-AUC и когда какую метрику использовать?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Что такое ROC-AUC и PR-AUC и когда какую метрику использовать?"}]}</script>
+  <h1>Что такое ROC-AUC и PR-AUC и когда какую метрику использовать?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Основы машинного обучения</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как интерпретировать ROC-кривую?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>ROC-кривая</b> — зависимость доли найденных положительных (TPR) от доли ложных тревог (FPR) при всех порогах; <b>ROC-AUC</b> — площадь под ней, вероятность того, что случайный положительный объект получит оценку выше случайного отрицательного. <b>PR-кривая</b> — precision против recall; при <b>сильном дисбалансе</b> PR-AUC честнее.</p><ul><li>ROC-AUC 0,5 — случайное угадывание, 1 — идеальное ранжирование</li><li>AUC не зависит от порога — оценивает качество ранжирования, а не решения</li><li>ROC-AUC может выглядеть высоким при редком классе, когда precision при этом низкий</li></ul><p class="extra"><span>А ещё</span> Для бизнеса важна метрика при выбранном пороге: precision@k, recall при фиксированной доле тревог</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Порог классификатора: матрица ошибок, ROC и PR</p><script type="module" src="/widgets/roc-threshold.js"></script><sotto-roc-threshold theme="dark"></sotto-roc-threshold></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Построение ROC.</b> Сортируем объекты по оценке модели и сдвигаем порог от максимума к минимуму. На каждом пороге считаем:</p>
+<ul><li>TPR = TP / (TP + FN) — recall, доля найденных положительных;</li><li>FPR = FP / (FP + TN) — доля отрицательных, ошибочно отмеченных.</li></ul>
+<p><b>Почему ROC обманчив при дисбалансе.</b> При миллионе нормальных транзакций и тысяче мошеннических FPR 1% — это 10 000 ложных тревог на 1 000 настоящих: precision около 9%, хотя на ROC-кривой точка выглядит отлично. PR-кривая показывает эту проблему сразу.</p>
+<p><b>PR-AUC (average precision)</b> — площадь под кривой precision-recall. Базовый уровень случайной модели равен доле положительного класса, а не 0,5.</p>
+<p><b>Когда что:</b></p>
+<ul><li>классы сбалансированы, важно ранжирование в целом — ROC-AUC;</li><li>редкий класс, важны найденные срабатывания — PR-AUC;</li><li>конкретное решение — метрики при выбранном пороге и их стоимость.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Как строятся кривые и что означает площадь.</li><li>Независимость от порога.</li><li>Почему при дисбалансе нужна PR-кривая.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/classification-metrics/">Какие метрики качества классификации вы знаете?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/imbalanced-classes/">Как работать с несбалансированными классами?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое ROC-AUC и PR-AUC и когда какую метрику использовать?","acceptedAnswer":{"@type":"Answer","text":"ROC-кривая — зависимость доли найденных положительных (TPR) от доли ложных тревог (FPR) при всех порогах; ROC-AUC — площадь под ней, вероятность того, что случайный положительный объект получит оценку выше случайного отрицательного. PR-кривая — precision против recall; при сильном дисбалансе PR-AUC честнее. ROC-AUC 0,5 — случайное угадывание, 1 — идеальное ранжирование AUC не зависит от порога — оценивает качество ранжирования, а не решения ROC-AUC может выглядеть высоким при редком классе, когда precision при этом низкий Для бизнеса важна метрика при выбранном пороге: precision@k, recall при фиксированной доле тревог Построение ROC. Сортируем объекты по оценке модели и сдвигаем порог от максимума к минимуму. На каждом пороге считаем: - TPR = TP / (TP + FN) — recall, доля найденных положительных; - FPR = FP / (FP + TN) — доля отрицательных, ошибочно отмеченных. Почему ROC обманчив при дисбалансе. При миллионе нормальных транзакций и тысяче мошеннических FPR 1% — это 10 000 ложных тревог на 1 000 настоящих: precision около 9%, хотя на ROC-кривой точка выглядит отлично. PR-кривая показывает эту проблему сразу. PR-AUC (average precision) — площадь под кривой precision-recall. Базовый уровень случайной модели равен доле положительного класса, а не 0,5. Когда что: - классы сбалансированы, важно ранжирование в целом — ROC-AUC; - редкий класс, важны найденные срабатывания — PR-AUC; - конкретное решение — метрики при выбранном пороге и их стоимость."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

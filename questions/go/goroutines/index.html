@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое горутина и чем она отличается от потока ОС? — вопрос с собеседования</title>
+<meta name="description" content="Горутина — лёгкий поток, управляемый рантаймом Go: стартовый стек ~2 КБ (растёт по необходимости), создание и переключение в разы дешевле потока ОС …">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/go/goroutines/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/go/goroutines/">
+<meta property="og:title" content="Что такое горутина и чем она отличается от потока ОС? — вопрос с собеседования">
+<meta property="og:description" content="Горутина — лёгкий поток, управляемый рантаймом Go: стартовый стек ~2 КБ (растёт по необходимости), создание и переключение в разы дешевле потока ОС …">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/go/">Go</a> <span>/</span> <span>Что такое горутина и чем она отличается от потока ОС?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Go","item":"https://learn.getsotto.ru/questions/go/"},{"@type":"ListItem","position":3,"name":"Что такое горутина и чем она отличается от потока ОС?"}]}</script>
+  <h1>Что такое горутина и чем она отличается от потока ОС?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Горутины и каналы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как устроен планировщик Go (модель GMP)?</li><li>Сколько горутин можно запустить?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Горутина — <b>лёгкий поток, управляемый рантаймом Go</b>: стартовый стек ~2 КБ (растёт по необходимости), создание и переключение в разы дешевле потока ОС — можно держать <b>сотни тысяч</b>. Планировщик <b>M:N</b> распределяет горутины (G) по потокам ОС (M) через логические процессоры (P), число которых = <b>GOMAXPROCS</b> (по умолчанию — число ядер).</p><ul><li>Блокирующий системный вызов — планировщик отдаёт P другому потоку</li><li>Сетевой ввод-вывод — через netpoller (epoll): горутина паркуется, поток свободен</li><li>Вытесняющий планировщик (с Go 1.14) — долгий цикл не захватит ядро навсегда</li></ul><p class="extra"><span>А ещё</span> main завершилась — программа завершается, не дожидаясь горутин</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Запуск:</b> <code>go f(x)</code> — функция выполняется конкурентно; аргументы вычисляются сразу. Результат горутина возвращает через канал или общую структуру под мьютексом.</p>
+<p><b>Модель GMP:</b></p>
+<ul><li><b>G</b> — горутина: стек, указатель команды, состояние;</li><li><b>M</b> — поток ОС;</li><li><b>P</b> — логический процессор с локальной очередью горутин; поток выполняет код Go, только держа P.</li></ul>
+<p>Свободный P крадёт горутины из чужих очередей (work stealing). При блокирующем системном вызове M отпускает P, и тот уходит к другому потоку. Сеть обслуживает netpoller: горутина «спит», не занимая поток, а когда сокет готов, её снова ставят в очередь.</p>
+<p><b>Сравнение с потоками ОС:</b> поток — мегабайты стека и переключение через ядро; горутина — килобайты и переключение в пространстве пользователя. Поэтому в Go принят стиль «горутина на запрос» с простым блокирующим кодом — то же, к чему Java пришла с виртуальными потоками.</p>
+<p><b>Ожидание завершения</b> — <code>sync.WaitGroup</code> или каналы; без этого main выйдет раньше.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Отличие от потоков ОС.</li><li>Модель GMP и GOMAXPROCS.</li><li>Как планировщик обходится с вводом-выводом.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/go/channels/">Чем буферизованный канал отличается от небуферизованного и что происходит при закрытии канала?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/go/mutex-waitgroup/">Когда использовать каналы, а когда sync.Mutex и WaitGroup?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/process-vs-thread/">Чем процесс отличается от потока?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/virtual-threads/">Чем виртуальный поток отличается от обычного платформенного?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/asyncio-event-loop/">Как устроен event loop в asyncio?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое горутина и чем она отличается от потока ОС?","acceptedAnswer":{"@type":"Answer","text":"Горутина — лёгкий поток, управляемый рантаймом Go: стартовый стек ~2 КБ (растёт по необходимости), создание и переключение в разы дешевле потока ОС — можно держать сотни тысяч. Планировщик M:N распределяет горутины (G) по потокам ОС (M) через логические процессоры (P), число которых = GOMAXPROCS (по умолчанию — число ядер). Блокирующий системный вызов — планировщик отдаёт P другому потоку Сетевой ввод-вывод — через netpoller (epoll): горутина паркуется, поток свободен Вытесняющий планировщик (с Go 1.14) — долгий цикл не захватит ядро навсегда main завершилась — программа завершается, не дожидаясь горутин Запуск: go f(x) — функция выполняется конкурентно; аргументы вычисляются сразу. Результат горутина возвращает через канал или общую структуру под мьютексом. Модель GMP: - G — горутина: стек, указатель команды, состояние; - M — поток ОС; - P — логический процессор с локальной очередью горутин; поток выполняет код Go, только держа P. Свободный P крадёт горутины из чужих очередей (work stealing). При блокирующем системном вызове M отпускает P, и тот уходит к другому потоку. Сеть обслуживает netpoller: горутина «спит», не занимая поток, а когда сокет готов, её снова ставят в очередь. Сравнение с потоками ОС: поток — мегабайты стека и переключение через ядро; горутина — килобайты и переключение в пространстве пользователя. Поэтому в Go принят стиль «горутина на запрос» с простым блокирующим кодом — то же, к чему Java пришла с виртуальными потоками. Ожидание завершения — sync.WaitGroup или…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

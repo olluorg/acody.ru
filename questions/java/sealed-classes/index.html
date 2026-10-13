@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что делает модификатор sealed у класса или интерфейса? — вопрос с собеседования</title>
+<meta name="description" content="sealed ограничивает список наследников: наследовать или реализовывать могут только перечисленные в permits типы. Набор вариантов закрыт и известен…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/sealed-classes/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/sealed-classes/">
+<meta property="og:title" content="Что делает модификатор sealed у класса или интерфейса? — вопрос с собеседования">
+<meta property="og:description" content="sealed ограничивает список наследников: наследовать или реализовывать могут только перечисленные в permits типы. Набор вариантов закрыт и известен…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что делает модификатор sealed у класса или интерфейса?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что делает модификатор sealed у класса или интерфейса?"}]}</script>
+  <h1>Что делает модификатор sealed у класса или интерфейса?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Современная Java</span><span class="chip ver">Java &gt;=17</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Зачем нужны sealed-классы?</li><li>Что такое pattern matching для switch?</li><li>Что такое sealed class/interface?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">sealed <b>ограничивает список наследников</b>: наследовать или реализовывать могут только перечисленные в <code>permits</code> типы.</p><ul><li>Набор вариантов закрыт и известен компилятору</li><li>Вместе с pattern matching в switch компилятор проверяет, что разобраны все варианты</li></ul><p class="extra"><span>А ещё</span> Наследник должен быть final, sealed или non-sealed</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><code>sealed</code> (Java 17) — промежуточный вариант между открытым классом и <code>final</code>. Вы явно перечисляете, кто может наследоваться: <code>sealed interface Shape permits Circle, Square, Rectangle</code>. Каждый наследник объявляется <code>final</code>, <code>sealed</code> (дальше ограничивает) или <code>non-sealed</code> (снова открывает иерархию).</p>
+<p>Главная выгода проявляется вместе с <b>сопоставлением с образцом</b> (pattern matching for switch, Java 21). Раз компилятор знает все варианты, <code>switch</code> по <code>Shape</code> без <code>default</code> проверяется на полноту: если добавить новый тип, компилятор укажет все места, где он не обработан.</p>
+<p>Так удобно моделировать закрытые наборы состояний и результатов: результат операции «успех или ошибка», статус заказа, команды, узлы дерева выражений. Это то, что в функциональных языках называют алгебраическими типами данных; record хорошо подходит для вариантов.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>sealed interface PaymentResult permits Success, Declined, Failed {}
+record Success(String txId) implements PaymentResult {}
+record Declined(String reason) implements PaymentResult {}
+record Failed(Exception error) implements PaymentResult {}
+
+String message(PaymentResult r) {
+    return switch (r) {                 // без default — компилятор проверит полноту
+        case Success s  -&gt; &quot;Оплачено: &quot; + s.txId();
+        case Declined d -&gt; &quot;Отказ: &quot; + d.reason();
+        case Failed f   -&gt; &quot;Ошибка, попробуйте позже&quot;;
+    };
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Назначение: закрытый список наследников.</li><li>Требования к наследникам: final, sealed, non-sealed.</li><li>Связь с pattern matching и проверкой полноты switch.</li><li>Пример применения.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Путать с полным запретом наследования.</li><li>Применять к иерархии, которую должны расширять сторонние разработчики.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Ограничивает список типов, которым разрешено его наследовать или реализовывать</li><li class="no"><span class="mark">✗</span>Полностью запрещает наследование, как final</li><li class="no"><span class="mark">✗</span>Делает все поля класса неизменяемыми</li><li class="no"><span class="mark">✗</span>Скрывает класс от других пакетов</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что обязан объявить о себе наследник такого типа?</li><li>Как это связано с проверкой полноты в switch?</li><li>Чем sealed полезен для switch?</li><li>Когда sealed ухудшит расширяемость?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/sealed-pattern/">Sealed-типы и pattern matching</a><p>Закрытые иерархии через sealed, pattern matching в instanceof и switch, деконструкция записей и проверка исчерпываемости.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/instanceof-pattern/">Что даёт pattern matching в instanceof по сравнению с классической проверкой?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/sealed-pattern-matching/">Какое главное преимущество даёт sealed-иерархия при использовании switch с pattern matching?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/sealed-subclass-requirements/">Что обязан сделать наследник sealed-класса?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что делает модификатор sealed у класса или интерфейса?","acceptedAnswer":{"@type":"Answer","text":"sealed ограничивает список наследников: наследовать или реализовывать могут только перечисленные в permits типы. Набор вариантов закрыт и известен компилятору Вместе с pattern matching в switch компилятор проверяет, что разобраны все варианты Наследник должен быть final, sealed или non-sealed sealed (Java 17) — промежуточный вариант между открытым классом и final. Вы явно перечисляете, кто может наследоваться: sealed interface Shape permits Circle, Square, Rectangle. Каждый наследник объявляется final, sealed (дальше ограничивает) или non-sealed (снова открывает иерархию). Главная выгода проявляется вместе с сопоставлением с образцом (pattern matching for switch, Java 21). Раз компилятор знает все варианты, switch по Shape без default проверяется на полноту: если добавить новый тип, компилятор укажет все места, где он не обработан. Так удобно моделировать закрытые наборы состояний и результатов: результат операции «успех или ошибка», статус заказа, команды, узлы дерева выражений. Это то, что в функциональных языках называют алгебраическими типами данных; record хорошо подходит для вариантов."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

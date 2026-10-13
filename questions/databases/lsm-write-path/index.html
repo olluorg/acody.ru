@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как устроен путь записи в LSM-дереве, лежащем в основе Cassandra и подобных хранилищ? — вопрос с собеседования</title>
+<meta name="description" content="Запись → журнал (commit log) и memtable в памяти → при заполнении сброс неизменяемым отсортированным файлом SSTable → фоновая компакция сливает…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/lsm-write-path/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/lsm-write-path/">
+<meta property="og:title" content="Как устроен путь записи в LSM-дереве, лежащем в основе Cassandra и подобных хранилищ? — вопрос с собеседования">
+<meta property="og:description" content="Запись → журнал (commit log) и memtable в памяти → при заполнении сброс неизменяемым отсортированным файлом SSTable → фоновая компакция сливает…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Как устроен путь записи в LSM-дереве, лежащем в основе Cassandra и подобных хранилищ?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Как устроен путь записи в LSM-дереве, лежащем в основе Cassandra и подобных хранилищ?"}]}</script>
+  <h1>Как устроен путь записи в LSM-дереве, лежащем в основе Cassandra и подобных хранилищ?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Колоночные БД</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему Cassandra быстро пишет?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Запись → <b>журнал</b> (commit log) и <b>memtable</b> в памяти → при заполнении сброс неизменяемым отсортированным файлом <b>SSTable</b> → фоновая <b>компакция</b> сливает файлы.</p><ul><li>Вся запись последовательная — отсюда скорость</li><li>Чтение проверяет memtable и несколько SSTable, отсекая лишние фильтрами Блума</li><li>Удаление — надгробие, место освобождается при компакции</li></ul><p class="extra"><span>А ещё</span> Цена — усиление записи при компакции и всплески задержки</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">LSM-дерево: memtable, сброс и слияние</p><script type="module" src="/widgets/lsm-tree.js"></script><sotto-lsm-tree theme="dark"></sotto-lsm-tree></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Ключевая идея в том, что диск получает только последовательные записи: ничего не обновляется по месту, что радикально быстрее случайных обновлений B-tree. Плата возникает при чтении — искомый ключ может лежать в памяти или в любом из накопившихся файлов, поэтому обращений становится несколько; смягчают это фильтры Блума, отсеивающие файлы без нужного ключа, и разреженные индексы. Вторая часть цены — компакция: она потребляет диск и процессор в фоне и способна повлиять на задержки, а до её выполнения удалённые данные физически остаются на диске в виде надгробий. Отсюда практическое правило: такие хранилища выбирают под нагрузку с преобладанием записи и доступом по известному ключу.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Путь записи по шагам.</li><li>Почему быстро.</li><li>Чтение, фильтры Блума, компакция и надгробия.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать удаление в таких хранилищах немедленным освобождением места.</li><li>Игнорировать влияние компакции на задержки и планирование дискового пространства.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Запись идёт в журнал и в структуру в памяти; та периодически сбрасывается на диск неизменяемым файлом, а фоновая компакция сливает файлы и удаляет устаревшие версии</li><li class="no"><span class="mark">✗</span>Каждая запись сразу обновляет страницу на диске по месту</li><li class="no"><span class="mark">✗</span>Записи накапливаются в памяти и теряются при сбое узла</li><li class="no"><span class="mark">✗</span>Данные пишутся в B-tree с перебалансировкой при каждой вставке</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Зачем нужны фильтры Блума при чтении?</li><li>Что такое надгробия и чем опасно их накопление?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/wide-column-db/">Колоночные БД: wide-column и аналитические</a><p>Разница между wide-column (Cassandra) и column-oriented OLAP (ClickHouse), partition/clustering keys, LSM-дерево и зачем хранить по колонкам.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/lsm-tree/">Что такое LSM-дерево и чем оно отличается от B-дерева?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/cs/wal/">Что такое журнал предзаписи (WAL) и зачем он нужен?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/bloom-filter/">Что такое фильтр Блума и где он применяется?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как устроен путь записи в LSM-дереве, лежащем в основе Cassandra и подобных хранилищ?","acceptedAnswer":{"@type":"Answer","text":"Запись → журнал (commit log) и memtable в памяти → при заполнении сброс неизменяемым отсортированным файлом SSTable → фоновая компакция сливает файлы. Вся запись последовательная — отсюда скорость Чтение проверяет memtable и несколько SSTable, отсекая лишние фильтрами Блума Удаление — надгробие, место освобождается при компакции Цена — усиление записи при компакции и всплески задержки Ключевая идея в том, что диск получает только последовательные записи: ничего не обновляется по месту, что радикально быстрее случайных обновлений B-tree. Плата возникает при чтении — искомый ключ может лежать в памяти или в любом из накопившихся файлов, поэтому обращений становится несколько; смягчают это фильтры Блума, отсеивающие файлы без нужного ключа, и разреженные индексы. Вторая часть цены — компакция: она потребляет диск и процессор в фоне и способна повлиять на задержки, а до её выполнения удалённые данные физически остаются на диске в виде надгробий. Отсюда практическое правило: такие хранилища выбирают под нагрузку с преобладанием записи и доступом по известному ключу."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

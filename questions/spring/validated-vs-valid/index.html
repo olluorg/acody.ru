@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем @Validated отличается от @Valid? — вопрос с собеседования</title>
+<meta name="description" content="@Valid — стандарт Jakarta Bean Validation, включает каскадную проверку вложенных объектов. @Validated — аннотация Spring: группы валидации и проверка…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/validated-vs-valid/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/validated-vs-valid/">
+<meta property="og:title" content="Чем @Validated отличается от @Valid? — вопрос с собеседования">
+<meta property="og:description" content="@Valid — стандарт Jakarta Bean Validation, включает каскадную проверку вложенных объектов. @Validated — аннотация Spring: группы валидации и проверка…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Чем @Validated отличается от @Valid?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Чем @Validated отличается от @Valid?"}]}</script>
+  <h1>Чем @Validated отличается от @Valid?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Валидация и обработка ошибок</span><span class="chip">Spring</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как использовать группы валидации в Spring?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>@Valid</b> — стандарт Jakarta Bean Validation, включает каскадную проверку вложенных объектов. <b>@Validated</b> — аннотация Spring: <b>группы валидации</b> и проверка <b>параметров методов</b> бинов (на классе).</p><ul><li>@Validated(OnCreate.class) — разные правила для создания и изменения</li><li>@Validated на классе сервиса + @NotNull на параметрах — проверка через AOP</li><li>Для вложенных полей — @Valid</li></ul><p class="extra"><span>А ещё</span> Нарушение в методе сервиса — ConstraintViolationException</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Практическая разница проявляется в двух местах. Группы: одна DTO часто валидируется по-разному при создании и обновлении, и задать это можно только через @Validated(OnCreate.class). Валидация параметров методов: @Validated на классе подключает MethodValidationPostProcessor, и тогда проверяются аннотации прямо на аргументах сервисных методов, а нарушение даёт ConstraintViolationException. Важное следствие для обработки ошибок: в контроллере с @Valid на теле запроса вы ловите MethodArgumentNotValidException, а при валидации методов — ConstraintViolationException, и эти случаи обрабатываются по-разному. Каскадную проверку вложенного объекта включает именно @Valid на поле.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Различие и когда что.</li><li>Группы и валидация параметров методов.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ожидать групп от @Valid.</li><li>Забыть @Valid на вложенном поле и получить непроверенный объект внутри DTO.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>@Validated — аннотация Spring, поддерживает группы валидации и на уровне класса включает проверку параметров методов; @Valid — стандарт Bean Validation с каскадной проверкой вложенных объектов</li><li class="no"><span class="mark">✗</span>@Valid работает только в контроллерах, @Validated — только в сервисах</li><li class="no"><span class="mark">✗</span>Это полные синонимы, оставленные для совместимости</li><li class="no"><span class="mark">✗</span>@Validated проверяет только примитивные типы</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Какое исключение возникает при валидации параметров сервисного метода?</li><li>Как включить каскадную валидацию списка вложенных объектов?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/mvc-advanced/">Валидация и обработка ошибок</a><p>Bean Validation и @Valid/@Validated, превращение ошибок в ответ, @ControllerAdvice и единый контракт, ProblemDetail (RFC 7807), multipart и interceptors.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/dto-validation/">Как в Spring MVC обычно обрабатывают ошибки и валидацию входных DTO?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/invalid-request-body/">В контроллере стоит @Valid @RequestBody CreateUserRequest, и клиент прислал невалидное тело. Что произойдёт по умолчанию?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем @Validated отличается от @Valid?","acceptedAnswer":{"@type":"Answer","text":"@Valid — стандарт Jakarta Bean Validation, включает каскадную проверку вложенных объектов. @Validated — аннотация Spring: группы валидации и проверка параметров методов бинов (на классе). @Validated(OnCreate.class) — разные правила для создания и изменения @Validated на классе сервиса + @NotNull на параметрах — проверка через AOP Для вложенных полей — @Valid Нарушение в методе сервиса — ConstraintViolationException Практическая разница проявляется в двух местах. Группы: одна DTO часто валидируется по-разному при создании и обновлении, и задать это можно только через @Validated(OnCreate.class). Валидация параметров методов: @Validated на классе подключает MethodValidationPostProcessor, и тогда проверяются аннотации прямо на аргументах сервисных методов, а нарушение даёт ConstraintViolationException. Важное следствие для обработки ошибок: в контроллере с @Valid на теле запроса вы ловите MethodArgumentNotValidException, а при валидации методов — ConstraintViolationException, и эти случаи обрабатываются по-разному. Каскадную проверку вложенного объекта включает именно @Valid на поле."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем балансировщик L4 отличается от L7? — вопрос с собеседования</title>
+<meta name="description" content="L4 видит только IP и порты и распределяет соединения: быстро, дёшево, не понимает содержимого. L7 разбирает HTTP и распределяет запросы…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/load-balancing-l4-l7/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/load-balancing-l4-l7/">
+<meta property="og:title" content="Чем балансировщик L4 отличается от L7? — вопрос с собеседования">
+<meta property="og:description" content="L4 видит только IP и порты и распределяет соединения: быстро, дёшево, не понимает содержимого. L7 разбирает HTTP и распределяет запросы…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Чем балансировщик L4 отличается от L7?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Чем балансировщик L4 отличается от L7?"}]}</script>
+  <h1>Чем балансировщик L4 отличается от L7?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Балансировка нагрузки</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое обратный прокси?</li><li>Где терминировать TLS?</li><li>Как устроена балансировка от DNS до сервиса?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>L4</b> видит только IP и порты и распределяет <b>соединения</b>: быстро, дёшево, не понимает содержимого. <b>L7</b> разбирает HTTP и распределяет <b>запросы</b>: маршрутизация по пути и заголовкам, TLS, повторы, кэш — но дороже.</p><ul><li>L4: IPVS, LVS, Maglev, сетевые балансировщики облаков — миллионы соединений</li><li>L7: nginx, HAProxy, Envoy, ingress в Kubernetes, API-шлюзы</li><li>Долгое соединение (HTTP/2, gRPC, WebSocket) на L4 приклеивается к одному бэкенду</li></ul><p class="extra"><span>А ещё</span> Типичный стек: DNS/Anycast → L4 → L7 → сервисы</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Балансировка: round robin, least connections, power of two choices</p><script type="module" src="/widgets/load-balancer.js"></script><sotto-load-balancer theme="dark"></sotto-load-balancer></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>L4 (транспортный уровень).</b> Балансировщик выбирает бэкенд при установке TCP-соединения (или для UDP-потока) по адресам и портам и дальше пересылает пакеты, не заглядывая внутрь. Варианты: NAT (меняет адрес назначения), DSR — direct server return (ответ идёт от сервера напрямую клиенту, минуя балансировщик), ECMP на маршрутизаторах и консистентное хеширование для одинакового выбора на всех узлах (Maglev). Плюсы — производительность, работа с любым протоколом, мало состояния. Минусы — не видит HTTP: не может маршрутизировать по пути, повторить запрос, учесть статус ответа.</p>
+<p><b>L7 (прикладной уровень).</b> Это обратный прокси: принимает соединение от клиента, разбирает HTTP и открывает (или берёт из пула) соединение к бэкенду. Возможности:</p>
+<ul><li>маршрутизация по хосту, пути, заголовкам, cookie (<code>/api</code> → один сервис, <code>/static</code> → другой; канареечный релиз по заголовку);</li><li><b>терминация TLS</b> — сертификаты в одном месте, бэкенды разгружены;</li><li>балансировка <b>каждого запроса</b>, а не соединения — важно для HTTP/2 и gRPC, где одно соединение несёт тысячи запросов;</li><li>повторы, таймауты, circuit breaker, ограничение частоты, кэш, сжатие, аутентификация на входе;</li><li>наблюдаемость: метрики и логи по каждому запросу.</li></ul>
+<p>Цена — больше CPU и памяти на запрос, дополнительная задержка, прокси сам становится сложной точкой отказа.</p>
+<p><b>Ловушка долгих соединений.</b> gRPC через L4: клиент открыл одно соединение, и все запросы идут на один бэкенд, а новые экземпляры не получают трафика. Решения — L7-прокси (Envoy), клиентская балансировка или периодическое переподключение.</p>
+<p><b>Где TLS.</b> Терминация на L7 даёт видимость и маршрутизацию; внутри сети — либо открытый HTTP в доверенном сегменте, либо повторное шифрование (mTLS в service mesh). L4 с TLS passthrough — когда ключи не должны покидать бэкенд.</p>
+<p><b>Многоуровневая схема крупного сервиса:</b> GeoDNS или Anycast выбирают ближайший дата-центр → L4-балансировщики на границе держат объём соединений → парк L7-прокси терминирует TLS и маршрутизирует → внутри — сервисная балансировка (service mesh или клиентская).</p>
+<p><b>Сам балансировщик тоже резервируют:</b> пара в active-passive с общим виртуальным IP (keepalived, VRRP) или active-active за ECMP/Anycast.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-nginx"><code>upstream api { least_conn; server 10.0.1.11:8080; server 10.0.1.12:8080; keepalive 64; }
+server {
+    listen 443 ssl http2;                # TLS терминируется здесь (L7)
+    location /api/   { proxy_pass http://api; proxy_next_upstream error timeout; }
+    location /static/ { root /srv/static; expires 7d; }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Разница уровней: соединения против запросов, что видит каждый.</li><li>Возможности L7: маршрутизация, TLS, повторы, наблюдаемость — и цена.</li><li>Проблема долгих соединений и gRPC на L4.</li><li>Многоуровневая схема и резервирование балансировщика.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ставить gRPC за L4 и удивляться неравномерной нагрузке.</li><li>Забывать, что балансировщик — тоже точка отказа.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/highload/balancing-algorithms/">Какие алгоритмы балансировки нагрузки вы знаете и когда какой лучше?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/health-checks/">Как балансировщик понимает, что экземпляр сервиса нездоров?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/osi-tcp-ip/">Расскажите про модель OSI и стек TCP/IP.</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/system-design/horizontal-vs-vertical-scaling/">Чем горизонтальное масштабирование отличается от вертикального?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем балансировщик L4 отличается от L7?","acceptedAnswer":{"@type":"Answer","text":"L4 видит только IP и порты и распределяет соединения: быстро, дёшево, не понимает содержимого. L7 разбирает HTTP и распределяет запросы: маршрутизация по пути и заголовкам, TLS, повторы, кэш — но дороже. L4: IPVS, LVS, Maglev, сетевые балансировщики облаков — миллионы соединений L7: nginx, HAProxy, Envoy, ingress в Kubernetes, API-шлюзы Долгое соединение (HTTP/2, gRPC, WebSocket) на L4 приклеивается к одному бэкенду Типичный стек: DNS/Anycast → L4 → L7 → сервисы L4 (транспортный уровень). Балансировщик выбирает бэкенд при установке TCP-соединения (или для UDP-потока) по адресам и портам и дальше пересылает пакеты, не заглядывая внутрь. Варианты: NAT (меняет адрес назначения), DSR — direct server return (ответ идёт от сервера напрямую клиенту, минуя балансировщик), ECMP на маршрутизаторах и консистентное хеширование для одинакового выбора на всех узлах (Maglev). Плюсы — производительность, работа с любым протоколом, мало состояния. Минусы — не видит HTTP: не может маршрутизировать по пути, повторить запрос, учесть статус ответа. L7 (прикладной уровень). Это обратный прокси: принимает соединение от клиента, разбирает HTTP и открывает (или берёт из пула) соединение к бэкенду. Возможности: - маршрутизация по хосту, пути, заголовкам, cookie (/api → один сервис, /static → другой; канареечный релиз по заголовку); - терминация TLS — сертификаты в одном…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

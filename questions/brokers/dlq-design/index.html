@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что важно предусмотреть при проектировании dead letter queue? — вопрос с собеседования</title>
+<meta name="description" content="В DLQ кладут сообщение с метаданными сбоя (причина, стек, попытки, исходный топик и offset, время); у DLQ есть владелец и алерт; есть продуманное…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/brokers/dlq-design/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/brokers/dlq-design/">
+<meta property="og:title" content="Что важно предусмотреть при проектировании dead letter queue? — вопрос с собеседования">
+<meta property="og:description" content="В DLQ кладут сообщение с метаданными сбоя (причина, стек, попытки, исходный топик и offset, время); у DLQ есть владелец и алерт; есть продуманное…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/brokers/">Брокеры сообщений</a> <span>/</span> <span>Что важно предусмотреть при проектировании dead letter queue?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/questions/brokers/"},{"@type":"ListItem","position":3,"name":"Что важно предусмотреть при проектировании dead letter queue?"}]}</script>
+  <h1>Что важно предусмотреть при проектировании dead letter queue?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Ретраи, DLQ и идемпотентность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как организовать разбор очереди недоставленных?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">В DLQ кладут сообщение <b>с метаданными сбоя</b> (причина, стек, попытки, исходный топик и offset, время); у DLQ есть <b>владелец и алерт</b>; есть продуманное <b>переигрывание</b> после исправления причины.</p><ul><li>Автоматический возврат без исправления причины — бесконечный круг</li><li>Срок хранения DLQ больше, чем время на разбор</li><li>Переигрывание идемпотентно</li></ul><p class="extra"><span>А ещё</span> Растущая DLQ без внимания — тихая потеря данных</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Самая частая ошибка — завести DLQ и забыть о ней: через полгода там миллион сообщений, никто не знает, что с ними делать, и часть данных потеряна безвозвратно. Поэтому непустая DLQ должна порождать алерт, у неё должен быть ответственный, а каждое сообщение — нести контекст: исходный топик и смещение, стектрейс или код ошибки, счётчик попыток, идентификатор трассировки. Возврат в обработку делают отдельной осознанной операцией после устранения причины, причём повторная обработка обязана быть идемпотентной. Немедленный автоматический возврат просто воспроизводит ту же ошибку по кругу.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Метаданные в DLQ.</li><li>Владелец, алерт, процесс разбора.</li><li>Переигрывание после исправления.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Складывать в DLQ только тело сообщения без контекста ошибки.</li><li>Не мониторить DLQ и обнаруживать потери спустя месяцы.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Несколько верных вариантов. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Сохранять причину сбоя, число попыток, исходный топик и время — иначе разобрать содержимое DLQ невозможно</li><li class="ok"><span class="mark">✓</span>Назначить владельца и алерт на непустую очередь: DLQ без наблюдения превращается в свалку</li><li class="ok"><span class="mark">✓</span>Предусмотреть механизм возврата сообщений в обработку после исправления причины</li><li class="no"><span class="mark">✗</span>Настроить автоматический возврат сообщений в основной топик сразу после попадания в DLQ</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как безопасно вернуть сообщения из DLQ в обработку?</li><li>Что делать, если в DLQ попали сообщения из-за общей аварии зависимости?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/brokers/dlq-retries/">Retries, DLQ и идемпотентность</a><p>Что повторять и почему не всё, backoff/jitter, non-blocking retry, дизайн DLQ и redrive, идемпотентность как фундамент.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/brokers/dead-letter-queue/">Что такое dead letter queue (DLQ) и зачем она нужна?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/retryable-errors/">Какие ошибки обработки сообщения имеет смысл повторять, а какие нет?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что важно предусмотреть при проектировании dead letter queue?","acceptedAnswer":{"@type":"Answer","text":"В DLQ кладут сообщение с метаданными сбоя (причина, стек, попытки, исходный топик и offset, время); у DLQ есть владелец и алерт; есть продуманное переигрывание после исправления причины. Автоматический возврат без исправления причины — бесконечный круг Срок хранения DLQ больше, чем время на разбор Переигрывание идемпотентно Растущая DLQ без внимания — тихая потеря данных Самая частая ошибка — завести DLQ и забыть о ней: через полгода там миллион сообщений, никто не знает, что с ними делать, и часть данных потеряна безвозвратно. Поэтому непустая DLQ должна порождать алерт, у неё должен быть ответственный, а каждое сообщение — нести контекст: исходный топик и смещение, стектрейс или код ошибки, счётчик попыток, идентификатор трассировки. Возврат в обработку делают отдельной осознанной операцией после устранения причины, причём повторная обработка обязана быть идемпотентной. Немедленный автоматический возврат просто воспроизводит ту же ошибку по кругу."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

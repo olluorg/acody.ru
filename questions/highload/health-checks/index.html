@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как балансировщик понимает, что экземпляр сервиса нездоров? — вопрос с собеседования</title>
+<meta name="description" content="Активные проверки — балансировщик сам опрашивает /health; пассивные — следит за ошибками и задержками реальных запросов и выкидывает выбросы (outlier…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/health-checks/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/health-checks/">
+<meta property="og:title" content="Как балансировщик понимает, что экземпляр сервиса нездоров? — вопрос с собеседования">
+<meta property="og:description" content="Активные проверки — балансировщик сам опрашивает /health; пассивные — следит за ошибками и задержками реальных запросов и выкидывает выбросы (outlier…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Как балансировщик понимает, что экземпляр сервиса нездоров?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Как балансировщик понимает, что экземпляр сервиса нездоров?"}]}</script>
+  <h1>Как балансировщик понимает, что экземпляр сервиса нездоров?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Балансировка нагрузки</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем liveness-проба отличается от readiness?</li><li>Что такое outlier detection?</li><li>Зачем нужны sticky sessions и чем они плохи?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Активные проверки</b> — балансировщик сам опрашивает /health; <b>пассивные</b> — следит за ошибками и задержками реальных запросов и выкидывает выбросы (outlier detection).</p><ul><li>Readiness — «готов принимать трафик» (убрать из балансировки), liveness — «процесс завис» (перезапустить)</li><li>Liveness не должна проверять базу и зависимости — иначе сбой базы перезапустит всё</li><li>Медленный старт и прогрев, корректное снятие с балансировки при остановке</li></ul><p class="extra"><span>А ещё</span> Sticky sessions мешают балансировке и отказоустойчивости — лучше stateless и общее хранилище сессий</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Активные проверки.</b> Балансировщик или оркестратор раз в несколько секунд обращается к служебному эндпоинту. После N неудач подряд экземпляр исключается, после M успехов — возвращается (гистерезис, чтобы не мигал).</p>
+<p><b>Пассивные проверки (outlier detection).</b> Смотрим на реальные ответы: 5xx, таймауты, рост задержки. Экземпляр, у которого ошибок заметно больше, чем у остальных, временно исключается (ejection) с растущим временем изоляции. Ловит то, что /health не видит: сервис отвечает на проверку, но реальные запросы падают. Envoy, Istio, Linkerd делают это из коробки. Ограничение — не выкидывать больше заданной доли экземпляров, иначе при общей проблеме выкинем всех.</p>
+<p><b>Kubernetes различает три пробы:</b></p>
+<ul><li><b>startup</b> — пока не прошла, остальные не проверяются: даёт время медленному старту;</li><li><b>readiness</b> — готов ли принимать трафик сейчас. Не прошла — под убирают из Service, но не перезапускают. Может учитывать прогрев кэшей, доступность критичных зависимостей, перегрузку;</li><li><b>liveness</b> — жив ли процесс. Не прошла — контейнер перезапускают. Должна быть простой и проверять только сам процесс (не завис ли цикл обработки). Если liveness проверяет базу, то при сбое базы Kubernetes перезапустит все поды разом — и они вдобавок ударят по базе при старте.</li></ul>
+<p><b>Подключение и отключение экземпляров:</b></p>
+<ul><li><b>медленный старт</b> — новый экземпляр с холодным кэшем и JIT получает долю трафика постепенно;</li><li><b>graceful shutdown</b> — сначала readiness = false и пауза, пока балансировщики узнают, потом завершение текущих запросов.</li></ul>
+<p><b>Sticky sessions</b> — привязка клиента к экземпляру (по cookie или хешу IP), чтобы держать сессию в памяти. Минусы: неравномерная нагрузка, потеря сессий при падении или выкатке, трудности автомасштабирования. Лучше вынести сессию в Redis или подписанный токен и сделать сервис stateless. Оправдано для WebSocket и локальных кэшей, где привязка даёт выигрыш, — тогда через consistent hashing.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-yaml"><code>readinessProbe:            # «можно ли слать трафик»
+  httpGet: { path: /ready, port: 8080 }
+  periodSeconds: 5
+  failureThreshold: 2
+livenessProbe:             # «не завис ли процесс» — без проверки базы
+  httpGet: { path: /live, port: 8080 }
+  periodSeconds: 10
+  failureThreshold: 3
+startupProbe:
+  httpGet: { path: /live, port: 8080 }
+  failureThreshold: 30     # до 5 минут на старт</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Активные и пассивные проверки, outlier detection.</li><li>Readiness против liveness и почему liveness не проверяет зависимости.</li><li>Медленный старт и корректное снятие с балансировки.</li><li>Минусы sticky sessions и альтернатива.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Проверять в liveness доступность базы.</li><li>Считать, что /health = 200 означает, что сервис обслуживает запросы нормально.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/balancing-algorithms/">Какие алгоритмы балансировки нагрузки вы знаете и когда какой лучше?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/signals-shutdown/">Чем SIGTERM отличается от SIGKILL и как правильно завершать сервис?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/circuit-breaker-states/">В каких состояниях бывает circuit breaker и как он между ними переходит?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как балансировщик понимает, что экземпляр сервиса нездоров?","acceptedAnswer":{"@type":"Answer","text":"Активные проверки — балансировщик сам опрашивает /health; пассивные — следит за ошибками и задержками реальных запросов и выкидывает выбросы (outlier detection). Readiness — «готов принимать трафик» (убрать из балансировки), liveness — «процесс завис» (перезапустить) Liveness не должна проверять базу и зависимости — иначе сбой базы перезапустит всё Медленный старт и прогрев, корректное снятие с балансировки при остановке Sticky sessions мешают балансировке и отказоустойчивости — лучше stateless и общее хранилище сессий Активные проверки. Балансировщик или оркестратор раз в несколько секунд обращается к служебному эндпоинту. После N неудач подряд экземпляр исключается, после M успехов — возвращается (гистерезис, чтобы не мигал). Пассивные проверки (outlier detection). Смотрим на реальные ответы: 5xx, таймауты, рост задержки. Экземпляр, у которого ошибок заметно больше, чем у остальных, временно исключается (ejection) с растущим временем изоляции. Ловит то, что /health не видит: сервис отвечает на проверку, но реальные запросы падают. Envoy, Istio, Linkerd делают это из коробки. Ограничение — не выкидывать больше заданной доли экземпляров, иначе при общей проблеме выкинем всех. Kubernetes различает три пробы: - startup — пока не прошла, остальные не проверяются: даёт время медленному старту; - readiness — готов ли принимать трафик сейчас. Не прошла — под убирают из Service, но не перезапускают. Может…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

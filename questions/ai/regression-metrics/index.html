@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие метрики используют для задач регрессии — MAE, RMSE, MAPE, R²? — вопрос с собеседования</title>
+<meta name="description" content="MAE — средняя абсолютная ошибка, понятна в единицах цели, устойчива к выбросам. RMSE — корень из средней квадратичной ошибки, сильнее штрафует…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/regression-metrics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/regression-metrics/">
+<meta property="og:title" content="Какие метрики используют для задач регрессии — MAE, RMSE, MAPE, R²? — вопрос с собеседования">
+<meta property="og:description" content="MAE — средняя абсолютная ошибка, понятна в единицах цели, устойчива к выбросам. RMSE — корень из средней квадратичной ошибки, сильнее штрафует…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Какие метрики используют для задач регрессии — MAE, RMSE, MAPE, R²?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Какие метрики используют для задач регрессии — MAE, RMSE, MAPE, R²?"}]}</script>
+  <h1>Какие метрики используют для задач регрессии — MAE, RMSE, MAPE, R²?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Основы машинного обучения</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>MAE</b> — средняя абсолютная ошибка, понятна в единицах цели, устойчива к выбросам. <b>RMSE</b> — корень из средней квадратичной ошибки, сильнее штрафует большие промахи. <b>MAPE</b> — средняя относительная ошибка в процентах, удобна бизнесу, но ломается на значениях около нуля. <b>R²</b> — доля объяснённой дисперсии относительно прогноза средним.</p><ul><li>RMSE ≥ MAE; сильный разрыв — признак крупных выбросов в ошибках</li><li>Оптимум MAE — медиана, RMSE — среднее</li><li>MAPE несимметрична: недопрогноз и перепрогноз штрафуются по-разному</li></ul><p class="extra"><span>А ещё</span> Метрику выбирают по цене ошибки в бизнесе: важны ли редкие большие промахи</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><div class="table"><table><thead><tr><th>метрика</th><th>формула</th><th>особенности</th></tr></thead><tbody><tr><td>MAE</td><td>среднее модуля (y − ŷ)</td><td>в единицах цели, устойчива к выбросам</td></tr><tr><td>RMSE</td><td>√среднее (y − ŷ)²</td><td>штрафует крупные ошибки</td></tr><tr><td>MAPE</td><td>среднее модуля (y − ŷ) / y</td><td>проценты, ломается около нуля</td></tr><tr><td>R²</td><td>1 − SSE / SST</td><td>1 — идеально, 0 — как среднее, может быть &lt; 0</td></tr></tbody></table></div>
+<p><b>Выбор:</b></p>
+<ul><li>стоимость ошибки пропорциональна её размеру — MAE;</li><li>большие промахи особенно опасны (прогноз нагрузки, запасы) — RMSE;</li><li>нужно объяснить бизнесу «ошибаемся в среднем на 8%» — MAPE или sMAPE, WAPE (взвешенная, устойчивее);</li><li>сравнить модели на одной задаче — R², но он не говорит, достаточно ли точна модель для решения.</li></ul>
+<p><b>Связь с обучением:</b> минимизация MSE даёт прогноз среднего, минимизация MAE — медианы. Для прогноза интервалов — квантильная функция потерь.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определения и интерпретация.</li><li>Различие MAE и RMSE.</li><li>Ограничения MAPE и R².</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/classification-metrics/">Какие метрики качества классификации вы знаете?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/linear-logistic-regression/">Как работают линейная и логистическая регрессия?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие метрики используют для задач регрессии — MAE, RMSE, MAPE, R²?","acceptedAnswer":{"@type":"Answer","text":"MAE — средняя абсолютная ошибка, понятна в единицах цели, устойчива к выбросам. RMSE — корень из средней квадратичной ошибки, сильнее штрафует большие промахи. MAPE — средняя относительная ошибка в процентах, удобна бизнесу, но ломается на значениях около нуля. R² — доля объяснённой дисперсии относительно прогноза средним. RMSE ≥ MAE; сильный разрыв — признак крупных выбросов в ошибках Оптимум MAE — медиана, RMSE — среднее MAPE несимметрична: недопрогноз и перепрогноз штрафуются по-разному Метрику выбирают по цене ошибки в бизнесе: важны ли редкие большие промахи | метрика | формула | особенности | | --- | --- | --- | | MAE | среднее модуля (y − ŷ) | в единицах цели, устойчива к выбросам | | RMSE | √среднее (y − ŷ)² | штрафует крупные ошибки | | MAPE | среднее модуля (y − ŷ) / y | проценты, ломается около нуля | | R² | 1 − SSE / SST | 1 — идеально, 0 — как среднее, может быть < 0 | Выбор: - стоимость ошибки пропорциональна её размеру — MAE; - большие промахи особенно опасны (прогноз нагрузки, запасы) — RMSE; - нужно объяснить бизнесу «ошибаемся в среднем на 8%» — MAPE или sMAPE, WAPE (взвешенная, устойчивее); - сравнить модели на одной задаче — R², но он не говорит, достаточно ли точна модель для решения. Связь с обучением: минимизация MSE даёт прогноз среднего, минимизация MAE — медианы. Для прогноза интервалов — квантильная функция потерь."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

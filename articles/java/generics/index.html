@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Дженерики и стирание типов — разбор для собеседования</title>
+<meta name="description" content="Типобезопасность на компиляции, механизм type erasure и его последствия, дженерик-методы, ограниченные параметры и опасность raw types.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/generics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/generics/">
+<meta property="og:title" content="Дженерики и стирание типов — разбор для собеседования">
+<meta property="og:description" content="Типобезопасность на компиляции, механизм type erasure и его последствия, дженерик-методы, ограниченные параметры и опасность raw types.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Дженерики и стирание типов</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Дженерики и стирание типов"}]}</script>
+  <h1>Дженерики и стирание типов</h1>
+  <p class="lead">Типобезопасность на компиляции, механизм type erasure и его последствия, дженерик-методы, ограниченные параметры и опасность raw types.</p>
+  <article class="md"><h2>Зачем дженерики</h2>
+<p>Дженерики дают параметризацию типом: коллекция/класс/метод работает с конкретным типом, а компилятор это проверяет. Ошибка типа ловится до запуска, и не нужны ручные приведения.</p>
+<p>До Java 5 коллекции были «сырыми» (List без параметра): клали в них что угодно, доставали Object и приводили вручную — а ошибка вылезала в рантайме как ClassCastException. Дженерики переносят эту проверку на компиляцию.</p>
+<pre class="lang-java"><code>List&lt;String&gt; list = new ArrayList&lt;&gt;();
+list.add(&quot;x&quot;);
+String s = list.get(0); // без приведения — тип проверен компилятором</code></pre>
+<h2>Что такое type erasure</h2>
+<p>Дженерики в Java реализованы стиранием (type erasure): компилятор проверяет типы по параметрам, а затем стирает их — заменяет параметр на его границу (или Object, если границы нет) и вставляет нужные приведения. В байткод информация о конкретном T не попадает.</p>
+<p>Так сделали ради обратной совместимости при вводе дженериков в Java 5: старый и новый код должны были работать вместе на той же JVM. Цена — дженерики существуют только на этапе компиляции (это «не reified» типы, в отличие, например, от C# или Kotlin inline reified).</p>
+<pre class="lang-java"><code>// то, что пишем:           // то, во что превращается после стирания:
+List&lt;String&gt; l = ...;        // List l = ...;
+String s = l.get(0);         // String s = (String) l.get(0); // cast вставил компилятор</code></pre>
+<h2>Последствия стирания</h2>
+<p>Раз конкретный тип стёрт, в рантайме его нет: <code>new ArrayList&lt;String&gt;().getClass()</code> == <code>new ArrayList&lt;Integer&gt;().getClass()</code> (один класс List). Отсюда запреты: нельзя <code>T.class</code>, <code>new T()</code>, <code>new T[]</code>, нельзя <code>instanceof List&lt;String&gt;</code> (только <code>instanceof List&lt;?&gt;</code>), нельзя иметь static-поле типа T, и нельзя завести два метода, чьи сигнатуры различаются только параметром дженерика (после стирания они совпадут).</p>
+<p>Как обойти, когда тип реально нужен в рантайме: передавать его явным токеном <code>Class&lt;T&gt;</code> в метод/конструктор (фабрики так и делают: <code>clazz.getDeclaredConstructor().newInstance()</code>), либо приёмом super type token (анонимный подкласс параметризованного типа, у которого тип-аргумент можно достать рефлексией — так работает чтение generic-типов в Jackson/Spring).</p>
+<pre class="lang-java"><code>// типобезопасная фабрика через Class-токен — обходит запрет new T()
+static &lt;T&gt; T create(Class&lt;T&gt; type) throws Exception {
+    return type.getDeclaredConstructor().newInstance();
+}</code></pre>
+<h2>Дженерик-методы и вывод типов</h2>
+<p>Метод может быть параметризован независимо от класса: <code>&lt;T&gt; T first(List&lt;T&gt; xs)</code>. Тип-аргумент обычно не пишут явно — компилятор выводит его из аргументов (type inference). Тот же вывод стоит за diamond (<code>new ArrayList&lt;&gt;()</code>) и за var.</p>
+<p>Иногда вывод не справляется (например, из null или вложенных вызовов) — тогда тип задают явно: <code>Collections.&lt;String&gt;emptyList()</code>.</p>
+<h2>Ограниченные параметры (bounds)</h2>
+<p>Параметр типа можно ограничить: <code>&lt;T extends Comparable&lt;T&gt;&gt;</code> разрешает вызывать на T методы границы (здесь <code>compareTo</code>). Без границы T стирается до Object, и доступны только методы Object; с границей — стирается до неё, и доступны её методы.</p>
+<p>Границ может быть несколько: <code>&lt;T extends Number &amp; Comparable&lt;T&gt;&gt;</code> (класс, если есть, идёт первым). Это делает дженерик-код одновременно гибким и типобезопасным.</p>
+<h2>Raw types — почему нельзя</h2>
+<p>Raw type — это использование дженерик-класса без параметра (List вместо <code>List&lt;String&gt;</code>). Он существует только ради совместимости с дописьменным кодом и опасен: использование raw type ОТКЛЮЧАЕТ проверки дженериков для всего объекта, возвращая риск ClassCastException в рантайме и unchecked-предупреждения.</p>
+<p>Правило: не использовать raw types в новом коде. Если нужен «любой тип» — это <code>List&lt;?&gt;</code> (типобезопасный wildcard), а не сырой List.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Объясните erasure как механизм (проверка → стирание до границы/Object → вставка cast) и его мотив (совместимость с Java 5), перечислите последствия (один класс в рантайме; нет <code>new T()</code>/<code>T[]</code>/instanceof generic) и обход через Class-токен/super type token. Добавьте bounded types (зачем — методы границы) и почему raw types запрещены (отключают проверки).</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/type-erasure/">Что означает стирание типов (type erasure)?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/generics-wildcards/">Что такое generics в Java и зачем нужен wildcard ? extends / ? super?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/type-erasure-limits/">Что невозможно из-за стирания типов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/bounded-type-parameter/">Зачем в сигнатуре пишут &lt;T extends Comparable&lt;T&gt;&gt;?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/generics-benefits/">Что дают дженерики при работе с коллекциями?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/wildcards/">Wildcards и правило PECS</a><p>Инвариантность дженериков против ковариантных массивов, ? extends/super, и когда что выбирать по PECS.</p></li><li><a href="/articles/java/collections-overview/">Collections Framework: карта и выбор структуры</a><p>Иерархия интерфейсов, сложности операций основных структур, неизменяемые коллекции и принцип выбора по паттерну доступа.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Дженерики и стирание типов","description":"Типобезопасность на компиляции, механизм type erasure и его последствия, дженерик-методы, ограниченные параметры и опасность raw types.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/generics/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

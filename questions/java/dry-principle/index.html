@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что означает принцип DRY? — вопрос с собеседования</title>
+<meta name="description" content="DRY — Don&#x27;t Repeat Yourself: каждое знание (правило, расчёт) должно быть записано в одном месте. Смысл — стоимость изменения: правка в одном месте, а…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/dry-principle/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/dry-principle/">
+<meta property="og:title" content="Что означает принцип DRY? — вопрос с собеседования">
+<meta property="og:description" content="DRY — Don&#x27;t Repeat Yourself: каждое знание (правило, расчёт) должно быть записано в одном месте. Смысл — стоимость изменения: правка в одном месте, а…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что означает принцип DRY?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что означает принцип DRY?"}]}</script>
+  <h1>Что означает принцип DRY?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Принципы проектирования</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое DRY, KISS и YAGNI?</li><li>Всегда ли нужно убирать дублирование кода?</li><li>Что именно запрещает дублировать принцип DRY в его оригинальной формулировке?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">DRY — <b>Don't Repeat Yourself</b>: каждое <b>знание</b> (правило, расчёт) должно быть записано в <b>одном месте</b>.</p><ul><li>Смысл — стоимость изменения: правка в одном месте, а не в трёх</li><li>Речь о знании, а не о похожем тексте: совпадающий код с разными причинами изменений не объединяют</li></ul><p class="extra"><span>А ещё</span> Рядом — KISS (делай просто) и YAGNI (не пиши то, что пока не нужно)</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>DRY сформулирован в книге «Программист-прагматик»: у каждого куска знания в системе должно быть одно авторитетное представление. Если правило «скидка 10 % от 5000 ₽» записано в трёх местах, при изменении легко обновить два и забыть третье — получится расхождение.</p>
+<p>Важная тонкость: DRY — не про похожий текст. Два одинаковых фрагмента, которые меняются по разным причинам (валидация email в регистрации и в рассылке с разными требованиями в будущем), объединять не стоит. Преждевременное «вынесение в общий метод» склеивает независимые вещи и потом обрастает флагами и условиями. Есть встречное правило «трёх раз»: обобщать, когда повторение встретилось третий раз и смысл совпадает.</p>
+<p>Связанные принципы:</p>
+<ul><li><b>KISS</b> (Keep It Simple) — простое решение лучше хитрого;</li><li><b>YAGNI</b> (You Aren't Gonna Need It) — не писать функциональность «на будущее», пока она не нужна.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Расшифровка и смысл: одно место для каждого знания.</li><li>Связь со стоимостью изменений.</li><li>Различие между дублированием знания и случайным совпадением кода.</li><li>KISS и YAGNI — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Применять принцип механически по внешнему сходству кода.</li><li>Считать любое дублирование ошибкой.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Don't Repeat Yourself — одно и то же знание не должно дублироваться в нескольких местах</li><li class="no"><span class="mark">✗</span>Do Rewrite Yearly — код следует полностью переписывать раз в год</li><li class="no"><span class="mark">✗</span>Data Redundancy Yield — данные нужно дублировать для надёжности</li><li class="no"><span class="mark">✗</span>Deploy Rapidly Yourself — выкатывать изменения нужно как можно чаще</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое случайное дублирование?</li><li>Что утверждают принципы KISS и YAGNI?</li><li>Почему «дублирование дешевле неправильной абстракции»?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/design-principles/">DRY, KISS, YAGNI и качество связей</a><p>Дублирование знания против дублирования текста, цена преждевременной абстракции, связность и связанность, закон Деметры, каталог code smells и когда рефакторить.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/anemic-domain-model/">Что такое anemic domain model, чем она плоха и когда всё-таки допустима?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/cohesion-coupling/">Что верно про связность (cohesion) и связанность (coupling)?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/law-of-demeter/">Какой из фрагментов нарушает закон Деметры?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/yagni/">Что верно про YAGNI?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что означает принцип DRY?","acceptedAnswer":{"@type":"Answer","text":"DRY — Don't Repeat Yourself: каждое знание (правило, расчёт) должно быть записано в одном месте. Смысл — стоимость изменения: правка в одном месте, а не в трёх Речь о знании, а не о похожем тексте: совпадающий код с разными причинами изменений не объединяют Рядом — KISS (делай просто) и YAGNI (не пиши то, что пока не нужно) DRY сформулирован в книге «Программист-прагматик»: у каждого куска знания в системе должно быть одно авторитетное представление. Если правило «скидка 10 % от 5000 ₽» записано в трёх местах, при изменении легко обновить два и забыть третье — получится расхождение. Важная тонкость: DRY — не про похожий текст. Два одинаковых фрагмента, которые меняются по разным причинам (валидация email в регистрации и в рассылке с разными требованиями в будущем), объединять не стоит. Преждевременное «вынесение в общий метод» склеивает независимые вещи и потом обрастает флагами и условиями. Есть встречное правило «трёх раз»: обобщать, когда повторение встретилось третий раз и смысл совпадает. Связанные принципы: - KISS (Keep It Simple) — простое решение лучше хитрого; - YAGNI (You Aren't Gonna Need It) — не писать функциональность «на будущее», пока она не нужна."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как устроен event loop в asyncio? — вопрос с собеседования</title>
+<meta name="description" content="Event loop — цикл в одном потоке: берёт готовые к выполнению задачи, выполняет каждую до ближайшего await, а ожидающие ввода-вывода передаёт ОС…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/asyncio-event-loop/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/asyncio-event-loop/">
+<meta property="og:title" content="Как устроен event loop в asyncio? — вопрос с собеседования">
+<meta property="og:description" content="Event loop — цикл в одном потоке: берёт готовые к выполнению задачи, выполняет каждую до ближайшего await, а ожидающие ввода-вывода передаёт ОС…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Как устроен event loop в asyncio?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Как устроен event loop в asyncio?"}]}</script>
+  <h1>Как устроен event loop в asyncio?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Конкурентность</span><span class="chip">asyncio</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что происходит при await внутри корутины?</li><li>Чем корутина отличается от задачи (Task) в asyncio?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Event loop</b> — цикл в одном потоке: берёт готовые к выполнению задачи, выполняет каждую <b>до ближайшего await</b>, а ожидающие ввода-вывода передаёт ОС (epoll, kqueue) и возвращается к ним, когда данные пришли. Переключение <b>кооперативное</b> — только в точках await.</p><ul><li>Корутина — объект, который ничего не делает, пока его не ждут или не обернули в Task</li><li>Task — корутина, поставленная в расписание цикла: выполняется конкурентно с остальными</li><li>Пока корутина не дошла до await, все остальные стоят</li></ul><p class="extra"><span>А ещё</span> asyncio.run создаёт цикл, выполняет главную корутину и закрывает цикл</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Корутина</b> — результат вызова <code>async def</code>-функции. Сам вызов ничего не выполняет:</p>
+<pre class="lang-python"><code>async def fetch(): ...
+coro = fetch()        # корутина создана, код не выполнялся
+await coro            # выполнится сейчас, последовательно
+task = asyncio.create_task(fetch())   # запланирована, пойдёт конкурентно</code></pre>
+<p><b>Цикл событий</b> держит очередь готовых задач и регистрирует ожидания в селекторе ОС. Один оборот:</p>
+<ol><li>выполнить по очереди готовые колбэки и шаги задач;</li><li>каждая задача работает до <code>await</code> на чём-то незавершённом — тогда она приостанавливается, а её Future регистрируется на событие;</li><li>спросить у ОС, какие сокеты готовы (с таймаутом до ближайшего таймера), и пометить соответствующие задачи готовыми.</li></ol>
+<p><b>Что значит await.</b> Если ожидаемое уже готово — выполнение продолжается сразу, без переключения. Если нет — корутина отдаёт управление циклу. Поэтому <code>await</code> на функции без настоящего ожидания внутри не даёт конкурентности.</p>
+<p><b>Следствия однопоточности:</b></p>
+<ul><li>между двумя await код выполняется атомарно относительно других задач — гонок за данные меньше, чем в потоках;</li><li>любой долгий синхронный участок (вычисление, <code>time.sleep</code>, блокирующий драйвер БД) останавливает <b>все</b> задачи;</li><li>масштабирование по ядрам — несколько процессов, каждый со своим циклом.</li></ul>
+<p><b>Ссылку на Task нужно хранить</b>: цикл держит задачи слабыми ссылками, и «выстрелил и забыл» <code>create_task(...)</code> без сохранения может быть собран сборщиком мусора посреди работы.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import asyncio
+
+async def worker(name, delay):
+    await asyncio.sleep(delay)      # отдаёт управление циклу
+    return name
+
+async def main():
+    t1 = asyncio.create_task(worker(&quot;a&quot;, 1))
+    t2 = asyncio.create_task(worker(&quot;b&quot;, 1))
+    print(await t1, await t2)        # около 1 секунды, а не 2
+
+asyncio.run(main())</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Однопоточный цикл и кооперативная многозадачность.</li><li>Различие корутины и Task.</li><li>Что происходит на await.</li><li>Почему блокирующий код останавливает всё.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ожидать параллельного выполнения от последовательных await без create_task или gather.</li><li>Не сохранять ссылку на созданную задачу.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/asyncio-blocking-call/">Что будет, если внутри async-функции вызвать блокирующий код?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/asyncio-gather-taskgroup/">Чем asyncio.gather отличается от TaskGroup и как в них обрабатываются ошибки?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/async-await/">Как работают async и await?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/async-vs-threads/">Чем асинхронность отличается от многопоточности?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/threading-multiprocessing-asyncio/">Чем отличаются threading, multiprocessing и asyncio?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как устроен event loop в asyncio?","acceptedAnswer":{"@type":"Answer","text":"Event loop — цикл в одном потоке: берёт готовые к выполнению задачи, выполняет каждую до ближайшего await, а ожидающие ввода-вывода передаёт ОС (epoll, kqueue) и возвращается к ним, когда данные пришли. Переключение кооперативное — только в точках await. Корутина — объект, который ничего не делает, пока его не ждут или не обернули в Task Task — корутина, поставленная в расписание цикла: выполняется конкурентно с остальными Пока корутина не дошла до await, все остальные стоят asyncio.run создаёт цикл, выполняет главную корутину и закрывает цикл Корутина — результат вызова async def-функции. Сам вызов ничего не выполняет: Цикл событий держит очередь готовых задач и регистрирует ожидания в селекторе ОС. Один оборот: 1. выполнить по очереди готовые колбэки и шаги задач; 2. каждая задача работает до await на чём-то незавершённом — тогда она приостанавливается, а её Future регистрируется на событие; 3. спросить у ОС, какие сокеты готовы (с таймаутом до ближайшего таймера), и пометить соответствующие задачи готовыми. Что значит await. Если ожидаемое уже готово — выполнение продолжается сразу, без переключения. Если нет — корутина отдаёт управление циклу. Поэтому await на функции без настоящего ожидания внутри не даёт конкурентности. Следствия однопоточности: - между двумя await код выполняется атомарно относительно других задач — гонок за данные меньше, чем в потоках; - любой долгий синхронный участок (вычисление, time.sleep…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

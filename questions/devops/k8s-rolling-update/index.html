@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как Deployment выполняет обновление и как откатить неудачную версию? — вопрос с собеседования</title>
+<meta name="description" content="Стратегия по умолчанию — RollingUpdate: создаётся новый ReplicaSet, поды постепенно заменяются. maxSurge — сколько подов сверх нужного числа можно…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/k8s-rolling-update/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/k8s-rolling-update/">
+<meta property="og:title" content="Как Deployment выполняет обновление и как откатить неудачную версию? — вопрос с собеседования">
+<meta property="og:description" content="Стратегия по умолчанию — RollingUpdate: создаётся новый ReplicaSet, поды постепенно заменяются. maxSurge — сколько подов сверх нужного числа можно…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Как Deployment выполняет обновление и как откатить неудачную версию?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Как Deployment выполняет обновление и как откатить неудачную версию?"}]}</script>
+  <h1>Как Deployment выполняет обновление и как откатить неудачную версию?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Kubernetes</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое maxSurge и maxUnavailable?</li><li>Как сделать выкатку без простоя в Kubernetes?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Стратегия по умолчанию — <b>RollingUpdate</b>: создаётся новый ReplicaSet, поды постепенно заменяются. <b>maxSurge</b> — сколько подов сверх нужного числа можно поднять, <b>maxUnavailable</b> — сколько можно потерять во время обновления. Новый под получает трафик только после <b>readiness</b>. Откат: <code>kubectl rollout undo deployment/orders</code> — возвращается предыдущий ReplicaSet (хранятся <code>revisionHistoryLimit</code> ревизий).</p><ul><li>maxUnavailable: 0 и maxSurge: 1 — обновление без снижения ёмкости</li><li>Без readiness-пробы трафик пойдёт в неготовые поды — ошибки при каждой выкатке</li><li>progressDeadlineSeconds — когда признать выкатку зависшей</li></ul><p class="extra"><span>А ещё</span> Старая и новая версии работают одновременно — API и схема БД должны быть совместимы</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Ход выкатки</b> (3 реплики, maxSurge 1, maxUnavailable 0):</p>
+<ol><li>Поднимается 1 новый под, ждём readiness.</li><li>Удаляется 1 старый.</li><li>Повторяется, пока все поды не станут новыми.</li></ol>
+<p><b>Команды:</b></p>
+<pre class="lang-bash"><code>kubectl set image deployment/orders app=orders:1.4.3
+kubectl rollout status deployment/orders
+kubectl rollout history deployment/orders
+kubectl rollout undo deployment/orders --to-revision=4</code></pre>
+<p><b>Ограничения rolling update:</b> нет автоматического отката по метрикам ошибок, трафик переключается пропорционально числу подов. Для canary и автоматического анализа используют Argo Rollouts или Flagger.</p>
+<p><b>Стратегия Recreate</b> — убить все старые, потом поднять новые: простой, но нужна, когда две версии одновременно работать не могут.</p>
+<p><b>Откат в GitOps</b> делается откатом коммита в репозитории конфигурации, иначе контроллер вернёт «сломанное» желаемое состояние.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механика RollingUpdate, maxSurge и maxUnavailable.</li><li>Роль readiness.</li><li>Откат и ограничения стратегии.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/rolling-update/">Что такое rolling update при выкатке новой версии?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/system-design/canary-vs-blue-green/">Чем canary-выкатка принципиально отличается от blue-green?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/k8s-probes/">Приложение долго стартует, а Kubernetes перезапускает его по кругу. Как правильно настроить пробы?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/deployment-strategies/">Какие стратегии выкатки вы знаете и как выбрать подходящую?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как Deployment выполняет обновление и как откатить неудачную версию?","acceptedAnswer":{"@type":"Answer","text":"Стратегия по умолчанию — RollingUpdate: создаётся новый ReplicaSet, поды постепенно заменяются. maxSurge — сколько подов сверх нужного числа можно поднять, maxUnavailable — сколько можно потерять во время обновления. Новый под получает трафик только после readiness. Откат: kubectl rollout undo deployment/orders — возвращается предыдущий ReplicaSet (хранятся revisionHistoryLimit ревизий). maxUnavailable: 0 и maxSurge: 1 — обновление без снижения ёмкости Без readiness-пробы трафик пойдёт в неготовые поды — ошибки при каждой выкатке progressDeadlineSeconds — когда признать выкатку зависшей Старая и новая версии работают одновременно — API и схема БД должны быть совместимы Ход выкатки (3 реплики, maxSurge 1, maxUnavailable 0): 1. Поднимается 1 новый под, ждём readiness. 2. Удаляется 1 старый. 3. Повторяется, пока все поды не станут новыми. Команды: Ограничения rolling update: нет автоматического отката по метрикам ошибок, трафик переключается пропорционально числу подов. Для canary и автоматического анализа используют Argo Rollouts или Flagger. Стратегия Recreate — убить все старые, потом поднять новые: простой, но нужна, когда две версии одновременно работать не могут. Откат в GitOps делается откатом коммита в репозитории конфигурации, иначе контроллер вернёт «сломанное» желаемое состояние."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

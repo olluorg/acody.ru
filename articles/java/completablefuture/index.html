@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Future и CompletableFuture — разбор для собеседования</title>
+<meta name="description" content="Ограничения Future, асинхронная композиция CompletableFuture, async-варианты с пулами и обработка ошибок.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/completablefuture/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/completablefuture/">
+<meta property="og:title" content="Future и CompletableFuture — разбор для собеседования">
+<meta property="og:description" content="Ограничения Future, асинхронная композиция CompletableFuture, async-варианты с пулами и обработка ошибок.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Future и CompletableFuture</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Future и CompletableFuture"}]}</script>
+  <h1>Future и CompletableFuture</h1>
+  <p class="lead">Ограничения Future, асинхронная композиция CompletableFuture, async-варианты с пулами и обработка ошибок.</p>
+  <article class="md"><h2>Future и его ограничения</h2>
+<p><code>submit(Callable)</code> возвращает Future — дескриптор будущего результата с <code>get()</code> (блокирующее ожидание), <code>isDone()</code> и <code>cancel()</code>. Это базовый способ получить результат асинхронной задачи.</p>
+<p>Ограничения Future жёсткие: <code>get()</code> блокирует поток, нельзя задать колбэк на завершение и нельзя композировать несколько Future в конвейер без блокировок. Именно это решает CompletableFuture.</p>
+<h2>CompletableFuture: асинхронный результат</h2>
+<p>CompletableFuture — это Future, на который можно навешивать продолжения, не блокируя поток. Задачу запускают через <code>supplyAsync</code> (с результатом) или <code>runAsync</code> (без), а дальше описывают конвейер преобразований, который выполнится по готовности.</p>
+<p>Это сдвиг от «дождитесь и заберите» к «опишите, что сделать с результатом, когда он появится».</p>
+<pre class="lang-java"><code>CompletableFuture
+    .supplyAsync(() -&gt; loadUser(id), pool)
+    .thenApply(User::name)
+    .thenAccept(System.out::println);</code></pre>
+<h2>Композиция</h2>
+<p><code>thenApply</code> трансформирует результат (как map). <code>thenCompose</code> сцепляет зависимую асинхронную операцию, возвращающую свой CompletableFuture (как <code>flatMap</code>) — без него получился бы вложенный CompletableFuture&lt;CompletableFuture&lt;…&gt;&gt;. <code>thenCombine</code> объединяет два независимых результата.</p>
+<p>Для групп: <code>allOf</code> ждёт завершения всех, <code>anyOf</code> — первого. Так строят и параллельные веера, и последовательные цепочки.</p>
+<h2>async-варианты и пул</h2>
+<p>У каждого шага есть *Async-вариант (<code>thenApplyAsync</code>), который выполняет продолжение в пуле, а не в потоке, завершившем предыдущий шаг. Без явного Executor используется общий <code>ForkJoinPool.commonPool</code>.</p>
+<p>Важное правило: не выполнять блокирующие операции в common pool — он маленький (по числу ядер) и общий на весь процесс; для блокирующих шагов передавайте отдельный пул.</p>
+<h2>Обработка ошибок</h2>
+<p>Исключение внутри стадии заворачивается в CompletionException и пробрасывается по цепочке. Его обрабатывают: exceptionally (подставить запасное значение), handle (получить и результат, и исключение), <code>whenComplete</code> (побочный эффект без изменения результата).</p>
+<p>Забытая обработка ошибки в CompletableFuture — частый баг: исключение «теряется», если результат никто не забрал.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Назовите ограничения Future (блокирующий get, нет композиции) как мотивацию CompletableFuture, различите <code>thenApply</code>/<code>thenCompose</code>/<code>thenCombine</code> (map/<code>flatMap</code>/zip) и <code>allOf</code>/<code>anyOf</code>, подчеркните про *Async с явным пулом и запрет блокировок в <code>commonPool</code>, и перечислите exceptionally/handle/<code>whenComplete</code> для ошибок.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/future-vs-completablefuture/">Какое ограничение Future решает CompletableFuture?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/thencompose-vs-thenapply/">Чем thenCompose отличается от thenApply в CompletableFuture?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/completablefuture-blocking-common-pool/">Почему опасно выполнять блокирующие операции в стадиях CompletableFuture без явного Executor?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/completablefuture-error-handling/">Чем различаются exceptionally, handle и whenComplete у CompletableFuture?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/future/">Что представляет собой объект Future?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/executors/">Пулы потоков и ExecutorService</a><p>Зачем пул, параметры ThreadPoolExecutor, ловушки фабрик Executors, выбор размера и корректное завершение.</p></li><li><a href="/articles/java/coordination/">Координация: семафоры, защёлки и барьеры</a><p>Semaphore, CountDownLatch, CyclicBarrier, Phaser и Exchanger — что каждый делает и когда выбирать.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Future и CompletableFuture","description":"Ограничения Future, асинхронная композиция CompletableFuture, async-варианты с пулами и обработка ошибок.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/completablefuture/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

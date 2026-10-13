@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Java: карта развития 2026</title>
+<meta name="description" content="Карта Java-разработчика — основы языка, коллекции, Stream API, многопоточность, JVM и сборка мусора, дизайн и паттерны; Spring — отдельной картой.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/java/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/java/">
+<meta property="og:title" content="Java: карта развития 2026">
+<meta property="og:description" content="Карта Java-разработчика — основы языка, коллекции, Stream API, многопоточность, JVM и сборка мусора, дизайн и паттерны; Spring — отдельной картой.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank roadmap"><div class="wrap">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/">Backend-разработчик</a> <span>/</span> <span>Java</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://learn.getsotto.ru/roadmap/backend/"},{"@type":"ListItem","position":3,"name":"Java"}]}</script>
+  <h1>Java: карта развития</h1>
+  <p class="lead">Java — часть пути бэкенд-разработчика. Сверху вниз — порядок изучения: основы языка и ООП, коллекции изнутри, дженерики и Stream API, современная Java, многопоточность, JVM и сборка мусора, ввод-вывод, дизайн и паттерны, сборка и тесты, затем Spring. Нажмите на узел, чтобы открыть справку.</p>
+  <p class="rm-count">11 этапов · 25 тем</p>
+  <p><a class="btn-plan" href="/roadmap/java/plan/">Составить ИПР по этой карте →</a></p>
+  <div class="rm-legend"><span class="rm-node sub k-core">Основа</span><span class="rm-node sub k-optional">Полезно знать</span><span class="rm-node sub k-alternative">Альтернатива</span></div><div class="rm-tree"><div class="rm-step" id="basics"><div class="rm-side l"><a class="rm-node sub k-core" href="/roadmap/java/language/" title="Примитивы и обёртки, кэш Integer, строки и StringBuilder, передача по значению, порядок инициализации.">Примитивы, строки и методы</a><a class="rm-node sub k-core" href="/roadmap/java/oop/" title="Инкапсуляция, наследование, полиморфизм, интерфейсы против абстрактных классов, неизменяемые классы.">ООП, интерфейсы и неизменяемость</a></div><a class="rm-node trunk k-core" href="/roadmap/java/basics/" title="Синтаксис, примитивы и строки, методы, ООП, равенство и исключения."><i>1</i>Основы языка</a><div class="rm-side r"><a class="rm-node sub k-core" href="/roadmap/java/equality-exceptions/" title="equals и hashCode, контракт и ловушки; checked и unchecked исключения, try-with-resources.">Равенство и исключения</a></div></div><div class="rm-step" id="collections"><div class="rm-side l"><a class="rm-node sub k-core" href="/roadmap/java/lists/" title="Динамический массив и связный список изнутри, сложность операций и выбор.">ArrayList и LinkedList</a><a class="rm-node sub k-core" href="/roadmap/java/hash-collections/" title="Бакеты, коллизии, treeify, resize, порядок обхода и LRU-кэш.">HashMap, HashSet и LinkedHashMap</a></div><a class="rm-node trunk k-core" href="/roadmap/java/collections/" title="Collections Framework — списки, хеш-таблицы, сортированные структуры, очереди и итераторы изнутри."><i>2</i>Коллекции</a><div class="rm-side r"><a class="rm-node sub k-core" href="/roadmap/java/sorted-collections/" title="Сортированные структуры, ArrayDeque и PriorityQueue, fail-fast итераторы.">TreeMap, очереди и итераторы</a></div></div><div class="rm-step" id="generics"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/java/generics/" title="Параметризованные типы, стирание, wildcards и правило PECS."><i>3</i>Дженерики</a><div class="rm-side r empty"></div></div><div class="rm-step" id="functional"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/java/functional/" title="Функциональные интерфейсы, лямбды, Optional, ленивые стримы и коллекторы."><i>4</i>Лямбды и Stream API</a><div class="rm-side r empty"></div></div><div class="rm-step" id="modern-java"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/java/modern-java/" title="var, records, sealed-типы, pattern matching, текстовые блоки и switch-выражения."><i>5</i>Современная Java</a><div class="rm-side r empty"></div></div><div class="rm-step" id="concurrency"><div class="rm-side l"><a class="rm-node sub k-core" href="/roadmap/java/threads-sync/" title="Создание и состояния потоков, synchronized, wait/notify, явные блокировки.">Потоки и синхронизация</a><a class="rm-node sub k-core" href="/roadmap/java/jmm-atomics/" title="happens-before, volatile, атомарные классы и CAS.">Java Memory Model и атомарность</a><a class="rm-node sub k-core" href="/roadmap/java/executors-futures/" title="ExecutorService, размеры пулов, Future и CompletableFuture, ThreadLocal и Fork/Join.">Пулы потоков и CompletableFuture</a></div><a class="rm-node trunk k-core" href="/roadmap/java/concurrency/" title="Потоки и синхронизация, Java Memory Model, пулы, CompletableFuture, конкурентные коллекции и виртуальные потоки."><i>6</i>Многопоточность</a><div class="rm-side r"><a class="rm-node sub k-core" href="/roadmap/java/concurrent-utils/" title="ConcurrentHashMap, CopyOnWrite, BlockingQueue, семафоры, защёлки и барьеры.">Конкурентные коллекции и координация</a><a class="rm-node sub k-core" href="/roadmap/java/virtual-threads/" title="Project Loom — миллионы лёгких потоков для блокирующего кода.">Виртуальные потоки</a></div></div><div class="rm-step" id="jvm"><div class="rm-side l"><a class="rm-node sub k-core" href="/roadmap/java/jvm-memory/" title="Куча, стек, метаспейс, устройство объекта, память Java в контейнере.">Память JVM</a><a class="rm-node sub k-core" href="/roadmap/java/gc/" title="Поколения, алгоритмы и сборщики (G1, ZGC), паузы и тюнинг.">Сборка мусора</a></div><a class="rm-node trunk k-core" href="/roadmap/java/jvm/" title="Память JVM, устройство объекта, сборщики мусора, загрузка классов и JIT."><i>7</i>JVM и сборка мусора</a><div class="rm-side r"><a class="rm-node sub k-core" href="/roadmap/java/classloading-jit/" title="Class loaders, интерпретация и JIT-компиляция, бенчмаркинг на JMH.">Загрузка классов и JIT</a></div></div><div class="rm-step" id="io-data"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/java/io-data/" title="Потоки ввода-вывода, NIO, сериализация и java.time."><i>8</i>Ввод-вывод и данные</a><div class="rm-side r empty"></div></div><div class="rm-step" id="design"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/java/design/" title="SOLID, DRY, KISS, порождающие, структурные и поведенческие паттерны."><i>9</i>Дизайн и паттерны</a><div class="rm-side r empty"></div></div><div class="rm-step" id="build-test"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/java/build-test/" title="Maven и Gradle, JUnit 5 и Mockito, логирование через SLF4J."><i>10</i>Сборка, тесты и логирование</a><div class="rm-side r empty"></div></div><div class="rm-step" id="spring"><div class="rm-side l empty"></div><a class="rm-node trunk k-core" href="/roadmap/spring/" title="Главный фреймворк Java-бэкенда — отдельная карта от IoC до Security, данных, тестов и микросервисов."><i>11</i>Spring</a><div class="rm-side r empty"></div></div></div>
+  
+  <div class="prep-links"><span>Другие карты:</span> <a class="chip" href="/roadmap/ai-engineer/">ИИ-инженер</a><a class="chip" href="/roadmap/backend/">Backend-разработчик</a><a class="chip" href="/roadmap/frontend/">Frontend-разработчик</a><a class="chip" href="/roadmap/data-science/">Data Scientist</a></div>
+</div></section>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

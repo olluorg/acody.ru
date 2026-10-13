@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие бывают Service в Kubernetes и чем Service отличается от Ingress? — вопрос с собеседования</title>
+<meta name="description" content="Service — стабильное имя и виртуальный IP для набора подов по меткам, балансировка на уровне L4. Типы: ClusterIP — только внутри кластера (по…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/k8s-service-ingress/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/k8s-service-ingress/">
+<meta property="og:title" content="Какие бывают Service в Kubernetes и чем Service отличается от Ingress? — вопрос с собеседования">
+<meta property="og:description" content="Service — стабильное имя и виртуальный IP для набора подов по меткам, балансировка на уровне L4. Типы: ClusterIP — только внутри кластера (по…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Какие бывают Service в Kubernetes и чем Service отличается от Ingress?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Какие бывают Service в Kubernetes и чем Service отличается от Ingress?"}]}</script>
+  <h1>Какие бывают Service в Kubernetes и чем Service отличается от Ingress?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Kubernetes</span><span class="chip">nginx</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем ClusterIP отличается от NodePort и LoadBalancer?</li><li>Как трафик снаружи попадает в под?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Service</b> — стабильное имя и виртуальный IP для набора подов по меткам, балансировка на уровне L4. Типы: <b>ClusterIP</b> — только внутри кластера (по умолчанию), <b>NodePort</b> — порт на каждом узле, <b>LoadBalancer</b> — внешний балансировщик облака. <b>Ingress</b> — правила L7 (HTTP): маршрутизация по домену и пути, TLS, на один внешний вход — много сервисов; работает через <b>ingress-контроллер</b> (nginx, Traefik).</p><ul><li>Внутри кластера сервис доступен по DNS: orders.shop.svc.cluster.local</li><li>Headless Service (clusterIP: None) — DNS возвращает IP подов, нужен StatefulSet</li><li>Gateway API — более выразительная замена Ingress</li></ul><p class="extra"><span>А ещё</span> В Service попадают только поды, прошедшие readiness</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Путь запроса снаружи:</b></p>
+<pre><code>клиент → облачный LB → ingress-контроллер (L7: хост, путь, TLS)
+       → Service orders (ClusterIP) → один из готовых подов</code></pre>
+<p><b>Как работает Service.</b> Контроллер ведёт список адресов готовых подов (EndpointSlice). kube-proxy на каждом узле программирует правила iptables или IPVS: обращение к виртуальному IP заменяется адресом случайного пода. Балансировка — по соединениям, поэтому долгие соединения (gRPC, HTTP/2) распределяются неравномерно — нужна L7 балансировка на клиенте или в service mesh.</p>
+<p><b>Ingress:</b></p>
+<pre class="lang-yaml"><code>spec:
+  tls: [{ hosts: [api.example.com], secretName: api-tls }]
+  rules:
+    - host: api.example.com
+      http:
+        paths:
+          - path: /orders
+            pathType: Prefix
+            backend: { service: { name: orders, port: { number: 80 } } }</code></pre>
+<p>Без установленного ingress-контроллера объект Ingress ничего не делает.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Назначение Service и его типы.</li><li>Ingress как L7-маршрутизация и роль контроллера.</li><li>Связь с readiness и проблема долгих соединений.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/devops/k8s-pod-deployment/">Чем Pod, ReplicaSet и Deployment отличаются друг от друга?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/nginx-reverse-proxy/">Что такое reverse proxy и какие задачи решает nginx перед приложением?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/highload/load-balancing-l4-l7/">Чем балансировщик L4 отличается от L7?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие бывают Service в Kubernetes и чем Service отличается от Ingress?","acceptedAnswer":{"@type":"Answer","text":"Service — стабильное имя и виртуальный IP для набора подов по меткам, балансировка на уровне L4. Типы: ClusterIP — только внутри кластера (по умолчанию), NodePort — порт на каждом узле, LoadBalancer — внешний балансировщик облака. Ingress — правила L7 (HTTP): маршрутизация по домену и пути, TLS, на один внешний вход — много сервисов; работает через ingress-контроллер (nginx, Traefik). Внутри кластера сервис доступен по DNS: orders.shop.svc.cluster.local Headless Service (clusterIP: None) — DNS возвращает IP подов, нужен StatefulSet Gateway API — более выразительная замена Ingress В Service попадают только поды, прошедшие readiness Путь запроса снаружи: Как работает Service. Контроллер ведёт список адресов готовых подов (EndpointSlice). kube-proxy на каждом узле программирует правила iptables или IPVS: обращение к виртуальному IP заменяется адресом случайного пода. Балансировка — по соединениям, поэтому долгие соединения (gRPC, HTTP/2) распределяются неравномерно — нужна L7 балансировка на клиенте или в service mesh. Ingress: Без установленного ingress-контроллера объект Ingress ничего не делает."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

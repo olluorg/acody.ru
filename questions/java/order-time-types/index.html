@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>В сервисе нужно сохранить момент оформления заказа и дату доставки, выбранную пользователем. Какие типы java.time возьмёшь и почему? — вопрос с собеседования</title>
+<meta name="description" content="Момент оформления — Instant (в БД timestamptz, всегда UTC): событие произошло объективно, его сравнивают и сортируют глобально. Дата доставки …">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/order-time-types/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/order-time-types/">
+<meta property="og:title" content="В сервисе нужно сохранить момент оформления заказа и дату доставки, выбранную пользователем. Какие типы java.time возьмёшь и почему? — вопрос с собеседования">
+<meta property="og:description" content="Момент оформления — Instant (в БД timestamptz, всегда UTC): событие произошло объективно, его сравнивают и сортируют глобально. Дата доставки …">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>В сервисе нужно сохранить момент оформления заказа и дату доставки, выбранную пользователем. Какие типы java.time возьмёшь и почему?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"В сервисе нужно сохранить момент оформления заказа и дату доставки, выбранную пользователем. Какие типы java.time возьмёшь и почему?"}]}</script>
+  <h1>В сервисе нужно сохранить момент оформления заказа и дату доставки, выбранную пользователем. Какие типы java.time возьмёшь и почему?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Дата и время</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Момент оформления — Instant</b> (в БД timestamptz, всегда UTC): событие произошло объективно, его сравнивают и сортируют глобально. <b>Дата доставки — LocalDate</b>: это не момент, а выбор человека «15 марта», и он не должен сдвигаться при смене зоны. Зону пользователя для показа хранят отдельно.</p><ul><li>Ошибка: хранить дату доставки как момент в полночь — у пользователя в другой зоне она съедет на день</li><li>Время слота доставки — LocalTime плюс зона склада</li><li>Показ — конвертация Instant в зону пользователя на границе</li></ul><p class="extra"><span>А ещё</span> Будущие события по местному времени (встреча в 10:00) хранят как LocalDateTime + ZoneId — правила зон меняются</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Разведи два вида времени — это и есть суть вопроса. Момент оформления заказа произошёл объективно, его надо уметь сравнивать и сортировать глобально, поэтому это Instant, в базе timestamptz, всегда в UTC. Дата доставки — не момент, а намерение человека: пользователь выбрал «пятнадцатое марта», и это должно остаться пятнадцатым марта независимо от того, из какого часового пояса он смотрит, поэтому LocalDate. Объясни, почему обратный выбор ломается: LocalDateTime без зоны не задаёт точку на оси времени — одно и то же значение соответствует разным моментам в разных поясах, поэтому хранить им время события нельзя. А если для даты доставки взять Instant, придётся выдумывать время суток и зону, и при переводе часов дата может сместиться на сутки. Добавь про зону: сам Instant её не хранит, поэтому если нужно показывать пользователю время в его поясе или считать «рабочий день по месту доставки», ZoneId сохраняют отдельным полем и применяют при отображении через ZonedDateTime. И упомяни, за что java.time вообще любят: типы неизменяемы и потокобезопасны, DateTimeFormatter можно держать в статическом поле — со старым SimpleDateFormat это давало плавающие баги.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Разделение момента и календарной даты.</li><li>Хранение в БД.</li><li>Ошибка со сдвигом даты.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Хранить момент события в LocalDateTime без зоны.</li><li>Считать смещение и часовой пояс одним и тем же.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем Duration отличается от Period и почему это важно при переходе на летнее время?</li><li>Что произойдёт с ZonedDateTime, если правила часового пояса изменятся?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/date-time/">Дата и время: java.time</a><p>Почему java.time вытеснил Date/Calendar, машинное (Instant) и человеческое (LocalDateTime) время, часовые пояса, Duration/Period и потокобезопасный DateTimeFormatter.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/localdatetime-vs-zoneddatetime/">Чем LocalDateTime отличается от ZonedDateTime?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/instant-duration-period/">Чем Instant и LocalDateTime отличаются и когда брать Duration, а когда Period?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"В сервисе нужно сохранить момент оформления заказа и дату доставки, выбранную пользователем. Какие типы java.time возьмёшь и почему?","acceptedAnswer":{"@type":"Answer","text":"Момент оформления — Instant (в БД timestamptz, всегда UTC): событие произошло объективно, его сравнивают и сортируют глобально. Дата доставки — LocalDate: это не момент, а выбор человека «15 марта», и он не должен сдвигаться при смене зоны. Зону пользователя для показа хранят отдельно. Ошибка: хранить дату доставки как момент в полночь — у пользователя в другой зоне она съедет на день Время слота доставки — LocalTime плюс зона склада Показ — конвертация Instant в зону пользователя на границе Будущие события по местному времени (встреча в 10:00) хранят как LocalDateTime + ZoneId — правила зон меняются Разведи два вида времени — это и есть суть вопроса. Момент оформления заказа произошёл объективно, его надо уметь сравнивать и сортировать глобально, поэтому это Instant, в базе timestamptz, всегда в UTC. Дата доставки — не момент, а намерение человека: пользователь выбрал «пятнадцатое марта», и это должно остаться пятнадцатым марта независимо от того, из какого часового пояса он смотрит, поэтому LocalDate. Объясни, почему обратный выбор ломается: LocalDateTime без зоны не задаёт точку на оси времени — одно и то же значение соответствует разным моментам в разных поясах, поэтому хранить им время события нельзя. А если для даты доставки взять Instant, придётся выдумывать время суток и зону, и при переводе часов дата может сместиться на сутки. Добавь про зону: сам Instant её не хранит, поэтому если нужно показывать пользователю время в его поясе или считать «рабочий день по месту…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему чтение файла по одному байту через FileInputStream радикально медленнее, чем через BufferedInputStream? — вопрос с собеседования</title>
+<meta name="description" content="Дорог не байт, а системный вызов с переходом в ядро. Чтение по байту из FileInputStream — по вызову на байт; BufferedInputStream читает блок (8 КБ)…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/buffered-io/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/buffered-io/">
+<meta property="og:title" content="Почему чтение файла по одному байту через FileInputStream радикально медленнее, чем через BufferedInputStream? — вопрос с собеседования">
+<meta property="og:description" content="Дорог не байт, а системный вызов с переходом в ядро. Чтение по байту из FileInputStream — по вызову на байт; BufferedInputStream читает блок (8 КБ)…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Почему чтение файла по одному байту через FileInputStream радикально медленнее, чем через BufferedInputStream?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Почему чтение файла по одному байту через FileInputStream радикально медленнее, чем через BufferedInputStream?"}]}</script>
+  <h1>Почему чтение файла по одному байту через FileInputStream радикально медленнее, чем через BufferedInputStream?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Ввод-вывод и NIO</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Зачем нужна буферизация при вводе-выводе?</li><li>Зачем нужна буферизация при вводе-выводе и что происходит, если читать файл без неё?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Дорог не байт, а <b>системный вызов</b> с переходом в ядро. Чтение по байту из FileInputStream — по вызову на байт; <b>BufferedInputStream</b> читает блок (8 КБ) за один вызов и отдаёт байты из памяти — разница на порядки.</p><ul><li>При записи то же — плюс flush() перед закрытием или ожиданием ответа</li><li>Читать массивами (read(byte[])) — тот же эффект без обёртки</li><li>Files.readAllBytes, transferTo — уже эффективны</li></ul><p class="extra"><span>А ещё</span> Забытый flush — данные «потерялись» в буфере</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Системный вызов требует переключения контекста между пользовательским режимом и ядром, и его стоимость на порядки превышает копирование байта из памяти. Буферизующая обёртка читает блок разом и обслуживает последующие обращения из него. Ровно тот же принцип действует при записи, с важным дополнением: данные остаются в буфере, пока он не заполнится, поэтому забытые flush или close приводят к потере хвоста файла — try-with-resources решает и это. Стоит помнить, что буферизация не бесплатна и не всегда нужна: если вы и так читаете крупными массивами, дополнительный слой лишь копирует данные ещё раз.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Стоимость системного вызова.</li><li>Как буфер её снимает.</li><li>flush при записи.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Забыть закрыть или сбросить буферизованный поток записи и потерять данные.</li><li>Оборачивать в буфер поток, который и так читается большими блоками.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Каждое чтение оборачивается системным вызовом; буфер читает крупными блоками и отдаёт байты из памяти</li><li class="no"><span class="mark">✗</span>BufferedInputStream использует несколько потоков для чтения</li><li class="no"><span class="mark">✗</span>FileInputStream проверяет права доступа при каждом обращении</li><li class="no"><span class="mark">✗</span>Буферизация сжимает данные, поэтому их меньше</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что произойдёт, если не вызвать close у BufferedWriter?</li><li>Где в этой конструкции проявляется паттерн Decorator?</li><li>Почему у BufferedReader есть readLine, а у InputStream нет?</li><li>Когда буферизация не нужна или даже вредна?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/io/">Потоки ввода-вывода: байты, символы, буферы</a><p>Байтовые и символьные потоки, кодировки и Charset, буферизация и системные вызовы, декоратор-паттерн и современный файловый API.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/java-io-decorator/">Какой паттерн лежит в основе конструкции new BufferedInputStream(new GZIPInputStream(new FileInputStream(file)))?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/latency-numbers/">Какие порядки задержек нужно знать разработчику?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему чтение файла по одному байту через FileInputStream радикально медленнее, чем через BufferedInputStream?","acceptedAnswer":{"@type":"Answer","text":"Дорог не байт, а системный вызов с переходом в ядро. Чтение по байту из FileInputStream — по вызову на байт; BufferedInputStream читает блок (8 КБ) за один вызов и отдаёт байты из памяти — разница на порядки. При записи то же — плюс flush() перед закрытием или ожиданием ответа Читать массивами (read(byte[])) — тот же эффект без обёртки Files.readAllBytes, transferTo — уже эффективны Забытый flush — данные «потерялись» в буфере Системный вызов требует переключения контекста между пользовательским режимом и ядром, и его стоимость на порядки превышает копирование байта из памяти. Буферизующая обёртка читает блок разом и обслуживает последующие обращения из него. Ровно тот же принцип действует при записи, с важным дополнением: данные остаются в буфере, пока он не заполнится, поэтому забытые flush или close приводят к потере хвоста файла — try-with-resources решает и это. Стоит помнить, что буферизация не бесплатна и не всегда нужна: если вы и так читаете крупными массивами, дополнительный слой лишь копирует данные ещё раз."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

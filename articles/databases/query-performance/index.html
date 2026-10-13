@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Практика оптимизации запросов — разбор для собеседования</title>
+<meta name="description" content="EXPLAIN и чтение плана, порядок колонок индекса, keyset-пагинация и ловушки, мешающие индексу.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/databases/query-performance/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/databases/query-performance/">
+<meta property="og:title" content="Практика оптимизации запросов — разбор для собеседования">
+<meta property="og:description" content="EXPLAIN и чтение плана, порядок колонок индекса, keyset-пагинация и ловушки, мешающие индексу.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>Практика оптимизации запросов</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"Практика оптимизации запросов"}]}</script>
+  <h1>Практика оптимизации запросов</h1>
+  <p class="lead">EXPLAIN и чтение плана, порядок колонок индекса, keyset-пагинация и ловушки, мешающие индексу.</p>
+  <article class="md"><h2>Сначала измерить</h2>
+<p>Оптимизация начинается не с добавления индекса, а с фактов: какой запрос медленный, на каких параметрах, сколько строк читает, сколько возвращает и как часто вызывается. Часто проблема не в одном тяжёлом запросе, а в частом среднем (привет, N+1).</p>
+<p>EXPLAIN показывает план, выбранный планировщиком; EXPLAIN ANALYZE во многих СУБД ещё и реально выполняет запрос, давая фактические время и строки. ANALYZE на write-запросах применяйте осторожно — он действительно изменит данные (или оберните в транзакцию с rollback).</p>
+<h2>Как читать план</h2>
+<p>В плане смотрят тип доступа (seq scan против index scan/index-only scan), порядок соединений и алгоритм join, оценку строк и стоимость. Большой разрыв между estimated и actual rows — признак устаревшей статистики или неудачной оценки селективности.</p>
+<p>Seq scan не всегда плох: на маленькой таблице или при низкой селективности он дешевле индекса.</p>
+<h2>Порядок колонок в индексе</h2>
+<p>Составной B-tree использует левый префикс, поэтому порядок колонок важен. Частая стратегия: сначала колонки с равенством, затем диапазон/сортировка — тогда один индекс закрывает и фильтр, и ORDER BY.</p>
+<p>Индекс (user_id, created_at desc) обслуживает запрос «последние заказы пользователя» без отдельной сортировки.</p>
+<pre class="lang-sql"><code>create index idx_orders_user_created
+on orders (user_id, created_at desc);</code></pre>
+<h2>Пагинация: OFFSET против keyset</h2>
+<p>OFFSET на больших страницах дорог: база проходит и отбрасывает все предыдущие строки, поэтому стоимость растёт со страницей.</p>
+<p>Keyset (seek) pagination запоминает последнее увиденное значение и продолжает по индексу — стоимость почти постоянна и не зависит от глубины.</p>
+<pre class="lang-sql"><code>-- keyset: дешевле OFFSET на глубоких страницах
+select * from orders
+where user_id = ?
+  and created_at &lt; ?   -- курсор: последнее значение прошлой страницы
+order by created_at desc
+limit 50;</code></pre>
+<h2>Статистика и селективность</h2>
+<p>Планировщик выбирает план не по самому запросу, а по СТАТИСТИКЕ: сколько строк в таблице, как распределены значения колонок, сколько среди них уникальных, какие значения встречаются чаще всего. По ней он оценивает селективность условия — какую долю строк оно оставит.</p>
+<p>Отсюда правило чтения плана: сравнивайте оценку с фактом (rows=1000 против actual rows=900000). Расхождение на порядки означает, что планировщик обманут, и дальше он делает неверный выбор — берёт nested loop там, где нужен hash join, или игнорирует индекс.</p>
+<p>Типичные причины расхождения: устаревшая статистика после массовой заливки данных (лечится ANALYZE), коррелированные условия (город и страна не независимы, а планировщик перемножает вероятности как независимые), выражения, по которым статистики просто нет.</p>
+<p>Практический вывод: если план внезапно «испортился» после большой загрузки данных, первым делом обновите статистику, а не добавляйте индексы.</p>
+<h2>Что мешает индексу</h2>
+<p>Функция над колонкой (<code>lower(email)</code> = ?) мешает индексу — нужен функциональный индекс или нормализованное поле. SELECT * раздувает IO и лишает шанса на index-only scan. Ведущий wildcard в LIKE '%x' не использует B-tree. OR по разным колонкам часто хуже UNION.</p>
+<p>Сюда же — неявное приведение типов: сравнение varchar-колонки с числом или timestamp с datetime может заставить БД привести колонку к другому типу, а это та же функция над колонкой со всеми последствиями.</p>
+<p>И низкая селективность: индекс по колонке status с тремя значениями сам по себе почти бесполезен — база справедливо решит, что дешевле прочитать таблицу. Такие колонки имеют смысл как ВТОРАЯ часть составного индекса или в частичном индексе (WHERE status = 'ACTIVE') под конкретный горячий запрос.</p>
+<pre class="lang-sql"><code>-- индекс по email не сработает: функция над колонкой
+select * from users where lower(email) = ?;
+
+-- вариант 1: функциональный индекс
+create index idx_users_email_lower on users (lower(email));
+
+-- вариант 2: частичный индекс под горячий запрос
+create index idx_orders_active on orders (created_at desc)
+where status = &#x27;ACTIVE&#x27;;</code></pre>
+<h2>Как отвечать на собеседовании</h2>
+<p>Главное — показать ПОРЯДОК действий, а не список трюков: измерить и найти конкретный медленный запрос → посмотреть план через EXPLAIN (ANALYZE) → понять, где уходит время → подобрать индекс или переписать запрос → перепроверить планом. Ответ «добавлю индекс» без этой рамки звучит слабо.</p>
+<p>Отдельно отметьте, что дело не всегда в одном тяжёлом запросе: часто виноват средний по стоимости, но вызываемый тысячи раз (N+1). Это сразу показывает, что вы смотрите на нагрузку целиком.</p>
+<p>При чтении плана называйте, на что смотрите: тип доступа (seq scan против index scan / index-only scan), алгоритм соединения, и главное — расхождение estimated и actual rows как признак устаревшей статистики. Оговоритесь, что seq scan не всегда зло: на маленькой таблице или при низкой селективности он дешевле индекса.</p>
+<p>Про индексы дайте одно сильное правило вместо перечисления: в составном индексе работает левый префикс, поэтому сначала колонки с равенством, потом диапазон и сортировка — тогда один индекс закрывает и фильтр, и ORDER BY.</p>
+<p>Завершите пагинацией: OFFSET дорожает с глубиной страницы, потому что база проходит и отбрасывает все предыдущие строки, а keyset-пагинация продолжает по индексу от последнего значения и стоит почти одинаково на любой странице.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/databases/explain/">Что делает EXPLAIN для SQL-запроса?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/keyset-pagination/">Почему keyset-пагинация (seek) обычно лучше OFFSET-пагинации на больших таблицах?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/explain-analyze/">Чем EXPLAIN ANALYZE отличается от обычного EXPLAIN?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/stale-statistics/">После массовой загрузки данных запросы, работавшие быстро, резко замедлились, хотя индексы на месте. Наиболее вероятная причина?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/slow-query-first-step/">Запрос стал работать медленно. С чего правильно начать разбор?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/databases/indexes/">Индексы и планы запросов</a><p>Устройство B-tree, hash vs B-tree, составной и covering индекс, цена записи и когда индекс не используется.</p></li><li><a href="/articles/databases/orm/">ORM, persistence context и N+1</a><p>Что делает ORM, lazy/eager и proxy, механизм N+1, способы лечения и типичные грабли.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Практика оптимизации запросов","description":"EXPLAIN и чтение плана, порядок колонок индекса, keyset-пагинация и ловушки, мешающие индексу.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/databases/query-performance/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

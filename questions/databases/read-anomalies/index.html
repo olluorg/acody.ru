@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем dirty read, non-repeatable read и phantom read отличаются друг от друга? — вопрос с собеседования</title>
+<meta name="description" content="Грязное чтение — видим чужие неподтверждённые изменения. Неповторяемое — повторное чтение той же строки даёт другое значение. Фантом — повторный…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/read-anomalies/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/read-anomalies/">
+<meta property="og:title" content="Чем dirty read, non-repeatable read и phantom read отличаются друг от друга? — вопрос с собеседования">
+<meta property="og:description" content="Грязное чтение — видим чужие неподтверждённые изменения. Неповторяемое — повторное чтение той же строки даёт другое значение. Фантом — повторный…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Чем dirty read, non-repeatable read и phantom read отличаются друг от друга?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Чем dirty read, non-repeatable read и phantom read отличаются друг от друга?"}]}</script>
+  <h1>Чем dirty read, non-repeatable read и phantom read отличаются друг от друга?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Транзакции и изоляция</span><span class="chip">SQL</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое грязное чтение?</li><li>Чем неповторяемое чтение отличается от фантома?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Грязное чтение</b> — видим чужие <b>неподтверждённые</b> изменения. <b>Неповторяемое</b> — повторное чтение <b>той же строки</b> даёт другое значение. <b>Фантом</b> — повторный запрос с условием возвращает <b>другой набор строк</b>.</p><ul><li>Грязное: другая транзакция потом откатится, а мы уже использовали её данные</li><li>Неповторяемое: между чтениями кто-то закоммитил UPDATE</li><li>Фантом: между чтениями кто-то закоммитил INSERT или DELETE подходящих строк</li></ul><p class="extra"><span>А ещё</span> Есть и аномалии вне стандарта: потерянное обновление, асимметрия записи</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Уровни изоляции: версии строк, снимки и аномалии</p><script type="module" src="/widgets/isolation.js"></script><sotto-isolation theme="dark"></sotto-isolation></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Грязное чтение (dirty read).</b> Транзакция A изменила баланс, но не закоммитила. Транзакция B прочитала новое значение и приняла решение. A откатилась — B действовала по данным, которых никогда не было. Запрещено начиная с READ COMMITTED.</p>
+<p><b>Неповторяемое чтение (non-repeatable read).</b> B читает строку, A меняет её и коммитит, B читает ту же строку снова — значение другое. Проблема для транзакций, которые читают данные несколько раз и рассчитывают на их неизменность (отчёт, проверка с последующим действием). Запрещено начиная с REPEATABLE READ.</p>
+<p><b>Фантом (phantom read).</b> B выполняет <code>SELECT ... WHERE status = &#x27;new&#x27;</code>, A вставляет новую строку с этим статусом и коммитит, B повторяет запрос — строк стало больше. Отличие от неповторяемого чтения: меняется не значение существующей строки, а сам набор. По стандарту запрещено только на SERIALIZABLE (в PostgreSQL снимок скрывает фантомы и на REPEATABLE READ).</p>
+<p><b>Цена изоляции:</b> чем выше уровень, тем больше блокировок или откатов из-за конфликтов сериализации. Поэтому выбирают минимально достаточный уровень и защищают критичные места явно (<code>FOR UPDATE</code>, атомарные UPDATE).</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определение каждой аномалии с примером.</li><li>Различие неповторяемого чтения и фантома.</li><li>Какой уровень изоляции запрещает каждую.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Путать неповторяемое чтение и фантом.</li><li>Считать грязное чтение возможным в PostgreSQL.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Какой уровень убирает phantom по SQL standard?</li><li>Как MVCC влияет на эти аномалии?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/transactions/">Транзакции, изоляция и блокировки</a><p>ACID по буквам, аномалии чтения, уровни изоляции, MVCC и оптимистичные/пессимистичные блокировки.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/isolation-anomalies/">Какие аномалии бывают при параллельных транзакциях и от чего защищает каждый уровень изоляции?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/isolation-phantom-reads/">Какой уровень изоляции транзакций по стандарту SQL гарантированно предотвращает phantom reads?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/mvcc/">Что такое MVCC и как он позволяет читать без блокировок?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем dirty read, non-repeatable read и phantom read отличаются друг от друга?","acceptedAnswer":{"@type":"Answer","text":"Грязное чтение — видим чужие неподтверждённые изменения. Неповторяемое — повторное чтение той же строки даёт другое значение. Фантом — повторный запрос с условием возвращает другой набор строк. Грязное: другая транзакция потом откатится, а мы уже использовали её данные Неповторяемое: между чтениями кто-то закоммитил UPDATE Фантом: между чтениями кто-то закоммитил INSERT или DELETE подходящих строк Есть и аномалии вне стандарта: потерянное обновление, асимметрия записи Грязное чтение (dirty read). Транзакция A изменила баланс, но не закоммитила. Транзакция B прочитала новое значение и приняла решение. A откатилась — B действовала по данным, которых никогда не было. Запрещено начиная с READ COMMITTED. Неповторяемое чтение (non-repeatable read). B читает строку, A меняет её и коммитит, B читает ту же строку снова — значение другое. Проблема для транзакций, которые читают данные несколько раз и рассчитывают на их неизменность (отчёт, проверка с последующим действием). Запрещено начиная с REPEATABLE READ. Фантом (phantom read). B выполняет SELECT ... WHERE status = 'new', A вставляет новую строку с этим статусом и коммитит, B повторяет запрос — строк стало больше. Отличие от неповторяемого чтения: меняется не значение существующей строки, а сам набор. По стандарту запрещено только на SERIALIZABLE (в PostgreSQL снимок скрывает фантомы и на REPEATABLE…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

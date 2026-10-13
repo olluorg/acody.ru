@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что невозможно из-за стирания типов? — вопрос с собеседования</title>
+<meta name="description" content="В рантайме параметра типа нет, поэтому нельзя: new T(), new T[n], instanceof List&lt;String&gt;, статическое поле типа T, перегрузка m(List&lt;String&gt;) и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/type-erasure-limits/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/type-erasure-limits/">
+<meta property="og:title" content="Что невозможно из-за стирания типов? — вопрос с собеседования">
+<meta property="og:description" content="В рантайме параметра типа нет, поэтому нельзя: new T(), new T[n], instanceof List&lt;String&gt;, статическое поле типа T, перегрузка m(List&lt;String&gt;) и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что невозможно из-за стирания типов?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что невозможно из-за стирания типов?"}]}</script>
+  <h1>Что невозможно из-за стирания типов?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Дженерики</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main">В рантайме параметра типа нет, поэтому нельзя: <b>new T()</b>, <b>new T[n]</b>, <b>instanceof List&lt;String&gt;</b>, <b>статическое поле типа T</b>, перегрузка <b>m(List&lt;String&gt;)</b> и <b>m(List&lt;Integer&gt;)</b> (одинаковая стёртая сигнатура), <b>catch (T e)</b>.</p><ul><li>Причина — совместимость с кодом до Java 5</li><li>Компилятор вставляет приведения, в байт-коде Object или верхняя граница</li><li>Обход — передать Class&lt;T&gt;, Supplier&lt;T&gt;, TypeReference (Jackson)</li></ul><p class="extra"><span>А ещё</span> Тип сохраняется в сигнатурах классов и полей — его читают через рефлексию</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Стирание было платой за совместимость с кодом, написанным до появления дженериков: компилятор проверяет типы и вставляет приведения, а в байткоде остаётся обычный Object или верхняя граница. Отсюда весь список ограничений, включая невозможность создать массив параметризованного типа и запрет на обобщённые классы исключений — блок catch работает в рантайме и не смог бы различить типы. Статическое поле невозможно потому, что оно принадлежит классу, общему для всех параметризаций. Обходной приём, который стоит назвать: передавать Class&lt;T&gt; в конструктор и создавать объекты рефлексией, либо принимать фабрику Supplier&lt;T&gt;. Использование T в сигнатурах методов, разумеется, работает — на этом дженерики и построены.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Перечень ограничений.</li><li>Причина стирания.</li><li>Обходные пути.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Пытаться сделать обобщённый класс исключения.</li><li>Забывать, что информация о параметре в полях и сигнатурах всё же сохраняется в метаданных и доступна рефлексии.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Несколько верных вариантов. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Создать экземпляр параметра типа: new T()</li><li class="ok"><span class="mark">✓</span>Проверить obj instanceof List&lt;String&gt;</li><li class="ok"><span class="mark">✓</span>Объявить статическое поле типа параметра T в обобщённом классе</li><li class="no"><span class="mark">✗</span>Использовать параметр типа в качестве типа возвращаемого значения метода</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как обойти невозможность new T()?</li><li>Почему нельзя создать массив List&lt;String&gt;[]?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/generics/">Дженерики и стирание типов</a><p>Типобезопасность на компиляции, механизм type erasure и его последствия, дженерик-методы, ограниченные параметры и опасность raw types.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/type-erasure/">Что означает стирание типов (type erasure)?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/generic-array-heap-pollution/">Почему нельзя создать массив параметризованного типа (new List&lt;String&gt;[10] или new T[n])?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/bridge-method/">Что такое bridge-метод в Java?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что невозможно из-за стирания типов?","acceptedAnswer":{"@type":"Answer","text":"В рантайме параметра типа нет, поэтому нельзя: new T(), new T[n], instanceof List<String>, статическое поле типа T, перегрузка m(List<String>) и m(List<Integer>) (одинаковая стёртая сигнатура), catch (T e). Причина — совместимость с кодом до Java 5 Компилятор вставляет приведения, в байт-коде Object или верхняя граница Обход — передать Class<T>, Supplier<T>, TypeReference (Jackson) Тип сохраняется в сигнатурах классов и полей — его читают через рефлексию Стирание было платой за совместимость с кодом, написанным до появления дженериков: компилятор проверяет типы и вставляет приведения, а в байткоде остаётся обычный Object или верхняя граница. Отсюда весь список ограничений, включая невозможность создать массив параметризованного типа и запрет на обобщённые классы исключений — блок catch работает в рантайме и не смог бы различить типы. Статическое поле невозможно потому, что оно принадлежит классу, общему для всех параметризаций. Обходной приём, который стоит назвать: передавать Class<T> в конструктор и создавать объекты рефлексией, либо принимать фабрику Supplier<T>. Использование T в сигнатурах методов, разумеется, работает — на этом дженерики и построены."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

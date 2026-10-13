@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что изменилось с переменной цикла в Go 1.22? — вопрос с собеседования</title>
+<meta name="description" content="До Go 1.22 переменная цикла for i := ... была одна на весь цикл: замыкания и горутины, захватившие её, видели последнее значение. С Go 1.22 каждая…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/go/loop-variable/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/go/loop-variable/">
+<meta property="og:title" content="Что изменилось с переменной цикла в Go 1.22? — вопрос с собеседования">
+<meta property="og:description" content="До Go 1.22 переменная цикла for i := ... была одна на весь цикл: замыкания и горутины, захватившие её, видели последнее значение. С Go 1.22 каждая…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/go/">Go</a> <span>/</span> <span>Что изменилось с переменной цикла в Go 1.22?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Go","item":"https://learn.getsotto.ru/questions/go/"},{"@type":"ListItem","position":3,"name":"Что изменилось с переменной цикла в Go 1.22?"}]}</script>
+  <h1>Что изменилось с переменной цикла в Go 1.22?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Горутины и каналы</span><span class="chip ver">Go &gt;=1.22</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему все горутины в цикле печатали одно и то же значение?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">До Go 1.22 переменная цикла <code>for i := ...</code> была <b>одна на весь цикл</b>: замыкания и горутины, захватившие её, видели последнее значение. С <b>Go 1.22</b> каждая итерация получает <b>свою копию</b> — классическая ошибка исчезла (для модулей с go 1.22 в go.mod).</p><ul><li>Старое исправление: i := i внутри цикла или передача аргументом</li><li>Поведение зависит от версии в go.mod, а не компилятора</li><li>То же касается for k, v := range</li></ul><p class="extra"><span>А ещё</span> В Python та же ловушка позднего связывания осталась</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Почему было так.</b> Цикл переиспользовал одну переменную, меняя её значение. Замыкание захватывает переменную, а не значение; горутины стартуют позже, чем цикл успевает пройти дальше.</p>
+<p><b>Изменение 1.22</b> (предложение Расса Кокса) сделало переменную на итерацию. Чтобы не сломать старый код, правило включается по версии языка в <code>go.mod</code>. Инструмент <code>loopclosure</code> в go vet ловил старую ошибку.</p>
+<p>На собеседовании этот вопрос проверяет понимание замыканий и того, что горутина выполняется позже места запуска.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-go"><code>for _, url := range urls {
+    go func() {
+        fetch(url)     // Go 1.22+: своя url на итерацию
+    }()                // до 1.22: все горутины могли взять последнюю
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Старое поведение и его причина.</li><li>Что изменилось и как включается.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/late-binding-closures/">Почему лямбды, созданные в цикле, возвращают одно и то же значение?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/go/race-detector/">Что такое гонка данных в Go и как её найти?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что изменилось с переменной цикла в Go 1.22?","acceptedAnswer":{"@type":"Answer","text":"До Go 1.22 переменная цикла for i := ... была одна на весь цикл: замыкания и горутины, захватившие её, видели последнее значение. С Go 1.22 каждая итерация получает свою копию — классическая ошибка исчезла (для модулей с go 1.22 в go.mod). Старое исправление: i := i внутри цикла или передача аргументом Поведение зависит от версии в go.mod, а не компилятора То же касается for k, v := range В Python та же ловушка позднего связывания осталась Почему было так. Цикл переиспользовал одну переменную, меняя её значение. Замыкание захватывает переменную, а не значение; горутины стартуют позже, чем цикл успевает пройти дальше. Изменение 1.22 (предложение Расса Кокса) сделало переменную на итерацию. Чтобы не сломать старый код, правило включается по версии языка в go.mod. Инструмент loopclosure в go vet ловил старую ошибку. На собеседовании этот вопрос проверяет понимание замыканий и того, что горутина выполняется позже места запуска."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

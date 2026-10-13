@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем := отличается от var и что такое затенение переменных? — вопрос с собеседования</title>
+<meta name="description" content=":= — короткое объявление с выводом типа, только внутри функций; объявляет хотя бы одну новую переменную слева. var — работает и на уровне пакета…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/go/short-declaration-shadowing/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/go/short-declaration-shadowing/">
+<meta property="og:title" content="Чем := отличается от var и что такое затенение переменных? — вопрос с собеседования">
+<meta property="og:description" content=":= — короткое объявление с выводом типа, только внутри функций; объявляет хотя бы одну новую переменную слева. var — работает и на уровне пакета…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/go/">Go</a> <span>/</span> <span>Чем := отличается от var и что такое затенение переменных?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Go","item":"https://learn.getsotto.ru/questions/go/"},{"@type":"ListItem","position":3,"name":"Чем := отличается от var и что такое затенение переменных?"}]}</script>
+  <h1>Чем := отличается от var и что такое затенение переменных?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Основы языка</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему err оказался nil после if в Go?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>:=</b> — короткое объявление с выводом типа, <b>только внутри функций</b>; объявляет хотя бы одну новую переменную слева. <b>var</b> — работает и на уровне пакета, позволяет указать тип без значения. <b>Затенение</b>: := во вложенном блоке создаёт <b>новую</b> переменную с тем же именем, и внешняя остаётся неизменной.</p><ul><li>x, err := f() — err может переиспользоваться, если x новая</li><li>Классическая ошибка: err := внутри if перекрывает внешний err</li><li>go vet -shadow и линтеры находят затенение</li></ul><p class="extra"><span>А ещё</span> Неиспользуемая локальная переменная — ошибка компиляции</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Правила :=:</b> слева хотя бы одна новая переменная в текущей области; остальные переиспользуются. Работает только внутри функций.</p>
+<p><b>var</b> нужен, когда: переменная на уровне пакета; нужен конкретный тип (<code>var x int64 = 1</code>); нужно нулевое значение без инициализации.</p>
+<p><b>Затенение</b> опасно тем, что компилятор не жалуется — переменная используется. Особенно часто это происходит с <code>err</code> и с переменными, инициализируемыми в if или for.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-go"><code>var cfg *Config
+if path != &quot;&quot; {
+    cfg, err := load(path)   // новые cfg и err в блоке if!
+    if err != nil { return err }
+    _ = cfg
+}
+// здесь внешний cfg всё ещё nil
+
+// правильно:
+var err error
+if path != &quot;&quot; {
+    cfg, err = load(path)
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Различия := и var.</li><li>Что такое затенение и пример ошибки.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/errors-as-values/">Как в Go обрабатывают ошибки и зачем нужны errors.Is, errors.As и %w?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/go/zero-values/">Что такое нулевые значения в Go?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем := отличается от var и что такое затенение переменных?","acceptedAnswer":{"@type":"Answer","text":":= — короткое объявление с выводом типа, только внутри функций; объявляет хотя бы одну новую переменную слева. var — работает и на уровне пакета, позволяет указать тип без значения. Затенение: := во вложенном блоке создаёт новую переменную с тем же именем, и внешняя остаётся неизменной. x, err := f() — err может переиспользоваться, если x новая Классическая ошибка: err := внутри if перекрывает внешний err go vet -shadow и линтеры находят затенение Неиспользуемая локальная переменная — ошибка компиляции Правила :=: слева хотя бы одна новая переменная в текущей области; остальные переиспользуются. Работает только внутри функций. var нужен, когда: переменная на уровне пакета; нужен конкретный тип (var x int64 = 1); нужно нулевое значение без инициализации. Затенение опасно тем, что компилятор не жалуется — переменная используется. Особенно часто это происходит с err и с переменными, инициализируемыми в if или for."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

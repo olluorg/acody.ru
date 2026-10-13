@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Равенство: ==, equals и hashCode — разбор для собеседования</title>
+<meta name="description" content="Идентичность против логического равенства, контракт equals и hashCode, проблема equals с наследованием и корректная реализация.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/equality/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/equality/">
+<meta property="og:title" content="Равенство: ==, equals и hashCode — разбор для собеседования">
+<meta property="og:description" content="Идентичность против логического равенства, контракт equals и hashCode, проблема equals с наследованием и корректная реализация.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Равенство: ==, equals и hashCode</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Равенство: ==, equals и hashCode"}]}</script>
+  <h1>Равенство: ==, equals и hashCode</h1>
+  <p class="lead">Идентичность против логического равенства, контракт equals и hashCode, проблема equals с наследованием и корректная реализация.</p>
+  <article class="md"><h2>== против equals</h2>
+<p>Для примитивов == сравнивает значения. Для ссылочных типов == сравнивает идентичность — одна ли это ссылка на один объект в памяти, а <code>equals()</code> — логическое равенство по содержимому, ЕСЛИ метод переопределён.</p>
+<p>По умолчанию <code>Object.equals</code> реализован как ==, то есть без переопределения «равенство по содержимому» не работает. Поэтому два разных объекта с одинаковыми полями равны по правильно написанному equals, но не по ==.</p>
+<pre class="lang-java"><code>String a = new String(&quot;a&quot;);
+String b = new String(&quot;a&quot;);
+a == b;       // false — разные объекты в куче
+a.equals(b);  // true  — одинаковое содержимое</code></pre>
+<h2>Контракт equals</h2>
+<p>equals обязан быть: рефлексивным (<code>x.equals(x)</code> — true), симметричным (<code>x.equals(y)</code> ⇔ <code>y.equals(x)</code>), транзитивным (x=y и y=z ⇒ x=z), согласованным (повторные вызовы дают тот же результат, пока объекты не менялись) и возвращать false на null (<code>x.equals(null)</code> == false).</p>
+<p>Эти правила не формальность: их нарушение делает поведение коллекций и сравнений непредсказуемым. Классический пример нарушения симметрии — equals, который пытается «понимать» чужой тип (например, регистронезависимая строка, считающая себя равной обычной String, тогда как String так не считает).</p>
+<h2>equals и наследование</h2>
+<p>Самая коварная тема: нельзя одновременно сохранить контракт equals и добавлять значимые поля в подкласс расширяемого класса. Если сравнивать через instanceof, симметрия/транзитивность ломаются между объектом базового и производного класса; если через <code>getClass()</code>, объекты разных классов никогда не равны — это нарушает принцип подстановки Лисков для подтипов.</p>
+<p>Практические выходы: делать класс (или сам equals) final; либо предпочесть композицию наследованию — вынести «значимые поля» в отдельный объект, а не в подкласс. Записи (records) обходят проблему тем, что финальны и сравнивают строго по компонентам.</p>
+<h2>Контракт hashCode</h2>
+<p>Главное правило связки: если два объекта равны по equals, у них ОБЯЗАН совпадать <code>hashCode</code>. Обратное не требуется — неравные объекты могут иметь одинаковый хеш (коллизия — это нормально). В пределах одного запуска <code>hashCode</code> стабилен, пока значимые поля не меняются.</p>
+<p>Нарушение этого правила тихо ломает HashMap/HashSet: объект кладётся в бакет по <code>hashCode</code>, а ищется по нему же — если хеши «разъехались» с равенством, объект уходит не в тот бакет и «теряется» (get вернёт null для логически того же ключа).</p>
+<h2>Как реализовать правильно</h2>
+<p>equals и <code>hashCode</code> должны опираться на ОДИН И ТОТ ЖЕ набор значимых полей. Удобные помощники: <code>Objects.equals(a, b)</code> (null-безопасное сравнение) в equals и <code>Objects.hash(f1, f2, …)</code> в <code>hashCode</code> (для горячих путей — ручная формула 31*h + field, чтобы не аллоцировать массив varargs).</p>
+<p>В современном коде это чаще всего не пишут руками: records генерируют equals/<code>hashCode</code>/<code>toString</code> из компонентов автоматически, а для классов их генерирует IDE. Главное — держать наборы полей синхронными между двумя методами при любом изменении класса.</p>
+<pre class="lang-java"><code>@Override public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Point p)) return false;
+    return x == p.x &amp;&amp; y == p.y;
+}
+@Override public int hashCode() { return Objects.hash(x, y); }</code></pre>
+<h2>Изменяемые ключи</h2>
+<p>Если <code>hashCode</code> (или equals) зависит от изменяемого поля и это поле поменять ПОСЛЕ вставки объекта в HashMap/HashSet, объект становится недостижим: он лежит в старом бакете, а ищется по новому хешу.</p>
+<p>Поэтому ключи хеш-коллекций делают неизменяемыми (или хотя бы не меняют значимые поля, пока объект лежит в коллекции) — см. урок про неизменяемость.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Различите == (идентичность/значение примитива) и equals (логическое равенство, по умолчанию == у Object), перечислите пять свойств контракта equals и главное правило <code>hashCode</code> (equal ⇒ равный <code>hashCode</code>) с последствием для HashMap. Покажите зрелость на теме equals+наследование (instanceof ломает симметрию, <code>getClass</code> ломает Лисков → final/композиция/records) и на синхронности полей equals/<code>hashCode</code> + неизменяемости ключей.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/string-equals-vs-double-equals/">Что вернут сравнения для new String(&quot;a&quot;) и new String(&quot;a&quot;) через == и через equals()?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/equals-hashcode-contract/">Какое правило связывает equals() и hashCode()?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/equals-contract/">Какие требования входят в контракт equals?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/hashmap/">HashMap изнутри: бакеты, treeify, resize</a><p>Таблица бакетов, перемешивание хеша и индекс, превращение цепочки в дерево, ресайз и load factor, контракт ключа.</p></li><li><a href="/articles/java/immutability/">Проектирование неизменяемых классов</a><p>Зачем нужна неизменяемость, рецепт immutable-класса, защитные копии, безопасная публикация и records.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Равенство: ==, equals и hashCode","description":"Идентичность против логического равенства, контракт equals и hashCode, проблема equals с наследованием и корректная реализация.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/equality/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

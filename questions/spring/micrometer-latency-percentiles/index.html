@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как в Spring Boot собрать перцентили времени ответа HTTP-запросов? — вопрос с собеседования</title>
+<meta name="description" content="Actuator + Micrometer уже пишут таймер http.server.requests с метками uri (шаблон), method, status, outcome. Для перцентилей включают гистограмму и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/micrometer-latency-percentiles/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/micrometer-latency-percentiles/">
+<meta property="og:title" content="Как в Spring Boot собрать перцентили времени ответа HTTP-запросов? — вопрос с собеседования">
+<meta property="og:description" content="Actuator + Micrometer уже пишут таймер http.server.requests с метками uri (шаблон), method, status, outcome. Для перцентилей включают гистограмму и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Как в Spring Boot собрать перцентили времени ответа HTTP-запросов?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Как в Spring Boot собрать перцентили времени ответа HTTP-запросов?"}]}</script>
+  <h1>Как в Spring Boot собрать перцентили времени ответа HTTP-запросов?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Spring Boot и Actuator</span><span class="chip">Spring Boot</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как настроить метрики задержки через Micrometer?</li><li>Что такое p99?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Actuator + Micrometer уже пишут таймер **<code>http.server.requests</code><b> с метками uri (шаблон), method, status, outcome. Для перцентилей включают </b>гистограмму** и считают квантили в Prometheus — так они корректно складываются по экземплярам.</p><ul><li><code>management.metrics.distribution.percentiles-histogram.http.server.requests=true</code></li><li><code>histogram_quantile(0.99, sum by (le, uri) (rate(http_server_requests_seconds_bucket[5m])))</code></li><li>Готовые перцентили в приложении (<code>percentiles</code>) нельзя усреднять между подами</li></ul><p class="extra"><span>А ещё</span> p99 — время, быстрее которого укладываются 99% запросов</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Что есть из коробки.</b> С <code>spring-boot-starter-actuator</code> и <code>micrometer-registry-prometheus</code> каждый запрос MVC/WebFlux записывается в таймер <code>http.server.requests</code> с метками <code>uri</code> (шаблон маршрута <code>/orders/{id}</code>, а не полный путь), <code>method</code>, <code>status</code>, <code>outcome</code>, <code>exception</code>. Экспорт — <code>/actuator/prometheus</code>.</p>
+<p><b>Перцентили — два способа:</b></p>
+<ul><li><b>гистограмма</b> — <code>percentiles-histogram: true</code> публикует счётчики по бакетам (<code>_bucket{le=...}</code>). Prometheus вычисляет любой квантиль и корректно агрегирует по всем экземплярам и маршрутам. Рекомендуемый путь;</li><li><b>клиентские перцентили</b> — <code>percentiles: 0.5,0.95,0.99</code> считаются в приложении и публикуются готовыми числами. Их нельзя складывать и усреднять между подами — математически бессмысленно.</li></ul>
+<p><b>Настройки:</b> <code>minimum-expected-value</code> и <code>maximum-expected-value</code> или <code>slo</code> (свои границы бакетов, например 100ms, 300ms, 1s) — точнее и меньше рядов.</p>
+<p><b>Свои таймеры:</b> <code>@Timed</code> на методе или <code>Timer.builder(&quot;payments.charge&quot;)</code> — для внешних вызовов и бизнес-операций.</p>
+<p><b>Осторожно с метками:</b> только ограниченные значения. Полный URL или id пользователя в метке — миллионы временных рядов.</p>
+<p><b>Смысл p99:</b> 99% запросов быстрее этого значения. Смотрят p50, p95, p99 отдельно для успешных запросов и долю ошибок отдельно.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-yaml"><code>management:
+  endpoints.web.exposure.include: health,prometheus
+  metrics.distribution:
+    percentiles-histogram.http.server.requests: true
+    slo.http.server.requests: 100ms,300ms,1s</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Метрика http.server.requests из коробки.</li><li>Гистограммы и вычисление квантилей на стороне Prometheus.</li><li>Почему нельзя усреднять готовые перцентили.</li><li>Ограниченные метки, смысл p99.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Усреднять p99 разных подов.</li><li>Метка uri с полным путём вместо шаблона.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Метрика http.server.requests уже есть в Actuator; включить гистограмму (management.metrics.distribution.percentiles-histogram) и считать перцентили в Prometheus через histogram_quantile</li><li class="no"><span class="mark">✗</span>Считать среднее время ответа в контроллере и писать в лог</li><li class="no"><span class="mark">✗</span>Вычислять p99 в каждом экземпляре и усреднять значения в Grafana</li><li class="no"><span class="mark">✗</span>Добавить в метрику метку с id пользователя</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем histogram отличается от timer?</li><li>Какие RED metrics вы знаете?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/actuator/">Actuator и наблюдаемость</a><p>Production-эндпоинты, health-проверки и probes, метрики через Micrometer, трассировка и безопасность эндпоинтов.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/latency-percentiles/">Почему время ответа измеряют перцентилями, а не средним?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/measuring-latency/">Что верно про измерение времени ответа сервиса?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/actuator-exposure/">Что важно учесть при выставлении наружу эндпоинтов Actuator?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как в Spring Boot собрать перцентили времени ответа HTTP-запросов?","acceptedAnswer":{"@type":"Answer","text":"Actuator + Micrometer уже пишут таймер http.server.requests с метками uri (шаблон), method, status, outcome. Для перцентилей включают гистограмму и считают квантили в Prometheus — так они корректно складываются по экземплярам. management.metrics.distribution.percentiles-histogram.http.server.requests=true histogram_quantile(0.99, sum by (le, uri) (rate(http_server_requests_seconds_bucket[5m]))) Готовые перцентили в приложении (percentiles) нельзя усреднять между подами p99 — время, быстрее которого укладываются 99% запросов Что есть из коробки. С spring-boot-starter-actuator и micrometer-registry-prometheus каждый запрос MVC/WebFlux записывается в таймер http.server.requests с метками uri (шаблон маршрута /orders/{id}, а не полный путь), method, status, outcome, exception. Экспорт — /actuator/prometheus. Перцентили — два способа: - гистограмма — percentiles-histogram: true публикует счётчики по бакетам (_bucket{le=...}). Prometheus вычисляет любой квантиль и корректно агрегирует по всем экземплярам и маршрутам. Рекомендуемый путь; - клиентские перцентили — percentiles: 0.5,0.95,0.99 считаются в приложении и публикуются готовыми числами. Их нельзя складывать и усреднять между подами — математически бессмысленно. Настройки: minimum-expected-value и maximum-expected-value или slo (свои границы бакетов, например 100ms, 300ms, 1s) — точнее и меньше рядов. Свои таймеры: @Timed на методе или…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

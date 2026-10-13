@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работает сортировка слиянием? — вопрос с собеседования</title>
+<meta name="description" content="Делим массив пополам, рекурсивно сортируем половины и сливаем их, каждый раз беря меньший из двух первых элементов. Всегда O(n log n): log n уровней…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/merge-sort/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/merge-sort/">
+<meta property="og:title" content="Как работает сортировка слиянием? — вопрос с собеседования">
+<meta property="og:description" content="Делим массив пополам, рекурсивно сортируем половины и сливаем их, каждый раз беря меньший из двух первых элементов. Всегда O(n log n): log n уровней…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Как работает сортировка слиянием?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Как работает сортировка слиянием?"}]}</script>
+  <h1>Как работает сортировка слиянием?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Сортировки</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему сортировка слиянием всегда O(n log n)?</li><li>Как слить два отсортированных массива?</li><li>Где применяют внешнюю сортировку?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Делим массив <b>пополам</b>, рекурсивно сортируем половины и <b>сливаем</b> их, каждый раз беря меньший из двух первых элементов.</p><ul><li>Всегда O(n log n): log n уровней деления, на каждом O(n) работы слияния</li><li>Устойчива, но требует O(n) дополнительной памяти</li></ul><p class="extra"><span>А ещё</span> Слияние читает данные последовательно — поэтому подходит для внешней сортировки и связных списков</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Сортировки по шагам: пузырёк, вставки, выбор, слияние, быстрая, пирамидальная</p><script type="module" src="/widgets/sorting.js"></script><sotto-sorting theme="dark"></sotto-sorting></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Алгоритм:</b></p>
+<ol><li>если в массиве 0 или 1 элемент — он отсортирован;</li><li>разделить массив на две половины;</li><li>рекурсивно отсортировать каждую;</li><li><b>слить</b> две отсортированные половины в одну.</li></ol>
+<p><b>Слияние</b> — два указателя на начала половин. На каждом шаге берём меньший из двух текущих элементов и переносим в результат; когда одна половина кончилась, дописываем остаток другой. Это O(n) для двух половин суммарной длины n. Если при равенстве брать элемент из левой половины, сохраняется исходный порядок равных — сортировка <b>устойчива</b>.</p>
+<p><b>Сложность.</b> Глубина деления — log₂ n уровней, на каждом уровне сливается ровно n элементов. Итого O(n log n) в любом случае — нет худшего случая, как у быстрой сортировки. Цена — O(n) дополнительной памяти под временный массив.</p>
+<p><b>Где особенно хороша:</b></p>
+<ul><li><b>внешняя сортировка</b> — данные не помещаются в память: сортируем куски, пишем на диск и сливаем потоками (так работают базы данных и сортировка больших файлов);</li><li><b>связные списки</b> — слияние не требует произвольного доступа и дополнительной памяти под массив;</li><li>там, где нужна устойчивость — основа Timsort.</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>def merge_sort(a):
+    if len(a) &lt;= 1:
+        return a
+    mid = len(a) // 2
+    left, right = merge_sort(a[:mid]), merge_sort(a[mid:])
+    result, i, j = [], 0, 0
+    while i &lt; len(left) and j &lt; len(right):
+        if left[i] &lt;= right[j]:          # &lt;= сохраняет устойчивость
+            result.append(left[i]); i += 1
+        else:
+            result.append(right[j]); j += 1
+    return result + left[i:] + right[j:]</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Схема: деление, рекурсия, слияние.</li><li>Как работает слияние двумя указателями.</li><li>Почему O(n log n) всегда и цена O(n) памяти.</li><li>Устойчивость и внешняя сортировка — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Забыть дописать остаток одной из половин при слиянии.</li><li>Нарушить устойчивость, используя строгое сравнение <code>&lt;</code>.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/stable-sort/">Что такое устойчивая (стабильная) сортировка и когда это важно?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/sorting-lower-bound/">Можно ли отсортировать быстрее, чем за O(n log n)?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/quicksort/">Как работает быстрая сортировка и когда она работает медленно?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/sorting-overview/">Какие алгоритмы сортировки вы знаете и чем они отличаются?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работает сортировка слиянием?","acceptedAnswer":{"@type":"Answer","text":"Делим массив пополам, рекурсивно сортируем половины и сливаем их, каждый раз беря меньший из двух первых элементов. Всегда O(n log n): log n уровней деления, на каждом O(n) работы слияния Устойчива, но требует O(n) дополнительной памяти Слияние читает данные последовательно — поэтому подходит для внешней сортировки и связных списков Алгоритм: 1. если в массиве 0 или 1 элемент — он отсортирован; 2. разделить массив на две половины; 3. рекурсивно отсортировать каждую; 4. слить две отсортированные половины в одну. Слияние — два указателя на начала половин. На каждом шаге берём меньший из двух текущих элементов и переносим в результат; когда одна половина кончилась, дописываем остаток другой. Это O(n) для двух половин суммарной длины n. Если при равенстве брать элемент из левой половины, сохраняется исходный порядок равных — сортировка устойчива. Сложность. Глубина деления — log₂ n уровней, на каждом уровне сливается ровно n элементов. Итого O(n log n) в любом случае — нет худшего случая, как у быстрой сортировки. Цена — O(n) дополнительной памяти под временный массив. Где особенно хороша: - внешняя сортировка — данные не помещаются в память: сортируем куски, пишем на диск и сливаем потоками (так работают базы данных и…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

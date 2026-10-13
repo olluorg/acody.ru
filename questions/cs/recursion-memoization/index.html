@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое рекурсия и мемоизация? — вопрос с собеседования</title>
+<meta name="description" content="Рекурсия — функция вызывает саму себя для меньшей задачи и останавливается на базовом случае; мемоизация — кэш уже посчитанных результатов. Наивный…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/recursion-memoization/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/recursion-memoization/">
+<meta property="og:title" content="Что такое рекурсия и мемоизация? — вопрос с собеседования">
+<meta property="og:description" content="Рекурсия — функция вызывает саму себя для меньшей задачи и останавливается на базовом случае; мемоизация — кэш уже посчитанных результатов. Наивный…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Что такое рекурсия и мемоизация?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Что такое рекурсия и мемоизация?"}]}</script>
+  <h1>Что такое рекурсия и мемоизация?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Рекурсия и динамическое программирование</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему рекурсивные числа Фибоначчи считаются так медленно?</li><li>Что такое переполнение стека при рекурсии?</li><li>Что такое хвостовая рекурсия?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Рекурсия — функция вызывает <b>саму себя</b> для меньшей задачи и останавливается на <b>базовом случае</b>; мемоизация — <b>кэш уже посчитанных</b> результатов.</p><ul><li>Наивный рекурсивный Фибоначчи — O(2ⁿ): одни и те же значения пересчитываются экспоненциально много раз</li><li>С мемоизацией — O(n): каждое значение считается один раз</li></ul><p class="extra"><span>А ещё</span> Каждый вызов занимает место в стеке: глубокая рекурсия → переполнение стека</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Дерево рекурсивных вызовов и мемоизация</p><script type="module" src="/widgets/recursion-tree.js"></script><sotto-recursion-tree theme="dark"></sotto-recursion-tree></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Рекурсия</b> удобна, когда задача сводится к такой же задаче меньшего размера: обход дерева, «разделяй и властвуй», перебор. Обязательные части:</p>
+<ul><li><b>базовый случай</b> — когда ответ известен без рекурсии;</li><li><b>шаг</b> — сведение к меньшей задаче, который гарантированно приближает к базовому случаю.</li></ul>
+<p>Каждый вызов кладёт кадр в <b>стек вызовов</b> (параметры, локальные переменные, адрес возврата). При слишком большой глубине стек переполняется: <code>RecursionError</code> в Python (лимит около 1000 по умолчанию), <code>StackOverflowError</code> в Java. Тогда рекурсию переписывают на цикл с явным стеком.</p>
+<p><b>Проблема повторных вычислений.</b> <code>fib(n) = fib(n-1) + fib(n-2)</code> порождает дерево вызовов, где <code>fib(n-2)</code> считается дважды, <code>fib(n-3)</code> — трижды и так далее: число вызовов растёт экспоненциально, примерно как 1,6ⁿ.</p>
+<p><b>Мемоизация</b> — запоминать результат для каждого аргумента и при повторном вызове брать из кэша. Дерево вызовов «схлопывается» в цепочку: O(n) времени и O(n) памяти. Это подход «сверху вниз» к динамическому программированию.</p>
+<p><b>Хвостовая рекурсия</b> — рекурсивный вызов последний в функции. Некоторые языки (Scheme, Scala с аннотацией) превращают её в цикл без роста стека; Python и Java так не делают.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>from functools import lru_cache
+
+def fib_slow(n):                     # O(2^n)
+    return n if n &lt; 2 else fib_slow(n - 1) + fib_slow(n - 2)
+
+@lru_cache(maxsize=None)
+def fib_fast(n):                     # O(n): каждое значение — один раз
+    return n if n &lt; 2 else fib_fast(n - 1) + fib_fast(n - 2)
+
+fib_fast(90)   # мгновенно; fib_slow(90) не дождаться</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Базовый случай и шаг рекурсии.</li><li>Стек вызовов и риск переполнения.</li><li>Почему наивный Фибоначчи экспоненциальный.</li><li>Мемоизация и как она меняет сложность.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Забыть базовый случай или шаг, который к нему не приближает.</li><li>Не учитывать память стека вызовов в оценке сложности.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/dynamic-programming/">Что такое динамическое программирование?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/stack-queue/">Чем стек отличается от очереди и где они применяются?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/time-vs-memory/">Что такое компромисс между временем и памятью?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое рекурсия и мемоизация?","acceptedAnswer":{"@type":"Answer","text":"Рекурсия — функция вызывает саму себя для меньшей задачи и останавливается на базовом случае; мемоизация — кэш уже посчитанных результатов. Наивный рекурсивный Фибоначчи — O(2ⁿ): одни и те же значения пересчитываются экспоненциально много раз С мемоизацией — O(n): каждое значение считается один раз Каждый вызов занимает место в стеке: глубокая рекурсия → переполнение стека Рекурсия удобна, когда задача сводится к такой же задаче меньшего размера: обход дерева, «разделяй и властвуй», перебор. Обязательные части: - базовый случай — когда ответ известен без рекурсии; - шаг — сведение к меньшей задаче, который гарантированно приближает к базовому случаю. Каждый вызов кладёт кадр в стек вызовов (параметры, локальные переменные, адрес возврата). При слишком большой глубине стек переполняется: RecursionError в Python (лимит около 1000 по умолчанию), StackOverflowError в Java. Тогда рекурсию переписывают на цикл с явным стеком. Проблема повторных вычислений. fib(n) = fib(n-1) + fib(n-2) порождает дерево вызовов, где fib(n-2) считается дважды, fib(n-3) — трижды и так далее: число вызовов растёт экспоненциально, примерно как 1,6ⁿ. Мемоизация — запоминать результат для каждого аргумента и при повторном вызове брать из кэша. Дерево вызовов «схлопывается» в цепочку…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

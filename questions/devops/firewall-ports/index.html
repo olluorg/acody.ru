@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как ограничивать сетевой доступ к серверам и сервисам? — вопрос с собеседования</title>
+<meta name="description" content="Принцип — запрещено всё, что не разрешено явно. Слои защиты: файрвол хоста (nftables/iptables, ufw), облачные security groups у каждой машины…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/firewall-ports/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/firewall-ports/">
+<meta property="og:title" content="Как ограничивать сетевой доступ к серверам и сервисам? — вопрос с собеседования">
+<meta property="og:description" content="Принцип — запрещено всё, что не разрешено явно. Слои защиты: файрвол хоста (nftables/iptables, ufw), облачные security groups у каждой машины…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Как ограничивать сетевой доступ к серверам и сервисам?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Как ограничивать сетевой доступ к серверам и сервисам?"}]}</script>
+  <h1>Как ограничивать сетевой доступ к серверам и сервисам?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Сети и прокси</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем stateful-файрвол отличается от stateless?</li><li>Что такое security group?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Принцип — <b>запрещено всё, что не разрешено явно</b>. Слои защиты: <b>файрвол хоста</b> (nftables/iptables, ufw), <b>облачные security groups</b> у каждой машины, <b>сетевые ACL</b> подсетей, <b>NetworkPolicy</b> в Kubernetes. Наружу открыты только 80/443 балансировщика; БД, кэши и брокеры — только из подсети приложений; SSH — только с bastion или через VPN.</p><ul><li>Stateful-файрвол помнит соединения: ответный трафик разрешён автоматически</li><li>Security group разрешает доступ по ссылке на другую группу, а не только по IP</li><li>Сервис, слушающий 0.0.0.0 без файрвола, доступен всем — частая причина утечек баз</li></ul><p class="extra"><span>А ещё</span> Docker публикует порты в обход ufw, правя iptables напрямую</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Пример политики для веб-сервиса:</b></p>
+<div class="table"><table><thead><tr><th>откуда</th><th>куда</th><th>порт</th></tr></thead><tbody><tr><td>интернет</td><td>балансировщик</td><td>443</td></tr><tr><td>балансировщик</td><td>приложения</td><td>8080</td></tr><tr><td>приложения</td><td>PostgreSQL</td><td>5432</td></tr><tr><td>bastion</td><td>все узлы</td><td>22</td></tr></tbody></table></div>
+<p><b>Stateful и stateless.</b> Security groups и nftables с conntrack — stateful: разрешили входящее — ответ пройдёт. Сетевые ACL облака — stateless: нужно явно разрешить и обратное направление (эфемерные порты).</p>
+<p><b>Kubernetes NetworkPolicy:</b> по умолчанию все поды видят друг друга. Политика «запретить всё входящее» на namespace и явные разрешения ограничивают последствия взлома одного сервиса. Работает, только если сетевой плагин поддерживает политики (Calico, Cilium).</p>
+<p><b>Проверка:</b> <code>nmap</code> снаружи — какие порты реально открыты.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Принцип запрета по умолчанию и слои защиты.</li><li>Stateful против stateless.</li><li>Практическая схема доступа.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/devops/network-debugging/">Сервис A не может подключиться к сервису B. Как вы будете искать причину?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/ssh-keys-bastion/">Как устроен доступ по SSH-ключам и зачем нужен bastion-хост?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/cidr-subnets/">Что означает запись 10.0.0.0/16 и как разбить сеть на подсети?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как ограничивать сетевой доступ к серверам и сервисам?","acceptedAnswer":{"@type":"Answer","text":"Принцип — запрещено всё, что не разрешено явно. Слои защиты: файрвол хоста (nftables/iptables, ufw), облачные security groups у каждой машины, сетевые ACL подсетей, NetworkPolicy в Kubernetes. Наружу открыты только 80/443 балансировщика; БД, кэши и брокеры — только из подсети приложений; SSH — только с bastion или через VPN. Stateful-файрвол помнит соединения: ответный трафик разрешён автоматически Security group разрешает доступ по ссылке на другую группу, а не только по IP Сервис, слушающий 0.0.0.0 без файрвола, доступен всем — частая причина утечек баз Docker публикует порты в обход ufw, правя iptables напрямую Пример политики для веб-сервиса: | откуда | куда | порт | | --- | --- | --- | | интернет | балансировщик | 443 | | балансировщик | приложения | 8080 | | приложения | PostgreSQL | 5432 | | bastion | все узлы | 22 | Stateful и stateless. Security groups и nftables с conntrack — stateful: разрешили входящее — ответ пройдёт. Сетевые ACL облака — stateless: нужно явно разрешить и обратное направление (эфемерные порты). Kubernetes NetworkPolicy: по умолчанию все поды видят друг друга. Политика «запретить всё входящее» на namespace и явные разрешения ограничивают последствия взлома одного сервиса. Работает, только если сетевой плагин поддерживает политики (Calico, Cilium). Проверка: nmap снаружи — какие порты реально открыты."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Бины: жизненный цикл и scopes — разбор для собеседования</title>
+<meta name="description" content="Бин и BeanDefinition, полный жизненный цикл, роль BeanPostProcessor, области видимости и их ловушки.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/spring/bean/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/spring/bean/">
+<meta property="og:title" content="Бины: жизненный цикл и scopes — разбор для собеседования">
+<meta property="og:description" content="Бин и BeanDefinition, полный жизненный цикл, роль BeanPostProcessor, области видимости и их ловушки.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#spring">Spring</a> <span>/</span> <span>Бины: жизненный цикл и scopes</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/articles/#spring"},{"@type":"ListItem","position":3,"name":"Бины: жизненный цикл и scopes"}]}</script>
+  <h1>Бины: жизненный цикл и scopes</h1>
+  <p class="lead">Бин и BeanDefinition, полный жизненный цикл, роль BeanPostProcessor, области видимости и их ловушки.</p>
+  <article class="md"><h2>Бин и BeanDefinition</h2>
+<p>Бин — объект, созданный и управляемый Spring-контейнером: контейнер решает, когда его создать, как связать зависимости и когда уничтожить.</p>
+<p>Важная деталь: сначала контейнер хранит не сам объект, а BeanDefinition — «рецепт» бина (класс, scope, зависимости, init/destroy-методы, lazy-флаг). Бины создаются из этих определений. Поэтому конфигурацию можно менять до создания объектов (см. BeanFactoryPostProcessor).</p>
+<h2>Полный жизненный цикл</h2>
+<p>Стадии создания singleton-бина: инстанцирование (конструктор) → внедрение зависимостей (populate) → Aware-колбэки (BeanNameAware, ApplicationContextAware) → <code>BeanPostProcessor.postProcessBeforeInitialization</code> → инициализация (<code>@PostConstruct</code> → <code>InitializingBean.afterPropertiesSet</code> → init-method) → <code>BeanPostProcessor.postProcessAfterInitialization</code> → бин готов. При остановке контекста: <code>@PreDestroy</code> → <code>DisposableBean.destroy</code> → destroy-method.</p>
+<p>Знать порядок важно: именно на стадии <code>postProcessAfterInitialization</code> бин при необходимости оборачивается в прокси.</p>
+<pre class="lang-java"><code>@Component
+class Cache {
+    @PostConstruct void init()  { /* прогрев после внедрения зависимостей */ }
+    @PreDestroy  void close() { /* очистка при остановке контекста */ }
+}</code></pre>
+<figure><img src="/articles/assets/bean-lifecycle.webp" alt="Фазы жизненного цикла Spring-бина: создание, внедрение зависимостей, Aware-интерфейсы, BeanPostProcessor до, инициализация, BeanPostProcessor после, бин готов, уничтожение." loading="lazy"><figcaption>Жизненный цикл бина: от создания и внедрения зависимостей через инициализацию до готовности и уничтожения.</figcaption></figure>
+<h2>BeanPostProcessor — где живёт «магия»</h2>
+<p>BeanPostProcessor (BPP) — точка расширения, которая вмешивается до и после инициализации КАЖДОГО бина. Именно BPP оборачивают бины в прокси: так работают AOP, <code>@Transactional</code>, <code>@Async</code>, <code>@Cacheable</code>.</p>
+<p>Это объясняет «магию» Spring: вы получаете не свой объект, а его прокси-обёртку, добавляющую поведение. Отсюда же типичная ловушка — self-invocation: вызов своего <code>@Transactional</code>-метода через this идёт мимо прокси и не открывает транзакцию (подробнее — в уроке про транзакции/AOP).</p>
+<h2>Scopes</h2>
+<p>Scope определяет, сколько живёт и сколько экземпляров у бина. singleton (по умолчанию) — один на контейнер, создаётся жадно при старте (fail-fast). prototype — новый объект на каждый запрос из контейнера/инъекцию. Веб-scopes: request, session, application, websocket — привязаны к жизни запроса/сессии.</p>
+<p>singleton ≠ паттерн Singleton из GoF: это «один на контейнер», а не «один на JVM».</p>
+<h2>Ловушки scope</h2>
+<p>Для prototype-бинов контейнер НЕ вызывает destroy-колбэк — за освобождение ресурсов отвечаете вы.</p>
+<p>Более коварная ловушка — prototype внутри singleton: prototype-зависимость внедрится в singleton ОДИН раз при его создании, и дальше будет один и тот же экземпляр, а не новый при каждом обращении. Чтобы получать новый, инъектируют <code>ObjectProvider&lt;T&gt;</code> (<code>provider.getObject()</code>), используют <code>@Lookup</code>-метод или scoped proxy.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Объясните роль BeanDefinition (рецепт до объекта), назовите порядок жизненного цикла (инстанцирование → DI → Aware → BPP.before → init → BPP.after → готов; destroy в конце) и подчеркните, что прокси (AOP/<code>@Transactional</code>) навешивает BeanPostProcessor — отсюда self-invocation. Перечислите scopes (singleton≠GoF Singleton, prototype без destroy) и ловушку prototype-в-singleton (ObjectProvider/<code>@Lookup</code>).</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/spring/spring-bean/">Что такое Spring Bean?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/spring/bean-scopes/">Какой scope у Spring-бина по умолчанию?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/spring/bean-init-order/">В каком порядке контейнер выполняет шаги инициализации бина?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/prototype-predestroy/">Бин объявлен со scope prototype и содержит @PreDestroy. Когда контейнер вызовет этот метод?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/spring/ioc/">IoC и Dependency Injection</a><p>Принцип инверсии управления, DI как его форма, три способа внедрения и почему конструктор, разрешение циклических зависимостей.</p></li><li><a href="/articles/spring/context-config/">ApplicationContext и конфигурация</a><p>BeanFactory против ApplicationContext, способы конфигурации, @Configuration full/lite, профили и Environment, @Conditional.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Бины: жизненный цикл и scopes","description":"Бин и BeanDefinition, полный жизненный цикл, роль BeanPostProcessor, области видимости и их ловушки.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/spring/bean/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

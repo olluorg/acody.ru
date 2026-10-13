@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Разработчик случайно закоммитил ключ доступа к платёжному провайдеру и через час удалил его следующим коммитом. Что нужно сделать? — вопрос с собеседования</title>
+<meta name="description" content="Секрет в истории git — утёк. Единственное надёжное действие — отозвать и перевыпустить (ротация), затем проверить журналы использования ключа…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/leaked-secret-in-git/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/leaked-secret-in-git/">
+<meta property="og:title" content="Разработчик случайно закоммитил ключ доступа к платёжному провайдеру и через час удалил его следующим коммитом. Что нужно сделать? — вопрос с собеседования">
+<meta property="og:description" content="Секрет в истории git — утёк. Единственное надёжное действие — отозвать и перевыпустить (ротация), затем проверить журналы использования ключа…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Разработчик случайно закоммитил ключ доступа к платёжному провайдеру и через час удалил его следующим коммитом. Что нужно сделать?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Разработчик случайно закоммитил ключ доступа к платёжному провайдеру и через час удалил его следующим коммитом. Что нужно сделать?"}]}</script>
+  <h1>Разработчик случайно закоммитил ключ доступа к платёжному провайдеру и через час удалил его следующим коммитом. Что нужно сделать?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Безопасность приложения</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что делать, если секрет попал в git?</li><li>Где хранить секреты приложения?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Секрет в истории git — <b>утёк</b>. Единственное надёжное действие — <b>отозвать и перевыпустить</b> (ротация), затем проверить журналы использования ключа.</p><ul><li>Удаляющий коммит не убирает секрет из истории; клоны, форки, кэши и CI уже могли его получить</li><li>Переписывание истории — уборка, но не замена ротации</li><li>Профилактика: секреты в менеджере (Vault, облачный KMS), сканер секретов в pre-commit и CI</li></ul><p class="extra"><span>А ещё</span> Публичные репозитории сканируют боты — ключи облаков используют за минуты</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Почему удаление не помогает.</b> Git хранит все версии: объект с ключом доступен по старому коммиту. Репозиторий уже клонирован коллегами и CI, мог попасть в зеркала, кэш хостинга, в логи сборки. В публичных репозиториях ключи облачных провайдеров находят автоматические сканеры за минуты.</p>
+<p><b>Порядок действий:</b></p>
+<ol><li><b>отозвать ключ</b> у провайдера и выпустить новый;</li><li>обновить секрет во всех окружениях;</li><li>проверить журнал использования старого ключа: были ли операции не от нас;</li><li>по желанию — вычистить историю (<code>git filter-repo</code>) и попросить хостинг очистить кэш; это не отменяет первых шагов;</li><li>разобрать причину и закрыть её.</li></ol>
+<p><b>Профилактика:</b></p>
+<ul><li>секреты не хранятся в репозитории — только в менеджере секретов (Vault, Yandex Lockbox, AWS Secrets Manager) с контролем доступа, аудитом и ротацией;</li><li>в приложение — через переменные окружения или примонтированные файлы, в Kubernetes — внешние секреты, а не значения в манифестах;</li><li>сканеры секретов: pre-commit (gitleaks), проверка в CI и на хостинге (push protection);</li><li>короткоживущие учётные данные (OIDC для CI, временные токены) вместо вечных ключей.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Секрет считается скомпрометированным, ротация обязательна.</li><li>Почему удаление коммита не помогает.</li><li>Порядок реагирования, включая проверку использования.</li><li>Профилактика: менеджер секретов, сканеры.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ограничиться переписыванием истории.</li><li>Хранить секреты в зашифрованном файле в репозитории с ключом рядом.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Считать ключ скомпрометированным и немедленно ротировать: он остался в истории git</li><li class="no"><span class="mark">✗</span>Ничего: удаляющий коммит убрал ключ из репозитория</li><li class="no"><span class="mark">✗</span>Достаточно сделать репозиторий приватным</li><li class="no"><span class="mark">✗</span>Достаточно переписать историю через force-push, ротация не нужна</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как организовать регулярную ротацию секретов?</li><li>Чем это относится к категории Security Misconfiguration?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/security/">Безопасность приложения: OWASP, доступ и секреты</a><p>OWASP Top 10 в редакции 2025, разница аутентификации и авторизации, ловушки JWT против сессий, хранение паролей и секретов, безопасность цепочки поставок.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/supply-chain-risks/">Что относится к рискам цепочки поставок ПО (Software Supply Chain Failures, A03 в OWASP Top 10:2025)?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/secure-public-api/">Какие меры безопасности вы заложите при проектировании публичного REST API с личным кабинетом пользователя?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Разработчик случайно закоммитил ключ доступа к платёжному провайдеру и через час удалил его следующим коммитом. Что нужно сделать?","acceptedAnswer":{"@type":"Answer","text":"Секрет в истории git — утёк. Единственное надёжное действие — отозвать и перевыпустить (ротация), затем проверить журналы использования ключа. Удаляющий коммит не убирает секрет из истории; клоны, форки, кэши и CI уже могли его получить Переписывание истории — уборка, но не замена ротации Профилактика: секреты в менеджере (Vault, облачный KMS), сканер секретов в pre-commit и CI Публичные репозитории сканируют боты — ключи облаков используют за минуты Почему удаление не помогает. Git хранит все версии: объект с ключом доступен по старому коммиту. Репозиторий уже клонирован коллегами и CI, мог попасть в зеркала, кэш хостинга, в логи сборки. В публичных репозиториях ключи облачных провайдеров находят автоматические сканеры за минуты. Порядок действий: 1. отозвать ключ у провайдера и выпустить новый; 2. обновить секрет во всех окружениях; 3. проверить журнал использования старого ключа: были ли операции не от нас; 4. по желанию — вычистить историю (git filter-repo) и попросить хостинг очистить кэш; это не отменяет первых шагов; 5. разобрать причину и закрыть её. Профилактика: - секреты не хранятся в репозитории — только в менеджере секретов (Vault, Yandex Lockbox, AWS Secrets Manager) с контролем доступа, аудитом и ротацией; - в приложение — через переменные окружения или примонтированные файлы, в Kubernetes — внешние секреты, а не…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

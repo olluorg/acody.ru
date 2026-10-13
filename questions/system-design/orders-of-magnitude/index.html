@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие порядки величин стоит держать в голове при оценке на салфетке? — вопрос с собеседования</title>
+<meta name="description" content="Важны соотношения: память ~100 нс, SSD ~100 мкс (в тысячу раз медленнее), HDD ~10 мс (ещё в сто), сеть внутри дата-центра ~0,5 мс, другой континент…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/orders-of-magnitude/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/orders-of-magnitude/">
+<meta property="og:title" content="Какие порядки величин стоит держать в голове при оценке на салфетке? — вопрос с собеседования">
+<meta property="og:description" content="Важны соотношения: память ~100 нс, SSD ~100 мкс (в тысячу раз медленнее), HDD ~10 мс (ещё в сто), сеть внутри дата-центра ~0,5 мс, другой континент…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Какие порядки величин стоит держать в голове при оценке на салфетке?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Какие порядки величин стоит держать в голове при оценке на салфетке?"}]}</script>
+  <h1>Какие порядки величин стоит держать в голове при оценке на салфетке?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Оценка нагрузки</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Какие числа помнить для оценок на собеседовании?</li><li>Во сколько раз память быстрее диска?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Важны <b>соотношения</b>: память ~100 нс, SSD ~100 мкс (в тысячу раз медленнее), HDD ~10 мс (ещё в сто), сеть внутри дата-центра ~0,5 мс, другой континент ~100+ мс.</p><ul><li>Скорость света в оптоволокне ~200 000 км/с — межконтинентальный оборот физически ≥ 50–100 мс</li><li>Последовательное чтение намного быстрее случайного</li><li>Пропускная способность: память — десятки ГБ/с, NVMe — единицы ГБ/с, сеть 10 Гбит/с ≈ 1 ГБ/с</li></ul><p class="extra"><span>А ещё</span> Выводы: кэш в памяти окупается, случайного доступа к диску избегают, далёких пользователей обслуживают CDN и региональные копии</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Задержки (порядки):</b></p>
+<div class="table"><table><thead><tr><th>Операция</th><th>Время</th></tr></thead><tbody><tr><td>кэш процессора L1</td><td>~1 нс</td></tr><tr><td>оперативная память</td><td>~100 нс</td></tr><tr><td>случайное чтение NVMe SSD</td><td>~20–100 мкс</td></tr><tr><td>оборот в дата-центре</td><td>~0,2–0,5 мс</td></tr><tr><td>случайное чтение HDD</td><td>~5–10 мс</td></tr><tr><td>Москва — Санкт-Петербург и обратно</td><td>~10 мс</td></tr><tr><td>Москва — Франкфурт и обратно</td><td>~40 мс</td></tr><tr><td>через океан и обратно</td><td>~100–150 мс</td></tr></tbody></table></div>
+<p><b>Объёмы и скорости:</b> в сутках ~10⁵ с, в месяце ~2,5 × 10⁶ с, в году ~3 × 10⁷ с; 1 млн записей по 1 КБ = 1 ГБ; сеть 1 Гбит/с ≈ 125 МБ/с.</p>
+<p><b>Выводы для проектирования:</b></p>
+<ul><li>обращение к кэшу в памяти в десятки тысяч раз дешевле запроса в базу — кэш почти всегда окупается;</li><li>поход в сеть в цикле — главный источник медленных запросов (N+1);</li><li>диск любит последовательную запись — отсюда журналы, Kafka, LSM;</li><li>физику не обойти: пользователи на другом континенте получат +100 мс на каждый оборот — нужны CDN, региональные развёртывания, меньше оборотов.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Порядки по уровням памяти, диска и сети.</li><li>Соотношения между ними, а не точные цифры.</li><li>Выводы для архитектуры.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать SSD сравнимым с памятью.</li><li>Забывать про физический предел задержки между континентами.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Несколько верных вариантов. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Обращение к оперативной памяти — порядка сотни наносекунд, случайное чтение с SSD — десятки-сотни микросекунд</li><li class="ok"><span class="mark">✓</span>Round trip внутри дата-центра — около половины миллисекунды, между континентами — порядка сотни миллисекунд</li><li class="ok"><span class="mark">✓</span>Межконтинентальная задержка ограничена скоростью света и принципиально не оптимизируется</li><li class="no"><span class="mark">✗</span>Случайное чтение с вращающегося диска сопоставимо по скорости с чтением из памяти</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Почему это делает CDN обязательным для глобальной аудитории?</li><li>Как оценить объём кэша через рабочее множество?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/estimation/">Оценка нагрузки и ресурсов</a><p>Как считать на салфетке: QPS из аудитории, пиковые коэффициенты, объём хранения и трафик, порядки задержек, узкое место и типичные ошибки оценки на интервью.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/latency-numbers/">Какие порядки задержек нужно знать разработчику?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/qps-estimation/">Сервисом пользуются 10 млн активных пользователей в сутки, каждый совершает около 20 целевых действий. Какой примерно QPS в пике при коэффициенте пиковости 3?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/storage-estimation/">Сервис принимает 100 млн сообщений в сутки по 1 КБ. Сколько примерно места потребуется за год и какой множитель забывают чаще всего?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие порядки величин стоит держать в голове при оценке на салфетке?","acceptedAnswer":{"@type":"Answer","text":"Важны соотношения: память ~100 нс, SSD ~100 мкс (в тысячу раз медленнее), HDD ~10 мс (ещё в сто), сеть внутри дата-центра ~0,5 мс, другой континент ~100+ мс. Скорость света в оптоволокне ~200 000 км/с — межконтинентальный оборот физически ≥ 50–100 мс Последовательное чтение намного быстрее случайного Пропускная способность: память — десятки ГБ/с, NVMe — единицы ГБ/с, сеть 10 Гбит/с ≈ 1 ГБ/с Выводы: кэш в памяти окупается, случайного доступа к диску избегают, далёких пользователей обслуживают CDN и региональные копии Задержки (порядки): | Операция | Время | | --- | --- | | кэш процессора L1 | ~1 нс | | оперативная память | ~100 нс | | случайное чтение NVMe SSD | ~20–100 мкс | | оборот в дата-центре | ~0,2–0,5 мс | | случайное чтение HDD | ~5–10 мс | | Москва — Санкт-Петербург и обратно | ~10 мс | | Москва — Франкфурт и обратно | ~40 мс | | через океан и обратно | ~100–150 мс | Объёмы и скорости: в сутках ~10⁵ с, в месяце ~2,5 × 10⁶ с, в году ~3 × 10⁷ с; 1 млн записей по 1 КБ = 1 ГБ; сеть 1 Гбит/с ≈ 125 МБ/с. Выводы для проектирования: - обращение к кэшу в памяти в десятки тысяч раз дешевле запроса в базу — кэш почти всегда окупается; - поход в сеть в цикле — главный источник медленных запросов (N+1); - диск любит последовательную запись — отсюда журналы, Kafka, LSM; - физику не обойти: пользователи на другом континенте получат +100 мс на каждый оборот — нужны CDN, региональные развёртывания, меньше…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое взаимная блокировка и как её избежать? — вопрос с собеседования</title>
+<meta name="description" content="Взаимная блокировка — потоки ждут друг друга по кругу: первый держит A и ждёт B, второй держит B и ждёт A. Никто не продвинется. Нужны все 4 условия…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/deadlock/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/deadlock/">
+<meta property="og:title" content="Что такое взаимная блокировка и как её избежать? — вопрос с собеседования">
+<meta property="og:description" content="Взаимная блокировка — потоки ждут друг друга по кругу: первый держит A и ждёт B, второй держит B и ждёт A. Никто не продвинется. Нужны все 4 условия…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Что такое взаимная блокировка и как её избежать?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Что такое взаимная блокировка и как её избежать?"}]}</script>
+  <h1>Что такое взаимная блокировка и как её избежать?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Конкурентность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое deadlock?</li><li>Какие условия нужны для дедлока?</li><li>Чем livelock отличается от deadlock?</li><li>Как найти дедлок в работающем приложении?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Взаимная блокировка</b> — потоки ждут друг друга по кругу: первый держит A и ждёт B, второй держит B и ждёт A. Никто не продвинется.</p><ul><li>Нужны все 4 условия Коффмана: взаимное исключение, удержание с ожиданием, нет отнятия, цикл ожидания</li><li>Главная профилактика — единый порядок захвата блокировок</li><li>Ещё: tryLock с таймаутом, одна крупная блокировка, отказ от вложенных блокировок</li></ul><p class="extra"><span>А ещё</span> Livelock — потоки активно уступают друг другу и тоже не продвигаются; голодание — поток бесконечно ждёт своей очереди</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Взаимная блокировка двух потоков</p><script type="module" src="/widgets/deadlock.js"></script><sotto-deadlock theme="dark"></sotto-deadlock></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Условия Коффмана</b> — дедлок возможен, только если выполнены все четыре:</p>
+<ol><li><b>взаимное исключение</b> — ресурс может держать только один;</li><li><b>удержание и ожидание</b> — поток держит один ресурс и ждёт другой;</li><li><b>нет принудительного отнятия</b> — ресурс нельзя забрать, только отпустить добровольно;</li><li><b>циклическое ожидание</b> — есть цикл в графе «кто кого ждёт».</li></ol>
+<p>Профилактика — сломать хотя бы одно:</p>
+<ul><li><b>единый порядок блокировок</b> (ломает цикл) — например, всегда сначала счёт с меньшим id. Классический перевод денег <code>transfer(from, to)</code> блокирует оба счёта; если один поток переводит A→B, а другой B→A, при захвате «сначала from» получится дедлок. Захват по порядку id устраняет его;</li><li><b>tryLock с таймаутом</b> (ломает «нет отнятия» — поток сам отказывается): не получилось за время — отпустить всё, подождать случайное время и повторить;</li><li><b>захват всех ресурсов сразу</b> или одна общая блокировка (ломает удержание с ожиданием) — проще, но меньше параллелизма;</li><li><b>не вызывать чужой код под блокировкой</b> — колбэки и слушатели могут захватить что-то своё.</li></ul>
+<p><b>В базах данных</b> дедлоки — обычное дело: две транзакции обновляют строки в разном порядке. СУБД строит граф ожиданий, находит цикл и откатывает одну транзакцию с ошибкой (<code>deadlock detected</code> в PostgreSQL). Приложение должно уметь повторить транзакцию; профилактика та же — обновлять строки в одном порядке.</p>
+<p><b>Livelock</b> — потоки не заблокированы, но не продвигаются: оба вежливо отпускают ресурс, видя конфликт, и снова сталкиваются. Лечится случайной задержкой перед повтором. <b>Голодание</b> — поток в принципе может продвинуться, но ему постоянно не достаётся ресурс (несправедливая блокировка, низкий приоритет, писатель при потоке читателей).</p>
+<p><b>Диагностика:</b> в Java <code>jstack &lt;pid&gt;</code> или дамп потоков сам пишет «Found one Java-level deadlock» с цепочкой; <code>ThreadMXBean.findDeadlockedThreads</code>. Симптом — процесс жив, CPU около нуля, запросы висят.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>void transfer(Account from, Account to, long amount) {
+    Account first = from.id &lt; to.id ? from : to;    // единый порядок
+    Account second = first == from ? to : from;
+    synchronized (first) {
+        synchronized (second) {
+            from.withdraw(amount);
+            to.deposit(amount);
+        }
+    }
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определение через циклическое ожидание и пример с двумя блокировками.</li><li>Четыре условия Коффмана.</li><li>Способы предотвращения: порядок блокировок, tryLock с таймаутом.</li><li>Дедлоки в базе данных и повтор транзакции.</li><li>Отличие от livelock и голодания, диагностика — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Путать дедлок с гонкой.</li><li>Предлагать «увеличить таймауты» как решение.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/mutex-semaphore/">Чем мьютекс отличается от семафора?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/race-condition/">Что такое состояние гонки?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/isolation-anomalies/">Какие аномалии бывают при параллельных транзакциях и от чего защищает каждый уровень изоляции?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое взаимная блокировка и как её избежать?","acceptedAnswer":{"@type":"Answer","text":"Взаимная блокировка — потоки ждут друг друга по кругу: первый держит A и ждёт B, второй держит B и ждёт A. Никто не продвинется. Нужны все 4 условия Коффмана: взаимное исключение, удержание с ожиданием, нет отнятия, цикл ожидания Главная профилактика — единый порядок захвата блокировок Ещё: tryLock с таймаутом, одна крупная блокировка, отказ от вложенных блокировок Livelock — потоки активно уступают друг другу и тоже не продвигаются; голодание — поток бесконечно ждёт своей очереди Условия Коффмана — дедлок возможен, только если выполнены все четыре: 1. взаимное исключение — ресурс может держать только один; 2. удержание и ожидание — поток держит один ресурс и ждёт другой; 3. нет принудительного отнятия — ресурс нельзя забрать, только отпустить добровольно; 4. циклическое ожидание — есть цикл в графе «кто кого ждёт». Профилактика — сломать хотя бы одно: - единый порядок блокировок (ломает цикл) — например, всегда сначала счёт с меньшим id. Классический перевод денег transfer(from, to) блокирует оба счёта; если один поток переводит A→B, а другой B→A, при захвате «сначала from» получится дедлок. Захват по порядку id устраняет его; - tryLock с таймаутом (ломает «нет отнятия» — поток сам отказывается): не получилось за время — отпустить всё, подождать случайное время и повторить; - захват всех ресурсов сразу или одна общая блокировка (ломает удержание с ожиданием) …"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

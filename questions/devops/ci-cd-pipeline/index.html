@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Из каких этапов состоит CI/CD-пайплайн и чем continuous delivery отличается от continuous deployment? — вопрос с собеседования</title>
+<meta name="description" content="CI — каждое изменение автоматически собирается и проверяется: сборка, линтеры, юнит-тесты, сканирование, сборка артефакта (образа). CD: continuous…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/ci-cd-pipeline/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/ci-cd-pipeline/">
+<meta property="og:title" content="Из каких этапов состоит CI/CD-пайплайн и чем continuous delivery отличается от continuous deployment? — вопрос с собеседования">
+<meta property="og:description" content="CI — каждое изменение автоматически собирается и проверяется: сборка, линтеры, юнит-тесты, сканирование, сборка артефакта (образа). CD: continuous…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Из каких этапов состоит CI/CD-пайплайн и чем continuous delivery отличается от continuous deployment?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Из каких этапов состоит CI/CD-пайплайн и чем continuous delivery отличается от continuous deployment?"}]}</script>
+  <h1>Из каких этапов состоит CI/CD-пайплайн и чем continuous delivery отличается от continuous deployment?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">CI/CD и Git</span><span class="chip">Docker</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как вы бы построили пайплайн для сервиса?</li><li>Что такое продвижение артефакта между окружениями?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>CI</b> — каждое изменение автоматически собирается и проверяется: сборка, линтеры, юнит-тесты, сканирование, сборка артефакта (образа). <b>CD</b>: <b>continuous delivery</b> — артефакт всегда готов к выкатке, на прод — по кнопке; <b>continuous deployment</b> — каждое прошедшее проверки изменение уходит в прод автоматически. Ключевой принцип: <b>собрать один раз</b>, затем продвигать <b>тот же артефакт</b> через окружения.</p><ul><li>Быстрая обратная связь: дешёвые проверки первыми, пайплайн до 10–15 минут</li><li>Версия артефакта — из коммита (git sha, semver), не latest</li><li>Миграции БД, смоук-тесты после выкатки, автоматический откат</li></ul><p class="extra"><span>А ещё</span> Красный main — приоритет команды: пока он сломан, никто не выкатывает</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Типичный пайплайн:</b></p>
+<pre><code>push → сборка и линтеры → юнит-тесты → сборка образа (тег = sha)
+     → сканирование уязвимостей → публикация в реестр
+     → деплой на staging → интеграционные и e2e-тесты
+     → (ручное подтверждение) → деплой на prod → смоук-тесты</code></pre>
+<p><b>Принципы:</b></p>
+<ul><li>пайплайн как код в репозитории (GitHub Actions, GitLab CI, Jenkinsfile);</li><li>кэш зависимостей и слоёв для скорости;</li><li>параллельные задачи;</li><li>нестабильные тесты чинят или убирают — иначе их перестают замечать;</li><li>секреты из хранилища CI, права деплоя — только у пайплайна.</li></ul>
+<p><b>Неизменяемый артефакт.</b> Пересборка для каждого окружения даёт другие версии зависимостей: на staging проверено одно, на прод уехало другое. Окружения различаются только конфигурацией.</p>
+<p><b>Метрики DORA:</b> частота деплоя, время от коммита до прода, доля неудачных изменений, время восстановления.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Этапы пайплайна и их порядок.</li><li>Delivery против deployment.</li><li>Один артефакт для всех окружений.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/devops/docker-layers-cache/">Как устроены слои Docker-образа и почему образ — неизменяемый артефакт?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/branching-strategies/">Чем trunk-based development отличается от GitFlow?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/ci-secrets/">Как правильно работать с секретами в CI/CD и инфраструктуре?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/deployment-strategies/">Какие стратегии выкатки вы знаете и как выбрать подходящую?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Из каких этапов состоит CI/CD-пайплайн и чем continuous delivery отличается от continuous deployment?","acceptedAnswer":{"@type":"Answer","text":"CI — каждое изменение автоматически собирается и проверяется: сборка, линтеры, юнит-тесты, сканирование, сборка артефакта (образа). CD: continuous delivery — артефакт всегда готов к выкатке, на прод — по кнопке; continuous deployment — каждое прошедшее проверки изменение уходит в прод автоматически. Ключевой принцип: собрать один раз, затем продвигать тот же артефакт через окружения. Быстрая обратная связь: дешёвые проверки первыми, пайплайн до 10–15 минут Версия артефакта — из коммита (git sha, semver), не latest Миграции БД, смоук-тесты после выкатки, автоматический откат Красный main — приоритет команды: пока он сломан, никто не выкатывает Типичный пайплайн: Принципы: - пайплайн как код в репозитории (GitHub Actions, GitLab CI, Jenkinsfile); - кэш зависимостей и слоёв для скорости; - параллельные задачи; - нестабильные тесты чинят или убирают — иначе их перестают замечать; - секреты из хранилища CI, права деплоя — только у пайплайна. Неизменяемый артефакт. Пересборка для каждого окружения даёт другие версии зависимостей: на staging проверено одно, на прод уехало другое. Окружения различаются только конфигурацией. Метрики DORA: частота деплоя, время от коммита до прода, доля неудачных изменений, время восстановления."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

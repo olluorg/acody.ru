@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Промпты в продакшене — карта «ИИ-инженер»</title>
+<meta name="description" content="Шаблоны, версии, кэширование префикса и проверка изменений на наборе примеров.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/ai-engineer/prompt-management/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/ai-engineer/prompt-management/">
+<meta property="og:title" content="Промпты в продакшене — карта «ИИ-инженер»">
+<meta property="og:description" content="Шаблоны, версии, кэширование префикса и проверка изменений на наборе примеров.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/ai-engineer/#prompting">ИИ-инженер</a> <span>/</span> <a href="/roadmap/ai-engineer/prompting/">Промпт-инжиниринг</a> <span>/</span> <span>Промпты в продакшене</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"ИИ-инженер","item":"https://learn.getsotto.ru/roadmap/ai-engineer/#prompting"},{"@type":"ListItem","position":3,"name":"Промпт-инжиниринг","item":"https://learn.getsotto.ru/roadmap/ai-engineer/prompting/"},{"@type":"ListItem","position":4,"name":"Промпты в продакшене"}]}</script>
+  <h1>Промпты в продакшене</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-middle">с Middle</span></div>
+  <p class="lead">Шаблоны, версии, кэширование префикса и проверка изменений на наборе примеров.</p>
+  <article class="md"><h3>Что важно знать</h3>
+<ul><li>Промпты — в репозитории рядом с кодом или в системе управления промптами, с историей изменений и ревью.</li><li>Шаблоны с явными переменными; пользовательские данные всегда подставляются в отведённое место и экранируются разметкой.</li><li><b>Каждое изменение промпта прогоняют на наборе для оценки</b> — исправив один случай, легко сломать десять других.</li><li>Смена модели — тоже изменение: промпт, отлаженный под одну модель, может хуже работать на другой.</li><li><b>Кэширование префикса</b>: неизменную часть (инструкции, документы) ставят в начало — провайдеры удешевляют повторно отправляемый префикс в разы.</li><li>Логировать версию промпта и модели вместе с каждым ответом — иначе разбор жалоб невозможен.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Middle <small>≈ 6 ч</small></h3><ul><li>Хранит промпты в репозитории с версиями и подстановкой переменных</li><li>Прогоняет набор оценки при каждом изменении промпта или модели</li><li>Располагает неизменную часть промпта в начале для кэширования префикса</li></ul><p class="rm-practice"><b>Практика.</b> Перенести промпты сервиса в версионируемые шаблоны, добавить прогон набора оценки в CI и логирование версии промпта в каждом ответе.</p></div><div class="rm-grade"><h3>Senior <small>≈ 4 ч</small></h3><ul><li>Выстраивает процесс изменения промптов в команде — ревью, оценка, постепенная выкатка, откат</li></ul><p class="rm-practice"><b>Практика.</b> Описать и внедрить в команде регламент изменения промптов с порогами качества и откатом конфигурацией.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/ai/llm-caching/">Как кэшировать запросы к LLM — prompt caching и семантический кэш?</a> <span class="lvl lvl-middle">Middle</span><p>Prompt caching (на стороне провайдера или сервера инференса) переиспользует обработку одинакового префикса промпта — системные инструкции, документы, историю: повторные запросы…</p></li><li><a href="/questions/ai/llm-evaluation/">Как оценивать качество ответов LLM?</a> <span class="lvl lvl-middle">Middle</span><p>Собрать набор тестовых примеров с ожидаемым результатом, выбрать метрики под задачу и прогонять его при каждом изменении промпта, модели или поиска.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/ai-engineer/prompt-techniques/">← Техники промптов</a><a class="next" href="/roadmap/ai-engineer/embeddings-search/">Эмбеддинги и поиск →</a></nav>
+  <p class="rm-back"><a href="/roadmap/ai-engineer/#prompting">← Вся карта «ИИ-инженер»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Промпты в продакшене","description":"Шаблоны, версии, кэширование префикса и проверка изменений на наборе примеров.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/ai-engineer/prompt-management/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему List&lt;String&gt; нельзя присвоить переменной типа List&lt;Object&gt;? — вопрос с собеседования</title>
+<meta name="description" content="Дженерики инвариантны: если бы List&lt;Object&gt; objs = strings компилировалось, через objs можно было бы положить Integer, а потом получить…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/generics-invariance/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/generics-invariance/">
+<meta property="og:title" content="Почему List&lt;String&gt; нельзя присвоить переменной типа List&lt;Object&gt;? — вопрос с собеседования">
+<meta property="og:description" content="Дженерики инвариантны: если бы List&lt;Object&gt; objs = strings компилировалось, через objs можно было бы положить Integer, а потом получить…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Почему List&lt;String&gt; нельзя присвоить переменной типа List&lt;Object&gt;?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Почему List<String> нельзя присвоить переменной типа List<Object>?"}]}</script>
+  <h1>Почему List&lt;String&gt; нельзя присвоить переменной типа List&lt;Object&gt;?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Дженерики</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main">Дженерики <b>инвариантны</b>: если бы <code>List&lt;Object&gt; objs = strings</code> компилировалось, через objs можно было бы положить Integer, а потом получить ClassCastException при чтении из списка строк — в совсем другом месте.</p><ul><li>Массивы ковариантны: Object[] arr = new String[1] компилируется, а запись Integer даёт ArrayStoreException</li><li>Нужна гибкость — List&lt;? extends Object&gt; (только чтение) или List&lt;?&gt;</li><li>Инвариантность переносит ошибку из рантайма в компиляцию</li></ul><p class="extra"><span>А ещё</span> Kotlin и Scala позволяют объявлять вариантность в месте объявления</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Если бы присваивание разрешалось, через новую ссылку можно было бы добавить Integer, а потом получить ClassCastException при чтении из исходного List&lt;String&gt; — причём в совсем другом месте программы. Поучительно сравнить с массивами: они как раз ковариантны, поэтому Object[] arr = new String[1] компилируется, а запись Integer в него падает уже в рантайме с ArrayStoreException. Дженерики сознательно строже, чтобы ошибка ловилась компилятором. Когда гибкость всё же нужна, её добавляют wildcard: List&lt;? extends Object&gt; для чтения, List&lt;? super String&gt; для записи.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Почему запрещено, с примером.</li><li>Сравнение с массивами.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ожидать от дженериков ковариантности по аналогии с массивами.</li><li>Считать причиной стирание типов — дело в правилах типизации.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Дженерики инвариантны: иначе через ссылку List&lt;Object&gt; можно было бы положить Integer в список строк</li><li class="no"><span class="mark">✗</span>Из-за стирания типов такое присваивание технически невозможно</li><li class="no"><span class="mark">✗</span>Можно, компилятор разрешает это без предупреждений</li><li class="no"><span class="mark">✗</span>Потому что String является финальным классом</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Почему массивы в Java ковариантны и чем это опасно?</li><li>Что такое PECS?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/wildcards/">Wildcards и правило PECS</a><p>Инвариантность дженериков против ковариантных массивов, ? extends/super, и когда что выбирать по PECS.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/generics-wildcards/">Что такое generics в Java и зачем нужен wildcard ? extends / ? super?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/generic-array-heap-pollution/">Почему нельзя создать массив параметризованного типа (new List&lt;String&gt;[10] или new T[n])?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/extends-wildcard/">Что можно делать со списком, объявленным как List&lt;? extends Number&gt;?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему List<String> нельзя присвоить переменной типа List<Object>?","acceptedAnswer":{"@type":"Answer","text":"Дженерики инвариантны: если бы List<Object> objs = strings компилировалось, через objs можно было бы положить Integer, а потом получить ClassCastException при чтении из списка строк — в совсем другом месте. Массивы ковариантны: Object[] arr = new String[1] компилируется, а запись Integer даёт ArrayStoreException Нужна гибкость — List<? extends Object> (только чтение) или List<?> Инвариантность переносит ошибку из рантайма в компиляцию Kotlin и Scala позволяют объявлять вариантность в месте объявления Если бы присваивание разрешалось, через новую ссылку можно было бы добавить Integer, а потом получить ClassCastException при чтении из исходного List<String> — причём в совсем другом месте программы. Поучительно сравнить с массивами: они как раз ковариантны, поэтому Object[] arr = new String[1] компилируется, а запись Integer в него падает уже в рантайме с ArrayStoreException. Дженерики сознательно строже, чтобы ошибка ловилась компилятором. Когда гибкость всё же нужна, её добавляют wildcard: List<? extends Object> для чтения, List<? super String> для записи."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

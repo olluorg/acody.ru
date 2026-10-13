@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему 0.1 + 0.2 не равно 0.3? — вопрос с собеседования</title>
+<meta name="description" content="double хранит число как двоичную дробь: знак, порядок и 52 бита мантиссы. 0.1 в двоичной системе бесконечна, как 1/3 в десятичной, — хранится…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/floating-point/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/floating-point/">
+<meta property="og:title" content="Почему 0.1 + 0.2 не равно 0.3? — вопрос с собеседования">
+<meta property="og:description" content="double хранит число как двоичную дробь: знак, порядок и 52 бита мантиссы. 0.1 в двоичной системе бесконечна, как 1/3 в десятичной, — хранится…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Почему 0.1 + 0.2 не равно 0.3?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Почему 0.1 + 0.2 не равно 0.3?"}]}</script>
+  <h1>Почему 0.1 + 0.2 не равно 0.3?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Числа в компьютере</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как устроен тип double?</li><li>Что такое IEEE 754?</li><li>Как правильно сравнивать числа с плавающей точкой?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">double хранит число как <b>двоичную</b> дробь: знак, порядок и 52 бита мантиссы. 0.1 в двоичной системе бесконечна, как 1/3 в десятичной, — хранится приближение.</p><ul><li>0.1 + 0.2 = 0.30000000000000004: ошибки округления сложились</li><li>Сравнивать с допуском: |a − b| &lt; ε, лучше относительным</li><li>Точно представимы целые до 2⁵³ и дроби вида k/2ⁿ</li></ul><p class="extra"><span>А ещё</span> Спецзначения: NaN ≠ NaN, +0 и −0, бесконечности</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Число изнутри: дополнительный код и плавающая точка</p><script type="module" src="/widgets/number-bits.js"></script><sotto-number-bits theme="dark"></sotto-number-bits></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Тип <code>double</code> (IEEE 754, 64 бита) хранит число в научной записи, только по основанию 2: <b>знак</b> (1 бит), <b>порядок</b> (11 бит, со смещением 1023) и <b>мантисса</b> (52 бита, плюс неявная ведущая единица). Значение — (−1)^знак × 1.мантисса × 2^(порядок − 1023).</p>
+<p>Конечной двоичной дробью записываются только числа вида k/2ⁿ: 0.5, 0.25, 0.375. А 0.1 = 1/10, и в знаменателе есть пятёрка — в двоичной системе получается бесконечная периодическая дробь 0.000110011001100… Её обрезают до 53 значащих бит, и хранится ближайшее представимое число — 0.1000000000000000055511… То же с 0.2. При сложении ошибки складываются, результат округляется до ближайшего double, и это не тот double, который получается из литерала 0.3.</p>
+<p><b>Сколько точности.</b> 53 бита — это 15–17 значащих десятичных цифр. Все целые до 2⁵³ (≈ 9·10¹⁵) представимы точно, дальше — уже через одно. У <code>float</code> 24 бита мантиссы — около 7 цифр, и 16 777 217 в него не помещается.</p>
+<p><b>Сравнение.</b> <code>==</code> для вычисленных значений почти всегда ошибка. Сравнивают с допуском: абсолютным <code>abs(a - b) &lt; 1e-9</code> для чисел около единицы или относительным, как <code>math.isclose</code>, для чисел любого масштаба.</p>
+<p><b>Спецзначения.</b> <code>+∞</code> и <code>−∞</code> (1.0 / 0 в Java), <code>NaN</code> (0.0 / 0, корень из −1) — и NaN не равен ничему, даже себе, поэтому проверяют <code>isnan</code>. Есть <code>−0.0</code>, равный <code>+0.0</code>, но 1 / −0.0 = −∞.</p>
+<p><b>Последствия:</b> порядок сложения меняет результат (сумма большого числа малых теряет точность — помогает алгоритм Кэхэна или <code>math.fsum</code>), деньги в double не хранят, счётчик цикла с шагом 0.1 не дойдёт ровно до 1.0.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>0.1 + 0.2                     # 0.30000000000000004
+0.1 + 0.2 == 0.3              # False
+import math
+math.isclose(0.1 + 0.2, 0.3)  # True
+from decimal import Decimal
+Decimal(0.1)                  # 0.1000000000000000055511151231257827…
+2.0 ** 53 + 1 == 2.0 ** 53    # True — дальше целые уже не все
+float(&quot;nan&quot;) == float(&quot;nan&quot;)  # False</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Двоичное представление: 0.1 нельзя записать конечной двоичной дробью.</li><li>Устройство: знак, порядок, мантисса, примерно 15–17 цифр точности.</li><li>Сравнение с допуском, лучше относительным.</li><li>Следствие для денег — хранить не в double.</li><li>NaN и бесконечности — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«Компьютер считает неточно» без объяснения про двоичные дроби.</li><li>Сравнивать через <code>==</code> или с одним абсолютным ε для чисел любого масштаба.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/cs/money-types/">Как хранить денежные суммы в коде и в базе?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/twos-complement/">Как в компьютере хранятся отрицательные целые числа?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему 0.1 + 0.2 не равно 0.3?","acceptedAnswer":{"@type":"Answer","text":"double хранит число как двоичную дробь: знак, порядок и 52 бита мантиссы. 0.1 в двоичной системе бесконечна, как 1/3 в десятичной, — хранится приближение. 0.1 + 0.2 = 0.30000000000000004: ошибки округления сложились Сравнивать с допуском: |a − b| < ε, лучше относительным Точно представимы целые до 2⁵³ и дроби вида k/2ⁿ Спецзначения: NaN ≠ NaN, +0 и −0, бесконечности Тип double (IEEE 754, 64 бита) хранит число в научной записи, только по основанию 2: знак (1 бит), порядок (11 бит, со смещением 1023) и мантисса (52 бита, плюс неявная ведущая единица). Значение — (−1)^знак × 1.мантисса × 2^(порядок − 1023). Конечной двоичной дробью записываются только числа вида k/2ⁿ: 0.5, 0.25, 0.375. А 0.1 = 1/10, и в знаменателе есть пятёрка — в двоичной системе получается бесконечная периодическая дробь 0.000110011001100… Её обрезают до 53 значащих бит, и хранится ближайшее представимое число — 0.1000000000000000055511… То же с 0.2. При сложении ошибки складываются, результат округляется до ближайшего double, и это не тот double, который получается из литерала 0.3. Сколько точности. 53 бита — это 15–17 значащих десятичных цифр. Все целые до 2⁵³ (≈ 910¹⁵) представимы точно, дальше — уже через одно. У float 24 бита мантиссы — около 7 цифр, и 16 777 217 в него не…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

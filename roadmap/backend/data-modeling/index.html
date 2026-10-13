@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Моделирование данных — карта «Backend-разработчик»</title>
+<meta name="description" content="Таблицы и связи, нормализация, ключи и ограничения, миграции схемы.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/backend/data-modeling/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/backend/data-modeling/">
+<meta property="og:title" content="Моделирование данных — карта «Backend-разработчик»">
+<meta property="og:description" content="Таблицы и связи, нормализация, ключи и ограничения, миграции схемы.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/#databases">Backend-разработчик</a> <span>/</span> <a href="/roadmap/backend/databases/">Базы данных</a> <span>/</span> <span>Моделирование данных</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://learn.getsotto.ru/roadmap/backend/#databases"},{"@type":"ListItem","position":3,"name":"Базы данных","item":"https://learn.getsotto.ru/roadmap/backend/databases/"},{"@type":"ListItem","position":4,"name":"Моделирование данных"}]}</script>
+  <h1>Моделирование данных</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Таблицы и связи, нормализация, ключи и ограничения, миграции схемы.</p>
+  <article class="md"><h3>Что важно знать</h3>
+<ul><li><b>Связи</b>: один ко многим — внешний ключ, многие ко многим — таблица связи.</li><li><b>Нормализация</b> убирает дублирование; денормализация — осознанно ради чтения.</li><li><b>Ограничения</b> в базе надёжнее проверок в коде: NOT NULL, UNIQUE, FOREIGN KEY, CHECK.</li><li><b>Ключи</b>: суррогатные (bigint, UUIDv7) против естественных.</li><li><b>Миграции</b> — версионированные скрипты (Flyway, Liquibase, Alembic); изменения схемы — по шагам, совместимым со старым кодом.</li><li><b>Деньги</b> — в целых копейках или decimal, не в float.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 6 ч</small></h3><ul><li>Проектирует схему со связями один ко многим и многие ко многим и внешними ключами</li><li>Использует ограничения NOT NULL, UNIQUE, CHECK для целостности</li></ul><p class="rm-practice"><b>Практика.</b> Спроектировать схему интернет-магазина (пользователи, товары, заказы, позиции, оплаты) с ограничениями.</p></div><div class="rm-grade"><h3>Middle <small>≈ 6 ч</small></h3><ul><li>Осознанно денормализует данные под нагрузку чтения</li><li>Пишет миграции схемы, совместимые с выкаткой без простоя</li></ul><p class="rm-practice"><b>Практика.</b> Переименовать колонку и разделить таблицу в работающей системе по схеме expand–contract без простоя.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/databases/left-join/">Какой JOIN вернёт все строки левой таблицы и совпавшие из правой (NULL там, где совпадений нет)?</a> <span class="lvl lvl-junior">Junior</span><p>LEFT JOIN возвращает все строки левой таблицы и совпавшие из правой; где совпадений нет — в колонках правой NULL.</p></li><li><a href="/questions/databases/normalization/">Что такое нормализация и когда оправдана денормализация?</a> <span class="lvl lvl-middle">Middle</span><p>Нормализация — каждый факт хранится в одном месте: нет дублей, а значит нет аномалий обновления. Денормализация — сознательное дублирование ради быстрого чтения.</p></li><li><a href="/questions/databases/having-vs-where/">Чем HAVING отличается от WHERE?</a> <span class="lvl lvl-junior">Junior</span><p>WHERE фильтрует строки до группировки, HAVING — группы после агрегации. Условие на count() или sum() — только в HAVING.</p></li><li><a href="/questions/databases/normal-forms/">Что требуют первые три нормальные формы?</a> <span class="lvl lvl-middle">Middle</span><p>1НФ — атомарные значения, нет списков в ячейке. 2НФ — нет частичной зависимости неключевых полей от части составного ключа. 3НФ — нет транзитивных зависимостей (неключевое поле не…</p></li><li><a href="/questions/databases/inner-join/">Что вернёт INNER JOIN?</a> <span class="lvl lvl-junior">Junior</span><p>INNER JOIN возвращает только пары строк, удовлетворяющие условию ON. Строки без пары в результат не попадают.</p></li><li><a href="/questions/databases/on-delete-cascade-risk/">Чем опасно объявление внешнего ключа с ON DELETE CASCADE?</a> <span class="lvl lvl-middle">Middle</span><p>Удаление одной строки может рекурсивно удалить тысячи связанных строк по цепочке внешних ключей — и это не видно из кода приложения.</p></li></ul></section><section class="block"><h2>Разборы темы</h2><ul class="links"><li><a href="/articles/databases/data-modeling/">Моделирование данных и целостность</a><p>Ключи и constraints, нормальные формы простыми словами, осознанная денормализация и каскадные действия.</p></li><li><a href="/articles/databases/joins-keys/">JOIN, ключи и ограничения</a><p>INNER/OUTER/CROSS JOIN, ловушка ON vs WHERE, первичные/внешние/уникальные ключи и ссылочная целостность.</p></li><li><a href="/articles/databases/sql-basics/">SQL: операторы, NULL и фильтрация</a><p>Группы команд, логический порядок SELECT, трёхзначная логика NULL, разница WHERE/HAVING и оконные функции — с ловушками, на которых валятся на собеседовании.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/backend/db-transactions/">← Транзакции и изоляция</a><a class="next" href="/roadmap/backend/orm/">ORM и доступ к данным →</a></nav>
+  <p class="rm-back"><a href="/roadmap/backend/#databases">← Вся карта «Backend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Моделирование данных","description":"Таблицы и связи, нормализация, ключи и ограничения, миграции схемы.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/backend/data-modeling/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

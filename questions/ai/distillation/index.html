@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое дистилляция модели? — вопрос с собеседования</title>
+<meta name="description" content="Дистилляция — обучение маленькой модели-ученика повторять поведение большой модели-учителя. Ученик учится на ответах или распределениях вероятностей…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/distillation/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/distillation/">
+<meta property="og:title" content="Что такое дистилляция модели? — вопрос с собеседования">
+<meta property="og:description" content="Дистилляция — обучение маленькой модели-ученика повторять поведение большой модели-учителя. Ученик учится на ответах или распределениях вероятностей…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Что такое дистилляция модели?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Что такое дистилляция модели?"}]}</script>
+  <h1>Что такое дистилляция модели?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Нейросети и трансформеры</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как сделать маленькую модель почти такой же хорошей, как большая?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Дистилляция — обучение маленькой модели-<b>ученика</b> повторять поведение большой модели-<b>учителя</b>. Ученик учится на ответах или распределениях вероятностей учителя, а не только на исходной разметке, и достигает качества, недостижимого при обучении «с нуля» того же размера.</p><ul><li>Мягкие метки (вероятности всех классов) несут больше информации, чем один правильный ответ</li><li>В мире LLM — генерация синтетических данных большой моделью и SFT маленькой</li><li>Цель — дешевле и быстрее в продакшене при узкой задаче</li></ul><p class="extra"><span>А ещё</span> Условия использования коммерческих моделей могут запрещать обучение конкурирующих моделей на их ответах</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Классическая схема.</b> Учитель выдаёт распределение вероятностей по классам; ученик минимизирует расхождение с ним (KL) плюс обычную функцию потерь на правильных метках. «Температура» в softmax делает распределение мягче и раскрывает, какие неправильные классы учитель считает похожими.</p>
+<p><b>Для LLM</b> чаще всего:</p>
+<ol><li>Собрать запросы своей задачи.</li><li>Получить ответы большой модели (и, при необходимости, отфильтровать их по качеству).</li><li>Дообучить маленькую модель (SFT, LoRA) на этих парах.</li></ol>
+<p>Результат — модель в десятки раз дешевле, хорошо решающая узкую задачу (классификация обращений, извлечение полей, ответы по шаблону).</p>
+<p><b>Ограничения:</b> ученик наследует ошибки учителя и хуже обобщает за пределы обучающих запросов. Нужен честный тестовый набор, чтобы сравнить дистиллированную модель с исходной на своей задаче.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Идея учителя и ученика.</li><li>Роль мягких меток.</li><li>Как это применяют к LLM и ограничения.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/quantization/">Что такое квантизация модели и чем приходится за неё платить?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/finetuning-lora/">Что такое дообучение модели и LoRA?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-cost-latency/">Как снизить стоимость и задержку приложения на LLM?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое дистилляция модели?","acceptedAnswer":{"@type":"Answer","text":"Дистилляция — обучение маленькой модели-ученика повторять поведение большой модели-учителя. Ученик учится на ответах или распределениях вероятностей учителя, а не только на исходной разметке, и достигает качества, недостижимого при обучении «с нуля» того же размера. Мягкие метки (вероятности всех классов) несут больше информации, чем один правильный ответ В мире LLM — генерация синтетических данных большой моделью и SFT маленькой Цель — дешевле и быстрее в продакшене при узкой задаче Условия использования коммерческих моделей могут запрещать обучение конкурирующих моделей на их ответах Классическая схема. Учитель выдаёт распределение вероятностей по классам; ученик минимизирует расхождение с ним (KL) плюс обычную функцию потерь на правильных метках. «Температура» в softmax делает распределение мягче и раскрывает, какие неправильные классы учитель считает похожими. Для LLM чаще всего: 1. Собрать запросы своей задачи. 2. Получить ответы большой модели (и, при необходимости, отфильтровать их по качеству). 3. Дообучить маленькую модель (SFT, LoRA) на этих парах. Результат — модель в десятки раз дешевле, хорошо решающая узкую задачу (классификация обращений, извлечение полей, ответы по шаблону). Ограничения: ученик наследует ошибки учителя и хуже обобщает за пределы обучающих запросов. Нужен честный тестовый набор, чтобы сравнить дистиллированную модель с исходной на своей задаче."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

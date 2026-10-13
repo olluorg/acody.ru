@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как consumer group в Kafka масштабирует потребление? — вопрос с собеседования</title>
+<meta name="description" content="Партиции топика делятся между участниками группы: каждая партиция в группе читается ровно одним потребителем. Добавили потребителя — партиции…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/brokers/consumer-group-scaling/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/brokers/consumer-group-scaling/">
+<meta property="og:title" content="Как consumer group в Kafka масштабирует потребление? — вопрос с собеседования">
+<meta property="og:description" content="Партиции топика делятся между участниками группы: каждая партиция в группе читается ровно одним потребителем. Добавили потребителя — партиции…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/brokers/">Брокеры сообщений</a> <span>/</span> <span>Как consumer group в Kafka масштабирует потребление?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/questions/brokers/"},{"@type":"ListItem","position":3,"name":"Как consumer group в Kafka масштабирует потребление?"}]}</script>
+  <h1>Как consumer group в Kafka масштабирует потребление?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Kafka Consumer</span><span class="chip">Kafka</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как масштабировать обработку сообщений в Kafka?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Партиции топика <b>делятся между участниками группы</b>: каждая партиция в группе читается ровно одним потребителем. Добавили потребителя — партиции перераспределились.</p><ul><li>Максимальный параллелизм группы = число партиций</li><li>Разные группы читают топик независимо, каждая получает все сообщения</li><li>Порядок сохраняется внутри партиции, потому что её читает один потребитель</li></ul><p class="extra"><span>А ещё</span> Число партиций закладывают с запасом: увеличение потом меняет распределение ключей</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Как работает.</b> Потребители с одинаковым <code>group.id</code> образуют группу. Координатор группы на брокере назначает каждому подмножество партиций (стратегии range, round-robin, sticky, cooperative-sticky). Каждая партиция — ровно одному потребителю группы, и он обрабатывает её сообщения по порядку.</p>
+<p><b>Масштабирование:</b></p>
+<ul><li>больше потребителей — меньше партиций на каждого и выше параллелизм;</li><li>потребителей больше, чем партиций, — лишние простаивают;</li><li>нужно больше параллелизма, чем партиций, — увеличить число партиций (с последствиями для порядка по ключу) или распараллелить обработку внутри потребителя (по ключу, чтобы сохранить порядок).</li></ul>
+<p><b>Несколько групп</b> — механизм pub/sub: сервис уведомлений и сервис аналитики читают тот же топик своими группами, каждая получает всё.</p>
+<p><b>Ребаланс</b> при изменении состава группы приостанавливает обработку; cooperative-sticky переназначает только нужные партиции.</p>
+<p><b>Выбор числа партиций:</b> по целевой пропускной способности (пропускная способность топика / пропускная способность одного потребителя) с запасом на рост.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Партиция на одного потребителя в группе.</li><li>Предел параллелизма — число партиций.</li><li>Независимые группы как pub/sub.</li><li>Ребаланс и выбор числа партиций — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ожидать ускорения от потребителей сверх числа партиций.</li><li>Путать группу с отдельным потребителем.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Сообщения дублируются всем consumer'ам группы для параллельной обработки</li><li class="ok"><span class="mark">✓</span>Партиции темы распределяются между consumer'ами группы (1 партиция → 1 consumer в группе); параллелизм ограничен числом партиций</li><li class="no"><span class="mark">✗</span>Каждый consumer группы читает каждую партицию целиком</li><li class="no"><span class="mark">✗</span>Consumer'ы делят между собой обработку каждой записи по байтам</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как выбрать число партиций?</li><li>Что такое sticky-assignor?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/brokers/kafka-consumer/">Kafka Consumer и consumer group</a><p>Группа и распределение партиций, poll-цикл, heartbeat и таймауты, модели commit offset, ребаланс и роль идемпотентности.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/brokers/consumer-group-basic/">Зачем потребителей объединяют в consumer group?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/brokers/more-consumers-than-partitions/">Что произойдёт, если потребителей в consumer group больше, чем партиций в топике?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/add-partitions-ordering/">Что произойдёт с гарантией порядка при увеличении числа партиций в существующем топике?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/brokers/consumer-lag-growth/">Consumer lag стабильно растёт. Что это означает и с чего начать разбор?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как consumer group в Kafka масштабирует потребление?","acceptedAnswer":{"@type":"Answer","text":"Партиции топика делятся между участниками группы: каждая партиция в группе читается ровно одним потребителем. Добавили потребителя — партиции перераспределились. Максимальный параллелизм группы = число партиций Разные группы читают топик независимо, каждая получает все сообщения Порядок сохраняется внутри партиции, потому что её читает один потребитель Число партиций закладывают с запасом: увеличение потом меняет распределение ключей Как работает. Потребители с одинаковым group.id образуют группу. Координатор группы на брокере назначает каждому подмножество партиций (стратегии range, round-robin, sticky, cooperative-sticky). Каждая партиция — ровно одному потребителю группы, и он обрабатывает её сообщения по порядку. Масштабирование: - больше потребителей — меньше партиций на каждого и выше параллелизм; - потребителей больше, чем партиций, — лишние простаивают; - нужно больше параллелизма, чем партиций, — увеличить число партиций (с последствиями для порядка по ключу) или распараллелить обработку внутри потребителя (по ключу, чтобы сохранить порядок). Несколько групп — механизм pub/sub: сервис уведомлений и сервис аналитики читают тот же топик своими группами, каждая получает всё. Ребаланс при изменении состава группы приостанавливает обработку; cooperative-sticky переназначает только нужные партиции. Выбор числа…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

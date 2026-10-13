@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зачем делить данные на обучающую, валидационную и тестовую выборки? — вопрос с собеседования</title>
+<meta name="description" content="Обучающая — на ней модель учится, валидационная — подбираем параметры и сравниваем модели, тестовая — один раз в конце для честной оценки. Если…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/train-val-test/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/train-val-test/">
+<meta property="og:title" content="Зачем делить данные на обучающую, валидационную и тестовую выборки? — вопрос с собеседования">
+<meta property="og:description" content="Обучающая — на ней модель учится, валидационная — подбираем параметры и сравниваем модели, тестовая — один раз в конце для честной оценки. Если…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Зачем делить данные на обучающую, валидационную и тестовую выборки?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Зачем делить данные на обучающую, валидационную и тестовую выборки?"}]}</script>
+  <h1>Зачем делить данные на обучающую, валидационную и тестовую выборки?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Основы машинного обучения</span><span class="chip">scikit-learn</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое кросс-валидация?</li><li>Что такое утечка данных (data leakage)?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Обучающая</b> — на ней модель учится, <b>валидационная</b> — подбираем параметры и сравниваем модели, <b>тестовая</b> — один раз в конце для честной оценки.</p><ul><li>Если подбирать параметры по тесту, оценка станет оптимистичной</li><li>Кросс-валидация — несколько разбиений по очереди, когда данных мало</li></ul><p class="extra"><span>А ещё</span> Утечка данных: в обучение попала информация, которой не будет при реальном использовании</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Оценка на данных, которые модель видела при обучении, ничего не говорит о работе на новых. Поэтому данные делят:</p>
+<ul><li><b>train</b> — обучение модели;</li><li><b>validation</b> — выбор модели и гиперпараметров, ранняя остановка;</li><li><b>test</b> — финальная оценка, к которой не прикасаются до конца. Если многократно подбирать решения по тестовой выборке, она перестаёт быть независимой.</li></ul>
+<p>Типичные пропорции — около 70/15/15 или 80/10/10, зависит от объёма.</p>
+<p><b>Кросс-валидация (k-fold)</b> — данные делят на k частей, по очереди каждая служит валидацией, остальные — обучением; метрики усредняют. Даёт более надёжную оценку на небольших данных.</p>
+<p><b>Особые случаи разбиения:</b></p>
+<ul><li><b>временные ряды</b> — делить по времени: обучаться на прошлом, проверять на будущем;</li><li><b>несбалансированные классы</b> — стратифицированное разбиение с сохранением долей классов;</li><li><b>группы</b> — записи одного пользователя целиком в одной выборке.</li></ul>
+<p><b>Утечка данных</b> — признаки, которые знают ответ или «будущее»: нормировка по всем данным до разбиения, дубли между выборками, признак, вычисленный после события. Модель показывает отличный результат на тесте и проваливается в работе.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Роль каждой выборки и почему тест используют один раз.</li><li>Кросс-валидация.</li><li>Особые разбиения: время, стратификация, группы.</li><li>Что такое утечка данных с примером.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Подбирать гиперпараметры по тестовой выборке.</li><li>Случайно перемешивать временной ряд.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/ai/classification-metrics/">Какие метрики качества классификации вы знаете?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/overfitting/">Что такое переобучение модели и как с ним бороться?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Зачем делить данные на обучающую, валидационную и тестовую выборки?","acceptedAnswer":{"@type":"Answer","text":"Обучающая — на ней модель учится, валидационная — подбираем параметры и сравниваем модели, тестовая — один раз в конце для честной оценки. Если подбирать параметры по тесту, оценка станет оптимистичной Кросс-валидация — несколько разбиений по очереди, когда данных мало Утечка данных: в обучение попала информация, которой не будет при реальном использовании Оценка на данных, которые модель видела при обучении, ничего не говорит о работе на новых. Поэтому данные делят: - train — обучение модели; - validation — выбор модели и гиперпараметров, ранняя остановка; - test — финальная оценка, к которой не прикасаются до конца. Если многократно подбирать решения по тестовой выборке, она перестаёт быть независимой. Типичные пропорции — около 70/15/15 или 80/10/10, зависит от объёма. Кросс-валидация (k-fold) — данные делят на k частей, по очереди каждая служит валидацией, остальные — обучением; метрики усредняют. Даёт более надёжную оценку на небольших данных. Особые случаи разбиения: - временные ряды — делить по времени: обучаться на прошлом, проверять на будущем; - несбалансированные классы — стратифицированное разбиение с сохранением долей классов; - группы — записи одного пользователя целиком в одной выборке. Утечка данных — признаки, которые…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

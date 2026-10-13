@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Команда добавила в метрику задержки метку с идентификатором пользователя, чтобы «удобнее расследовать инциденты». Что произойдёт? — вопрос с собеседования</title>
+<meta name="description" content="Каждая уникальная комбинация меток — отдельный временной ряд. Метка с user_id превращает одну метрику в миллионы рядов: растут память, диск и время…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/metrics-cardinality/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/metrics-cardinality/">
+<meta property="og:title" content="Команда добавила в метрику задержки метку с идентификатором пользователя, чтобы «удобнее расследовать инциденты». Что произойдёт? — вопрос с собеседования">
+<meta property="og:description" content="Каждая уникальная комбинация меток — отдельный временной ряд. Метка с user_id превращает одну метрику в миллионы рядов: растут память, диск и время…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Команда добавила в метрику задержки метку с идентификатором пользователя, чтобы «удобнее расследовать инциденты». Что произойдёт?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Команда добавила в метрику задержки метку с идентификатором пользователя, чтобы «удобнее расследовать инциденты». Что произойдёт?"}]}</script>
+  <h1>Команда добавила в метрику задержки метку с идентификатором пользователя, чтобы «удобнее расследовать инциденты». Что произойдёт?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Наблюдаемость и SLO</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое кардинальность метрик?</li><li>Почему нельзя добавлять user_id в метки Prometheus?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Каждая уникальная комбинация меток — <b>отдельный временной ряд</b>. Метка с user_id превращает одну метрику в миллионы рядов: растут память, диск и время запросов, система мониторинга падает.</p><ul><li>В метки — значения из малого фиксированного множества: метод, код ответа, шаблон маршрута <code>/orders/{id}</code></li><li>Уникальное (id пользователя и заказа, полный URL) — в логи и трейсы</li><li>Число рядов = произведение числа значений всех меток</li></ul><p class="extra"><span>А ещё</span> Расследовать конкретного пользователя — по логам и трейсам с его id</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Как хранит Prometheus</b> (и большинство систем метрик): ряд определяется именем метрики и набором меток. <code>http_request_duration{method, route, status}</code> при 5 методах, 50 маршрутах и 10 кодах — до 2 500 рядов (гистограмма умножает ещё на число бакетов). Добавили <code>user_id</code> с миллионом значений — до 2,5 миллиардов рядов. Каждый ряд держит индекс и данные в памяти; запросы перебирают ряды. Итог — исчерпание памяти, медленные запросы, падение мониторинга в самый нужный момент.</p>
+<p><b>Правило:</b> метки — для измерений, по которым агрегируют, с ограниченным множеством значений. Типичная ловушка — полный путь вместо шаблона маршрута: <code>/orders/123</code>, <code>/orders/124</code>… — тот же эффект.</p>
+<p><b>Где высокая кардинальность к месту:</b> логи и трейсы. Они хранят отдельные события, и поиск по id — их основной сценарий. Связка: метрика показывает, что выросла задержка на маршруте; пример трейса (exemplar) или поиск в логах по маршруту и времени даёт конкретные запросы и пользователей.</p>
+<p><b>Защита:</b> лимиты на число рядов и меток в конфигурации, алерты на рост кардинальности, ревью метрик.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Связь меток с числом временных рядов и расчёт.</li><li>Последствия для системы мониторинга.</li><li>Что класть в метки, а что в логи и трейсы.</li><li>Ловушка с полным URL.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Метки с id, email, полным путём.</li><li>«У нас мало пользователей» — их станет больше.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Взрыв кардинальности: каждое уникальное сочетание меток даёт отдельный временной ряд, и система мониторинга ляжет</li><li class="no"><span class="mark">✗</span>Ничего страшного — метки хранятся сжато и почти не занимают места</li><li class="no"><span class="mark">✗</span>Метрика станет точнее, но вырастет задержка её сбора на 5-10%</li><li class="no"><span class="mark">✗</span>Метрика перестанет собираться, но остальные не пострадают</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как тогда расследовать проблему конкретного пользователя?</li><li>Чем head-based семплирование трейсов отличается от tail-based?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/observability/">Наблюдаемость: метрики, логи, трассировка и SLO</a><p>Чем наблюдаемость отличается от мониторинга, три сигнала и что каждый умеет, RED и USE, почему среднее врёт, взрыв кардинальности, SLI/SLO/error budget и алерты на симптомы.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/observability-vs-monitoring/">Чем наблюдаемость (observability) отличается от мониторинга?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/measuring-latency/">Что верно про измерение времени ответа сервиса?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Команда добавила в метрику задержки метку с идентификатором пользователя, чтобы «удобнее расследовать инциденты». Что произойдёт?","acceptedAnswer":{"@type":"Answer","text":"Каждая уникальная комбинация меток — отдельный временной ряд. Метка с user_id превращает одну метрику в миллионы рядов: растут память, диск и время запросов, система мониторинга падает. В метки — значения из малого фиксированного множества: метод, код ответа, шаблон маршрута /orders/{id} Уникальное (id пользователя и заказа, полный URL) — в логи и трейсы Число рядов = произведение числа значений всех меток Расследовать конкретного пользователя — по логам и трейсам с его id Как хранит Prometheus (и большинство систем метрик): ряд определяется именем метрики и набором меток. http_request_duration{method, route, status} при 5 методах, 50 маршрутах и 10 кодах — до 2 500 рядов (гистограмма умножает ещё на число бакетов). Добавили user_id с миллионом значений — до 2,5 миллиардов рядов. Каждый ряд держит индекс и данные в памяти; запросы перебирают ряды. Итог — исчерпание памяти, медленные запросы, падение мониторинга в самый нужный момент. Правило: метки — для измерений, по которым агрегируют, с ограниченным множеством значений. Типичная ловушка — полный путь вместо шаблона маршрута: /orders/123, /orders/124… — тот же эффект. Где высокая кардинальность к месту: логи и трейсы. Они хранят отдельные события, и поиск по id — их основной сценарий. Связка: метрика показывает, что выросла задержка на маршруте; пример трейса (exemplar) или поиск в логах по маршруту и…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

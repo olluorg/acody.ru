@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему хорошая офлайн-метрика модели не гарантирует успех в продакшене и как проверить модель онлайн? — вопрос с собеседования</title>
+<meta name="description" content="Офлайн-метрика (ROC-AUC, RMSE) считается на исторических данных и не равна бизнес-цели: модель меняет поведение пользователей, данные могли устареть…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/ab-testing-models/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/ab-testing-models/">
+<meta property="og:title" content="Почему хорошая офлайн-метрика модели не гарантирует успех в продакшене и как проверить модель онлайн? — вопрос с собеседования">
+<meta property="og:description" content="Офлайн-метрика (ROC-AUC, RMSE) считается на исторических данных и не равна бизнес-цели: модель меняет поведение пользователей, данные могли устареть…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Почему хорошая офлайн-метрика модели не гарантирует успех в продакшене и как проверить модель онлайн?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Почему хорошая офлайн-метрика модели не гарантирует успех в продакшене и как проверить модель онлайн?"}]}</script>
+  <h1>Почему хорошая офлайн-метрика модели не гарантирует успех в продакшене и как проверить модель онлайн?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">MLOps и модели в продакшене</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как сравнить новую модель со старой на реальных пользователях?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Офлайн-метрика (ROC-AUC, RMSE) считается на исторических данных и <b>не равна бизнес-цели</b>: модель меняет поведение пользователей, данные могли устареть, есть утечки и training-serving skew. Окончательное решение — <b>онлайн-эксперимент</b>: A/B-тест по бизнес-метрике (выручка, конверсия, удержание) с заранее заданными метриками-ограничителями.</p><ul><li>Перед A/B — теневой режим: проверить, что модель работает технически и прогнозы разумны</li><li>Офлайн-метрики полезны для отбора кандидатов, а не для финального решения</li><li>Метрики-ограничители: задержка, жалобы, доля отказов, доход</li></ul><p class="extra"><span>А ещё</span> Для рекомендаций и ранжирования применяют interleaving — чувствительнее A/B</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Почему офлайн и онлайн расходятся:</b></p>
+<ul><li>офлайн-метрика измеряет качество прогноза, а бизнесу важно решение и его последствия;</li><li>модель влияет на данные: рекомендации меняют то, что пользователь видит и покупает;</li><li>различия в признаках между обучением и сервисом;</li><li>смещение исторических данных: старая модель уже отфильтровала часть случаев (например, не выданные кредиты не имеют меток).</li></ul>
+<p><b>Порядок проверки:</b></p>
+<ol><li>Офлайн-отбор кандидатов на отложенной выборке и срезах.</li><li>Теневой режим: прогнозы считаются и логируются, но не используются.</li><li>Канарейка на малой доле трафика — техническая устойчивость.</li><li>A/B-тест: случайное разбиение пользователей, основная метрика, ограничители, заранее рассчитанный размер выборки и длительность.</li></ol>
+<p>Статистика A/B-тестов (размер выборки, мощность, подглядывание, множественные сравнения) — общая с продуктовой аналитикой.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Причины расхождения офлайн- и онлайн-результатов.</li><li>Последовательность проверки модели.</li><li>Роль A/B-теста и метрик-ограничителей.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/mlops-lifecycle/">Что такое MLOps и как модель попадает в продакшен?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/model-drift/">Что такое дрейф данных и концепта и как его отслеживать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/roc-pr-auc/">Что такое ROC-AUC и PR-AUC и когда какую метрику использовать?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Почему хорошая офлайн-метрика модели не гарантирует успех в продакшене и как проверить модель онлайн?","acceptedAnswer":{"@type":"Answer","text":"Офлайн-метрика (ROC-AUC, RMSE) считается на исторических данных и не равна бизнес-цели: модель меняет поведение пользователей, данные могли устареть, есть утечки и training-serving skew. Окончательное решение — онлайн-эксперимент: A/B-тест по бизнес-метрике (выручка, конверсия, удержание) с заранее заданными метриками-ограничителями. Перед A/B — теневой режим: проверить, что модель работает технически и прогнозы разумны Офлайн-метрики полезны для отбора кандидатов, а не для финального решения Метрики-ограничители: задержка, жалобы, доля отказов, доход Для рекомендаций и ранжирования применяют interleaving — чувствительнее A/B Почему офлайн и онлайн расходятся: - офлайн-метрика измеряет качество прогноза, а бизнесу важно решение и его последствия; - модель влияет на данные: рекомендации меняют то, что пользователь видит и покупает; - различия в признаках между обучением и сервисом; - смещение исторических данных: старая модель уже отфильтровала часть случаев (например, не выданные кредиты не имеют меток). Порядок проверки: 1. Офлайн-отбор кандидатов на отложенной выборке и срезах. 2. Теневой режим: прогнозы считаются и логируются, но не используются. 3. Канарейка на малой доле трафика — техническая устойчивость. 4. A/B-тест: случайное разбиение пользователей, основная метрика, ограничители, заранее рассчитанный размер выборки и длительность. Статистика A/B-тестов (размер выборки, мощность, подглядывание, множественные сравнения) — общая с продуктовой аналитикой."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что означает стирание типов (type erasure)? — вопрос с собеседования</title>
+<meta name="description" content="Стирание типов: компилятор проверяет типы, но в байткоде параметр заменяется границей (обычно Object) — в рантайме его нет. Сделано ради…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/type-erasure/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/type-erasure/">
+<meta property="og:title" content="Что означает стирание типов (type erasure)? — вопрос с собеседования">
+<meta property="og:description" content="Стирание типов: компилятор проверяет типы, но в байткоде параметр заменяется границей (обычно Object) — в рантайме его нет. Сделано ради…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что означает стирание типов (type erasure)?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что означает стирание типов (type erasure)?"}]}</script>
+  <h1>Что означает стирание типов (type erasure)?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Дженерики</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему нельзя написать new T()?</li><li>Почему List&lt;String&gt; и List&lt;Integer&gt; — один класс в рантайме?</li><li>Что такое type erasure в дженериках?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Стирание типов: компилятор <b>проверяет типы</b>, но в байткоде параметр <b>заменяется границей</b> (обычно Object) — в рантайме его нет.</p><ul><li>Сделано ради совместимости со старым кодом без дженериков</li><li>Нельзя: <code>new T()</code>, <code>new T[]</code>, <code>instanceof List&lt;String&gt;</code>, обобщённое исключение</li></ul><p class="extra"><span>А ещё</span> <code>List&lt;String&gt;</code> и <code>List&lt;Integer&gt;</code> в рантайме — один класс ArrayList</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Дженерики появились в Java 5, и разработчики языка сохранили совместимость с уже написанным кодом: старые и новые классы должны были работать вместе. Поэтому параметры типов существуют только на этапе компиляции. Компилятор проверяет типы и вставляет нужные приведения, а в байткоде <code>T</code> заменяется на свою верхнюю границу — <code>Object</code> или, например, <code>Comparable</code> для <code>&lt;T extends Comparable&lt;T&gt;&gt;</code>.</p>
+<p>Практические последствия:</p>
+<ul><li>нельзя создать объект или массив по параметру: <code>new T()</code>, <code>new T[10]</code> — тип неизвестен в рантайме;</li><li>нельзя проверить <code>obj instanceof List&lt;String&gt;</code> — только <code>List&lt;?&gt;</code>;</li><li><code>List&lt;String&gt;</code> и <code>List&lt;Integer&gt;</code> во время выполнения — один и тот же класс;</li><li>нельзя перегрузить методы, отличающиеся только параметром (<code>void f(List&lt;String&gt;)</code> и <code>void f(List&lt;Integer&gt;)</code>);</li><li>нельзя объявить обобщённый класс исключения.</li></ul>
+<p>Обходной путь — передавать <code>Class&lt;T&gt;</code> явно (<code>clazz.getDeclaredConstructor() .newInstance()</code>) или токен типа, как делают JSON-библиотеки.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>List&lt;String&gt; a = new ArrayList&lt;&gt;();
+List&lt;Integer&gt; b = new ArrayList&lt;&gt;();
+System.out.println(a.getClass() == b.getClass()); // true
+
+&lt;T&gt; T create(Class&lt;T&gt; type) throws Exception {
+    return type.getDeclaredConstructor().newInstance();
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определение: проверка при компиляции, параметр стёрт в байткоде.</li><li>Причина — обратная совместимость.</li><li>Практические ограничения.</li><li>Обходной путь через Class&lt;T&gt; — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Пытаться создать массив параметризованного типа.</li><li>Проверять принадлежность объекта к параметризованному типу.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Компилятор проверяет типы, но в байткоде параметр заменяется на его верхнюю границу — во время выполнения информации о нём нет</li><li class="no"><span class="mark">✗</span>Параметр типа удаляется из исходного кода при форматировании</li><li class="no"><span class="mark">✗</span>Значения параметризованных полей обнуляются сборщиком мусора</li><li class="no"><span class="mark">✗</span>Компилятор генерирует отдельный класс для каждой параметризации</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как обойти невозможность создать объект по параметру типа?</li><li>Почему нельзя объявить обобщённый класс исключения?</li><li>Что такое PECS?</li><li>Почему нельзя new T[]?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/generics-pitfalls/">Дженерики: массивы, varargs и bridge-методы</a><p>Почему дженерики не дружат с массивами, heap pollution и @SafeVarargs, синтетические bridge-методы и reifiable-типы.</p></li><li><a href="/articles/java/generics/">Дженерики и стирание типов</a><p>Типобезопасность на компиляции, механизм type erasure и его последствия, дженерик-методы, ограниченные параметры и опасность raw types.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/raw-types/">Чем опасно использование raw type, например List вместо List&lt;String&gt;?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/generic-array-heap-pollution/">Почему нельзя создать массив параметризованного типа (new List&lt;String&gt;[10] или new T[n])?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/bridge-method/">Что такое bridge-метод в Java?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/safevarargs/">Когда корректно ставить @SafeVarargs на generic-varargs-метод?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что означает стирание типов (type erasure)?","acceptedAnswer":{"@type":"Answer","text":"Стирание типов: компилятор проверяет типы, но в байткоде параметр заменяется границей (обычно Object) — в рантайме его нет. Сделано ради совместимости со старым кодом без дженериков Нельзя: new T(), new T[], instanceof List<String>, обобщённое исключение List<String> и List<Integer> в рантайме — один класс ArrayList Дженерики появились в Java 5, и разработчики языка сохранили совместимость с уже написанным кодом: старые и новые классы должны были работать вместе. Поэтому параметры типов существуют только на этапе компиляции. Компилятор проверяет типы и вставляет нужные приведения, а в байткоде T заменяется на свою верхнюю границу — Object или, например, Comparable для <T extends Comparable<T>>. Практические последствия: - нельзя создать объект или массив по параметру: new T(), new T[10] — тип неизвестен в рантайме; - нельзя проверить obj instanceof List<String> — только List<?>; - List<String> и List<Integer> во время выполнения — один и тот же класс; - нельзя перегрузить методы, отличающиеся только параметром (void f(List<String>) и void f(List<Integer>)); - нельзя объявить обобщённый класс исключения. Обходной путь — передавать Class<T> явно (clazz.getDeclaredConstructor() .newInstance()) или…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

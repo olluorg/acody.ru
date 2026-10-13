@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Безопасность приложения — карта «Backend-разработчик»</title>
+<meta name="description" content="OWASP Top 10, инъекции, секреты, зависимости и защита данных.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/backend/security/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/backend/security/">
+<meta property="og:title" content="Безопасность приложения — карта «Backend-разработчик»">
+<meta property="og:description" content="OWASP Top 10, инъекции, секреты, зависимости и защита данных.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/#security">Backend-разработчик</a> <span>/</span> <span>Безопасность приложения</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://learn.getsotto.ru/roadmap/backend/#security"},{"@type":"ListItem","position":3,"name":"Безопасность приложения"}]}</script>
+  <h1>Безопасность приложения</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">OWASP Top 10, инъекции, секреты, зависимости и защита данных.</p>
+  <article class="md"><h3>Что важно знать</h3>
+<ul><li><b>Инъекции</b> — только параметризованные запросы.</li><li><b>Доступ к объектам</b>: проверять владельца ресурса, а не только вход.</li><li><b>SSRF</b>: сервер не должен ходить по адресам из пользовательского ввода без проверки.</li><li><b>Секреты</b> — в хранилище (Vault, секреты облака), не в коде и логах.</li><li><b>Зависимости</b> — сканирование и обновления.</li><li><b>Данные</b>: шифрование при передаче и хранении, маскирование персональных данных в логах.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 4 ч</small></h3><ul><li>Защищается от SQL-инъекций параметризованными запросами и не хранит секреты в коде</li></ul><p class="rm-practice"><b>Практика.</b> Найти и исправить SQL-инъекцию и захардкоженный пароль в учебном сервисе.</p></div><div class="rm-grade"><h3>Middle <small>≈ 6 ч</small></h3><ul><li>Проверяет сервис по OWASP Top 10, включая доступ к чужим объектам и SSRF</li><li>Хранит секреты в хранилище и ротирует их</li><li>Отслеживает уязвимости зависимостей в CI</li></ul><p class="rm-practice"><b>Практика.</b> Проверить свой сервис по OWASP Top 10, исправить найденное и добавить сканирование зависимостей в CI.</p></div><div class="rm-grade"><h3>Senior <small>≈ 6 ч</small></h3><ul><li>Проводит моделирование угроз для нового сервиса и вводит практики безопасной разработки в команде</li></ul><p class="rm-practice"><b>Практика.</b> Провести моделирование угроз для сервиса платежей и составить план мер.</p></div></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/cs/sql-injection/">Что такое SQL-инъекция и как от неё защититься?</a> <span class="lvl lvl-junior">Junior</span><p>Инъекция — данные пользователя попадают в текст запроса и меняют его смысл: &#x27; OR &#x27;1&#x27;=&#x27;1 превращает проверку пароля в «всегда истина».</p></li><li><a href="/questions/cs/xss/">Что такое XSS и как от неё защищаться?</a> <span class="lvl lvl-junior">Junior</span><p>XSS — злоумышленник заставляет сайт выполнить его JavaScript в браузере другого пользователя: скрипт работает с правами сайта — читает данные страницы, отправляет запросы от имени…</p></li><li><a href="/questions/cs/csrf-cors/">Что такое CSRF и как он связан с CORS?</a> <span class="lvl lvl-middle">Middle</span><p>CSRF — чужой сайт заставляет браузер жертвы отправить запрос на ваш сайт; браузер сам приложит cookie, и запрос выполнится от имени пользователя. CORS — правила, когда скрипт с…</p></li><li><a href="/questions/cs/password-storage/">Как правильно хранить пароли пользователей?</a> <span class="lvl lvl-junior">Junior</span><p>Не хранить пароль вовсе — только результат медленной функции с солью: argon2id, bcrypt или scrypt. При входе считаем то же самое и сравниваем.</p></li><li><a href="/questions/devops/ci-secrets/">Как правильно работать с секретами в CI/CD и инфраструктуре?</a> <span class="lvl lvl-middle">Middle</span><p>Секреты не хранят в коде, образах и логах. Источник — хранилище секретов (Vault, облачный менеджер, секреты CI), выдача — по минимальным правам и по возможности короткоживущая…</p></li><li><a href="/questions/cs/hashing-vs-encryption/">Чем хеширование отличается от шифрования и кодирования?</a> <span class="lvl lvl-junior">Junior</span><p>Кодирование (Base64, URL-кодирование) — смена формата, обратимо без секрета. Шифрование — обратимо только с ключом. Хеширование — необратимый отпечаток фиксированной длины.</p></li></ul></section><section class="block"><h2>Разборы темы</h2><ul class="links"><li><a href="/articles/system-design/security/">Безопасность приложения: OWASP, доступ и секреты</a><p>OWASP Top 10 в редакции 2025, разница аутентификации и авторизации, ловушки JWT против сессий, хранение паролей и секретов, безопасность цепочки поставок.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/backend/observability/">← Наблюдаемость</a><a class="next" href="/roadmap/backend/system-design/">Системный дизайн →</a></nav>
+  <p class="rm-back"><a href="/roadmap/backend/#security">← Вся карта «Backend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Безопасность приложения","description":"OWASP Top 10, инъекции, секреты, зависимости и защита данных.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/backend/security/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

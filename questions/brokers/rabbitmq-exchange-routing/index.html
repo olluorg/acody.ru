@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое exchange и routing key в RabbitMQ? — вопрос с собеседования</title>
+<meta name="description" content="Издатель публикует в exchange с routing key; exchange по bindings решает, в какие очереди положить копии. Потребители читают очереди. direct — ключ…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/brokers/rabbitmq-exchange-routing/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/brokers/rabbitmq-exchange-routing/">
+<meta property="og:title" content="Что такое exchange и routing key в RabbitMQ? — вопрос с собеседования">
+<meta property="og:description" content="Издатель публикует в exchange с routing key; exchange по bindings решает, в какие очереди положить копии. Потребители читают очереди. direct — ключ…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/brokers/">Брокеры сообщений</a> <span>/</span> <span>Что такое exchange и routing key в RabbitMQ?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Брокеры сообщений","item":"https://learn.getsotto.ru/questions/brokers/"},{"@type":"ListItem","position":3,"name":"Что такое exchange и routing key в RabbitMQ?"}]}</script>
+  <h1>Что такое exchange и routing key в RabbitMQ?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">RabbitMQ и SQS</span><span class="chip">RabbitMQ</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Какие бывают типы exchange в RabbitMQ?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Издатель публикует в <b>exchange</b> с <b>routing key</b>; exchange по <b>bindings</b> решает, в какие очереди положить копии. Потребители читают очереди.</p><ul><li>direct — ключ совпадает точно</li><li>topic — шаблоны: <code>order.*.paid</code>, <code>order.#</code></li><li>fanout — во все привязанные очереди; headers — по заголовкам</li></ul><p class="extra"><span>А ещё</span> Сообщение без подходящей привязки теряется — mandatory-флаг или alternate exchange</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Компоненты:</b></p>
+<ul><li><b>exchange</b> — точка публикации; сам не хранит сообщения;</li><li><b>queue</b> — хранит сообщения до подтверждения потребителем;</li><li><b>binding</b> — правило «очередь Q получает сообщения из exchange E с ключом K или шаблоном».</li></ul>
+<p><b>Типы exchange:</b></p>
+<ul><li><b>direct</b> — в очереди, где ключ привязки равен routing key; например, <code>email</code>, <code>sms</code>, <code>push</code> по каналу уведомлений;</li><li><b>topic</b> — ключ из слов через точку, шаблоны: <code>*</code> — одно слово, <code>#</code> — ноль и больше. <code>order.eu.paid</code> попадёт в привязку <code>order.*.paid</code> и <code>order.#</code>;</li><li><b>fanout</b> — во все привязанные очереди, ключ игнорируется (pub/sub);</li><li><b>headers</b> — по значениям заголовков.</li></ul>
+<p>Есть <b>default exchange</b> без имени: публикация с routing key = имени очереди кладёт сообщение прямо в неё.</p>
+<p><b>Что учесть:</b> если ни одна привязка не подошла, сообщение отбрасывается молча — помогает флаг mandatory (вернуть издателю) или alternate exchange. Для надёжности — durable exchange и очереди, persistent сообщения, publisher confirms.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Exchange, queue, binding и их роли.</li><li>Типы exchange с примерами.</li><li>Судьба сообщений без подходящей привязки.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Думать, что exchange хранит сообщения.</li><li>Публиковать в exchange без привязок и терять сообщения.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Exchange — это очередь, а routing key — её имя</li><li class="no"><span class="mark">✗</span>Exchange — это consumer group в RabbitMQ</li><li class="ok"><span class="mark">✓</span>Exchange — компонент маршрутизации (типы direct/topic/fanout/headers), куда продюсер пишет сообщение; routing key — метка, по которой exchange выбирает очереди через bindings</li><li class="no"><span class="mark">✗</span>Это термины из Kafka, в RabbitMQ их нет</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Что такое binding?</li><li>Чем direct exchange отличается от topic exchange?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/brokers/rabbitmq-sqs/">RabbitMQ, SQS и классические очереди</a><p>Модель exchange/binding/queue, ack/nack и publisher confirms, prefetch, DLQ через DLX, отложенные сообщения, SQS Standard vs FIFO и visibility timeout.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/brokers/rabbitmq-routing-basic/">Как в RabbitMQ сообщение попадает от издателя в очередь?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/brokers/pubsub-vs-queue/">Чем модель pub/sub отличается от point-to-point (очередь)?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/brokers/publisher-confirms/">Что дают publisher confirms в RabbitMQ?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое exchange и routing key в RabbitMQ?","acceptedAnswer":{"@type":"Answer","text":"Издатель публикует в exchange с routing key; exchange по bindings решает, в какие очереди положить копии. Потребители читают очереди. direct — ключ совпадает точно topic — шаблоны: order..paid, order.# fanout — во все привязанные очереди; headers — по заголовкам Сообщение без подходящей привязки теряется — mandatory-флаг или alternate exchange Компоненты: - exchange — точка публикации; сам не хранит сообщения; - queue — хранит сообщения до подтверждения потребителем; - binding — правило «очередь Q получает сообщения из exchange E с ключом K или шаблоном». Типы exchange: - direct — в очереди, где ключ привязки равен routing key; например, email, sms, push по каналу уведомлений; - topic — ключ из слов через точку, шаблоны: — одно слово, # — ноль и больше. order.eu.paid попадёт в привязку order..paid и order.#; - fanout — во все привязанные очереди, ключ игнорируется (pub/sub); - headers — по значениям заголовков. Есть default exchange без имени: публикация с routing key = имени очереди кладёт сообщение прямо в неё. Что учесть: если ни одна привязка не подошла, сообщение отбрасывается молча — помогает флаг mandatory (вернуть издателю) или alternate exchange. Для надёжности — durable exchange и очереди, persistent сообщения…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

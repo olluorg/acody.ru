@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>В цепочке из пяти сервисов у пользователей выросло время ответа. Как вы будете искать причину и что для этого должно быть построено заранее? — вопрос с собеседования</title>
+<meta name="description" content="Метрики показывают, где и когда выросло; трейсы — в каком шаге ушло время; логи по trace_id — почему. Работает, только если корреляция построена…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/latency-investigation/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/latency-investigation/">
+<meta property="og:title" content="В цепочке из пяти сервисов у пользователей выросло время ответа. Как вы будете искать причину и что для этого должно быть построено заранее? — вопрос с собеседования">
+<meta property="og:description" content="Метрики показывают, где и когда выросло; трейсы — в каком шаге ушло время; логи по trace_id — почему. Работает, только если корреляция построена…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>В цепочке из пяти сервисов у пользователей выросло время ответа. Как вы будете искать причину и что для этого должно быть построено заранее?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"В цепочке из пяти сервисов у пользователей выросло время ответа. Как вы будете искать причину и что для этого должно быть построено заранее?"}]}</script>
+  <h1>В цепочке из пяти сервисов у пользователей выросло время ответа. Как вы будете искать причину и что для этого должно быть построено заранее?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Наблюдаемость и SLO</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как искать причину роста задержки в микросервисах?</li><li>Зачем нужна распределённая трассировка?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Метрики</b> показывают, где и когда выросло; <b>трейсы</b> — в каком шаге ушло время; <b>логи</b> по trace_id — почему. Работает, только если корреляция построена <b>заранее</b>.</p><ul><li>По метрикам: какой сервис, с какого момента, перцентили, насыщение (очереди, пулы)</li><li>По трейсам медленных запросов: какой спан длинный — свой код, база, внешний вызов, ожидание пула</li><li>По логам этого trace_id: ошибки, повторы, медленный запрос</li></ul><p class="extra"><span>А ещё</span> Заранее: сквозной traceparent (W3C), OpenTelemetry, структурированные логи, tail-based семплирование</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>1. Локализовать по метрикам.</b> Смотрим p95/p99 по каждому сервису и эндпоинту: где выросло и с какого времени. Сопоставляем с событиями — выкатка, всплеск трафика, изменение конфигурации. Смотрим <b>насыщение</b>: длину очередей, занятость пулов соединений и потоков, паузы GC — они выдают причину раньше утилизации CPU.</p>
+<p><b>2. Найти шаг по трейсам.</b> Берём трейсы медленных запросов: видно, какой спан занял время — запрос в базу, внешний вызов, ожидание соединения из пула, повторы. Важно сравнить с трейсами нормальных запросов.</p>
+<p><b>3. Объяснить по логам.</b> По trace_id находим структурированные логи всех сервисов этого запроса: ошибки, таймауты, план медленного запроса.</p>
+<p><b>Что должно быть построено заранее:</b></p>
+<ul><li>сквозной идентификатор трассы через все сервисы и брокеры — заголовок <code>traceparent</code> (W3C Trace Context), автоматическая инструментация OpenTelemetry;</li><li>структурированные логи (JSON) с trace_id и span_id;</li><li>метрики в виде гистограмм с разрезом по версии и экземпляру;</li><li><b>tail-based семплирование</b> — решение о сохранении трейса после его завершения: медленные и ошибочные сохраняются всегда. При head-based (решение в начале, например 1%) редкие медленные запросы до вас не доедут;</li><li>связь метрик с трейсами (exemplars).</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Последовательность: метрики → трейсы → логи.</li><li>Насыщение как ранний признак.</li><li>Что нужно заранее: сквозная корреляция, OpenTelemetry, структурированные логи.</li><li>Tail-based семплирование — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Начинать с чтения логов всех сервисов подряд.</li><li>Не иметь сквозного идентификатора и пытаться сопоставлять по времени.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Почему хвост усиливается при параллельных вызовах?</li><li>Что бы вы измеряли, чтобы предсказать эту проблему заранее?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/observability/">Наблюдаемость: метрики, логи, трассировка и SLO</a><p>Чем наблюдаемость отличается от мониторинга, три сигнала и что каждый умеет, RED и USE, почему среднее врёт, взрыв кардинальности, SLI/SLO/error budget и алерты на симптомы.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/observability-vs-monitoring/">Чем наблюдаемость (observability) отличается от мониторинга?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/measuring-latency/">Что верно про измерение времени ответа сервиса?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/tail-latency/">Как бороться с хвостовыми задержками в распределённой системе?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/queueing-utilization/">Почему при загрузке сервера 90% время ответа растёт в разы, хотя запас ещё есть?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"В цепочке из пяти сервисов у пользователей выросло время ответа. Как вы будете искать причину и что для этого должно быть построено заранее?","acceptedAnswer":{"@type":"Answer","text":"Метрики показывают, где и когда выросло; трейсы — в каком шаге ушло время; логи по trace_id — почему. Работает, только если корреляция построена заранее. По метрикам: какой сервис, с какого момента, перцентили, насыщение (очереди, пулы) По трейсам медленных запросов: какой спан длинный — свой код, база, внешний вызов, ожидание пула По логам этого trace_id: ошибки, повторы, медленный запрос Заранее: сквозной traceparent (W3C), OpenTelemetry, структурированные логи, tail-based семплирование 1. Локализовать по метрикам. Смотрим p95/p99 по каждому сервису и эндпоинту: где выросло и с какого времени. Сопоставляем с событиями — выкатка, всплеск трафика, изменение конфигурации. Смотрим насыщение: длину очередей, занятость пулов соединений и потоков, паузы GC — они выдают причину раньше утилизации CPU. 2. Найти шаг по трейсам. Берём трейсы медленных запросов: видно, какой спан занял время — запрос в базу, внешний вызов, ожидание соединения из пула, повторы. Важно сравнить с трейсами нормальных запросов. 3. Объяснить по логам. По trace_id находим структурированные логи всех сервисов этого запроса: ошибки, таймауты, план медленного запроса. Что должно быть построено заранее: - сквозной идентификатор трассы через все сервисы и брокеры — заголовок traceparent (W3C Trace Context), автоматическая инструментация OpenTelemetry; - структурированные логи (JSON) с trace_id и span_id; -…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

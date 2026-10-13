@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Нужно ограничить число одновременных обращений к внешнему API десятью, не ограничивая при этом число рабочих потоков. Какой примитив подходит? — вопрос с собеседования</title>
+<meta name="description" content="Semaphore с десятью разрешениями: acquire перед вызовом, release в finally. Он ограничивает число одновременных доступов к ресурсу, не трогая число…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/semaphore-rate-limit/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/semaphore-rate-limit/">
+<meta property="og:title" content="Нужно ограничить число одновременных обращений к внешнему API десятью, не ограничивая при этом число рабочих потоков. Какой примитив подходит? — вопрос с собеседования">
+<meta property="og:description" content="Semaphore с десятью разрешениями: acquire перед вызовом, release в finally. Он ограничивает число одновременных доступов к ресурсу, не трогая число…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Нужно ограничить число одновременных обращений к внешнему API десятью, не ограничивая при этом число рабочих потоков. Какой примитив подходит?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Нужно ограничить число одновременных обращений к внешнему API десятью, не ограничивая при этом число рабочих потоков. Какой примитив подходит?"}]}</script>
+  <h1>Нужно ограничить число одновременных обращений к внешнему API десятью, не ограничивая при этом число рабочих потоков. Какой примитив подходит?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Многопоточность</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Semaphore</b> с десятью разрешениями: acquire перед вызовом, release в finally. Он ограничивает число одновременных доступов к ресурсу, не трогая число потоков.</p><ul><li>Не реентерабелен и не привязан к потоку: release может вызвать другой поток</li><li>tryAcquire с таймаутом — не ждать вечно</li><li>Справедливый режим — без голодания, но медленнее</li></ul><p class="extra"><span>А ещё</span> В распределённой системе нужен общий лимит — Redis, rate limiter</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Семафор держит счётчик разрешений: acquire занимает разрешение или ждёт, release возвращает. Защёлка решает другую задачу — дождаться завершения N событий, и она одноразовая. Барьер синхронизирует группу потоков в общей точке и переиспользуем. Практические детали семафора, которые ценят: он не реентрантен (повторный acquire тем же потоком займёт второе разрешение и может привести к самоблокировке), а release не обязан следовать за acquire того же потока — этим пользуются, но так же легко и раздают лишние разрешения. Освобождать разрешение нужно в finally.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Выбор семафора и почему не latch и barrier.</li><li>Освобождение в finally и tryAcquire.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Путать Semaphore с ReentrantLock: у семафора нет владельца.</li><li>Забыть release в finally и медленно исчерпать разрешения.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Semaphore с десятью разрешениями</li><li class="no"><span class="mark">✗</span>CountDownLatch со счётчиком 10</li><li class="no"><span class="mark">✗</span>CyclicBarrier на 10 участников</li><li class="no"><span class="mark">✗</span>ReentrantLock с десятикратным захватом</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем CountDownLatch отличается от CyclicBarrier?</li><li>Что делает справедливый (fair) режим семафора?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/coordination/">Координация: семафоры, защёлки и барьеры</a><p>Semaphore, CountDownLatch, CyclicBarrier, Phaser и Exchanger — что каждый делает и когда выбирать.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/latch-barrier-semaphore/">Чем различаются CountDownLatch, CyclicBarrier и Semaphore?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/semaphore-release-finally/">В коде вызывается semaphore.acquire(), затем работа с ресурсом, затем semaphore.release() в конце метода. Что здесь опасно?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/mutex-semaphore/">Чем мьютекс отличается от семафора?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Нужно ограничить число одновременных обращений к внешнему API десятью, не ограничивая при этом число рабочих потоков. Какой примитив подходит?","acceptedAnswer":{"@type":"Answer","text":"Semaphore с десятью разрешениями: acquire перед вызовом, release в finally. Он ограничивает число одновременных доступов к ресурсу, не трогая число потоков. Не реентерабелен и не привязан к потоку: release может вызвать другой поток tryAcquire с таймаутом — не ждать вечно Справедливый режим — без голодания, но медленнее В распределённой системе нужен общий лимит — Redis, rate limiter Семафор держит счётчик разрешений: acquire занимает разрешение или ждёт, release возвращает. Защёлка решает другую задачу — дождаться завершения N событий, и она одноразовая. Барьер синхронизирует группу потоков в общей точке и переиспользуем. Практические детали семафора, которые ценят: он не реентрантен (повторный acquire тем же потоком займёт второе разрешение и может привести к самоблокировке), а release не обязан следовать за acquire того же потока — этим пользуются, но так же легко и раздают лишние разрешения. Освобождать разрешение нужно в finally."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

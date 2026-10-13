@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Примитивы, обёртки и Integer cache — разбор для собеседования</title>
+<meta name="description" content="Восемь примитивов и их диапазоны, autoboxing, кэш Integer и ловушка ==, NPE при распаковке и цена боксинга.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/java/primitives/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/java/primitives/">
+<meta property="og:title" content="Примитивы, обёртки и Integer cache — разбор для собеседования">
+<meta property="og:description" content="Восемь примитивов и их диапазоны, autoboxing, кэш Integer и ловушка ==, NPE при распаковке и цена боксинга.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Примитивы, обёртки и Integer cache</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Примитивы, обёртки и Integer cache"}]}</script>
+  <h1>Примитивы, обёртки и Integer cache</h1>
+  <p class="lead">Восемь примитивов и их диапазоны, autoboxing, кэш Integer и ловушка ==, NPE при распаковке и цена боксинга.</p>
+  <article class="md"><h2>Восемь примитивов</h2>
+<p>В Java восемь примитивных типов: целые byte (8 бит), short (16), int (32), long (64); вещественные float (32) и double (64); char (16-битный беззнаковый — UTF-16 code unit) и boolean (размер не специфицирован спецификацией). Примитивы хранят значение напрямую, не объект.</p>
+<p>Целочисленное переполнение не бросает исключение, а молча «заворачивается» (Integer.MAX_VALUE + 1 = Integer.MIN_VALUE) — частый источник багов; для контроля есть <code>Math.addExact</code>. Вещественные float/double — это IEEE 754 с погрешностью представления, поэтому 0.1 + 0.2 != 0.3, и для денег берут BigDecimal, а не double.</p>
+<h2>Обёртки и autoboxing</h2>
+<p>У каждого примитива есть класс-обёртка (int↔Integer, long↔Long, …), нужный там, где требуется объект: дженерики и коллекции работают только со ссылочными типами, поэтому <code>List&lt;int&gt;</code> невозможен, только <code>List&lt;Integer&gt;</code>.</p>
+<p>Autoboxing/unboxing — автоматическое преобразование примитив↔обёртка, которое вставляет компилятор. Удобно, но скрывает аллокации и распаковки, что важно помнить в горячем коде.</p>
+<h2>Кэш Integer и ловушка ==</h2>
+<p><code>Integer.valueOf</code> (а значит и autoboxing) кэширует объекты для значений -128..127: одинаковые маленькие значения дают одну и ту же ссылку. Поэтому Integer a = 100, b = 100; a == b — true, а для 1000 — уже false (разные объекты).</p>
+<p>Почему именно -128..127? Кэшировать все 4 млрд значений int невозможно, а вот маленькие значения автобоксятся чаще всего (счётчики циклов, флаги, малые индексы), поэтому кэш именно их даёт почти весь выигрыш по аллокациям при копеечной памяти.</p>
+<p>Что именно гарантирует JLS (§5.1.7): Boolean кэшируется целиком (оба значения), Byte — все 256 значений, а Short, Integer и Long — диапазон -128..127, Character — 0..127. Для Integer нижняя граница -128 фиксирована, а верхнюю можно поднять флагом -XX:AutoBoxCacheMax. Float и Double не кэшируются никогда.</p>
+<p>Вывод железный: обёртки сравнивают через equals, а не ==. == на обёртках сравнивает ссылки и «случайно» работает только в диапазоне кэша — это классическая ловушка собеседований.</p>
+<pre class="lang-java"><code>Integer a = 100, b = 100;
+System.out.println(a == b);      // true  (из кэша -128..127)
+Integer c = 1000, d = 1000;
+System.out.println(c == d);      // false (разные объекты)
+System.out.println(c.equals(d)); // true  — правильное сравнение</code></pre>
+<div class="widget-in"><script type="module" src="/widgets/integer-cache.js"></script><sotto-integer-cache theme="dark"></sotto-integer-cache></div>
+<h2>NPE при распаковке</h2>
+<p>Обёртка может быть null, а примитив — нет. Распаковка null-обёртки в примитив бросает NullPointerException: Integer x = null; int y = x; упадёт.</p>
+<p>Особенно коварен тернарный оператор со смешением обёртки и примитива (cond ? <code>intValue</code> : <code>integerValue</code>): из-за числового расширения тип всего выражения становится примитивным, поэтому обёрточную ветвь распаковывает — и если выбрана именно она со значением null, будет NPE, хотя выражение выглядит безопасным.</p>
+<p>Как бороться: (1) использовать примитив в поле/сигнатуре там, где «отсутствие» бессмысленно — тогда null невозможен в принципе; (2) не смешивать обёртку и примитив в одном арифметическом/тернарном выражении; (3) проверять на null перед распаковкой результатов, способных её вернуть (<code>map.get(key)</code>, который при отсутствии ключа даёт null), и подставлять дефолт через <code>Objects.requireNonNullElse</code> или <code>getOrDefault</code>; (4) для «значение может отсутствовать» возвращать Optional, а не nullable-обёртку — это переносит проверку в тип.</p>
+<h2>Цена боксинга</h2>
+<p>Каждый бокс — это аллокация объекта в куче и лишняя косвенность при доступе. В циклах и больших структурах это бьёт и по памяти, и по скорости (плюс нагрузка на GC).</p>
+<p>Масштаб разницы: int[] на миллион элементов — это сплошной блок ~4 МБ, а <code>List&lt;Integer&gt;</code> на тот же миллион хранит миллион отдельных объектов Integer (каждый с заголовком ~16 байт) плюс массив ссылок — в разы больше памяти и сплошные промахи кэша при обходе.</p>
+<p>Поэтому в перфо-чувствительном коде берут примитивные массивы вместо <code>List&lt;Integer&gt;</code> и специализированные потоки (IntStream/LongStream/DoubleStream) вместо <code>Stream&lt;Integer&gt;</code> — они не боксят элементы.</p>
+<pre class="lang-java"><code>int[] data = new int[1_000_000];      // ~4 МБ, без боксинга, плотно в памяти
+long sum = IntStream.of(data).sum();  // примитивный поток, без Integer
+
+List&lt;Integer&gt; boxed = new ArrayList&lt;&gt;(); // каждый элемент — объект Integer
+boxed.add(1);                            // autoboxing на каждой вставке</code></pre>
+<h2>Как отвечать на собеседовании</h2>
+<p>Назовите примитивы и их размеры, объясните autoboxing и почему обёртки сравнивают через equals (кэш Integer -128..127 и ловушка ==), предупредите про NPE при распаковке (включая тернарник) и про цену боксинга (аллокации, IntStream/примитивные массивы в горячем коде).</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/integer-cache/">Integer a=127, b=127, c=128, d=128. Что вернут a==b и c==d?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/primitive-types-char/">Сколько в Java примитивных типов и что хранит char?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/int-overflow/">Чему равно Integer.MAX_VALUE + 1 и бросит ли это исключение?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/double-precision-money/">Что выведет System.out.println(0.1 + 0.2 == 0.3) и что брать для денег?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/unboxing-null-npe/">Что произойдёт при выполнении: Integer x = null; int y = x;?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/ternary-unboxing-npe/">Почему int v = flag ? map.get(key) : 0 (map.get может вернуть null) способно бросить NPE?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/int-array-vs-list-integer/">Чем int[] на миллион чисел выгоднее List&lt;Integer&gt; того же размера?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/generics-primitives/">Почему нельзя объявить List&lt;int&gt; и что пишут вместо этого?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/autoboxing-pitfalls/">Что такое autoboxing и какие ловушки он приносит?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/strings/">Строки: неизменяемость, пул и StringBuilder</a><p>Почему String immutable, String pool и intern, конкатенация и StringBuilder, char/code points и compact strings.</p></li><li><a href="/articles/java/equality/">Равенство: ==, equals и hashCode</a><p>Идентичность против логического равенства, контракт equals и hashCode, проблема equals с наследованием и корректная реализация.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Примитивы, обёртки и Integer cache","description":"Восемь примитивов и их диапазоны, autoboxing, кэш Integer и ловушка ==, NPE при распаковке и цена боксинга.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/primitives/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Пользовательские хуки — карта «React»</title>
+<meta name="description" content="Как выносить повторяющуюся логику с состоянием и эффектами в свои хуки.">
+<link rel="canonical" href="https://learn.getsotto.ru/roadmap/react/custom-hooks/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/roadmap/react/custom-hooks/">
+<meta property="og:title" content="Пользовательские хуки — карта «React»">
+<meta property="og:description" content="Как выносить повторяющуюся логику с состоянием и эффектами в свои хуки.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/frontend/">Frontend-разработчик</a> <span>/</span> <a href="/roadmap/react/#hooks">React</a> <span>/</span> <a href="/roadmap/react/hooks/">Хуки</a> <span>/</span> <span>Пользовательские хуки</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://learn.getsotto.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Frontend-разработчик","item":"https://learn.getsotto.ru/roadmap/frontend/"},{"@type":"ListItem","position":3,"name":"React","item":"https://learn.getsotto.ru/roadmap/react/#hooks"},{"@type":"ListItem","position":4,"name":"Хуки","item":"https://learn.getsotto.ru/roadmap/react/hooks/"},{"@type":"ListItem","position":5,"name":"Пользовательские хуки"}]}</script>
+  <h1>Пользовательские хуки</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-middle">с Middle</span></div>
+  <p class="lead">Как выносить повторяющуюся логику с состоянием и эффектами в свои хуки.</p>
+  <article class="md"><p>Пользовательский хук — функция с именем на <code>use</code>, которая вызывает другие хуки. Она делит <b>логику</b>, а не состояние: у каждого компонента, который её вызвал, своё состояние.</p>
+<pre class="lang-jsx"><code>function useDebounced(value, delay = 300) {
+  const [v, setV] = useState(value);
+  useEffect(() =&gt; {
+    const id = setTimeout(() =&gt; setV(value), delay);
+    return () =&gt; clearTimeout(id);
+  }, [value, delay]);
+  return v;
+}
+
+const q = useDebounced(search);</code></pre>
+<h3>Что важно знать</h3>
+<ul><li>Подчиняются тем же правилам хуков: вызывать на верхнем уровне.</li><li>Хорошие кандидаты: подписки (<code>useOnlineStatus</code>, <code>useMediaQuery</code>), таймеры, работа с <code>localStorage</code>, логика форм.</li><li>Возвращать стабильные значения (<code>useCallback</code> для функций), если их будут использовать в зависимостях.</li><li>Тестирование хуков — <code>renderHook</code> из Testing Library.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Middle <small>≈ 4 ч</small></h3><ul><li>Выносит повторяющуюся логику в пользовательские хуки со стабильным возвращаемым значением</li><li>Тестирует хуки через renderHook</li></ul><p class="rm-practice"><b>Практика.</b> Написать хуки useDebounce, useMediaQuery и useLocalStorage с тестами.</p></div></section><section class="block"><h2>Документация</h2><ul class="links"><li><a href="https://react.dev/learn/reusing-logic-with-custom-hooks" rel="noopener" target="_blank">react.dev: Свои хуки ↗</a></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/react/refs/">← Refs и работа с DOM</a><a class="next" href="/roadmap/react/rendering/">Рендеринг и производительность React →</a></nav>
+  <p class="rm-back"><a href="/roadmap/react/#hooks">← Вся карта «React»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Пользовательские хуки","description":"Как выносить повторяющуюся логику с состоянием и эффектами в свои хуки.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/roadmap/react/custom-hooks/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

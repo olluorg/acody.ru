@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое reactive programming и backpressure? — вопрос с собеседования</title>
+<meta name="description" content="Реактивное программирование — работа с асинхронными потоками данных через неблокирующие операторы. Backpressure — потребитель сам запрашивает столько…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/spring/reactive-backpressure/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/spring/reactive-backpressure/">
+<meta property="og:title" content="Что такое reactive programming и backpressure? — вопрос с собеседования">
+<meta property="og:description" content="Реактивное программирование — работа с асинхронными потоками данных через неблокирующие операторы. Backpressure — потребитель сам запрашивает столько…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Что такое reactive programming и backpressure?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Что такое reactive programming и backpressure?"}]}</script>
+  <h1>Что такое reactive programming и backpressure?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Reactive и WebFlux</span><span class="chip">WebFlux</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое Reactive Streams?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Реактивное программирование — работа с <b>асинхронными потоками данных</b> через неблокирующие операторы. <b>Backpressure</b> — потребитель сам запрашивает столько элементов, сколько готов обработать (<code>request(n)</code>), и быстрый источник его не захлёстывает.</p><ul><li>Reactive Streams: Publisher, Subscriber, Subscription, Processor (в Java 9 — Flow)</li><li>Project Reactor: Mono (0–1), Flux (0–N)</li><li>Без подписки ничего не происходит — цепочка ленивая</li></ul><p class="extra"><span>А ещё</span> Цена: сложнее код, отладка и стектрейсы</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Идея.</b> Вместо «вызвать и ждать результат» — описать конвейер преобразований, который выполнится, когда придут данные. Поток не блокируется на ожидании сети или базы и обслуживает другие задачи.</p>
+<p><b>Reactive Streams</b> — стандарт из четырёх интерфейсов: <code>Publisher</code>, <code>Subscriber</code>, <code>Subscription</code> (<code>request(n)</code>, <code>cancel()</code>), <code>Processor</code>. В Java 9 вошёл как <code>java.util.concurrent.Flow</code>. Реализации: Project Reactor (Spring), RxJava.</p>
+<p><b>Backpressure:</b> подписчик говорит, сколько элементов готов принять, и издатель не отправит больше. Это защищает от переполнения памяти. Если источник не может замедлиться (события пользователей), выбирают стратегию: ограниченный буфер, отбрасывание, только последнее значение (<code>onBackpressureBuffer</code>, <code>onBackpressureDrop</code>, <code>onBackpressureLatest</code>).</p>
+<p><b>Reactor:</b> <code>Mono&lt;T&gt;</code> — 0 или 1 элемент, <code>Flux&lt;T&gt;</code> — поток. Операторы <code>map</code>, <code>flatMap</code> (асинхронный шаг), <code>filter</code>, <code>zip</code>, <code>timeout</code>, <code>retry</code>. Без <code>subscribe</code> (или возврата наружу, где подпишется фреймворк) ничего не выполнится.</p>
+<p><b>Когда оправдано:</b> много одновременных соединений с ожиданием (шлюзы, стриминг, SSE, WebSocket), потоковая обработка. Для обычного CRUD цена в сложности кода часто выше выгоды, а виртуальные потоки Java 21 дают похожую масштабируемость с простым кодом.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Суть реактивного подхода.</li><li>Интерфейсы Reactive Streams и request(n).</li><li>Backpressure и стратегии.</li><li>Mono, Flux, ленивость, когда применять.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ожидать выполнения цепочки без подписки.</li><li>Считать реактивность автоматически «быстрее».</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем Mono отличается от Flux?</li><li>Что такое hot и cold publisher?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/reactive-webflux/">Reactive и Spring WebFlux</a><p>Неблокирующая модель и event loop, Reactive Streams и Reactor (Mono/Flux), backpressure, реактивный стек целиком, выбор MVC/WebFlux и цена сложности.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/backpressure/">Что такое backpressure и как его реализовать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/mvc-vs-webflux/">Чем Spring MVC отличается от Spring WebFlux?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/jdbc-in-webflux/">В реактивной цепочке WebFlux внутри map() выполняется синхронный JDBC-запрос. Чем это опасно?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/non-blocking-basic/">Чем неблокирующая модель обработки отличается от модели «поток на запрос»?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое reactive programming и backpressure?","acceptedAnswer":{"@type":"Answer","text":"Реактивное программирование — работа с асинхронными потоками данных через неблокирующие операторы. Backpressure — потребитель сам запрашивает столько элементов, сколько готов обработать (request(n)), и быстрый источник его не захлёстывает. Reactive Streams: Publisher, Subscriber, Subscription, Processor (в Java 9 — Flow) Project Reactor: Mono (0–1), Flux (0–N) Без подписки ничего не происходит — цепочка ленивая Цена: сложнее код, отладка и стектрейсы Идея. Вместо «вызвать и ждать результат» — описать конвейер преобразований, который выполнится, когда придут данные. Поток не блокируется на ожидании сети или базы и обслуживает другие задачи. Reactive Streams — стандарт из четырёх интерфейсов: Publisher, Subscriber, Subscription (request(n), cancel()), Processor. В Java 9 вошёл как java.util.concurrent.Flow. Реализации: Project Reactor (Spring), RxJava. Backpressure: подписчик говорит, сколько элементов готов принять, и издатель не отправит больше. Это защищает от переполнения памяти. Если источник не может замедлиться (события пользователей), выбирают стратегию: ограниченный буфер, отбрасывание, только последнее значение (onBackpressureBuffer, onBackpressureDrop, onBackpressureLatest). Reactor: Mono<T> — 0 или 1 элемент, Flux<T> — поток. Операторы map, flatMap (асинхронный шаг), filter, zip, timeout, retry. Без subscribe (или возврата…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какое свойство LinkedHashMap отличает его от HashMap? — вопрос с собеседования</title>
+<meta name="description" content="LinkedHashMap — HashMap плюс двусвязный список записей: обход в порядке вставки (по умолчанию) или в порядке доступа (accessOrder = true). HashMap…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/linkedhashmap-order/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/linkedhashmap-order/">
+<meta property="og:title" content="Какое свойство LinkedHashMap отличает его от HashMap? — вопрос с собеседования">
+<meta property="og:description" content="LinkedHashMap — HashMap плюс двусвязный список записей: обход в порядке вставки (по умолчанию) или в порядке доступа (accessOrder = true). HashMap…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Какое свойство LinkedHashMap отличает его от HashMap?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Какое свойство LinkedHashMap отличает его от HashMap?"}]}</script>
+  <h1>Какое свойство LinkedHashMap отличает его от HashMap?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Коллекции</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как сохранить порядок ключей в Map?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">LinkedHashMap — HashMap плюс <b>двусвязный список записей</b>: обход в <b>порядке вставки</b> (по умолчанию) или в <b>порядке доступа</b> (<code>accessOrder = true</code>).</p><ul><li>HashMap порядок обхода не гарантирует</li><li>Режим доступа + removeEldestEntry = LRU-кэш</li><li>Сложность get/put та же, O(1)</li></ul><p class="extra"><span>А ещё</span> Повторный put существующего ключа порядок вставки не меняет</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">LRU-кэш: хеш-таблица плюс двусвязный список</p><script type="module" src="/widgets/lru-cache.js"></script><sotto-lru-cache theme="dark"></sotto-lru-cache></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>HashMap</b> раскладывает записи по корзинам хеш-таблицы; обход идёт по корзинам, поэтому порядок зависит от хешей и меняется при расширении.</p>
+<p><b>LinkedHashMap</b> наследует HashMap и связывает все записи двусвязным списком. Режимы:</p>
+<ul><li><b>порядок вставки</b> (по умолчанию) — обход в порядке первого добавления ключа; повторный <code>put</code> того же ключа порядок не меняет;</li><li><b>порядок доступа</b> (<code>new LinkedHashMap&lt;&gt;(16, 0.75f, true)</code>) — каждый <code>get</code>, <code>put</code>, <code>getOrDefault</code> переносит запись в конец.</li></ul>
+<p>Метод <code>removeEldestEntry(Map.Entry eldest)</code> вызывается после вставки; если вернуть true, самая старая запись удаляется — так получается LRU-кэш в несколько строк.</p>
+<p><b>Цена:</b> две дополнительные ссылки на запись и поддержка списка при изменениях. Зато обход пропорционален числу элементов, а не ёмкости таблицы.</p>
+<p>Типичные применения: JSON с сохранённым порядком полей, кэш LRU, реестры, где важен порядок регистрации.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Двусвязный список поверх хеш-таблицы.</li><li>Два режима порядка.</li><li>LRU через accessOrder и removeEldestEntry.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Думать, что повторный put перемещает ключ в конец в режиме вставки.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Он всегда сортирует ключи по возрастанию</li><li class="ok"><span class="mark">✓</span>Он сохраняет порядок вставки или порядок доступа</li><li class="no"><span class="mark">✗</span>Он запрещает любые null-значения</li><li class="no"><span class="mark">✗</span>Он потокобезопасен без внешней синхронизации</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как сделать простой LRU cache?</li><li>Чем TreeMap отличается от LinkedHashMap?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/linkedhashmap/">LinkedHashMap и LRU-кэш</a><p>Порядок вставки против порядка доступа, связанный список поверх HashMap и реализация LRU через removeEldestEntry.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/jc-157/">Как получить LRU-кэш на базе LinkedHashMap?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jc-158/">Какой ценой LinkedHashMap поддерживает предсказуемый порядок обхода по сравнению с HashMap?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jc-159/">Что произойдёт при обходе LinkedHashMap, созданного с accessOrder = true, если во время итерации вызвать get() по существующему ключу?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/ordered-fast-lookup/">Нужна структура с быстрым поиском по ключу, которая при обходе отдаёт элементы в порядке их добавления. Что выбрать?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какое свойство LinkedHashMap отличает его от HashMap?","acceptedAnswer":{"@type":"Answer","text":"LinkedHashMap — HashMap плюс двусвязный список записей: обход в порядке вставки (по умолчанию) или в порядке доступа (accessOrder = true). HashMap порядок обхода не гарантирует Режим доступа + removeEldestEntry = LRU-кэш Сложность get/put та же, O(1) Повторный put существующего ключа порядок вставки не меняет HashMap раскладывает записи по корзинам хеш-таблицы; обход идёт по корзинам, поэтому порядок зависит от хешей и меняется при расширении. LinkedHashMap наследует HashMap и связывает все записи двусвязным списком. Режимы: - порядок вставки (по умолчанию) — обход в порядке первого добавления ключа; повторный put того же ключа порядок не меняет; - порядок доступа (new LinkedHashMap<>(16, 0.75f, true)) — каждый get, put, getOrDefault переносит запись в конец. Метод removeEldestEntry(Map.Entry eldest) вызывается после вставки; если вернуть true, самая старая запись удаляется — так получается LRU-кэш в несколько строк. Цена: две дополнительные ссылки на запись и поддержка списка при изменениях. Зато обход пропорционален числу элементов, а не ёмкости таблицы. Типичные применения: JSON с сохранённым порядком полей, кэш LRU, реестры, где важен порядок регистрации."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

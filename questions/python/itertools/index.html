@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие инструменты itertools стоит знать? — вопрос с собеседования</title>
+<meta name="description" content="Ленивые строительные блоки: chain (склеить), islice (срез итератора), groupby (группы подряд идущих — нужна предварительная сортировка)…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/itertools/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/itertools/">
+<meta property="og:title" content="Какие инструменты itertools стоит знать? — вопрос с собеседования">
+<meta property="og:description" content="Ленивые строительные блоки: chain (склеить), islice (срез итератора), groupby (группы подряд идущих — нужна предварительная сортировка)…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Какие инструменты itertools стоит знать?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Какие инструменты itertools стоит знать?"}]}</script>
+  <h1>Какие инструменты itertools стоит знать?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Итераторы и генераторы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как обработать большой поток данных в Python без загрузки в память?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Ленивые строительные блоки: <b>chain</b> (склеить), <b>islice</b> (срез итератора), <b>groupby</b> (группы <b>подряд идущих</b> — нужна предварительная сортировка), <b>product/permutations/combinations</b>, <b>accumulate</b> (накопительные суммы), <b>batched</b> (3.12, пачки по n), <b>tee</b>, <b>zip_longest</b>, <b>count/cycle/repeat</b>.</p><ul><li>Всё лениво: работает с бесконечными и огромными потоками</li><li>groupby без сортировки разобьёт одинаковые ключи на несколько групп</li><li>Итератор одноразовый: после прохода пуст</li></ul><p class="extra"><span>А ещё</span> more-itertools — расширенный набор (chunked, windowed, first)</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Зачем.</b> Итераторы обрабатывают элементы по одному, не создавая промежуточных списков: файл на 10 ГБ читается построчно с постоянной памятью.</p>
+<p><b>Частые ловушки:</b></p>
+<ul><li><code>groupby</code> группирует только соседние элементы с одинаковым ключом;</li><li>группа — итератор, который «исчезает» при переходе к следующей — материализовать <code>list(group)</code>, если нужна позже;</li><li><code>tee</code> хранит буфер разницы между копиями — при сильном расхождении съедает память;</li><li>повторный обход исчерпанного итератора молча ничего не даёт.</li></ul>
+<p><b>batched</b> (3.12) — частая задача «отправлять в БД пачками»; в старых версиях — <code>islice</code> в цикле или <code>more_itertools.chunked</code>.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>from itertools import islice, groupby, batched, chain
+
+with open(&quot;big.log&quot;) as f:
+    first_100 = list(islice(f, 100))
+
+rows = sorted(orders, key=lambda o: o.city)
+for city, group in groupby(rows, key=lambda o: o.city):
+    print(city, sum(o.total for o in group))
+
+for chunk in batched(ids, 500):      # Python 3.12
+    db.fetch_many(chunk)</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Основные функции и ленивость.</li><li>Ловушка groupby.</li><li>Применение к большим данным.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/generators/">Что такое генератор и чем он полезен?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/comprehension-vs-genexpr/">Чем list comprehension отличается от генераторного выражения?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/generator-send-yield-from/">Что делают send, throw и yield from у генераторов?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие инструменты itertools стоит знать?","acceptedAnswer":{"@type":"Answer","text":"Ленивые строительные блоки: chain (склеить), islice (срез итератора), groupby (группы подряд идущих — нужна предварительная сортировка), product/permutations/combinations, accumulate (накопительные суммы), batched (3.12, пачки по n), tee, zip_longest, count/cycle/repeat. Всё лениво: работает с бесконечными и огромными потоками groupby без сортировки разобьёт одинаковые ключи на несколько групп Итератор одноразовый: после прохода пуст more-itertools — расширенный набор (chunked, windowed, first) Зачем. Итераторы обрабатывают элементы по одному, не создавая промежуточных списков: файл на 10 ГБ читается построчно с постоянной памятью. Частые ловушки: - groupby группирует только соседние элементы с одинаковым ключом; - группа — итератор, который «исчезает» при переходе к следующей — материализовать list(group), если нужна позже; - tee хранит буфер разницы между копиями — при сильном расхождении съедает память; - повторный обход исчерпанного итератора молча ничего не даёт. batched (3.12) — частая задача «отправлять в БД пачками»; в старых версиях — islice в цикле или more_itertools.chunked."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

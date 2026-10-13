@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Индексы и планы запросов — разбор для собеседования</title>
+<meta name="description" content="Устройство B-tree, hash vs B-tree, составной и covering индекс, цена записи и когда индекс не используется.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/databases/indexes/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/databases/indexes/">
+<meta property="og:title" content="Индексы и планы запросов — разбор для собеседования">
+<meta property="og:description" content="Устройство B-tree, hash vs B-tree, составной и covering индекс, цена записи и когда индекс не используется.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>Индексы и планы запросов</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"Индексы и планы запросов"}]}</script>
+  <h1>Индексы и планы запросов</h1>
+  <p class="lead">Устройство B-tree, hash vs B-tree, составной и covering индекс, цена записи и когда индекс не используется.</p>
+  <article class="md"><h2>Зачем индекс и чем за него платят</h2>
+<p>Индекс — отдельная структура для быстрого поиска строк без полного сканирования таблицы. Он ускоряет выборки по подходящему условию, но имеет цену: каждый INSERT/UPDATE/DELETE должен обновить ещё и индекс, а сам индекс занимает место на диске и в памяти.</p>
+<p>Поэтому индексировать «всё подряд» вредно: лишние индексы замедляют запись и могут не использоваться. Индексы добавляют под реальные паттерны запросов.</p>
+<h2>Как устроен B-tree</h2>
+<p>B-tree (точнее B+-tree) — сбалансированное дерево, где значения упорядочены, а листья связаны в список. Поиск, вставка и удаление — O(log n), а упорядоченность даёт бесплатно диапазоны (&gt;, &lt;, BETWEEN), сортировку (ORDER BY) и поиск по префиксу.</p>
+<p>Именно из-за упорядоченности B-tree — индекс по умолчанию почти во всех СУБД: он покрывает и равенство, и диапазоны, и сортировку.</p>
+<figure><img src="/articles/assets/btree-index.webp" alt="Сбалансированное B-дерево: путь поиска от корня через внутренние узлы к листу за O(log n) против полного сканирования таблицы." loading="lazy"><figcaption>B-tree спускается от корня к листу за O(log n) — намного дешевле полного сканирования.</figcaption></figure>
+<div class="widget-in"><script type="module" src="/widgets/b-tree.js"></script><sotto-b-tree theme="dark"></sotto-b-tree></div>
+<h2>Hash против B-tree</h2>
+<p>Hash-индекс хранит хэш значения и хорош только для строгого равенства, зато поиск близок к O(1). Он не поддерживает диапазоны, сортировку и префиксы.</p>
+<p>Вывод: hash оправдан в узких сценариях равенства при особых нагрузках, но универсальный выбор — B-tree.</p>
+<div class="widget-in"><script type="module" src="/widgets/hash-table.js"></script><sotto-hash-table theme="dark"></sotto-hash-table></div>
+<h2>Где лежит строка: clustered, non-clustered и heap</h2>
+<p>Индекс — это структура поиска, но важно ещё, где лежат сами данные строки. Кластерный индекс (clustered) задаёт физический порядок строк на диске: строки хранятся прямо в листьях B-tree этого индекса. Кластерный индекс может быть только один (нельзя разложить данные двумя способами сразу). В MySQL/InnoDB кластерный индекс — это первичный ключ (поэтому выбор PK влияет на раскладку всей таблицы).</p>
+<p>Некластерный индекс (non-clustered) — отдельная структура: в её листьях лежат не строки, а указатели на строку. Если есть кластерный индекс, указатель — это значение ключа кластерного индекса; иначе таблица хранится как heap (куча, без порядка) и указатель — это физический адрес строки (RID/ctid).</p>
+<p>Отсюда bookmark lookup (он же key/RID lookup): найдя строку в некластерном индексе, база делает второй переход за остальными колонками в кластерный индекс или heap. Это лишние чтения — именно поэтому covering index (включающий все нужные колонки) так выгоден: он убирает этот второй переход. У PostgreSQL модель чуть иная: таблица всегда heap, а кластеризацию даёт только разовая команда CLUSTER, не поддерживаемая автоматически.</p>
+<h2>Составной индекс и левый префикс</h2>
+<p>Составной индекс строится по нескольким колонкам в заданном порядке, и B-tree эффективно использует только левый префикс. Индекс (user_id, created_at) помогает запросам по user_id и по user_id + created_at, но не обязан помочь запросу по одному created_at.</p>
+<p>Практическое правило построения порядка: сначала колонки с условием равенства, затем колонка диапазона/сортировки. Реальный выбор зависит от селективности и частоты запросов.</p>
+<pre class="lang-sql"><code>create index idx_orders_user_created
+on orders (user_id, created_at desc);
+
+-- использует индекс целиком (равенство + сортировка по префиксу)
+select * from orders
+where user_id = ?
+order by created_at desc
+limit 50;</code></pre>
+<h2>Covering index</h2>
+<p>Covering index содержит все колонки, нужные запросу (в ключе или через INCLUDE), и тогда база отвечает прямо из индекса, не читая строки таблицы — это index-only scan.</p>
+<p>Цена — более широкий индекс и чуть более дорогая запись. Выгодно для горячих запросов, читающих немного колонок.</p>
+<h2>Когда индекс не используется</h2>
+<p>Функция над колонкой в условии (<code>lower(email)</code> = ?) обычно ломает использование обычного индекса — нужен функциональный индекс или нормализованное хранение. LIKE '%abc' с ведущим символом подстановки тоже не использует B-tree.</p>
+<p>При низкой селективности (условие отбирает большую долю таблицы) планировщик может сознательно выбрать полный скан как более дешёвый. Поэтому план всегда стоит проверять через EXPLAIN, а не угадывать.</p>
+<h2>Как отвечать на собеседовании</h2>
+<p>Сильный ответ связывает идею «индекс ускоряет чтение ценой записи и памяти» с устройством B-tree (упорядоченность → диапазоны и сортировка) и с левым префиксом составного индекса. Упомяните, что выбор подтверждают через EXPLAIN.</p></article>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/databases/index-effect/">Каков основной эффект добавления индекса по столбцу?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/databases/btree-vs-hash-index/">Чем B-tree индекс принципиально превосходит hash-индекс?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/composite-index-order/">Почему в составном индексе важен порядок колонок?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/index-not-used/">В каких случаях созданный индекс, скорее всего, не будет использован?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/databases/joins-keys/">JOIN, ключи и ограничения</a><p>INNER/OUTER/CROSS JOIN, ловушка ON vs WHERE, первичные/внешние/уникальные ключи и ссылочная целостность.</p></li><li><a href="/articles/databases/orm/">ORM, persistence context и N+1</a><p>Что делает ORM, lazy/eager и proxy, механизм N+1, способы лечения и типичные грабли.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Индексы и планы запросов","description":"Устройство B-tree, hash vs B-tree, составной и covering индекс, цена записи и когда индекс не используется.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/databases/indexes/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что верно про управление ёмкостью ArrayList? — вопрос с собеседования</title>
+<meta name="description" content="Ёмкость растёт, но не уменьшается сама; clear() обнуляет ссылки, а массив остаётся прежнего размера. Пустой ArrayList без аргументов выделяет массив…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/jc-153/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/jc-153/">
+<meta property="og:title" content="Что верно про управление ёмкостью ArrayList? — вопрос с собеседования">
+<meta property="og:description" content="Ёмкость растёт, но не уменьшается сама; clear() обнуляет ссылки, а массив остаётся прежнего размера. Пустой ArrayList без аргументов выделяет массив…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что верно про управление ёмкостью ArrayList?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что верно про управление ёмкостью ArrayList?"}]}</script>
+  <h1>Что верно про управление ёмкостью ArrayList?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Коллекции</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main">Ёмкость <b>растёт, но не уменьшается сама</b>; clear() обнуляет ссылки, а массив остаётся прежнего размера. Пустой ArrayList без аргументов выделяет массив лениво — при первом добавлении (10).</p><ul><li>Известный размер — new ArrayList&lt;&gt;(n), нет промежуточных копирований</li><li>После массового удаления — trimToSize(), если список живёт долго</li><li>ensureCapacity — заранее перед пакетом добавлений</li></ul><p class="extra"><span>А ещё</span> Огромный долгоживущий пустой список держит память</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Сколько раз ArrayList копирует массив</p><script type="module" src="/widgets/arraylist-growth.js"></script><sotto-arraylist-growth theme="dark"></sotto-arraylist-growth></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Внутренний массив у пустого ArrayList ленивый — до первого добавления используется разделяемый пустой массив, и только затем выделяется место под ёмкость по умолчанию. Расти ёмкость умеет, а уменьшаться сама не станет: после удаления миллиона элементов массив останется прежнего размера, поэтому долгоживущий список, переживший пик, продолжит удерживать память — на этот случай есть trimToSize(). clear() проходит по элементам и обнуляет ссылки, чтобы объекты стали собираемыми, но сам массив сохраняет длину.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Ленивое выделение, рост, отсутствие уменьшения.</li><li>Начальная ёмкость и trimToSize.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ожидать, что clear() вернёт память.</li><li>Оставлять долгоживущий список раздутым после пиковой нагрузки.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Несколько верных вариантов. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Если размер известен заранее, начальную ёмкость стоит задать конструктором — это избавляет от серии расширений</li><li class="ok"><span class="mark">✓</span>После массового удаления ёмкость сама не уменьшается: нужен trimToSize()</li><li class="ok"><span class="mark">✓</span>Список, созданный конструктором без аргументов, откладывает выделение массива до первого добавления</li><li class="no"><span class="mark">✗</span>clear() освобождает внутренний массив и возвращает ёмкость к нулю</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Почему clear() обнуляет ссылки, а не просто ставит size = 0?</li><li>Какова ёмкость по умолчанию и когда она выделяется?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/arraylist/">ArrayList: динамический массив изнутри</a><p>Бэкенд-массив, рост в 1.5×, амортизированная O(1), стоимость вставки/удаления и когда массив лучше.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/arraylist-amortized-add/">Почему добавление в конец ArrayList считается амортизированно O(1), хотя иногда требует копирования всего массива?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что верно про управление ёмкостью ArrayList?","acceptedAnswer":{"@type":"Answer","text":"Ёмкость растёт, но не уменьшается сама; clear() обнуляет ссылки, а массив остаётся прежнего размера. Пустой ArrayList без аргументов выделяет массив лениво — при первом добавлении (10). Известный размер — new ArrayList<>(n), нет промежуточных копирований После массового удаления — trimToSize(), если список живёт долго ensureCapacity — заранее перед пакетом добавлений Огромный долгоживущий пустой список держит память Внутренний массив у пустого ArrayList ленивый — до первого добавления используется разделяемый пустой массив, и только затем выделяется место под ёмкость по умолчанию. Расти ёмкость умеет, а уменьшаться сама не станет: после удаления миллиона элементов массив останется прежнего размера, поэтому долгоживущий список, переживший пик, продолжит удерживать память — на этот случай есть trimToSize(). clear() проходит по элементам и обнуляет ссылки, чтобы объекты стали собираемыми, но сам массив сохраняет длину."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

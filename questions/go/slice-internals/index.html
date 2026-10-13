@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как устроен срез (slice) в Go? — вопрос с собеседования</title>
+<meta name="description" content="Срез — дескриптор из трёх полей: указатель на базовый массив, длина (len — сколько элементов доступно) и ёмкость (cap — сколько поместится до конца…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/go/slice-internals/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/go/slice-internals/">
+<meta property="og:title" content="Как устроен срез (slice) в Go? — вопрос с собеседования">
+<meta property="og:description" content="Срез — дескриптор из трёх полей: указатель на базовый массив, длина (len — сколько элементов доступно) и ёмкость (cap — сколько поместится до конца…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/go/">Go</a> <span>/</span> <span>Как устроен срез (slice) в Go?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Go","item":"https://learn.getsotto.ru/questions/go/"},{"@type":"ListItem","position":3,"name":"Как устроен срез (slice) в Go?"}]}</script>
+  <h1>Как устроен срез (slice) в Go?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Срезы, мапы и строки</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем len отличается от cap?</li><li>Что происходит при append, когда ёмкость закончилась?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Срез — <b>дескриптор из трёх полей</b>: указатель на базовый массив, <b>длина</b> (len — сколько элементов доступно) и <b>ёмкость</b> (cap — сколько поместится до конца массива). <b>append</b> пишет в тот же массив, пока хватает ёмкости; иначе выделяет <b>новый массив</b> большего размера и копирует данные.</p><ul><li>Рост: примерно ×2 для малых срезов, плавнее (~×1.25) для больших</li><li>Срез среза s[a:b] делит тот же массив</li><li>Известный размер — make([]T, 0, n): без перевыделений</li></ul><p class="extra"><span>А ещё</span> Результат append обязательно присваивать: s = append(s, x)</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Срезы Go: len, cap, append и общий массив</p><script type="module" src="/widgets/go-slices.js"></script><sotto-go-slices theme="dark"></sotto-go-slices></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><pre class="lang-go"><code>s := make([]int, 3, 5)   // len 3, cap 5: [0 0 0 _ _]
+s = append(s, 1)         // len 4, тот же массив
+s = append(s, 2, 3)      // len 6 &gt; cap 5 — новый массив, копирование</code></pre>
+<p><b>Почему присваивать результат append.</b> Функция возвращает новый дескриптор: длина изменилась всегда, а указатель — если массив перевыделен. Старая переменная остаётся с прежней длиной.</p>
+<p><b>Рост ёмкости.</b> Пока срез маленький (до 256 элементов в Go 1.18+), ёмкость удваивается, дальше растёт плавнее, с округлением до размеров классов аллокатора. Амортизированная стоимость append — O(1), как у ArrayList.</p>
+<p><b>Срез среза</b> <code>s[1:3]</code> — новый дескриптор над тем же массивом: изменения элементов видны в обоих. Полное выражение среза <code>s[1:3:3]</code> ограничивает ёмкость, и следующий append гарантированно создаст новый массив.</p>
+<p><b>Утечка через подсрез.</b> Маленький срез от огромного массива держит весь массив в памяти. Нужно скопировать нужное: <code>copy</code> или <code>slices.Clone</code>.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Три поля дескриптора.</li><li>Поведение append при нехватке ёмкости.</li><li>Общий массив у подсрезов.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Не присваивать результат append.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/go/append-shared-array/">Почему изменение одного среза неожиданно меняет другой?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/array-vs-slice/">Чем массив отличается от среза в Go?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/arraylist-amortized-add/">Почему добавление в конец ArrayList считается амортизированно O(1), хотя иногда требует копирования всего массива?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/amortized-complexity/">Что такое амортизированная сложность?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как устроен срез (slice) в Go?","acceptedAnswer":{"@type":"Answer","text":"Срез — дескриптор из трёх полей: указатель на базовый массив, длина (len — сколько элементов доступно) и ёмкость (cap — сколько поместится до конца массива). append пишет в тот же массив, пока хватает ёмкости; иначе выделяет новый массив большего размера и копирует данные. Рост: примерно ×2 для малых срезов, плавнее (~×1.25) для больших Срез среза s[a:b] делит тот же массив Известный размер — make([]T, 0, n): без перевыделений Результат append обязательно присваивать: s = append(s, x) Почему присваивать результат append. Функция возвращает новый дескриптор: длина изменилась всегда, а указатель — если массив перевыделен. Старая переменная остаётся с прежней длиной. Рост ёмкости. Пока срез маленький (до 256 элементов в Go 1.18+), ёмкость удваивается, дальше растёт плавнее, с округлением до размеров классов аллокатора. Амортизированная стоимость append — O(1), как у ArrayList. Срез среза s[1:3] — новый дескриптор над тем же массивом: изменения элементов видны в обоих. Полное выражение среза s[1:3:3] ограничивает ёмкость, и следующий append гарантированно создаст новый массив. Утечка через подсрез. Маленький срез от огромного массива держит весь массив в памяти. Нужно скопировать нужное: copy или slices.Clone."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

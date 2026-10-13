@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как устроен ConcurrentHashMap в Java 8+ и почему он эффективнее synchronized Map? — вопрос с собеседования</title>
+<meta name="description" content="Java 8+: массив корзин; вставка в пустую корзину — CAS без блокировки, при коллизии — synchronized на первом узле корзины. Блокируется только одна…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/concurrenthashmap-internals/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/concurrenthashmap-internals/">
+<meta property="og:title" content="Как устроен ConcurrentHashMap в Java 8+ и почему он эффективнее synchronized Map? — вопрос с собеседования">
+<meta property="og:description" content="Java 8+: массив корзин; вставка в пустую корзину — CAS без блокировки, при коллизии — synchronized на первом узле корзины. Блокируется только одна…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Как устроен ConcurrentHashMap в Java 8+ и почему он эффективнее synchronized Map?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Как устроен ConcurrentHashMap в Java 8+ и почему он эффективнее synchronized Map?"}]}</script>
+  <h1>Как устроен ConcurrentHashMap в Java 8+ и почему он эффективнее synchronized Map?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Коллекции</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему ConcurrentHashMap быстрее Collections.synchronizedMap?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Java 8+: массив корзин; вставка в <b>пустую корзину — CAS</b> без блокировки, при коллизии — <b>synchronized на первом узле корзины</b>. Блокируется только одна корзина, а <b>чтение вовсе без блокировок</b> (volatile-поля).</p><ul><li>synchronizedMap и Hashtable — один замок на всю карту: все операции по очереди</li><li>Длинная цепочка превращается в дерево, как в HashMap</li><li>Расширение таблицы выполняют несколько потоков совместно</li></ul><p class="extra"><span>А ещё</span> Атомарные составные операции: computeIfAbsent, merge, putIfAbsent</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">HashMap: put, коллизия и resize</p><script type="module" src="/widgets/hashmap-put.js"></script><sotto-hashmap-put theme="dark"></sotto-hashmap-put></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Проблема synchronized Map:</b> <code>Collections.synchronizedMap</code> и <code>Hashtable</code> берут один монитор на каждый вызов. Восемь потоков, читающих разные ключи, всё равно выстраиваются в очередь.</p>
+<p><b>Устройство ConcurrentHashMap (Java 8+):</b></p>
+<ul><li>массив корзин <code>Node[]</code> с volatile-доступом к элементам;</li><li><b>чтение</b> (<code>get</code>) — без блокировок: значения и ссылки узлов volatile, видимость обеспечена;</li><li><b>вставка в пустую корзину</b> — <code>CAS</code> (compare-and-set) первого узла: без блокировки, повтор при гонке;</li><li><b>вставка при коллизии</b> — <code>synchronized</code> на первом узле этой корзины: блокируется только она, остальные корзины доступны параллельно;</li><li>цепочки длиннее 8 при таблице от 64 превращаются в красно-чёрные деревья;</li><li><b>размер</b> — распределённые счётчики (как <code>LongAdder</code>), поэтому <code>size()</code> приблизителен под нагрузкой;</li><li><b>расширение</b> — новые потоки, обратившиеся к карте во время resize, помогают переносить корзины.</li></ul>
+<p>В Java 7 использовались сегменты — 16 отдельных замков на части таблицы.</p>
+<p><b>Важно для кода:</b> отдельные операции атомарны, но «проверить, потом положить» из двух вызовов — гонка. Используют <code>putIfAbsent</code>, <code>computeIfAbsent</code>, <code>compute</code>, <code>merge</code>. null ключи и значения запрещены: <code>get</code> возвращает null как «нет ключа», и отличить было бы нельзя.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>CAS для пустой корзины и замок на корзину при коллизии.</li><li>Чтение без блокировок.</li><li>Сравнение с synchronizedMap и сегментами Java 7.</li><li>Атомарные составные операции, запрет null.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«ConcurrentHashMap блокирует сегменты» — так было до Java 8.</li><li>Делать get-then-put вместо computeIfAbsent.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Почему null-ключи/значения запрещены?</li><li>Что такое weakly consistent iterator?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/concurrent-collections/">Конкурентные коллекции</a><p>ConcurrentHashMap без сегментов (CAS + блокировка бакета), запрет null, CopyOnWriteArrayList и BlockingQueue.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/hashmap-vs-hashtable-vs-chm/">Чем HashMap отличается от Hashtable и ConcurrentHashMap?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/atomic-cas/">Что такое атомарные операции и CAS?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/fail-fast-vs-weakly-consistent/">Чем fail-fast итератор отличается от weakly consistent?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как устроен ConcurrentHashMap в Java 8+ и почему он эффективнее synchronized Map?","acceptedAnswer":{"@type":"Answer","text":"Java 8+: массив корзин; вставка в пустую корзину — CAS без блокировки, при коллизии — synchronized на первом узле корзины. Блокируется только одна корзина, а чтение вовсе без блокировок (volatile-поля). synchronizedMap и Hashtable — один замок на всю карту: все операции по очереди Длинная цепочка превращается в дерево, как в HashMap Расширение таблицы выполняют несколько потоков совместно Атомарные составные операции: computeIfAbsent, merge, putIfAbsent Проблема synchronized Map: Collections.synchronizedMap и Hashtable берут один монитор на каждый вызов. Восемь потоков, читающих разные ключи, всё равно выстраиваются в очередь. Устройство ConcurrentHashMap (Java 8+): - массив корзин Node[] с volatile-доступом к элементам; - чтение (get) — без блокировок: значения и ссылки узлов volatile, видимость обеспечена; - вставка в пустую корзину — CAS (compare-and-set) первого узла: без блокировки, повтор при гонке; - вставка при коллизии — synchronized на первом узле этой корзины: блокируется только она, остальные корзины доступны параллельно; - цепочки длиннее 8 при таблице от 64 превращаются в красно-чёрные деревья; - размер — распределённые счётчики (как LongAdder), поэтому size() приблизителен под нагрузкой; - расширение — новые потоки, обратившиеся к карте во время resize, помогают переносить корзины. В Java 7 использовались сегменты — 16…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

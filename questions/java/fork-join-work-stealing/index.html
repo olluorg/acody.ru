@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое Fork/Join framework и work stealing? — вопрос с собеседования</title>
+<meta name="description" content="Fork/Join — рекурсивное деление задачи на подзадачи (fork) с последующим объединением результатов (join). Work stealing: у каждого рабочего потока…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/fork-join-work-stealing/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/fork-join-work-stealing/">
+<meta property="og:title" content="Что такое Fork/Join framework и work stealing? — вопрос с собеседования">
+<meta property="og:description" content="Fork/Join — рекурсивное деление задачи на подзадачи (fork) с последующим объединением результатов (join). Work stealing: у каждого рабочего потока…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Что такое Fork/Join framework и work stealing?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Что такое Fork/Join framework и work stealing?"}]}</script>
+  <h1>Что такое Fork/Join framework и work stealing?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Многопоточность</span></div>
+  
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Fork/Join</b> — рекурсивное деление задачи на подзадачи (fork) с последующим объединением результатов (join). <b>Work stealing</b>: у каждого рабочего потока своя двусторонняя очередь, а освободившийся поток <b>крадёт задачи с хвоста чужой очереди</b> — нагрузка балансируется сама.</p><ul><li>RecursiveTask возвращает результат, RecursiveAction — нет</li><li>Для CPU-bound задач без блокировок</li><li>На нём работают parallel stream и async-методы CompletableFuture (commonPool)</li></ul><p class="extra"><span>А ещё</span> Порог деления: слишком мелкие задачи съедают выигрыш накладными расходами</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Модель.</b> Задача проверяет размер: мала — решает напрямую, иначе делится на части, одну отправляет <code>fork()</code>, другую решает сама, затем <code>join()</code> собирает результат.</p>
+<pre class="lang-java"><code>class Sum extends RecursiveTask&lt;Long&gt; {
+    protected Long compute() {
+        if (hi - lo &lt; 10_000) return directSum();
+        Sum left = new Sum(arr, lo, mid);
+        left.fork();
+        long right = new Sum(arr, mid, hi).compute();
+        return left.join() + right;
+    }
+}</code></pre>
+<p><b>Work stealing.</b> Каждый поток <code>ForkJoinPool</code> кладёт свои подзадачи в собственную деку и берёт их с головы (LIFO — горячие данные в кэше). Свободный поток крадёт у других с хвоста — там самые крупные, ещё не разделённые задачи. Нет единой очереди, за которую бьются все.</p>
+<p><b>Ограничения:</b></p>
+<ul><li>задачи не должны блокироваться: заблокированный поток не делает работу, а пул фиксированного размера;</li><li>выигрыш только при достаточном объёме и разумном пороге деления;</li><li><code>ForkJoinPool.commonPool()</code> общий на всю JVM — его используют parallel stream и CompletableFuture без своего executor.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Рекурсивное деление и объединение.</li><li>Механика work stealing и зачем дека.</li><li>Для каких задач подходит и связь с commonPool.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Запускать долгий blocking IO в common ForkJoinPool.</li><li>Делить задачу слишком мелко и тратить время на overhead.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как parallelStream связан с ForkJoinPool?</li><li>Когда parallelStream вреден?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/threadlocal-forkjoin/">ThreadLocal и Fork/Join</a><p>Состояние на поток и утечки в пулах, InheritableThreadLocal, work-stealing в ForkJoinPool и общий пул parallel streams.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/parallel-stream-blocking/">В parallel stream выполняется обращение к внешнему HTTP-сервису. Почему это опасно для всего приложения?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/parallel-stream-no-gain/">В каких случаях parallel stream, скорее всего, не даст выигрыша или окажется медленнее последовательного?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/async-vs-threads/">Чем асинхронность отличается от многопоточности?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое Fork/Join framework и work stealing?","acceptedAnswer":{"@type":"Answer","text":"Fork/Join — рекурсивное деление задачи на подзадачи (fork) с последующим объединением результатов (join). Work stealing: у каждого рабочего потока своя двусторонняя очередь, а освободившийся поток крадёт задачи с хвоста чужой очереди — нагрузка балансируется сама. RecursiveTask возвращает результат, RecursiveAction — нет Для CPU-bound задач без блокировок На нём работают parallel stream и async-методы CompletableFuture (commonPool) Порог деления: слишком мелкие задачи съедают выигрыш накладными расходами Модель. Задача проверяет размер: мала — решает напрямую, иначе делится на части, одну отправляет fork(), другую решает сама, затем join() собирает результат. Work stealing. Каждый поток ForkJoinPool кладёт свои подзадачи в собственную деку и берёт их с головы (LIFO — горячие данные в кэше). Свободный поток крадёт у других с хвоста — там самые крупные, ещё не разделённые задачи. Нет единой очереди, за которую бьются все. Ограничения: - задачи не должны блокироваться: заблокированный поток не делает работу, а пул фиксированного размера; - выигрыш только при достаточном объёме и разумном пороге деления; - ForkJoinPool.commonPool() общий на всю JVM — его используют parallel stream и CompletableFuture без своего executor."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

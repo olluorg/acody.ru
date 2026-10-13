@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>На каком приёме построено большинство структурных паттернов? — вопрос с собеседования</title>
+<meta name="description" content="Структурные паттерны построены на композиции и делегировании: объект хранит ссылку на другой и пропускает вызовы через себя. Adapter — подогнать…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/structural-patterns/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/structural-patterns/">
+<meta property="og:title" content="На каком приёме построено большинство структурных паттернов? — вопрос с собеседования">
+<meta property="og:description" content="Структурные паттерны построены на композиции и делегировании: объект хранит ссылку на другой и пропускает вызовы через себя. Adapter — подогнать…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>На каком приёме построено большинство структурных паттернов?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"На каком приёме построено большинство структурных паттернов?"}]}</script>
+  <h1>На каком приёме построено большинство структурных паттернов?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Паттерны проектирования</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем Decorator отличается от Proxy и Adapter?</li><li>Какие структурные паттерны вы знаете?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Структурные паттерны построены на <b>композиции и делегировании</b>: объект хранит ссылку на другой и пропускает вызовы через себя.</p><ul><li>Adapter — подогнать интерфейс; Decorator — добавить поведение; Proxy — контролировать доступ</li><li>Ещё: Facade, Composite, Bridge, Flyweight</li></ul><p class="extra"><span>А ещё</span> Код у Adapter, Decorator и Proxy похож — различают по намерению</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Большинство структурных паттернов — обёртка вокруг другого объекта. Поэтому они выглядят в коде похоже, и различать их нужно по намерению:</p>
+<ul><li><b>Adapter</b> — подгоняет чужой интерфейс под тот, что нужен клиенту: <code>Arrays.asList</code> адаптирует массив к <code>List</code>, адаптер к сторонней платёжной библиотеке;</li><li><b>Decorator</b> — добавляет поведение, сохраняя интерфейс: <code>BufferedInputStream</code> поверх <code>FileInputStream</code>, <code>Collections.unmodifiableList</code>. Декораторы можно наслаивать;</li><li><b>Proxy</b> — контролирует доступ к объекту с тем же интерфейсом: ленивая загрузка, кэш, проверка прав, транзакции. Spring создаёт прокси для <code>@Transactional</code> и <code>@Cacheable</code>;</li><li><b>Facade</b> — простой интерфейс к сложной подсистеме;</li><li><b>Composite</b> — дерево объектов, с которым работают как с одним объектом (меню, файловая система);</li><li><b>Flyweight</b> — разделение общих неизменяемых объектов ради памяти (кэш <code>Integer.valueOf</code>).</li></ul>
+<p>Ценность приёма — поведение собирается во время выполнения из готовых частей, а не наследованием с классом на каждую комбинацию.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-java"><code>InputStream in = new BufferedInputStream(    // декоратор: буферизация
+        new GZIPInputStream(                 // декоратор: распаковка
+                new FileInputStream(&quot;log.gz&quot;)));</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Общий механизм: композиция и делегирование.</li><li>Различие Adapter, Decorator, Proxy по намерению.</li><li>Примеры из JDK или Spring.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Пытаться различать эти паттерны по структуре кода, а не по цели.</li><li>Строить иерархию классов там, где достаточно обёртки.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>На композиции и делегировании: объект хранит ссылку на другой и пропускает вызовы через себя</li><li class="no"><span class="mark">✗</span>На множественном наследовании классов</li><li class="no"><span class="mark">✗</span>На рефлексии и динамической генерации классов</li><li class="no"><span class="mark">✗</span>На использовании статических методов вместо объектов</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем адаптер отличается от декоратора?</li><li>Где в стандартной библиотеке встречаются декораторы?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/patterns-structural/">Структурные паттерны</a><p>Adapter, Decorator, Proxy и чем они отличаются друг от друга, Facade, Composite, Bridge и Flyweight — на примерах java.io, java.lang.reflect.Proxy и Spring AOP.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/proxy-vs-decorator/">Чем паттерн Proxy отличается от Decorator, если у обоих тот же интерфейс, что и у обёрнутого объекта?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/facade/">Какой паттерн реализуют SLF4J и JdbcTemplate по отношению к тому, что они скрывают?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/arrays-aslist-add/">Что произойдёт при вызове add на списке, полученном из Arrays.asList(array)?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/spring-proxy-consequences/">Spring оборачивает бины в прокси, чтобы работали @Transactional и @Cacheable. Какие практические следствия из этого вытекают?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"На каком приёме построено большинство структурных паттернов?","acceptedAnswer":{"@type":"Answer","text":"Структурные паттерны построены на композиции и делегировании: объект хранит ссылку на другой и пропускает вызовы через себя. Adapter — подогнать интерфейс; Decorator — добавить поведение; Proxy — контролировать доступ Ещё: Facade, Composite, Bridge, Flyweight Код у Adapter, Decorator и Proxy похож — различают по намерению Большинство структурных паттернов — обёртка вокруг другого объекта. Поэтому они выглядят в коде похоже, и различать их нужно по намерению: - Adapter — подгоняет чужой интерфейс под тот, что нужен клиенту: Arrays.asList адаптирует массив к List, адаптер к сторонней платёжной библиотеке; - Decorator — добавляет поведение, сохраняя интерфейс: BufferedInputStream поверх FileInputStream, Collections.unmodifiableList. Декораторы можно наслаивать; - Proxy — контролирует доступ к объекту с тем же интерфейсом: ленивая загрузка, кэш, проверка прав, транзакции. Spring создаёт прокси для @Transactional и @Cacheable; - Facade — простой интерфейс к сложной подсистеме; - Composite — дерево объектов, с которым работают как с одним объектом (меню, файловая система); - Flyweight — разделение общих неизменяемых объектов ради памяти (кэш Integer.valueOf). Ценность приёма — поведение собирается во время…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

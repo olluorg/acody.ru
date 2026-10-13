@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Спроектируйте распределённый rate limiter для публичного API. — вопрос с собеседования</title>
+<meta name="description" content="Состояние лимита — в общем быстром хранилище (Redis), проверка и списание — атомарно одним скриптом (Lua) или командой. Лимитер — в шлюзе или…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/design-distributed-rate-limiter/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/design-distributed-rate-limiter/">
+<meta property="og:title" content="Спроектируйте распределённый rate limiter для публичного API. — вопрос с собеседования">
+<meta property="og:description" content="Состояние лимита — в общем быстром хранилище (Redis), проверка и списание — атомарно одним скриптом (Lua) или командой. Лимитер — в шлюзе или…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Спроектируйте распределённый rate limiter для публичного API.</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Спроектируйте распределённый rate limiter для публичного API."}]}</script>
+  <h1>Спроектируйте распределённый rate limiter для публичного API.</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Задачи на проектирование</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как ограничить число запросов клиента, если серверов много?</li><li>Как реализовать rate limiting на Redis?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Состояние лимита — в общем быстром хранилище (Redis), проверка и списание — <b>атомарно</b> одним скриптом (Lua) или командой. Лимитер — в шлюзе или сайдкаре, до бизнес-логики.</p><ul><li>Token bucket в Redis: два поля (жетоны, время) и Lua-скрипт на проверку</li><li>Задержка: поход в Redis на каждый запрос — 0,2–1 мс; для огромных потоков — локальные квоты с периодической синхронизацией</li><li>При недоступности Redis — осознанный выбор fail-open или fail-closed</li></ul><p class="extra"><span>А ещё</span> Ответ 429 с Retry-After и заголовками RateLimit-*; разные лимиты по тарифам</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">Rate limiter: token bucket и окна</p><script type="module" src="/widgets/rate-limiter.js"></script><sotto-rate-limiter theme="dark"></sotto-rate-limiter></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Требования:</b> лимиты по API-ключу (тариф: 100 запросов/с, 1 млн в день), по IP для анонимных, по эндпоинту для тяжёлых операций; десятки экземпляров шлюза; добавка к задержке — не больше миллисекунды; точность ±несколько процентов допустима.</p>
+<p><b>Почему не локально.</b> Если у каждого из 20 экземпляров свой счётчик, клиент получит до 20× лимита (балансировщик раскидывает запросы). Делить лимит на число экземпляров — неточно при неравномерной балансировке и автомасштабировании.</p>
+<p><b>Централизованное состояние в Redis:</b></p>
+<ul><li><b>фиксированное окно</b> — <code>INCR key:{client}:{minute}</code> + <code>EXPIRE</code>: одна команда, но всплеск на стыке окон;</li><li><b>скользящий журнал</b> — sorted set с метками времени, <code>ZREMRANGEBYSCORE</code> + <code>ZCARD</code> + <code>ZADD</code> в одном скрипте: точно, но память на каждый запрос;</li><li><b>token bucket</b> — хэш <code>{tokens, ts}</code> и Lua-скрипт: пополнить по прошедшему времени, проверить, списать, записать — атомарно, потому что Redis исполняет скрипт целиком. Время берём из Redis (<code>TIME</code>), а не с шлюзов — их часы расходятся.</li></ul>
+<p><b>Масштаб Redis:</b> ключи по клиентам шардируются в Redis Cluster естественно; горячий клиент — один ключ, но один Redis держит сотни тысяч операций в секунду. Реплики не помогают (запись на каждый запрос).</p>
+<p><b>Снижение задержки и нагрузки:</b></p>
+<ul><li><b>локальные квоты</b> — шлюз берёт у Redis пачку жетонов (например, 10% лимита) и тратит локально, синхронизируясь при исчерпании. Точность чуть ниже, походов в Redis в разы меньше;</li><li><b>предварительная проверка</b> локальным приблизительным лимитером, к Redis — только близко к порогу.</li></ul>
+<p><b>Отказ хранилища:</b> fail-open (пропускать — сервис доступен, но без защиты) или fail-closed (отказывать — защищено, но недоступно); часто — fail-open с грубым локальным лимитом на экземпляр как страховкой. Таймаут на поход в Redis — единицы миллисекунд.</p>
+<p><b>Поведение для клиента:</b> <code>429 Too Many Requests</code>, <code>Retry-After</code>, <code>RateLimit-Limit/Remaining/Reset</code>; лимиты по тарифу из конфигурации, которую можно менять без выкатки; отдельные лимиты на тяжёлые операции (стоимость в жетонах).</p>
+<p><b>Наблюдаемость:</b> метрики отказов по клиентам и правилам — чтобы отличить атаку от ошибки конфигурации, которая режет честных клиентов.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-lua"><code>-- KEYS[1] = bucket:{api_key}; ARGV = rate, burst, cost
+local t = redis.call(&#x27;TIME&#x27;)
+local now = t[1] + t[2] / 1e6
+local b = redis.call(&#x27;HMGET&#x27;, KEYS[1], &#x27;tokens&#x27;, &#x27;ts&#x27;)
+local tokens = tonumber(b[1]) or tonumber(ARGV[2])
+local ts = tonumber(b[2]) or now
+tokens = math.min(tonumber(ARGV[2]), tokens + (now - ts) * tonumber(ARGV[1]))
+local ok = tokens &gt;= tonumber(ARGV[3])
+if ok then tokens = tokens - tonumber(ARGV[3]) end
+redis.call(&#x27;HSET&#x27;, KEYS[1], &#x27;tokens&#x27;, tokens, &#x27;ts&#x27;, now)
+redis.call(&#x27;EXPIRE&#x27;, KEYS[1], 3600)
+return ok and 1 or 0</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Почему нужен общий счётчик и где разместить лимитер.</li><li>Атомарность проверки и списания (Lua), время из одного источника.</li><li>Выбор алгоритма и его стоимость в Redis.</li><li>Снижение задержки локальными квотами, поведение при отказе Redis.</li><li>Ответ клиенту и наблюдаемость.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Читать счётчик и записывать отдельными командами — гонка между шлюзами.</li><li>Не продумать, что делать при недоступности Redis.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/rate-limiting/">Какие алгоритмы ограничения частоты запросов вы знаете?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/highload/load-shedding/">Как сервису пережить нагрузку выше его возможностей?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/redis-at-scale/">Какие проблемы бывают с Redis под высокой нагрузкой?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/highload/hot-keys/">Что делать с горячими ключами, на которые приходится непропорционально большая нагрузка?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Спроектируйте распределённый rate limiter для публичного API.","acceptedAnswer":{"@type":"Answer","text":"Состояние лимита — в общем быстром хранилище (Redis), проверка и списание — атомарно одним скриптом (Lua) или командой. Лимитер — в шлюзе или сайдкаре, до бизнес-логики. Token bucket в Redis: два поля (жетоны, время) и Lua-скрипт на проверку Задержка: поход в Redis на каждый запрос — 0,2–1 мс; для огромных потоков — локальные квоты с периодической синхронизацией При недоступности Redis — осознанный выбор fail-open или fail-closed Ответ 429 с Retry-After и заголовками RateLimit-; разные лимиты по тарифам Требования: лимиты по API-ключу (тариф: 100 запросов/с, 1 млн в день), по IP для анонимных, по эндпоинту для тяжёлых операций; десятки экземпляров шлюза; добавка к задержке — не больше миллисекунды; точность ±несколько процентов допустима. Почему не локально. Если у каждого из 20 экземпляров свой счётчик, клиент получит до 20× лимита (балансировщик раскидывает запросы). Делить лимит на число экземпляров — неточно при неравномерной балансировке и автомасштабировании. Централизованное состояние в Redis: - фиксированное окно — INCR key:{client}:{minute} + EXPIRE: одна команда, но всплеск на стыке окон; - скользящий журнал — sorted set с метками времени, ZREMRANGEBYSCORE + ZCARD + ZADD в одном скрипте: точно, но память на каждый запрос; - token bucket — хэш {tokens, ts} и Lua-скрипт: пополнить по прошедшему времени, проверить, списать, записать — атомарно, потому что Redis исполняет скрипт…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

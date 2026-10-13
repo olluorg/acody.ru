@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое декоратор и как его написать? — вопрос с собеседования</title>
+<meta name="description" content="Декоратор — функция, которая принимает функцию и возвращает новую; @dec — сахар для f = dec(f). Обёртка внутри — замыкание, вызывает исходную через…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/decorators/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/decorators/">
+<meta property="og:title" content="Что такое декоратор и как его написать? — вопрос с собеседования">
+<meta property="og:description" content="Декоратор — функция, которая принимает функцию и возвращает новую; @dec — сахар для f = dec(f). Обёртка внутри — замыкание, вызывает исходную через…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Что такое декоратор и как его написать?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Что такое декоратор и как его написать?"}]}</script>
+  <h1>Что такое декоратор и как его написать?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Функции</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как работают декораторы в Python?</li><li>Напишите декоратор, который замеряет время выполнения функции</li><li>Зачем нужен functools.wraps?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Декоратор — функция, которая <b>принимает функцию и возвращает новую</b>; <code>@dec</code> — сахар для <code>f = dec(f)</code>.</p><ul><li>Обёртка внутри — замыкание, вызывает исходную через <code>*args, **kwargs</code></li><li><code>functools.wraps</code> сохраняет имя и docstring исходной функции</li></ul><p class="extra"><span>А ещё</span> Покажите декоратор с параметрами — это три уровня вложенности</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Функции в Python — объекты: их можно передавать и возвращать. Декоратор этим пользуется: получает функцию, определяет внутри обёртку, которая что-то делает до и после вызова, и возвращает обёртку.</p>
+<p>Запись</p>
+<pre class="lang-python"><code>@timer
+def work(): ...</code></pre>
+<p>полностью эквивалентна <code>work = timer(work)</code> и выполняется один раз — при определении функции.</p>
+<p>Обёртка — замыкание: она помнит исходную функцию из внешней области. Чтобы подходить к любой функции, обёртка принимает <code>*args, **kwargs</code> и передаёт их дальше, а результат возвращает.</p>
+<p>Без <code>@functools.wraps(func)</code> у обёртки будет имя <code>wrapper</code> и пустой docstring — это ломает логи, отладку и документацию.</p>
+<p><b>Декоратор с параметрами</b> (<code>@retry(3)</code>) — это функция, которая возвращает декоратор: снаружи параметры, внутри декоратор, ещё глубже обёртка.</p>
+<p>Примеры из жизни: <code>@property</code>, <code>@staticmethod</code>, <code>@functools.lru_cache</code>, маршруты во Flask и FastAPI (<code>@app.get(&quot;/&quot;)</code>), проверка прав, логирование, повторные попытки.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import functools
+import time
+
+def timer(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        try:
+            return func(*args, **kwargs)
+        finally:
+            print(f&quot;{func.__name__}: {time.perf_counter() - start:.3f} с&quot;)
+    return wrapper
+
+def retry(times):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            for attempt in range(times):
+                try:
+                    return func(*args, **kwargs)
+                except Exception:
+                    if attempt == times - 1:
+                        raise
+        return wrapper
+    return decorator
+
+@timer
+@retry(3)
+def fetch():
+    ...</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определение через «функция принимает и возвращает функцию».</li><li>Эквивалентность <code>@dec</code> и <code>f = dec(f)</code>, момент применения.</li><li>Рабочий код обёртки с <code>*args, **kwargs</code> и возвратом результата.</li><li><code>functools.wraps</code> и декоратор с параметрами.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Забыть <code>return</code> результата исходной функции в обёртке.</li><li>Вызвать функцию при декорировании: <code>return wrapper()</code> вместо <code>return wrapper</code>.</li><li>Не знать, что порядок нескольких декораторов — снизу вверх.</li></ul></div></section>
+  
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/python/closures/">Что такое замыкание?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/args-kwargs/">Что такое *args и **kwargs?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/property/">Что такое @property и зачем он нужен?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/staticmethod-classmethod/">Чем @staticmethod отличается от @classmethod?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое декоратор и как его написать?","acceptedAnswer":{"@type":"Answer","text":"Декоратор — функция, которая принимает функцию и возвращает новую; @dec — сахар для f = dec(f). Обёртка внутри — замыкание, вызывает исходную через args, kwargs functools.wraps сохраняет имя и docstring исходной функции Покажите декоратор с параметрами — это три уровня вложенности Функции в Python — объекты: их можно передавать и возвращать. Декоратор этим пользуется: получает функцию, определяет внутри обёртку, которая что-то делает до и после вызова, и возвращает обёртку. Запись полностью эквивалентна work = timer(work) и выполняется один раз — при определении функции. Обёртка — замыкание: она помнит исходную функцию из внешней области. Чтобы подходить к любой функции, обёртка принимает args, kwargs и передаёт их дальше, а результат возвращает. Без @functools.wraps(func) у обёртки будет имя wrapper и пустой docstring — это ломает логи, отладку и документацию. Декоратор с параметрами (@retry(3)) — это функция, которая возвращает декоратор: снаружи параметры, внутри декоратор, ещё глубже обёртка. Примеры из жизни: @property, @staticmethod, @functools.lru_cache, маршруты во Flask и FastAPI (@app.get(\"/\")), проверка прав, логирование, повторные попытки."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

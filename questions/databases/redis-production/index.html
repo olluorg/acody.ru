@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что важно учитывать при работе с Redis в production? — вопрос с собеседования</title>
+<meta name="description" content="Команды выполняются в одном потоке — одна долгая команда тормозит всех. Отсюда: нельзя KEYS (есть SCAN), осторожно с большими структурами, TTL на…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/redis-production/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/redis-production/">
+<meta property="og:title" content="Что важно учитывать при работе с Redis в production? — вопрос с собеседования">
+<meta property="og:description" content="Команды выполняются в одном потоке — одна долгая команда тормозит всех. Отсюда: нельзя KEYS (есть SCAN), осторожно с большими структурами, TTL на…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Что важно учитывать при работе с Redis в production?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Что важно учитывать при работе с Redis в production?"}]}</script>
+  <h1>Что важно учитывать при работе с Redis в production?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Redis и кэширование</span><span class="chip">Redis</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Какие ошибки допускают с Redis в проде?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Команды выполняются <b>в одном потоке</b> — одна долгая команда тормозит всех. Отсюда: нельзя <code>KEYS *</code> (есть <code>SCAN</code>), осторожно с большими структурами, <b>TTL</b> на кэш-ключи и <b>maxmemory</b> с политикой вытеснения.</p><ul><li>Большие ключи удалять через UNLINK</li><li>Долговечность ограничена: RDB-снимки и AOF раз в секунду, асинхронные реплики</li><li>Пул соединений, таймауты, pipelining</li></ul><p class="extra"><span>А ещё</span> Redis — не основная база для данных, которые нельзя потерять</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p>Последовательное выполнение делает операции атомарными без блокировок, но превращает любую долгую команду в остановку для всех — отсюда правило избегать операций, линейных по размеру набора данных. Управление памятью задаётся политикой: noeviction приведёт к ошибкам записи при заполнении, allkeys-lru вытеснит давно не используемые ключи. Про долговечность стоит говорить честно: снимки состояния теряют последние изменения, журнал команд надёжнее, но полной гарантии всё равно нет — Redis отлично подходит для кэша, счётчиков и очередей, но не как единственное хранилище критичных данных.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Однопоточность и опасные команды.</li><li>TTL, maxmemory, политика вытеснения.</li><li>Ограниченная долговечность.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Выполнять KEYS или FLUSHALL на боевом инстансе.</li><li>Класть ключи без TTL и удивляться исчерпанию памяти.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Несколько верных вариантов. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Команды выполняются последовательно, поэтому одна тяжёлая операция блокирует всех клиентов</li><li class="ok"><span class="mark">✓</span>KEYS сканирует всё пространство ключей и в бою заменяется на SCAN</li><li class="ok"><span class="mark">✓</span>Нужна политика вытеснения и TTL, иначе память закончится</li><li class="no"><span class="mark">✗</span>Redis гарантирует сохранность данных так же, как реляционная СУБД</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Чем снимок отличается от журнала команд по гарантиям?</li><li>Как выбрать политику вытеснения?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/databases/redis-cache/">Redis и кэширование</a><p>Cache-aside и стратегии записи, TTL и eviction, защита от stampede и аккуратные распределённые блокировки.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/highload/redis-at-scale/">Какие проблемы бывают с Redis под высокой нагрузкой?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/databases/redis-distributed-lock/">Что обязательно при реализации распределённой блокировки на Redis?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/databases/cache-ttl/">Зачем ключам в кэше задают TTL?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что важно учитывать при работе с Redis в production?","acceptedAnswer":{"@type":"Answer","text":"Команды выполняются в одном потоке — одна долгая команда тормозит всех. Отсюда: нельзя KEYS (есть SCAN), осторожно с большими структурами, TTL на кэш-ключи и maxmemory с политикой вытеснения. Большие ключи удалять через UNLINK Долговечность ограничена: RDB-снимки и AOF раз в секунду, асинхронные реплики Пул соединений, таймауты, pipelining Redis — не основная база для данных, которые нельзя потерять Последовательное выполнение делает операции атомарными без блокировок, но превращает любую долгую команду в остановку для всех — отсюда правило избегать операций, линейных по размеру набора данных. Управление памятью задаётся политикой: noeviction приведёт к ошибкам записи при заполнении, allkeys-lru вытеснит давно не используемые ключи. Про долговечность стоит говорить честно: снимки состояния теряют последние изменения, журнал команд надёжнее, но полной гарантии всё равно нет — Redis отлично подходит для кэша, счётчиков и очередей, но не как единственное хранилище критичных данных."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

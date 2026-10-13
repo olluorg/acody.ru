@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как организовать архитектуру большого фронтенд-приложения? — вопрос с собеседования</title>
+<meta name="description" content="Цель — чтобы изменение в одной функции не задевало остальные и новый человек быстро находил код. Основа — разделение по функциональности (features…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/project-architecture/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/project-architecture/">
+<meta property="og:title" content="Как организовать архитектуру большого фронтенд-приложения? — вопрос с собеседования">
+<meta property="og:description" content="Цель — чтобы изменение в одной функции не задевало остальные и новый человек быстро находил код. Основа — разделение по функциональности (features…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Как организовать архитектуру большого фронтенд-приложения?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Как организовать архитектуру большого фронтенд-приложения?"}]}</script>
+  <h1>Как организовать архитектуру большого фронтенд-приложения?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Архитектура фронтенда</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое Feature-Sliced Design?</li><li>Как разделить фронтенд на модули?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Цель — чтобы изменение в одной функции не задевало остальные и новый человек быстро находил код. Основа — <b>разделение по функциональности</b> (features, страницы, сущности), а не по типу файлов (components, utils, hooks), <b>явные публичные API</b> модулей, <b>направление зависимостей</b> (верхние слои зависят от нижних, не наоборот) и <b>проверка границ</b> линтером. Популярная методология — <b>Feature-Sliced Design</b>: слои app, pages, widgets, features, entities, shared.</p><ul><li>Серверное состояние — в кэше запросов, клиентское — рядом с местом использования</li><li>Общие компоненты UI — в дизайн-системе, без бизнес-логики</li><li>Границы проверяются автоматически (eslint-plugin-boundaries, правила импорта)</li></ul><p class="extra"><span>А ещё</span> Архитектура должна соответствовать размеру: для маленького приложения FSD избыточна</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Признаки проблем:</b> циклические импорты, «utils» на тысячи строк, изменение формы ломает три страницы, страх рефакторинга.</p>
+<p><b>Принципы:</b></p>
+<ul><li>модуль по бизнес-функции, внутри — всё нужное ей;</li><li>импорт только через публичный <code>index</code> модуля;</li><li>зависимости в одну сторону: страница → фича → сущность → общее;</li><li>типы API генерируются из контракта бэкенда;</li><li>состояние: серверное — TanStack Query, глобальное клиентское — минимум.</li></ul>
+<p><b>FSD:</b></p>
+<div class="table"><table><thead><tr><th>слой</th><th>что внутри</th></tr></thead><tbody><tr><td>app</td><td>инициализация, провайдеры, маршруты</td></tr><tr><td>pages</td><td>страницы из виджетов</td></tr><tr><td>widgets</td><td>крупные блоки интерфейса</td></tr><tr><td>features</td><td>действия пользователя (добавить в корзину)</td></tr><tr><td>entities</td><td>бизнес-сущности (товар, пользователь)</td></tr><tr><td>shared</td><td>UI-кит, утилиты, клиент API</td></tr></tbody></table></div>
+<p><b>Эволюция:</b> при росте до нескольких команд — монорепозиторий с пакетами, затем, если нужно независимое развёртывание, микрофронтенды.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Деление по функциональности и явные границы.</li><li>Направление зависимостей и автоматическая проверка.</li><li>Соответствие архитектуры масштабу.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/react-state-management/">Как управлять состоянием в React-приложении — Context, Redux, Zustand, серверное состояние?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/microfrontends/">Что такое микрофронтенды и когда они оправданы?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/frontend/monorepo/">Зачем фронтенду монорепозиторий и как его организовать?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как организовать архитектуру большого фронтенд-приложения?","acceptedAnswer":{"@type":"Answer","text":"Цель — чтобы изменение в одной функции не задевало остальные и новый человек быстро находил код. Основа — разделение по функциональности (features, страницы, сущности), а не по типу файлов (components, utils, hooks), явные публичные API модулей, направление зависимостей (верхние слои зависят от нижних, не наоборот) и проверка границ линтером. Популярная методология — Feature-Sliced Design: слои app, pages, widgets, features, entities, shared. Серверное состояние — в кэше запросов, клиентское — рядом с местом использования Общие компоненты UI — в дизайн-системе, без бизнес-логики Границы проверяются автоматически (eslint-plugin-boundaries, правила импорта) Архитектура должна соответствовать размеру: для маленького приложения FSD избыточна Признаки проблем: циклические импорты, «utils» на тысячи строк, изменение формы ломает три страницы, страх рефакторинга. Принципы: - модуль по бизнес-функции, внутри — всё нужное ей; - импорт только через публичный index модуля; - зависимости в одну сторону: страница → фича → сущность → общее; - типы API генерируются из контракта бэкенда; - состояние: серверное — TanStack Query, глобальное клиентское — минимум. FSD: | слой | что внутри | | --- | --- | | app | инициализация, провайдеры, маршруты | | pages | страницы из виджетов | | widgets | крупные блоки интерфейса | | features | действия пользователя (добавить в корзину) | | entities | бизнес-сущности (товар, пользователь) | | shared | UI-кит, утилиты, клиент API | Эволюция: при росте до нескольких команд — монорепозиторий с пакетами, затем, если нужно независимое развёртывание, микрофронтенды."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

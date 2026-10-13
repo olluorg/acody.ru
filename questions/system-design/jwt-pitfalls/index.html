@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что верно про использование JWT для аутентификации? — вопрос с собеседования</title>
+<meta name="description" content="JWT самодостаточен — сервер проверяет подпись без базы. Отсюда главный минус: его нельзя отозвать до истечения. Решение — короткий access-токен…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/system-design/jwt-pitfalls/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/system-design/jwt-pitfalls/">
+<meta property="og:title" content="Что верно про использование JWT для аутентификации? — вопрос с собеседования">
+<meta property="og:description" content="JWT самодостаточен — сервер проверяет подпись без базы. Отсюда главный минус: его нельзя отозвать до истечения. Решение — короткий access-токен…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/system-design/">System design</a> <span>/</span> <span>Что верно про использование JWT для аутентификации?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/questions/system-design/"},{"@type":"ListItem","position":3,"name":"Что верно про использование JWT для аутентификации?"}]}</script>
+  <h1>Что верно про использование JWT для аутентификации?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Безопасность приложения</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Какие проблемы у JWT?</li><li>Где хранить JWT в браузере?</li><li>Как отозвать JWT?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">JWT самодостаточен — сервер проверяет подпись без базы. Отсюда главный минус: <b>его нельзя отозвать</b> до истечения. Решение — короткий access-токен (минуты) и отзываемый refresh, хранимый на сервере.</p><ul><li>Payload только подписан, не зашифрован — не класть персональные данные</li><li>Алгоритм фиксировать на сервере: атаки с <code>alg: none</code> и подменой RS256 на HS256</li><li>Хранение: httpOnly-cookie защищена от XSS, но нужна защита от CSRF; localStorage — наоборот</li></ul><p class="extra"><span>А ещё</span> Для обычного веб-приложения сессия на сервере часто проще и не хуже</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Устройство.</b> Заголовок, полезная нагрузка (claims) и подпись, каждая часть в base64url. Сервер проверяет подпись своим ключом и не ходит в базу — это хорошо масштабируется и удобно между сервисами (особенно с асимметричной подписью RS256/ES256: проверять может любой по открытому ключу).</p>
+<p><b>Ловушки:</b></p>
+<ul><li><b>отзыв</b> — выход пользователя, смена пароля, блокировка не отменяют уже выданный токен. Решения: короткий срок жизни access (5–15 минут) и refresh с сервером-хранилищем, который можно отозвать; чёрный список id токенов (jti) — но это снова поход в хранилище;</li><li><b>открытый payload</b> — его прочитает любой; персональные и секретные данные не кладут;</li><li><b>алгоритм</b> — проверять с явно заданным ожидаемым алгоритмом. Иначе атакующий ставит <code>alg: none</code> или подписывает HS256 открытым ключом, который библиотека примет за секрет;</li><li><b>размер</b> — токен уходит с каждым запросом; не раздувать claims;</li><li><b>проверка полей</b> — <code>exp</code>, <code>nbf</code>, <code>iss</code>, <code>aud</code>.</li></ul>
+<p><b>Где хранить в браузере</b> — симметричный выбор:</p>
+<ul><li><b>httpOnly-cookie</b> — скрипт не прочитает (защита от кражи через XSS), но браузер сам отправляет cookie — нужна защита от CSRF (SameSite, токен);</li><li><b>localStorage / память</b> — CSRF не страшен, но любой XSS украдёт токен.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Самодостаточность и проблема отзыва, схема access + refresh.</li><li>Открытый payload и атаки на алгоритм.</li><li>Компромисс хранения: cookie против localStorage.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«localStorage безопаснее cookie».</li><li>Долгоживущие access-токены без возможности отзыва.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Несколько верных вариантов. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Самодостаточный токен нельзя отозвать до истечения срока — отсюда короткий access и отзываемый refresh</li><li class="ok"><span class="mark">✓</span>Полезная нагрузка лишь закодирована base64, а не зашифрована, поэтому персональные данные туда класть нельзя</li><li class="ok"><span class="mark">✓</span>Алгоритм подписи должен быть зафиксирован на сервере, иначе возможна подмена алгоритма</li><li class="no"><span class="mark">✗</span>JWT в localStorage безопаснее httpOnly-cookie, потому что недоступен для CSRF</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как реализовать немедленный отзыв доступа при блокировке пользователя?</li><li>Когда обычная серверная сессия лучше JWT?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/system-design/security/">Безопасность приложения: OWASP, доступ и секреты</a><p>OWASP Top 10 в редакции 2025, разница аутентификации и авторизации, ловушки JWT против сессий, хранение паролей и секретов, безопасность цепочки поставок.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/system-design/authentication-vs-authorization/">Чем аутентификация отличается от авторизации?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/csrf-cors/">Что такое CSRF и как он связан с CORS?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/xss/">Что такое XSS и как от неё защищаться?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/symmetric-asymmetric/">Чем симметричное шифрование отличается от асимметричного и что такое цифровая подпись?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что верно про использование JWT для аутентификации?","acceptedAnswer":{"@type":"Answer","text":"JWT самодостаточен — сервер проверяет подпись без базы. Отсюда главный минус: его нельзя отозвать до истечения. Решение — короткий access-токен (минуты) и отзываемый refresh, хранимый на сервере. Payload только подписан, не зашифрован — не класть персональные данные Алгоритм фиксировать на сервере: атаки с alg: none и подменой RS256 на HS256 Хранение: httpOnly-cookie защищена от XSS, но нужна защита от CSRF; localStorage — наоборот Для обычного веб-приложения сессия на сервере часто проще и не хуже Устройство. Заголовок, полезная нагрузка (claims) и подпись, каждая часть в base64url. Сервер проверяет подпись своим ключом и не ходит в базу — это хорошо масштабируется и удобно между сервисами (особенно с асимметричной подписью RS256/ES256: проверять может любой по открытому ключу). Ловушки: - отзыв — выход пользователя, смена пароля, блокировка не отменяют уже выданный токен. Решения: короткий срок жизни access (5–15 минут) и refresh с сервером-хранилищем, который можно отозвать; чёрный список id токенов (jti) — но это снова поход в хранилище; - открытый payload — его прочитает любой; персональные и секретные данные не кладут; - алгоритм — проверять с явно заданным ожидаемым алгоритмом. Иначе атакующий ставит alg: none или подписывает HS256 открытым ключом, который библиотека примет за секрет; - размер — токен уходит с каждым запросом; не раздувать claims; - проверка полей — exp…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

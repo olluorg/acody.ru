@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как построить в команде систему оценки качества LLM-продукта? — вопрос с собеседования</title>
+<meta name="description" content="Оценка — инфраструктура, как тесты в CI. Набор примеров из реальных запросов и найденных ошибок, разбитый по сценариям; проверки по правилам там, где…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/eval-strategy/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/eval-strategy/">
+<meta property="og:title" content="Как построить в команде систему оценки качества LLM-продукта? — вопрос с собеседования">
+<meta property="og:description" content="Оценка — инфраструктура, как тесты в CI. Набор примеров из реальных запросов и найденных ошибок, разбитый по сценариям; проверки по правилам там, где…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как построить в команде систему оценки качества LLM-продукта?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как построить в команде систему оценки качества LLM-продукта?"}]}</script>
+  <h1>Как построить в команде систему оценки качества LLM-продукта?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Оценка качества</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как организовать evals для LLM-приложения?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Оценка — инфраструктура, как тесты в CI. <b>Набор примеров</b> из реальных запросов и найденных ошибок, разбитый по сценариям; <b>проверки по правилам</b> там, где возможно, и <b>калиброванный судья</b> для свободного текста; <b>прогон при каждом изменении</b> промпта, модели, поиска с порогами, блокирующими выкатку; <b>онлайн-метрики</b> и <b>регулярный ручной разбор</b>, из которого набор пополняется.</p><ul><li>Метрики по сценариям, а не одна средняя — иначе регресс в редком сценарии не виден</li><li>Судью калибруют по разметке людей и перепроверяют при смене модели судьи</li><li>Владелец набора и правила его пополнения — иначе он устаревает</li></ul><p class="extra"><span>А ещё</span> Цель — скорость: команда меняет промпты и модели уверенно, потому что видит последствия</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Уровни:</b></p>
+<ol><li>Юнит-проверки: формат, вызов нужного инструмента, обязательные ссылки — детерминированно и дёшево.</li><li>Офлайн-набор: сотни примеров по сценариям, метрики поиска и ответа, сравнение с базовой версией.</li><li>Онлайн: сигналы пользователей, бизнес-метрики, A/B.</li><li>Разбор: еженедельный просмотр выборки и неудачных диалогов.</li></ol>
+<p><b>Процесс:</b></p>
+<ul><li>каждый баг из продакшена превращается в пример набора;</li><li>отчёт прогона показывает изменения по сценариям и конкретные ухудшившиеся примеры;</li><li>пороги в CI: резкое падение метрики блокирует выкатку;</li><li>стоимость прогона учитывается: полный набор — по ночам, малый — на каждый PR.</li></ul>
+<p><b>Ловушки:</b> переобучение промпта под набор, утечка примеров набора в промпт, слепая вера судье, одна усреднённая метрика.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Многоуровневая оценка: правила, набор, судья, онлайн, разбор.</li><li>Встраивание в процесс разработки и выкатки.</li><li>Ловушки и поддержка набора.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/llm-evaluation/">Как оценивать качество ответов LLM?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-as-judge/">Что такое LLM как судья (LLM-as-a-judge) и какие у этого подхода ловушки?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/ab-testing-models/">Почему хорошая офлайн-метрика модели не гарантирует успех в продакшене и как проверить модель онлайн?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-observability/">Как наблюдать за LLM-приложением в продакшене?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как построить в команде систему оценки качества LLM-продукта?","acceptedAnswer":{"@type":"Answer","text":"Оценка — инфраструктура, как тесты в CI. Набор примеров из реальных запросов и найденных ошибок, разбитый по сценариям; проверки по правилам там, где возможно, и калиброванный судья для свободного текста; прогон при каждом изменении промпта, модели, поиска с порогами, блокирующими выкатку; онлайн-метрики и регулярный ручной разбор, из которого набор пополняется. Метрики по сценариям, а не одна средняя — иначе регресс в редком сценарии не виден Судью калибруют по разметке людей и перепроверяют при смене модели судьи Владелец набора и правила его пополнения — иначе он устаревает Цель — скорость: команда меняет промпты и модели уверенно, потому что видит последствия Уровни: 1. Юнит-проверки: формат, вызов нужного инструмента, обязательные ссылки — детерминированно и дёшево. 2. Офлайн-набор: сотни примеров по сценариям, метрики поиска и ответа, сравнение с базовой версией. 3. Онлайн: сигналы пользователей, бизнес-метрики, A/B. 4. Разбор: еженедельный просмотр выборки и неудачных диалогов. Процесс: - каждый баг из продакшена превращается в пример набора; - отчёт прогона показывает изменения по сценариям и конкретные ухудшившиеся примеры; - пороги в CI: резкое падение метрики блокирует выкатку; - стоимость прогона учитывается: полный набор — по ночам, малый — на каждый PR. Ловушки: переобучение промпта под набор, утечка примеров набора в промпт, слепая вера судье, одна усреднённая метрика."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

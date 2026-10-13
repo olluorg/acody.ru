@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какое правило связывает equals() и hashCode()? — вопрос с собеседования</title>
+<meta name="description" content="Равные по equals объекты обязаны иметь равный hashCode; обратное не требуется — коллизии нормальны. Иначе HashMap и HashSet ищут в другой корзине и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/java/equals-hashcode-contract/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/java/equals-hashcode-contract/">
+<meta property="og:title" content="Какое правило связывает equals() и hashCode()? — вопрос с собеседования">
+<meta property="og:description" content="Равные по equals объекты обязаны иметь равный hashCode; обратное не требуется — коллизии нормальны. Иначе HashMap и HashSet ищут в другой корзине и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Какое правило связывает equals() и hashCode()?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Какое правило связывает equals() и hashCode()?"}]}</script>
+  <h1>Какое правило связывает equals() и hashCode()?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Равенство, equals и hashCode</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему при переопределении equals обязательно переопределять и hashCode?</li><li>Почему в Java при переопределении equals обязательно переопределять и hashCode?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Равные по equals объекты обязаны иметь равный hashCode</b>; обратное не требуется — коллизии нормальны. Иначе HashMap и HashSet ищут в <b>другой корзине</b> и не находят равный объект: до вызова equals дело не доходит.</p><ul><li>Переопределили equals без hashCode — дубликаты в HashSet, «пропавшие» ключи</li><li>Считать hashCode по тем же полям, что equals: Objects.hash</li><li>Изменяемые поля в hashCode ключа — объект потеряется после изменения</li></ul><p class="extra"><span>А ещё</span> Record и Lombok @EqualsAndHashCode генерируют согласованную пару</p></div>
+  <section class="block widget"><h2>Попробуйте сами</h2><p class="hint">HashMap: put, коллизия и resize</p><script type="module" src="/widgets/hashmap-put.js"></script><sotto-hashmap-put theme="dark"></sotto-hashmap-put></section>
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Как HashMap ищет ключ:</b> вычисляет <code>hashCode</code>, по нему выбирает корзину, и только внутри неё сравнивает кандидатов через <code>equals</code>.</p>
+<pre class="lang-java"><code>class Point {
+    final int x, y;
+    @Override public boolean equals(Object o) {
+        return o instanceof Point p &amp;&amp; x == p.x &amp;&amp; y == p.y;
+    }
+    // hashCode не переопределён
+}
+Set&lt;Point&gt; set = new HashSet&lt;&gt;();
+set.add(new Point(1, 2));
+set.contains(new Point(1, 2));   // скорее всего false</code></pre>
+<p><code>hashCode</code> по умолчанию — от идентичности объекта, у двух равных точек разные хеши → разные корзины → equals не вызывается.</p>
+<p><b>Контракт hashCode:</b></p>
+<ul><li>равные по equals — равные hashCode (обязательно);</li><li>неравные могут совпадать (коллизия), но чем реже — тем быстрее таблица;</li><li>значение стабильно, пока не меняются поля, участвующие в equals.</li></ul>
+<p><b>Правильно:</b> <code>Objects.hash(x, y)</code> или вручную <code>31 * x + y</code>; те же поля, что в equals.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Контракт в обе стороны.</li><li>Механика поиска в HashMap и последствия нарушения.</li><li>Как реализовать.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Переопределить equals и забыть hashCode.</li><li>Делать hashCode на основе изменяемого состояния ключа.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Равные по equals объекты обязаны иметь равный hashCode (обратное не требуется — коллизии допустимы)</li><li class="no"><span class="mark">✗</span>Равный hashCode гарантирует равенство по equals</li><li class="no"><span class="mark">✗</span>hashCode обязан быть уникален у каждого объекта</li><li class="no"><span class="mark">✗</span>equals и hashCode независимы друг от друга</li></ul></details></section>
+  <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Как HashMap обрабатывает коллизии?</li><li>Почему ключи HashMap лучше делать неизменяемыми?</li><li>Что будет, если hashCode всегда возвращает 0?</li><li>Как HashMap обрабатывает коллизии и при чём тут treeify?</li></ul></section>
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/java/equality/">Равенство: ==, equals и hashCode</a><p>Идентичность против логического равенства, контракт equals и hashCode, проблема equals с наследованием и корректная реализация.</p></li><li><a href="/articles/java/hashmap/">HashMap изнутри: бакеты, treeify, resize</a><p>Таблица бакетов, перемешивание хеша и индекс, превращение цепочки в дерево, ресайз и load factor, контракт ключа.</p></li></ul></section>
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/java/equals-contract/">Какие требования входят в контракт equals?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/jc-162/">Объект добавили в HashSet, после чего изменили у него поле, участвующее в hashCode. Что теперь вернёт contains для этого же объекта?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/hash-table/">Как устроена хеш-таблица?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какое правило связывает equals() и hashCode()?","acceptedAnswer":{"@type":"Answer","text":"Равные по equals объекты обязаны иметь равный hashCode; обратное не требуется — коллизии нормальны. Иначе HashMap и HashSet ищут в другой корзине и не находят равный объект: до вызова equals дело не доходит. Переопределили equals без hashCode — дубликаты в HashSet, «пропавшие» ключи Считать hashCode по тем же полям, что equals: Objects.hash Изменяемые поля в hashCode ключа — объект потеряется после изменения Record и Lombok @EqualsAndHashCode генерируют согласованную пару Как HashMap ищет ключ: вычисляет hashCode, по нему выбирает корзину, и только внутри неё сравнивает кандидатов через equals. hashCode по умолчанию — от идентичности объекта, у двух равных точек разные хеши → разные корзины → equals не вызывается. Контракт hashCode: - равные по equals — равные hashCode (обязательно); - неравные могут совпадать (коллизия), но чем реже — тем быстрее таблица; - значение стабильно, пока не меняются поля, участвующие в equals. Правильно: Objects.hash(x, y) или вручную 31 x + y; те же поля, что в equals."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

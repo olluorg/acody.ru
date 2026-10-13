@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Чем SIGTERM отличается от SIGKILL и как правильно завершать сервис? — вопрос с собеседования</title>
+<meta name="description" content="SIGTERM — вежливая просьба завершиться: процесс может её перехватить и закончить работу. SIGKILL — убийство ядром, перехватить нельзя. Graceful…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/signals-shutdown/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/signals-shutdown/">
+<meta property="og:title" content="Чем SIGTERM отличается от SIGKILL и как правильно завершать сервис? — вопрос с собеседования">
+<meta property="og:description" content="SIGTERM — вежливая просьба завершиться: процесс может её перехватить и закончить работу. SIGKILL — убийство ядром, перехватить нельзя. Graceful…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/learn.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Чем SIGTERM отличается от SIGKILL и как правильно завершать сервис?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Чем SIGTERM отличается от SIGKILL и как правильно завершать сервис?"}]}</script>
+  <h1>Чем SIGTERM отличается от SIGKILL и как правильно завершать сервис?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Операционные системы</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое graceful shutdown?</li><li>Что происходит с приложением при остановке контейнера?</li><li>Что такое сигналы в Unix?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>SIGTERM</b> — вежливая просьба завершиться: процесс может её перехватить и закончить работу. <b>SIGKILL</b> — убийство ядром, перехватить нельзя.</p><ul><li>Graceful shutdown: перестать принимать новые запросы, доделать текущие, закрыть соединения</li><li>Docker и Kubernetes шлют SIGTERM, через срок (10 с / 30 с) — SIGKILL</li><li>Процесс с PID 1 в контейнере без обработчика SIGTERM не завершится сам</li></ul><p class="extra"><span>А ещё</span> Kubernetes: снятие пода из балансировки и SIGTERM идут параллельно — нужен preStop</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Сигнал</b> — асинхронное уведомление процессу от ядра или другого процесса. Процесс может перехватить большинство сигналов своим обработчиком, игнорировать или оставить действие по умолчанию.</p>
+<p>Частые сигналы:</p>
+<ul><li><code>SIGTERM</code> (15) — запрос на завершение, по умолчанию его шлёт <code>kill</code>;</li><li><code>SIGINT</code> (2) — Ctrl+C в терминале;</li><li><code>SIGKILL</code> (9) — немедленное завершение, перехватить нельзя; ресурсы освобождает ядро, но приложение ничего не успевает;</li><li><code>SIGHUP</code> — потеря терминала; многие демоны перечитывают по нему конфиг;</li><li><code>SIGSEGV</code> — недопустимый доступ к памяти;</li><li><code>SIGCHLD</code> — дочерний процесс завершился.</li></ul>
+<p><b>Graceful shutdown</b> — корректная остановка без потерь:</p>
+<ol><li>перестать принимать новые соединения и сообщить балансировщику, что экземпляр уходит (readiness = false);</li><li>дождаться завершения запросов в работе, с таймаутом;</li><li>закоммитить смещения в Kafka, вернуть сообщения в очередь, дописать буферы логов;</li><li>закрыть пулы соединений к базам;</li><li>выйти.</li></ol>
+<p>В Spring Boot это <code>server.shutdown=graceful</code>, в Go — <code>http.Server.Shutdown</code>, в Python — обработчик <code>signal.SIGTERM</code>.</p>
+<p><b>Контейнеры.</b> <code>docker stop</code> шлёт SIGTERM главному процессу и через 10 секунд SIGKILL; Kubernetes — через <code>terminationGracePeriodSeconds</code> (30 с). Ловушки:</p>
+<ul><li><b>PID 1.</b> Ядро не применяет действие по умолчанию к PID 1, поэтому процесс без обработчика игнорирует SIGTERM и умирает только от SIGKILL через таймаут. А если запустить через <code>sh -c</code>, сигнал получит оболочка, а не приложение. Решение — exec-форма <code>ENTRYPOINT [&quot;java&quot;, ...]</code>, <code>exec</code> в скрипте или минимальный init (<code>tini</code>, <code>--init</code>);</li><li><b>гонка с балансировкой.</b> Kubernetes одновременно шлёт SIGTERM и убирает под из Endpoints, а прокси узнают об этом с задержкой. Если сразу перестать принимать соединения, часть запросов получит ошибку. Добавляют <code>preStop</code> с паузой в несколько секунд.</li></ul></div></section><section class="block"><h2>Пример</h2><div class="md"><pre class="lang-python"><code>import signal, threading
+
+stopping = threading.Event()
+signal.signal(signal.SIGTERM, lambda *_: stopping.set())
+
+while not stopping.is_set():
+    handle_next_task(timeout=1)     # берём задачи, пока не попросили остановиться
+finish_in_flight()                  # доделываем начатое и выходим</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Перехватываемый SIGTERM против неперехватываемого SIGKILL.</li><li>Шаги graceful shutdown.</li><li>Поведение Docker/Kubernetes: SIGTERM, грейс-период, SIGKILL.</li><li>PID 1 и exec-форма запуска, preStop — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Использовать <code>kill -9</code> как обычный способ остановки.</li><li>Запускать приложение через shell-обёртку, которая не передаёт сигнал.</li></ul></div></section>
+  
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/process-vs-thread/">Чем процесс отличается от потока?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/system-design/rolling-update/">Что такое rolling update при выкатке новой версии?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем SIGTERM отличается от SIGKILL и как правильно завершать сервис?","acceptedAnswer":{"@type":"Answer","text":"SIGTERM — вежливая просьба завершиться: процесс может её перехватить и закончить работу. SIGKILL — убийство ядром, перехватить нельзя. Graceful shutdown: перестать принимать новые запросы, доделать текущие, закрыть соединения Docker и Kubernetes шлют SIGTERM, через срок (10 с / 30 с) — SIGKILL Процесс с PID 1 в контейнере без обработчика SIGTERM не завершится сам Kubernetes: снятие пода из балансировки и SIGTERM идут параллельно — нужен preStop Сигнал — асинхронное уведомление процессу от ядра или другого процесса. Процесс может перехватить большинство сигналов своим обработчиком, игнорировать или оставить действие по умолчанию. Частые сигналы: - SIGTERM (15) — запрос на завершение, по умолчанию его шлёт kill; - SIGINT (2) — Ctrl+C в терминале; - SIGKILL (9) — немедленное завершение, перехватить нельзя; ресурсы освобождает ядро, но приложение ничего не успевает; - SIGHUP — потеря терминала; многие демоны перечитывают по нему конфиг; - SIGSEGV — недопустимый доступ к памяти; - SIGCHLD — дочерний процесс завершился. Graceful shutdown — корректная остановка без потерь: 1. перестать принимать новые соединения и сообщить балансировщику, что экземпляр уходит (readiness = false); 2. дождаться завершения запросов в работе, с таймаутом; 3. закоммитить смещения в Kafka, вернуть сообщения в очередь, дописать буферы логов; 4. закрыть пулы…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>
