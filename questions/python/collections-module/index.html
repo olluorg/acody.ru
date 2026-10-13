@@ -48,7 +48,7 @@ Counter(words).most_common(3)
 
 last_5 = deque(maxlen=5)
 for x in stream: last_5.append(x)     # старые вытесняются сами</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Назначение каждого.</li><li>deque против list для очереди.</li><li>Когда OrderedDict ещё нужен.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>deque.popleft() — O(n), list.pop(0) — O(1)</li><li class="ok"><span class="mark">✓</span>defaultdict — для значения по умолчанию у новых ключей, Counter — для подсчёта, deque — очередь с O(1) по краям</li><li class="no"><span class="mark">✗</span>OrderedDict обязателен, чтобы dict сохранял порядок вставки</li><li class="no"><span class="mark">✗</span>Counter умеет только увеличивать счётчики, складывать их нельзя</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/dict-how-it-works/">Как устроен словарь в Python?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/stack-queue/">Чем стек отличается от очереди и где они применяются?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/complexity-list-dict/">Какая сложность у основных операций со списком, словарём и множеством?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>

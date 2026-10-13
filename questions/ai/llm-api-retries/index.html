@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как сделать надёжные вызовы API модели — повторы, таймауты, смена провайдера? — вопрос с собеседования</title>
+<meta name="description" content="429 (превышен лимит) и 5xx (сбой провайдера) повторяют с экспоненциальной паузой и случайным разбросом, учитывая заголовок Retry-After; ошибки 4xx…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/llm-api-retries/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/llm-api-retries/">
+<meta property="og:title" content="Как сделать надёжные вызовы API модели — повторы, таймауты, смена провайдера? — вопрос с собеседования">
+<meta property="og:description" content="429 (превышен лимит) и 5xx (сбой провайдера) повторяют с экспоненциальной паузой и случайным разбросом, учитывая заголовок Retry-After; ошибки 4xx…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как сделать надёжные вызовы API модели — повторы, таймауты, смена провайдера?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как сделать надёжные вызовы API модели — повторы, таймауты, смена провайдера?"}]}</script>
+  <h1>Как сделать надёжные вызовы API модели — повторы, таймауты, смена провайдера?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">LLM в продакшене</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что делать при ошибке 429 от API модели?</li><li>Как не зависеть от одного провайдера LLM?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>429</b> (превышен лимит) и <b>5xx</b> (сбой провайдера) повторяют с <b>экспоненциальной паузой и случайным разбросом</b>, учитывая заголовок Retry-After; ошибки <b>4xx запроса</b> не повторяют. У каждого вызова — <b>таймаут</b> (на соединение и на общий ответ), у повторов — общий бюджет времени. Провайдер скрыт за <b>тонкой абстракцией</b>: модель и провайдер меняются конфигурацией, а не кодом.</p><ul><li>Без случайного разброса клиенты повторяют синхронно и снова упираются в лимит</li><li>Для потоковых ответов таймаут — на паузу между фрагментами, а не только на весь ответ</li><li>Повтор после частично полученного ответа — помнить, что токены уже оплачены</li></ul><p class="extra"><span>А ещё</span> Лимиты провайдера считают в запросах и токенах в минуту — следить за обоими</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Повторы:</b></p>
+<ul><li>повторять: 429, 500, 502, 503, 504, обрывы соединения;</li><li>не повторять: 400 (неверный запрос), 401/403 (ключ), превышение контекста — повтор даст ту же ошибку;</li><li>пауза: база × 2^попытка + случайная добавка, не больше 3–5 попыток и общего бюджета времени.</li></ul>
+<p><b>Таймауты.</b> Генерация длинного ответа может идти десятки секунд, поэтому таймаут подбирают по сценарию; при стриминге следят за паузой между фрагментами.</p>
+<p><b>Абстракция.</b> Интерфейс «сообщения → ответ, токены, причина остановки» с реализациями для разных провайдеров. Модель, версия и параметры — в конфигурации. Это позволяет переключиться на резервного провайдера и проводить эксперименты.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Какие ошибки повторять и как (экспонента, разброс, Retry-After).</li><li>Таймауты, в том числе для стриминга.</li><li>Абстракция над провайдерами и конфигурация модели.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Несколько верных вариантов. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Повторять 429 и 5xx с экспоненциальной паузой и случайным разбросом</li><li class="no"><span class="mark">✗</span>Повторять 400 «неверный запрос» до успеха</li><li class="ok"><span class="mark">✓</span>Ставить таймауты на вызов и общий бюджет времени на повторы</li><li class="ok"><span class="mark">✓</span>Менять модель и провайдера конфигурацией через тонкую абстракцию</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/chat-api-basics/">Как устроен запрос к чат-API модели — роли сообщений, причина остановки, расход токенов?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/llm-provider-fallback/">Что делать, если провайдер LLM недоступен или деградировал?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-gateway/">Зачем компании единый шлюз к LLM и что в нём должно быть?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как сделать надёжные вызовы API модели — повторы, таймауты, смена провайдера?","acceptedAnswer":{"@type":"Answer","text":"429 (превышен лимит) и 5xx (сбой провайдера) повторяют с экспоненциальной паузой и случайным разбросом, учитывая заголовок Retry-After; ошибки 4xx запроса не повторяют. У каждого вызова — таймаут (на соединение и на общий ответ), у повторов — общий бюджет времени. Провайдер скрыт за тонкой абстракцией: модель и провайдер меняются конфигурацией, а не кодом. Без случайного разброса клиенты повторяют синхронно и снова упираются в лимит Для потоковых ответов таймаут — на паузу между фрагментами, а не только на весь ответ Повтор после частично полученного ответа — помнить, что токены уже оплачены Лимиты провайдера считают в запросах и токенах в минуту — следить за обоими Повторы: - повторять: 429, 500, 502, 503, 504, обрывы соединения; - не повторять: 400 (неверный запрос), 401/403 (ключ), превышение контекста — повтор даст ту же ошибку; - пауза: база × 2^попытка + случайная добавка, не больше 3–5 попыток и общего бюджета времени. Таймауты. Генерация длинного ответа может идти десятки секунд, поэтому таймаут подбирают по сценарию; при стриминге следят за паузой между фрагментами. Абстракция. Интерфейс «сообщения → ответ, токены, причина остановки» с реализациями для разных провайдеров. Модель, версия и параметры — в конфигурации. Это позволяет переключиться на резервного провайдера и проводить эксперименты."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как устроен синтез речи в голосовом ассистенте и что важно настроить? — вопрос с собеседования</title>
+<meta name="description" content="TTS превращает текст в речь. Для диалога нужен потоковый синтез: текст подают по предложениям по мере генерации, и звук начинает играть до того, как…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/tts-synthesis/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/tts-synthesis/">
+<meta property="og:title" content="Как устроен синтез речи в голосовом ассистенте и что важно настроить? — вопрос с собеседования">
+<meta property="og:description" content="TTS превращает текст в речь. Для диалога нужен потоковый синтез: текст подают по предложениям по мере генерации, и звук начинает играть до того, как…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как устроен синтез речи в голосовом ассистенте и что важно настроить?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как устроен синтез речи в голосовом ассистенте и что важно настроить?"}]}</script>
+  <h1>Как устроен синтез речи в голосовом ассистенте и что важно настроить?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">LLM в продакшене</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое TTS?</li><li>Как сделать, чтобы бот правильно читал числа?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>TTS</b> превращает текст в речь. Для диалога нужен <b>потоковый</b> синтез: текст подают <b>по предложениям</b> по мере генерации, и звук начинает играть до того, как модель закончила ответ. Качество зависит от <b>подготовки текста</b>: числа, даты, суммы, сокращения, адреса нужно <b>нормализовать</b> в слова («5 000 ₽» → «пять тысяч рублей»), ударения и произношение терминов — задать словарём или разметкой <b>SSML</b>. Голос выбирают под бренд и сценарий, проверяя на живых фразах.</p><ul><li>Метрики: время до первого звука, естественность (оценка слушателей), ошибки произношения</li><li>Markdown, эмодзи и ссылки из ответа модели удаляют до синтеза</li><li>Воспроизведение должно прерываться мгновенно при перебивании</li></ul><p class="extra"><span>А ещё</span> Облачные сервисы (Yandex SpeechKit, SaluteSpeech) и открытые модели различаются качеством русского и стоимостью</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Нормализация текста:</b></p>
+<ul><li>числа и суммы с учётом падежа: «2 заказа» — «два заказа»;</li><li>даты и время: «12.10» — «двенадцатого октября»;</li><li>телефоны и номера заказов — по группам цифр;</li><li>сокращения и аббревиатуры по словарю.</li></ul>
+<p><b>Разметка SSML:</b> паузы, ударения, скорость, произношение слова по буквам или фонемам — для мест, где модель синтеза ошибается.</p>
+<p><b>Поток:</b> разбивать ответ модели на предложения, синтезировать каждое и ставить в очередь воспроизведения; первое предложение лучше делать коротким.</p>
+<p><b>Проверка:</b> набор типичных ответов со сложными числами и терминами, прослушивание, список ошибок произношения.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Потоковый синтез по предложениям.</li><li>Нормализация чисел, дат, сокращений.</li><li>SSML и словари произношения.</li><li>Метрики и прерывание при перебивании.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Отдавать на синтез ответ модели как есть, с markdown и цифрами</li><li class="ok"><span class="mark">✓</span>Синтезировать по предложениям потоково, заранее нормализовав числа, даты и сокращения в слова и задав произношение терминов</li><li class="no"><span class="mark">✗</span>Ждать полный ответ модели — синтез одного длинного текста быстрее</li><li class="no"><span class="mark">✗</span>Синтез не влияет на задержку ответа голосового ассистента</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/voice-pipeline/">Как собрать голосового ассистента из распознавания, языковой модели и синтеза речи?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/voice-latency/">Как уложить голосового ассистента в задержку ответа около секунды?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/ai/asr-wer/">Как распознавать речь и как измерять качество распознавания (WER)?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как устроен синтез речи в голосовом ассистенте и что важно настроить?","acceptedAnswer":{"@type":"Answer","text":"TTS превращает текст в речь. Для диалога нужен потоковый синтез: текст подают по предложениям по мере генерации, и звук начинает играть до того, как модель закончила ответ. Качество зависит от подготовки текста: числа, даты, суммы, сокращения, адреса нужно нормализовать в слова («5 000 ₽» → «пять тысяч рублей»), ударения и произношение терминов — задать словарём или разметкой SSML. Голос выбирают под бренд и сценарий, проверяя на живых фразах. Метрики: время до первого звука, естественность (оценка слушателей), ошибки произношения Markdown, эмодзи и ссылки из ответа модели удаляют до синтеза Воспроизведение должно прерываться мгновенно при перебивании Облачные сервисы (Yandex SpeechKit, SaluteSpeech) и открытые модели различаются качеством русского и стоимостью Нормализация текста: - числа и суммы с учётом падежа: «2 заказа» — «два заказа»; - даты и время: «12.10» — «двенадцатого октября»; - телефоны и номера заказов — по группам цифр; - сокращения и аббревиатуры по словарю. Разметка SSML: паузы, ударения, скорость, произношение слова по буквам или фонемам — для мест, где модель синтеза ошибается. Поток: разбивать ответ модели на предложения, синтезировать каждое и ставить в очередь воспроизведения; первое предложение лучше делать коротким. Проверка: набор типичных ответов со сложными числами и терминами, прослушивание, список ошибок произношения."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -55,7 +55,7 @@ SELECT user_id, session_no,
        COUNT(*) AS events
 FROM numbered
 GROUP BY user_id, session_no;</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Флаг новой сессии через LAG и нарастающую сумму.</li><li>Выбор порога.</li><li>Ограничения: последнее событие, устройства.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Сессия — все события пользователя за календарный день</li><li class="ok"><span class="mark">✓</span>LAG даёт время предыдущего события, пауза больше порога ставит флаг новой сессии, нарастающая сумма флагов — номер сессии</li><li class="no"><span class="mark">✗</span>Порог паузы всегда ровно 5 минут</li><li class="no"><span class="mark">✗</span>Сессии нужно резать по полуночи</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/gaps-and-islands/">Как найти самую длинную серию дней подряд, когда пользователь был активен?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/analytics/window-functions/">Что такое оконные функции в SQL и чем они отличаются от GROUP BY?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>

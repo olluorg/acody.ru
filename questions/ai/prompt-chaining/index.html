@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Когда разбивать задачу на цепочку вызовов модели вместо одного большого промпта? — вопрос с собеседования</title>
+<meta name="description" content="Цепочка — последовательность вызовов, где каждый решает одну подзадачу и передаёт структурированный результат следующему: извлечь факты → проверить →…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/prompt-chaining/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/prompt-chaining/">
+<meta property="og:title" content="Когда разбивать задачу на цепочку вызовов модели вместо одного большого промпта? — вопрос с собеседования">
+<meta property="og:description" content="Цепочка — последовательность вызовов, где каждый решает одну подзадачу и передаёт структурированный результат следующему: извлечь факты → проверить →…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Когда разбивать задачу на цепочку вызовов модели вместо одного большого промпта?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Когда разбивать задачу на цепочку вызовов модели вместо одного большого промпта?"}]}</script>
+  <h1>Когда разбивать задачу на цепочку вызовов модели вместо одного большого промпта?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Промпты и структурированный вывод</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое prompt chaining?</li><li>Чем цепочка вызовов лучше одного промпта?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Цепочка — последовательность вызовов, где каждый решает <b>одну подзадачу</b> и передаёт <b>структурированный результат</b> следующему: извлечь факты → проверить → сформулировать ответ. Помогает, когда один промпт пытается делать <b>много разного</b> и путается, когда нужны <b>промежуточные проверки</b> кодом, когда шаги требуют <b>разных моделей</b> (дешёвая для классификации, сильная для ответа). Цена — <b>больше вызовов</b> и задержка. Решение — <b>сравнение на наборе</b>: качество, стоимость, время.</p><ul><li>Каждый шаг можно оценивать и улучшать отдельно</li><li>Между шагами — валидация: схема, бизнес-правила</li><li>Независимые шаги выполняются параллельно</li></ul><p class="extra"><span>А ещё</span> Улучшать промпт надо по разбору ошибок на наборе, а не по одному неудачному примеру</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Пример: ответ на претензию клиента.</b></p>
+<ol><li>Классифицировать тему и срочность (маленькая модель, JSON).</li><li>Извлечь номер заказа и требования клиента (схема).</li><li>Получить данные заказа инструментом.</li><li>Сформулировать ответ по шаблону и политике (сильная модель).</li><li>Проверить ответ на запрещённые обещания (правила или судья).</li></ol>
+<p><b>Когда один промпт лучше:</b> задача простая, шаги тесно связаны, задержка критична, а качество на наборе уже достаточное.</p>
+<p><b>Итерации.</b> Ошибки на наборе группируют по причинам, правят промпт или структуру цепочки и прогоняют весь набор заново, чтобы не сломать другие сценарии.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Когда цепочка лучше одного промпта.</li><li>Структурированная передача и проверки между шагами.</li><li>Цена в вызовах и задержке.</li><li>Решение по замеру и улучшение по разбору ошибок.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Цепочка всегда дешевле и быстрее одного вызова</li><li class="no"><span class="mark">✗</span>Один промпт всегда лучше: модель видит всю задачу сразу</li><li class="no"><span class="mark">✗</span>Промпт улучшают, исправляя его под каждый неудачный пример по отдельности</li><li class="ok"><span class="mark">✓</span>Цепочка помогает, когда промпт делает много разного или нужны проверки кодом между шагами; выбор — сравнением качества, стоимости и задержки на наборе</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/prompt-engineering/">Как писать хорошие промпты?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/agent-design/">Как проектировать LLM-агента и почему агенты ломаются?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-evaluation/">Как оценивать качество ответов LLM?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Когда разбивать задачу на цепочку вызовов модели вместо одного большого промпта?","acceptedAnswer":{"@type":"Answer","text":"Цепочка — последовательность вызовов, где каждый решает одну подзадачу и передаёт структурированный результат следующему: извлечь факты → проверить → сформулировать ответ. Помогает, когда один промпт пытается делать много разного и путается, когда нужны промежуточные проверки кодом, когда шаги требуют разных моделей (дешёвая для классификации, сильная для ответа). Цена — больше вызовов и задержка. Решение — сравнение на наборе: качество, стоимость, время. Каждый шаг можно оценивать и улучшать отдельно Между шагами — валидация: схема, бизнес-правила Независимые шаги выполняются параллельно Улучшать промпт надо по разбору ошибок на наборе, а не по одному неудачному примеру Пример: ответ на претензию клиента. 1. Классифицировать тему и срочность (маленькая модель, JSON). 2. Извлечь номер заказа и требования клиента (схема). 3. Получить данные заказа инструментом. 4. Сформулировать ответ по шаблону и политике (сильная модель). 5. Проверить ответ на запрещённые обещания (правила или судья). Когда один промпт лучше: задача простая, шаги тесно связаны, задержка критична, а качество на наборе уже достаточное. Итерации. Ошибки на наборе группируют по причинам, правят промпт или структуру цепочки и прогоняют весь набор заново, чтобы не сломать другие сценарии."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

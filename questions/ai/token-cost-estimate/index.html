@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как оценить стоимость запроса к модели в токенах? — вопрос с собеседования</title>
+<meta name="description" content="Посчитать входные токены (системный промпт + история + документы + вопрос) и выходные (ответ) токенизатором той модели, которую используете, и…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/token-cost-estimate/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/token-cost-estimate/">
+<meta property="og:title" content="Как оценить стоимость запроса к модели в токенах? — вопрос с собеседования">
+<meta property="og:description" content="Посчитать входные токены (системный промпт + история + документы + вопрос) и выходные (ответ) токенизатором той модели, которую используете, и…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как оценить стоимость запроса к модели в токенах?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как оценить стоимость запроса к модели в токенах?"}]}</script>
+  <h1>Как оценить стоимость запроса к модели в токенах?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Как устроены LLM</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Сколько стоит запрос к LLM?</li><li>Как посчитать токены текста?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Посчитать <b>входные токены</b> (системный промпт + история + документы + вопрос) и <b>выходные</b> (ответ) <b>токенизатором той модели</b>, которую используете, и умножить на <b>цены</b> провайдера — входные и выходные токены обычно стоят <b>по-разному</b>, выходные дороже. Месячная стоимость = стоимость запроса × число запросов. Реальный расход берут из поля <b>usage</b> в ответах API.</p><ul><li>Русский текст обычно занимает больше токенов, чем английский того же смысла</li><li>История диалога оплачивается заново в каждом следующем запросе</li><li>Кэшированный префикс у многих провайдеров дешевле обычного входа</li></ul><p class="extra"><span>А ещё</span> Оценку на старте сверяют с фактическим расходом после запуска</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Пример.</b> Системный промпт 800 токенов, документы 3000, вопрос 100, ответ 400. Цены (условные): 1 единица за тысячу входных, 4 — за тысячу выходных.</p>
+<p>Вход: 3900 токенов → 3,9; выход: 400 → 1,6; итого 5,5 единицы на запрос. При 10 000 запросов в день — 55 000 в день.</p>
+<p><b>Где снижать:</b> короче промпт, меньше и точнее документы, ограничение длины ответа, кэширование префикса, модель дешевле для простых запросов.</p>
+<p><b>Как считать токены:</b> библиотека токенизатора модели (например, tiktoken для моделей OpenAI) или метод подсчёта в API провайдера.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Вход и выход считаются отдельно и по разной цене.</li><li>Токенизатор конкретной модели.</li><li>История оплачивается в каждом запросе.</li><li>Сверка с usage.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Стоимость считают по числу символов ответа, вход бесплатный</li><li class="ok"><span class="mark">✓</span>Посчитать входные и выходные токены токенизатором модели и умножить на их цены; фактический расход — из usage в ответах API</li><li class="no"><span class="mark">✗</span>Входные и выходные токены всегда стоят одинаково</li><li class="no"><span class="mark">✗</span>История диалога оплачивается только один раз</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/tokens-context-window/">Что такое токены и контекстное окно LLM?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/tokenization-bpe/">Как работает токенизация в LLM и что такое BPE?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-cost-latency/">Как снизить стоимость и задержку приложения на LLM?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как оценить стоимость запроса к модели в токенах?","acceptedAnswer":{"@type":"Answer","text":"Посчитать входные токены (системный промпт + история + документы + вопрос) и выходные (ответ) токенизатором той модели, которую используете, и умножить на цены провайдера — входные и выходные токены обычно стоят по-разному, выходные дороже. Месячная стоимость = стоимость запроса × число запросов. Реальный расход берут из поля usage в ответах API. Русский текст обычно занимает больше токенов, чем английский того же смысла История диалога оплачивается заново в каждом следующем запросе Кэшированный префикс у многих провайдеров дешевле обычного входа Оценку на старте сверяют с фактическим расходом после запуска Пример. Системный промпт 800 токенов, документы 3000, вопрос 100, ответ 400. Цены (условные): 1 единица за тысячу входных, 4 — за тысячу выходных. Вход: 3900 токенов → 3,9; выход: 400 → 1,6; итого 5,5 единицы на запрос. При 10 000 запросов в день — 55 000 в день. Где снижать: короче промпт, меньше и точнее документы, ограничение длины ответа, кэширование префикса, модель дешевле для простых запросов. Как считать токены: библиотека токенизатора модели (например, tiktoken для моделей OpenAI) или метод подсчёта в API провайдера."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

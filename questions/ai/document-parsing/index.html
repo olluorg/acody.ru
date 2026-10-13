@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как подготовить документы PDF и HTML для RAG? — вопрос с собеседования</title>
+<meta name="description" content="Извлечь текст со структурой: заголовки, списки, таблицы — для HTML это разметка, для PDF — библиотеки разбора (pypdf, pdfplumber, unstructured…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/document-parsing/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/document-parsing/">
+<meta property="og:title" content="Как подготовить документы PDF и HTML для RAG? — вопрос с собеседования">
+<meta property="og:description" content="Извлечь текст со структурой: заголовки, списки, таблицы — для HTML это разметка, для PDF — библиотеки разбора (pypdf, pdfplumber, unstructured…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как подготовить документы PDF и HTML для RAG?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как подготовить документы PDF и HTML для RAG?"}]}</script>
+  <h1>Как подготовить документы PDF и HTML для RAG?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">RAG</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как извлечь текст из PDF для RAG?</li><li>Какие метаданные хранить у фрагментов?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Извлечь <b>текст со структурой</b>: заголовки, списки, таблицы — для HTML это разметка, для PDF — библиотеки разбора (pypdf, pdfplumber, unstructured, docling) или OCR для сканов. Убрать <b>мусор</b>: меню, колонтитулы, номера страниц, повторяющиеся блоки. Разбить на <b>фрагменты с перекрытием</b>, сохраняя <b>метаданные</b>: источник, адрес, заголовок раздела, страница, дата, права доступа.</p><ul><li>Таблицы при наивном извлечении превращаются в кашу — их обрабатывают отдельно</li><li>Сканы без текстового слоя требуют OCR</li><li>Метаданные нужны для ссылок в ответе, фильтров и обновления индекса</li></ul><p class="extra"><span>А ещё</span> Качество разбора проверяют глазами на выборке документов — до индексации</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>HTML:</b> взять основной контент (без меню и подвала), сохранить иерархию заголовков, преобразовать таблицы в текст или markdown.</p>
+<p><b>PDF:</b></p>
+<ul><li>текстовый слой есть — разбор с учётом колонок и порядка чтения;</li><li>скан — OCR;</li><li>таблицы — специальные инструменты или мультимодальная модель.</li></ul>
+<p><b>Фрагмент:</b></p>
+<pre class="lang-json"><code>{&quot;text&quot;: &quot;…&quot;, &quot;source&quot;: &quot;policy.pdf&quot;, &quot;page&quot;: 4,
+ &quot;section&quot;: &quot;Возврат товара&quot;, &quot;updated&quot;: &quot;2026-09-01&quot;,
+ &quot;acl&quot;: [&quot;support&quot;]}</code></pre>
+<p><b>Проверка.</b> Открыть десяток разобранных документов и сравнить с оригиналом: порядок текста, таблицы, потерянные куски.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Извлечение со структурой и очистка.</li><li>Особые случаи: таблицы, сканы.</li><li>Фрагменты с перекрытием и метаданными.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Склеить весь текст PDF в одну строку и резать по 1000 символов без метаданных</li><li class="no"><span class="mark">✗</span>Сканы можно индексировать как есть — эмбеддинги работают с изображениями PDF</li><li class="no"><span class="mark">✗</span>Колонтитулы и меню стоит оставить — больше текста, лучше поиск</li><li class="ok"><span class="mark">✓</span>Извлечь текст со структурой, очистить от мусора, разбить на фрагменты с перекрытием и сохранить метаданные: источник, раздел, страницу, права</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/chunking/">Как разбивать документы на фрагменты для RAG?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/what-is-rag/">Что такое RAG и как он устроен?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/document-extraction/">Как извлекать данные из сканов и PDF — мультимодальная модель или OCR-конвейер?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как подготовить документы PDF и HTML для RAG?","acceptedAnswer":{"@type":"Answer","text":"Извлечь текст со структурой: заголовки, списки, таблицы — для HTML это разметка, для PDF — библиотеки разбора (pypdf, pdfplumber, unstructured, docling) или OCR для сканов. Убрать мусор: меню, колонтитулы, номера страниц, повторяющиеся блоки. Разбить на фрагменты с перекрытием, сохраняя метаданные: источник, адрес, заголовок раздела, страница, дата, права доступа. Таблицы при наивном извлечении превращаются в кашу — их обрабатывают отдельно Сканы без текстового слоя требуют OCR Метаданные нужны для ссылок в ответе, фильтров и обновления индекса Качество разбора проверяют глазами на выборке документов — до индексации HTML: взять основной контент (без меню и подвала), сохранить иерархию заголовков, преобразовать таблицы в текст или markdown. PDF: - текстовый слой есть — разбор с учётом колонок и порядка чтения; - скан — OCR; - таблицы — специальные инструменты или мультимодальная модель. Фрагмент: Проверка. Открыть десяток разобранных документов и сравнить с оригиналом: порядок текста, таблицы, потерянные куски."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

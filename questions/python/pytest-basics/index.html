@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как писать тесты на pytest — assert, запуск, параметризация? — вопрос с собеседования</title>
+<meta name="description" content="Тест — функция с именем test_… в файле test_.py, проверки — обычный assert: pytest показывает, какие значения не совпали. Запуск — команда pytest…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/pytest-basics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/pytest-basics/">
+<meta property="og:title" content="Как писать тесты на pytest — assert, запуск, параметризация? — вопрос с собеседования">
+<meta property="og:description" content="Тест — функция с именем test_… в файле test_.py, проверки — обычный assert: pytest показывает, какие значения не совпали. Запуск — команда pytest…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Как писать тесты на pytest — assert, запуск, параметризация?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Как писать тесты на pytest — assert, запуск, параметризация?"}]}</script>
+  <h1>Как писать тесты на pytest — assert, запуск, параметризация?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Тестирование</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Чем pytest лучше unittest?</li><li>Как параметризовать тест в pytest?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Тест — функция с именем <b>test_…</b> в файле <b>test_*.py</b>, проверки — обычный <b>assert</b>: pytest показывает, какие значения не совпали. Запуск — команда <b>pytest</b> (или pytest путь::имя_теста). Один тест на много входов — <b>@pytest.mark.parametrize</b>. Ожидаемое исключение — <b>with pytest.raises(ValueError)</b>.</p><ul><li>pytest -x — остановиться на первой ошибке, -k — выбрать тесты по имени</li><li>Тест проверяет одно поведение и не зависит от порядка запуска</li><li>Данные и подготовку выносят в фикстуры</li></ul><p class="extra"><span>А ещё</span> unittest работает в pytest без изменений, но новые тесты проще писать в стиле pytest</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Пример:</b></p>
+<pre class="lang-python"><code>import pytest
+from shop import price_with_discount
+
+@pytest.mark.parametrize(&quot;price, percent, expected&quot;, [
+    (100, 10, 90),
+    (100, 0, 100),
+    (50, 100, 0),
+])
+def test_discount(price, percent, expected):
+    assert price_with_discount(price, percent) == expected
+
+def test_negative_percent():
+    with pytest.raises(ValueError):
+        price_with_discount(100, -5)</code></pre>
+<p><b>Хорошие привычки:</b> имена тестов описывают поведение, один сценарий — один тест, без обращения к сети и реальной базе в модульных тестах, тесты запускаются в CI.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Соглашения об именах и assert.</li><li>Параметризация и pytest.raises.</li><li>Независимость тестов.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Тесты в pytest пишут только классами-наследниками unittest.TestCase</li><li class="ok"><span class="mark">✓</span>Функции test_… с обычным assert, @pytest.mark.parametrize для набора входов и pytest.raises для ожидаемых исключений</li><li class="no"><span class="mark">✗</span>Чтобы проверить исключение, тест должен упасть</li><li class="no"><span class="mark">✗</span>Тесты должны запускаться строго в определённом порядке</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/pytest-fixtures/">Как работают фикстуры pytest и что такое их scope?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/mock-patch/">Как работает unittest.mock.patch и почему патчить нужно там, где объект используется?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/try-except-else-finally/">Как работают try, except, else и finally?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как писать тесты на pytest — assert, запуск, параметризация?","acceptedAnswer":{"@type":"Answer","text":"Тест — функция с именем test_… в файле test_.py, проверки — обычный assert: pytest показывает, какие значения не совпали. Запуск — команда pytest (или pytest путь::имя_теста). Один тест на много входов — @pytest.mark.parametrize. Ожидаемое исключение — with pytest.raises(ValueError). pytest -x — остановиться на первой ошибке, -k — выбрать тесты по имени Тест проверяет одно поведение и не зависит от порядка запуска Данные и подготовку выносят в фикстуры unittest работает в pytest без изменений, но новые тесты проще писать в стиле pytest Пример: Хорошие привычки: имена тестов описывают поведение, один сценарий — один тест, без обращения к сети и реальной базе в модульных тестах, тесты запускаются в CI."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

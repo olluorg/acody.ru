@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое собственные векторы и SVD и как они связаны с PCA и рекомендациями? — вопрос с собеседования</title>
+<meta name="description" content="Собственный вектор матрицы при умножении на неё только растягивается (в λ раз — собственное значение), не меняя направления. SVD раскладывает любую…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/svd-eigen/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/svd-eigen/">
+<meta property="og:title" content="Что такое собственные векторы и SVD и как они связаны с PCA и рекомендациями? — вопрос с собеседования">
+<meta property="og:description" content="Собственный вектор матрицы при умножении на неё только растягивается (в λ раз — собственное значение), не меняя направления. SVD раскладывает любую…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Что такое собственные векторы и SVD и как они связаны с PCA и рекомендациями?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Что такое собственные векторы и SVD и как они связаны с PCA и рекомендациями?"}]}</script>
+  <h1>Что такое собственные векторы и SVD и как они связаны с PCA и рекомендациями?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Основы машинного обучения</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое сингулярное разложение?</li><li>Как PCA связан с SVD?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Собственный вектор</b> матрицы при умножении на неё только <b>растягивается</b> (в λ раз — собственное значение), не меняя направления. <b>SVD</b> раскладывает любую матрицу X = U·Σ·Vᵀ: Σ — сингулярные числа по убыванию, показывающие «важность» направлений. <b>PCA</b> — это SVD центрированных данных: главные компоненты — строки Vᵀ, доля объяснённой дисперсии — квадраты сингулярных чисел. В <b>рекомендациях</b> матрицу «пользователи × товары» приближают произведением низкого ранга — получают <b>векторы вкусов</b> пользователей и <b>векторы свойств</b> товаров.</p><ul><li>Оставив k первых сингулярных чисел, получают лучшее приближение ранга k</li><li>Ковариационная матрица симметрична — её собственные векторы ортогональны</li><li>В рекомендациях пропуски не нули — используют матричную факторизацию (ALS), а не чистый SVD</li></ul><p class="extra"><span>А ещё</span> np.linalg.svd и sklearn TruncatedSVD для разреженных матриц</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Связь с PCA.</b> Центрировать X, сделать SVD. Компоненты — правые сингулярные векторы, проекция данных — U·Σ. Дисперсия по компоненте i пропорциональна σᵢ².</p>
+<p><b>Рекомендации.</b> Матрица оценок R (пользователи × фильмы) приближается P·Qᵀ, где строка P — пользователь в k измерениях, строка Q — фильм. Скалярное произведение — предсказанная оценка. Скрытые измерения часто интерпретируемы: «боевик ↔ драма».</p>
+<p><b>Сжатие.</b> Изображение или эмбеддинги можно сжать, оставив первые k сингулярных компонент.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определение собственного вектора и SVD.</li><li>PCA через SVD, объяснённая дисперсия.</li><li>Матричная факторизация в рекомендациях.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>SVD применим только к квадратным симметричным матрицам</li><li class="ok"><span class="mark">✓</span>SVD раскладывает матрицу на U·Σ·Vᵀ; PCA — это SVD центрированных данных, а низкоранговое приближение матрицы пользователей и товаров даёт их векторы в рекомендациях</li><li class="no"><span class="mark">✗</span>Собственный вектор меняет направление при умножении на матрицу</li><li class="no"><span class="mark">✗</span>В рекомендациях пропущенные оценки корректно считать нулями</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/pca-dimensionality/">Что такое PCA и зачем снижать размерность данных?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/recommender-systems/">Как устроены рекомендательные системы?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/linear-algebra-ml/">Какая математика нужна в машинном обучении и где она применяется?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое собственные векторы и SVD и как они связаны с PCA и рекомендациями?","acceptedAnswer":{"@type":"Answer","text":"Собственный вектор матрицы при умножении на неё только растягивается (в λ раз — собственное значение), не меняя направления. SVD раскладывает любую матрицу X = UΣVᵀ: Σ — сингулярные числа по убыванию, показывающие «важность» направлений. PCA — это SVD центрированных данных: главные компоненты — строки Vᵀ, доля объяснённой дисперсии — квадраты сингулярных чисел. В рекомендациях матрицу «пользователи × товары» приближают произведением низкого ранга — получают векторы вкусов пользователей и векторы свойств товаров. Оставив k первых сингулярных чисел, получают лучшее приближение ранга k Ковариационная матрица симметрична — её собственные векторы ортогональны В рекомендациях пропуски не нули — используют матричную факторизацию (ALS), а не чистый SVD np.linalg.svd и sklearn TruncatedSVD для разреженных матриц Связь с PCA. Центрировать X, сделать SVD. Компоненты — правые сингулярные векторы, проекция данных — UΣ. Дисперсия по компоненте i пропорциональна σᵢ². Рекомендации. Матрица оценок R (пользователи × фильмы) приближается PQᵀ, где строка P — пользователь в k измерениях, строка Q — фильм. Скалярное произведение — предсказанная оценка. Скрытые измерения часто интерпретируемы: «боевик ↔ драма». Сжатие. Изображение или эмбеддинги можно сжать, оставив первые k сингулярных компонент."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

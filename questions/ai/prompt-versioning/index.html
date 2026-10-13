@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как управлять промптами в продакшене — хранение, версии, изменения в команде? — вопрос с собеседования</title>
+<meta name="description" content="Промпт — код: хранится в репозитории как шаблон с переменными, проходит ревью, имеет версию, которая пишется в трассу каждого вызова. Изменение…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/prompt-versioning/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/prompt-versioning/">
+<meta property="og:title" content="Как управлять промптами в продакшене — хранение, версии, изменения в команде? — вопрос с собеседования">
+<meta property="og:description" content="Промпт — код: хранится в репозитории как шаблон с переменными, проходит ревью, имеет версию, которая пишется в трассу каждого вызова. Изменение…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как управлять промптами в продакшене — хранение, версии, изменения в команде?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как управлять промптами в продакшене — хранение, версии, изменения в команде?"}]}</script>
+  <h1>Как управлять промптами в продакшене — хранение, версии, изменения в команде?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Промпты и структурированный вывод</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Где хранить промпты?</li><li>Как безопасно менять промпт?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Промпт — <b>код</b>: хранится в <b>репозитории</b> как шаблон с переменными, проходит <b>ревью</b>, имеет <b>версию</b>, которая пишется в трассу каждого вызова. Изменение промпта или модели — <b>прогон набора оценки</b> в CI с порогами; выкатка — <b>постепенно</b> (на долю трафика или по флагу) с возможностью <b>отката</b>. Неизменную часть промпта ставят в <b>начало</b> — это позволяет кэшировать префикс.</p><ul><li>Шаблоны с явными переменными, а не склейка строк по коду</li><li>Промпт и параметры модели (температура, лимит токенов) версионируются вместе</li><li>Системы управления промптами удобны для не-разработчиков, но изменения всё равно проходят оценку</li></ul><p class="extra"><span>А ещё</span> Без версии в трассе нельзя понять, после какой правки ответы стали хуже</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Структура:</b></p>
+<pre class="lang-text"><code>prompts/
+  support/answer.v12.jinja
+  support/answer.yaml   # модель, температура, лимиты, версия
+eval/
+  support/cases.jsonl</code></pre>
+<p><b>Процесс изменения:</b></p>
+<ol><li>Правка промпта в ветке.</li><li>Прогон набора, сравнение метрик по сценариям с текущей версией.</li><li>Ревью: что изменилось и почему, примеры ответов.</li><li>Выкатка на долю трафика, наблюдение за онлайн-метриками.</li><li>Полная выкатка или откат конфигурацией.</li></ol>
+<p><b>Кэширование.</b> Инструкции и описания инструментов — в начале, пользовательские данные и вопрос — в конце.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Репозиторий, шаблоны, версии, ревью.</li><li>Оценка в CI при изменении.</li><li>Постепенная выкатка и откат.</li><li>Версия в трассе, кэшируемый префикс.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Править промпт прямо в продакшене — так быстрее</li><li class="ok"><span class="mark">✓</span>Шаблоны в репозитории с ревью и версиями, прогон набора оценки при изменении, постепенная выкатка с откатом, версия промпта в каждой трассе</li><li class="no"><span class="mark">✗</span>Версию промпта логировать не нужно: её легко восстановить по датам коммитов</li><li class="no"><span class="mark">✗</span>Переменную часть промпта лучше ставить в начало, чтобы кэш работал</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/prompt-engineering/">Как писать хорошие промпты?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/llm-evaluation/">Как оценивать качество ответов LLM?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-caching/">Как кэшировать запросы к LLM — prompt caching и семантический кэш?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как управлять промптами в продакшене — хранение, версии, изменения в команде?","acceptedAnswer":{"@type":"Answer","text":"Промпт — код: хранится в репозитории как шаблон с переменными, проходит ревью, имеет версию, которая пишется в трассу каждого вызова. Изменение промпта или модели — прогон набора оценки в CI с порогами; выкатка — постепенно (на долю трафика или по флагу) с возможностью отката. Неизменную часть промпта ставят в начало — это позволяет кэшировать префикс. Шаблоны с явными переменными, а не склейка строк по коду Промпт и параметры модели (температура, лимит токенов) версионируются вместе Системы управления промптами удобны для не-разработчиков, но изменения всё равно проходят оценку Без версии в трассе нельзя понять, после какой правки ответы стали хуже Структура: Процесс изменения: 1. Правка промпта в ветке. 2. Прогон набора, сравнение метрик по сценариям с текущей версией. 3. Ревью: что изменилось и почему, примеры ответов. 4. Выкатка на долю трафика, наблюдение за онлайн-метриками. 5. Полная выкатка или откат конфигурацией. Кэширование. Инструкции и описания инструментов — в начале, пользовательские данные и вопрос — в конце."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

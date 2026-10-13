@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как аннотировать списки, словари, необязательные значения и объединения типов? — вопрос с собеседования</title>
+<meta name="description" content="Коллекции: list[int], dict[str, float], set[str], tuple[int, str] (фиксированный) и tuple[int, ...] (любой длины) — встроенные типы в скобках с…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/typing-collections/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/typing-collections/">
+<meta property="og:title" content="Как аннотировать списки, словари, необязательные значения и объединения типов? — вопрос с собеседования">
+<meta property="og:description" content="Коллекции: list[int], dict[str, float], set[str], tuple[int, str] (фиксированный) и tuple[int, ...] (любой длины) — встроенные типы в скобках с…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Как аннотировать списки, словари, необязательные значения и объединения типов?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Как аннотировать списки, словари, необязательные значения и объединения типов?"}]}</script>
+  <h1>Как аннотировать списки, словари, необязательные значения и объединения типов?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Окружение и инструменты</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как написать тип Optional?</li><li>Как аннотировать словарь в Python?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Коллекции: <b>list[int]</b>, <b>dict[str, float]</b>, <b>set[str]</b>, <b>tuple[int, str]</b> (фиксированный) и <b>tuple[int, ...]</b> (любой длины) — встроенные типы в скобках с Python 3.9. Необязательное значение — <b>int | None</b> (3.10+, раньше Optional[int]). Объединение — <b>int | str</b>. Функция — <b>Callable[[int], str]</b>. Неизвестный тип — <b>Any</b>, но он отключает проверку.</p><ul><li>Для параметров удобнее абстрактные типы: Iterable, Sequence, Mapping из collections.abc</li><li>Optional не значит «необязательный аргумент» — это «может быть None»</li><li>Псевдоним длинного типа: UserId = int или type UserId = int (3.12)</li></ul><p class="extra"><span>А ещё</span> Перед использованием значения типа X | None нужно проверить его на None</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Примеры:</b></p>
+<pre class="lang-python"><code>from collections.abc import Iterable
+
+def total(prices: Iterable[float]) -&gt; float: ...
+def find_user(user_id: int) -&gt; dict[str, str] | None: ...
+def parse(value: str | bytes) -&gt; int: ...</code></pre>
+<p><b>Почему Iterable в параметрах.</b> Функции total подойдёт и список, и кортеж, и генератор. А возвращать лучше конкретный тип — list, чтобы вызывающий знал, что получит.</p>
+<p><b>Проверка на None:</b></p>
+<pre class="lang-python"><code>user = find_user(1)
+if user is None:
+    return
+print(user[&quot;name&quot;])  # здесь анализатор знает, что user — dict</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>list[int], dict[str, X], tuple.</li><li>X | None и Optional.</li><li>Абстрактные типы для параметров.</li><li>Сужение типа проверкой на None.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Optional[int] означает, что аргумент можно не передавать</li><li class="no"><span class="mark">✗</span>Аннотация list[int] запрещает интерпретатору класть в список строки</li><li class="ok"><span class="mark">✓</span>list[int], dict[str, float], int | None для значения, которое может быть None, и Iterable для параметров, принимающих любые коллекции</li><li class="no"><span class="mark">✗</span>Any — самый строгий тип, его стоит использовать везде</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/type-hints/">Что такое аннотации типов и проверяются ли они при выполнении?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/typing-generics/">Как в аннотациях Python описать обобщённые типы — TypeVar, Generic, Protocol?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/mypy-basics/">Как подключить проверку типов mypy или pyright к проекту?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как аннотировать списки, словари, необязательные значения и объединения типов?","acceptedAnswer":{"@type":"Answer","text":"Коллекции: list[int], dict[str, float], set[str], tuple[int, str] (фиксированный) и tuple[int, ...] (любой длины) — встроенные типы в скобках с Python 3.9. Необязательное значение — int | None (3.10+, раньше Optional[int]). Объединение — int | str. Функция — Callable[[int], str]. Неизвестный тип — Any, но он отключает проверку. Для параметров удобнее абстрактные типы: Iterable, Sequence, Mapping из collections.abc Optional не значит «необязательный аргумент» — это «может быть None» Псевдоним длинного типа: UserId = int или type UserId = int (3.12) Перед использованием значения типа X | None нужно проверить его на None Примеры: Почему Iterable в параметрах. Функции total подойдёт и список, и кортеж, и генератор. А возвращать лучше конкретный тип — list, чтобы вызывающий знал, что получит. Проверка на None:"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

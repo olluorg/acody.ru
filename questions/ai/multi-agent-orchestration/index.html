@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как устроить систему из оркестратора и агентов-исполнителей и как оценивать её работу? — вопрос с собеседования</title>
+<meta name="description" content="Оркестратор разбивает задачу на подзадачи и раздаёт их исполнителям — агентам с узким набором инструментов и своим контекстом, — затем собирает…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/multi-agent-orchestration/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/multi-agent-orchestration/">
+<meta property="og:title" content="Как устроить систему из оркестратора и агентов-исполнителей и как оценивать её работу? — вопрос с собеседования">
+<meta property="og:description" content="Оркестратор разбивает задачу на подзадачи и раздаёт их исполнителям — агентам с узким набором инструментов и своим контекстом, — затем собирает…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как устроить систему из оркестратора и агентов-исполнителей и как оценивать её работу?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как устроить систему из оркестратора и агентов-исполнителей и как оценивать её работу?"}]}</script>
+  <h1>Как устроить систему из оркестратора и агентов-исполнителей и как оценивать её работу?</h1>
+  <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Инструменты и агенты</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое мультиагентная система?</li><li>Когда нужен оркестратор с подагентами?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>Оркестратор</b> разбивает задачу на подзадачи и раздаёт их <b>исполнителям</b> — агентам с узким набором инструментов и своим контекстом, — затем собирает результаты. Схема оправдана, когда подзадачи <b>независимы</b> (можно параллельно) или требуют <b>разных инструментов и прав</b>; иначе один агент дешевле и надёжнее. Оценивают по <b>итоговому результату</b> задачи, а разбирают — по трассам каждого шага.</p><ul><li>Исполнитель получает чёткое задание и возвращает короткий структурированный итог, а не весь свой контекст</li><li>Стоимость растёт кратно: каждый исполнитель — отдельные вызовы модели</li><li>Ограничения: глубина вложенности, число исполнителей, бюджет токенов и времени на задачу</li></ul><p class="extra"><span>А ещё</span> Частая ошибка — делить на агентов то, что надёжнее сделать фиксированным конвейером</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Когда это нужно.</b> Исследовательская задача («собери обзор рынка по десяти компаниям»), где подзадачи независимы и выполняются параллельно; задача с разными правами (один исполнитель читает недоверенные документы, другой выполняет действия); задача, где контекст одного агента переполняется.</p>
+<p><b>Как устроить:</b></p>
+<ul><li>оркестратор планирует, раздаёт задания и решает, достаточно ли результатов;</li><li>у исполнителя — своё задание, свой набор инструментов и лимиты;</li><li>результат исполнителя — сжатый итог по схеме, чтобы не переполнить контекст оркестратора;</li><li>общее состояние (найденное, решения) — во внешнем хранилище.</li></ul>
+<p><b>Оценка.</b> Метрика — успешность всей задачи на наборе задач с эталонными результатами или проверкой судьёй. Дополнительно — стоимость и время на задачу, число шагов. Отказы разбирают по трассам: плохое планирование, неверное задание исполнителю, ошибка инструмента, потеря информации при сжатии итога. Системную причину исправляют и добавляют задачу в набор.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Когда мультиагентность оправдана, а когда нет.</li><li>Изоляция контекста и прав исполнителей, сжатые итоги.</li><li>Лимиты и стоимость.</li><li>Оценка по итоговому результату и разбор по трассам.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Делить на агентов любую задачу — так каждый шаг становится надёжнее</li><li class="no"><span class="mark">✗</span>Оценивать каждого исполнителя отдельно, итог задачи не важен</li><li class="ok"><span class="mark">✓</span>Подзадачи независимы или требуют разных прав: исполнители с узкими инструментами возвращают сжатые итоги, оценка — по результату всей задачи</li><li class="no"><span class="mark">✗</span>Передавать оркестратору полный контекст каждого исполнителя, чтобы ничего не потерять</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/agent-design/">Как проектировать LLM-агента и почему агенты ломаются?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/tool-calling-agents/">Что такое вызов инструментов (tool calling) и агенты?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-observability/">Как наблюдать за LLM-приложением в продакшене?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как устроить систему из оркестратора и агентов-исполнителей и как оценивать её работу?","acceptedAnswer":{"@type":"Answer","text":"Оркестратор разбивает задачу на подзадачи и раздаёт их исполнителям — агентам с узким набором инструментов и своим контекстом, — затем собирает результаты. Схема оправдана, когда подзадачи независимы (можно параллельно) или требуют разных инструментов и прав; иначе один агент дешевле и надёжнее. Оценивают по итоговому результату задачи, а разбирают — по трассам каждого шага. Исполнитель получает чёткое задание и возвращает короткий структурированный итог, а не весь свой контекст Стоимость растёт кратно: каждый исполнитель — отдельные вызовы модели Ограничения: глубина вложенности, число исполнителей, бюджет токенов и времени на задачу Частая ошибка — делить на агентов то, что надёжнее сделать фиксированным конвейером Когда это нужно. Исследовательская задача («собери обзор рынка по десяти компаниям»), где подзадачи независимы и выполняются параллельно; задача с разными правами (один исполнитель читает недоверенные документы, другой выполняет действия); задача, где контекст одного агента переполняется. Как устроить: - оркестратор планирует, раздаёт задания и решает, достаточно ли результатов; - у исполнителя — своё задание, свой набор инструментов и лимиты; - результат исполнителя — сжатый итог по схеме, чтобы не переполнить контекст оркестратора; - общее состояние (найденное, решения) — во внешнем хранилище. Оценка. Метрика — успешность всей задачи на наборе задач с эталонными результатами или проверкой судьёй. Дополнительно — стоимость и время на задачу, число шагов. Отказы разбирают по трассам: плохое планирование, неверное задание исполнителю, ошибка инструмента, потеря информации при сжатии…"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

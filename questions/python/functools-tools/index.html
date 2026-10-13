@@ -50,7 +50,7 @@ parse_int = partial(int, base=16)
 def render(x): return str(x)
 @render.register
 def _(x: list): return &quot;, &quot;.join(map(render, x))</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>lru_cache и требования к аргументам.</li><li>Ловушка с методами.</li><li>partial, singledispatch, cached_property.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>lru_cache работает с любыми аргументами, включая списки</li><li class="no"><span class="mark">✗</span>partial вызывает функцию с задержкой</li><li class="ok"><span class="mark">✓</span>lru_cache — мемоизация с вытеснением (аргументы хешируемые), partial фиксирует часть аргументов, singledispatch — перегрузка по типу первого аргумента</li><li class="no"><span class="mark">✗</span>lru_cache на методе не влияет на время жизни объектов</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/decorator-params-wraps/">Как написать декоратор с параметрами и зачем нужен functools.wraps?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/dynamic-programming/">Что такое динамическое программирование?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>

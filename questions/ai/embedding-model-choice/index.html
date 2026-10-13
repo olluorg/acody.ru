@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как выбрать модель эмбеддингов для поиска по русскоязычным документам? — вопрос с собеседования</title>
+<meta name="description" content="Начать с публичных рейтингов (MTEB и его русскоязычная часть) для короткого списка кандидатов, а решать замером на своих данных: набор пар «вопрос →…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/embedding-model-choice/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/embedding-model-choice/">
+<meta property="og:title" content="Как выбрать модель эмбеддингов для поиска по русскоязычным документам? — вопрос с собеседования">
+<meta property="og:description" content="Начать с публичных рейтингов (MTEB и его русскоязычная часть) для короткого списка кандидатов, а решать замером на своих данных: набор пар «вопрос →…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как выбрать модель эмбеддингов для поиска по русскоязычным документам?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как выбрать модель эмбеддингов для поиска по русскоязычным документам?"}]}</script>
+  <h1>Как выбрать модель эмбеддингов для поиска по русскоязычным документам?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Эмбеддинги и векторный поиск</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Какую модель эмбеддингов взять для RAG?</li><li>Что такое MTEB?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Начать с <b>публичных рейтингов</b> (MTEB и его русскоязычная часть) для короткого списка кандидатов, а решать <b>замером на своих данных</b>: набор пар «вопрос → нужный фрагмент», метрики recall@k и MRR. Учитывать <b>размерность</b> (память индекса), <b>максимальную длину</b> входа, <b>скорость и стоимость</b>, возможность <b>развернуть у себя</b> и требования модели к <b>префиксам</b> запроса и документа.</p><ul><li>Многоязычные модели (например, семейства e5, bge-m3) часто хорошо работают на русском</li><li>Смена модели эмбеддингов требует переиндексации всех документов</li><li>Некоторые модели требуют префиксов «query:» и «passage:» — без них качество падает</li></ul><p class="extra"><span>А ещё</span> Дообучение эмбеддингов на своих парах может дать заметный прирост в узкой области</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Процедура:</b></p>
+<ol><li>Собрать 100–300 реальных вопросов и отметить нужные фрагменты.</li><li>Выбрать 3–5 кандидатов по рейтингам и требованиям (лицензия, размещение, язык).</li><li>Проиндексировать документы каждой моделью.</li><li>Посчитать recall@5, recall@20, MRR.</li><li>Сравнить с затратами: размер индекса, скорость кодирования.</li></ol>
+<p><b>Детали:</b></p>
+<ul><li>длина входа: длинные фрагменты обрезаются молча;</li><li>размерность: 1024 против 384 — разница в памяти индекса в разы; некоторые модели позволяют укоротить вектор;</li><li>нормализация векторов для косинусного сходства.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Рейтинги как отправная точка, решение — на своём наборе.</li><li>Метрики поиска.</li><li>Размерность, длина входа, стоимость, размещение.</li><li>Переиндексация при смене модели.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Взять первую модель из общего рейтинга, своя проверка не нужна</li><li class="ok"><span class="mark">✓</span>Сузить список по рейтингам, затем сравнить кандидатов на своём наборе вопросов по recall@k и MRR с учётом размерности, длины входа и стоимости</li><li class="no"><span class="mark">✗</span>Выбирать модель с максимальной размерностью вектора — она всегда лучше</li><li class="no"><span class="mark">✗</span>Модель эмбеддингов можно сменить без переиндексации документов</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/embeddings/">Что такое эмбеддинги?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/vector-search/">Как устроен векторный поиск?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/retrieval-metrics/">Какие метрики используют для оценки поиска в RAG — recall@k, MRR, nDCG?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как выбрать модель эмбеддингов для поиска по русскоязычным документам?","acceptedAnswer":{"@type":"Answer","text":"Начать с публичных рейтингов (MTEB и его русскоязычная часть) для короткого списка кандидатов, а решать замером на своих данных: набор пар «вопрос → нужный фрагмент», метрики recall@k и MRR. Учитывать размерность (память индекса), максимальную длину входа, скорость и стоимость, возможность развернуть у себя и требования модели к префиксам запроса и документа. Многоязычные модели (например, семейства e5, bge-m3) часто хорошо работают на русском Смена модели эмбеддингов требует переиндексации всех документов Некоторые модели требуют префиксов «query:» и «passage:» — без них качество падает Дообучение эмбеддингов на своих парах может дать заметный прирост в узкой области Процедура: 1. Собрать 100–300 реальных вопросов и отметить нужные фрагменты. 2. Выбрать 3–5 кандидатов по рейтингам и требованиям (лицензия, размещение, язык). 3. Проиндексировать документы каждой моделью. 4. Посчитать recall@5, recall@20, MRR. 5. Сравнить с затратами: размер индекса, скорость кодирования. Детали: - длина входа: длинные фрагменты обрезаются молча; - размерность: 1024 против 384 — разница в памяти индекса в разы; некоторые модели позволяют укоротить вектор; - нормализация векторов для косинусного сходства."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

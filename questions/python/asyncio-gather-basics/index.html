@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как запустить несколько корутин одновременно и получить их результаты? — вопрос с собеседования</title>
+<meta name="description" content="Точка входа — asyncio.run(main()): создаёт цикл событий и выполняет корутину. Несколько корутин одновременно запускают asyncio.gather(a(), b(), c())…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/asyncio-gather-basics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/asyncio-gather-basics/">
+<meta property="og:title" content="Как запустить несколько корутин одновременно и получить их результаты? — вопрос с собеседования">
+<meta property="og:description" content="Точка входа — asyncio.run(main()): создаёт цикл событий и выполняет корутину. Несколько корутин одновременно запускают asyncio.gather(a(), b(), c())…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Как запустить несколько корутин одновременно и получить их результаты?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Как запустить несколько корутин одновременно и получить их результаты?"}]}</script>
+  <h1>Как запустить несколько корутин одновременно и получить их результаты?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Конкурентность</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как сделать несколько HTTP-запросов параллельно в asyncio?</li><li>Что делает asyncio.run?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Точка входа — <b>asyncio.run(main())</b>: создаёт цикл событий и выполняет корутину. Несколько корутин одновременно запускают <b>asyncio.gather(a(), b(), c())</b> — результаты приходят <b>в том же порядке</b>, что и корутины; с Python 3.11 — <b>asyncio.TaskGroup</b>. Если писать <b>await a(); await b()</b> подряд, они выполнятся <b>по очереди</b>, без выигрыша.</p><ul><li>Выигрыш есть только при ожидании ввода-вывода: сеть, диск, база</li><li>Ограничить число одновременных запросов — asyncio.Semaphore</li><li>Внутри корутин нужны асинхронные библиотеки: httpx, aiohttp, asyncpg</li></ul><p class="extra"><span>А ещё</span> Вызов корутины без await ничего не выполняет — Python предупредит «coroutine was never awaited»</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Пример:</b></p>
+<pre class="lang-python"><code>import asyncio, httpx
+
+async def fetch(client, url):
+    r = await client.get(url, timeout=10)
+    return r.status_code
+
+async def main(urls):
+    async with httpx.AsyncClient() as client:
+        return await asyncio.gather(*(fetch(client, u) for u in urls))
+
+print(asyncio.run(main([&quot;https://a.ru&quot;, &quot;https://b.ru&quot;])))</code></pre>
+<p>Десять запросов по секунде каждый займут около секунды, а не десять: пока один ждёт ответа, цикл переключается на другие.</p>
+<p><b>Ограничение параллельности:</b></p>
+<pre class="lang-python"><code>sem = asyncio.Semaphore(5)
+async def limited(client, url):
+    async with sem:
+        return await fetch(client, url)</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>asyncio.run как точка входа.</li><li>gather или TaskGroup для одновременного запуска.</li><li>Последовательные await не дают выигрыша.</li><li>Ограничение параллельности семафором.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Написать await для каждой корутины подряд — они выполнятся одновременно</li><li class="ok"><span class="mark">✓</span>asyncio.gather или TaskGroup внутри корутины, запущенной через asyncio.run; результаты gather приходят в порядке корутин</li><li class="no"><span class="mark">✗</span>Вызвать корутины без await — они запустятся в фоне</li><li class="no"><span class="mark">✗</span>gather ускоряет вычисления на нескольких ядрах процессора</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/async-await/">Как работают async и await?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/asyncio-gather-taskgroup/">Чем asyncio.gather отличается от TaskGroup и как в них обрабатываются ошибки?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/asyncio-blocking-call/">Что будет, если внутри async-функции вызвать блокирующий код?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как запустить несколько корутин одновременно и получить их результаты?","acceptedAnswer":{"@type":"Answer","text":"Точка входа — asyncio.run(main()): создаёт цикл событий и выполняет корутину. Несколько корутин одновременно запускают asyncio.gather(a(), b(), c()) — результаты приходят в том же порядке, что и корутины; с Python 3.11 — asyncio.TaskGroup. Если писать await a(); await b() подряд, они выполнятся по очереди, без выигрыша. Выигрыш есть только при ожидании ввода-вывода: сеть, диск, база Ограничить число одновременных запросов — asyncio.Semaphore Внутри корутин нужны асинхронные библиотеки: httpx, aiohttp, asyncpg Вызов корутины без await ничего не выполняет — Python предупредит «coroutine was never awaited» Пример: Десять запросов по секунде каждый займут около секунды, а не десять: пока один ждёт ответа, цикл переключается на другие. Ограничение параллельности:"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

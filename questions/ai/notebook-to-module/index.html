@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как перенести код из Jupyter-ноутбука в рабочий проект? — вопрос с собеседования</title>
+<meta name="description" content="Ноутбук хорош для исследования, но плох для работы: скрытое состояние (порядок ячеек), нет тестов, сложное ревью, параметры зашиты в код. Перенос…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/notebook-to-module/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/notebook-to-module/">
+<meta property="og:title" content="Как перенести код из Jupyter-ноутбука в рабочий проект? — вопрос с собеседования">
+<meta property="og:description" content="Ноутбук хорош для исследования, но плох для работы: скрытое состояние (порядок ячеек), нет тестов, сложное ревью, параметры зашиты в код. Перенос…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как перенести код из Jupyter-ноутбука в рабочий проект?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как перенести код из Jupyter-ноутбука в рабочий проект?"}]}</script>
+  <h1>Как перенести код из Jupyter-ноутбука в рабочий проект?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">MLOps и модели в продакшене</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему ноутбук нельзя отдавать в продакшен?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Ноутбук хорош для <b>исследования</b>, но плох для работы: скрытое состояние (порядок ячеек), нет тестов, сложное ревью, параметры зашиты в код. Перенос: вынести логику в <b>функции</b> в модулях (загрузка, признаки, обучение, оценка), параметры — в <b>конфигурацию</b>, точку входа — в <b>скрипт</b> с аргументами, добавить <b>тесты</b> на признаки и обработку данных, зависимости — в lock-файл. Ноутбук остаётся для анализа и <b>импортирует</b> функции из модулей.</p><ul><li>Функции признаков должны быть одни и те же при обучении и в сервисе</li><li>Пути и константы — не в коде, а в конфигурации</li><li>Тест на маленьком наборе данных ловит поломки до долгого обучения</li></ul><p class="extra"><span>А ещё</span> Инструменты: nbconvert для черновика, но структура пишется руками</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Структура проекта:</b></p>
+<pre class="lang-text"><code>churn/
+  data.py       # загрузка и очистка
+  features.py   # признаки
+  train.py      # обучение, точка входа
+  evaluate.py   # метрики
+configs/train.yaml
+tests/test_features.py
+notebooks/eda.ipynb   # импортирует churn.*</code></pre>
+<p><b>Порядок:</b> сначала выделить функции признаков (их будет использовать сервис), покрыть тестами на крайних случаях (пропуски, пустые группы), затем обучение и оценку.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Проблемы ноутбуков в продакшене.</li><li>Функции, модули, конфигурация, точка входа.</li><li>Тесты и общий код признаков.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Вынести логику в функции модулей, параметры в конфигурацию, точку входа в скрипт, добавить тесты; ноутбук импортирует функции</li><li class="no"><span class="mark">✗</span>Запускать ноутбук в продакшене по расписанию как есть</li><li class="no"><span class="mark">✗</span>Скопировать все ячейки подряд в один файл main.py без изменений</li><li class="no"><span class="mark">✗</span>Тесты для кода признаков не нужны — модель всё равно обучается</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/reproducibility-seeds/">Как сделать ML-эксперимент воспроизводимым?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/pytest-basics/">Как писать тесты на pytest — assert, запуск, параметризация?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/name-main/">Зачем нужна конструкция if __name__ == &quot;__main__&quot;?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как перенести код из Jupyter-ноутбука в рабочий проект?","acceptedAnswer":{"@type":"Answer","text":"Ноутбук хорош для исследования, но плох для работы: скрытое состояние (порядок ячеек), нет тестов, сложное ревью, параметры зашиты в код. Перенос: вынести логику в функции в модулях (загрузка, признаки, обучение, оценка), параметры — в конфигурацию, точку входа — в скрипт с аргументами, добавить тесты на признаки и обработку данных, зависимости — в lock-файл. Ноутбук остаётся для анализа и импортирует функции из модулей. Функции признаков должны быть одни и те же при обучении и в сервисе Пути и константы — не в коде, а в конфигурации Тест на маленьком наборе данных ловит поломки до долгого обучения Инструменты: nbconvert для черновика, но структура пишется руками Структура проекта: Порядок: сначала выделить функции признаков (их будет использовать сервис), покрыть тестами на крайних случаях (пропуски, пустые группы), затем обучение и оценку."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

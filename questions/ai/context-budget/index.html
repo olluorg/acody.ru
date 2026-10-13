@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как спланировать бюджет контекста и учесть эффект «потери середины»? — вопрос с собеседования</title>
+<meta name="description" content="Контекст делят между системным промптом, историей, найденными документами, результатами инструментов и резервом под ответ; у каждой части — свой…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/context-budget/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/context-budget/">
+<meta property="og:title" content="Как спланировать бюджет контекста и учесть эффект «потери середины»? — вопрос с собеседования">
+<meta property="og:description" content="Контекст делят между системным промптом, историей, найденными документами, результатами инструментов и резервом под ответ; у каждой части — свой…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как спланировать бюджет контекста и учесть эффект «потери середины»?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как спланировать бюджет контекста и учесть эффект «потери середины»?"}]}</script>
+  <h1>Как спланировать бюджет контекста и учесть эффект «потери середины»?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Промпты и структурированный вывод</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое lost in the middle?</li><li>Как собирать промпт из истории и документов?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Контекст делят между <b>системным промптом</b>, <b>историей</b>, <b>найденными документами</b>, <b>результатами инструментов</b> и <b>резервом под ответ</b>; у каждой части — свой лимит, а при переполнении заранее известно, что сокращать (старую историю — в резюме, документы — меньше и лучше отобранные). Модели хуже используют информацию <b>в середине</b> длинного контекста, чем в начале и конце, поэтому <b>самое важное</b> ставят ближе к краям — например, вопрос пользователя и ключевые инструкции после документов.</p><ul><li>Резерв под ответ обязателен — иначе ответ обрежется</li><li>Больше документов не всегда лучше: шум отвлекает модель</li><li>Неизменную часть держат в начале — это также позволяет кэшировать префикс</li></ul><p class="extra"><span>А ещё</span> Эффект зависит от модели — проверяют на своём наборе, меняя порядок фрагментов</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Пример бюджета для окна 32 тысячи токенов:</b></p>
+<ul><li>системный промпт — 1,5 тысячи;</li><li>инструменты и их описания — 2 тысячи;</li><li>история — до 6 тысяч, старшее — резюме;</li><li>документы — до 16 тысяч, 8–10 лучших фрагментов;</li><li>ответ — резерв 2 тысячи.</li></ul>
+<p><b>Порядок:</b> неизменные инструкции → документы → история → текущий вопрос с напоминанием формата. Так кэшируется начало, а вопрос стоит в конце, где модель внимательнее.</p>
+<p><b>Проверка.</b> Набор вопросов, где нужный факт ставится в разные позиции контекста, — видно, как падает точность в середине.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Разделение контекста и резерв под ответ.</li><li>Правила сокращения при переполнении.</li><li>Lost in the middle и порядок частей.</li><li>Связь с кэшированием префикса.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Заполнять окно документами до конца — чем больше контекста, тем точнее ответ</li><li class="ok"><span class="mark">✓</span>Разделить контекст на части с лимитами и резервом под ответ, сокращать по правилам, а важное ставить ближе к началу и концу</li><li class="no"><span class="mark">✗</span>Модель одинаково внимательна ко всем позициям контекста</li><li class="no"><span class="mark">✗</span>Вопрос пользователя лучше всегда ставить в середину между документами</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/tokens-context-window/">Что такое токены и контекстное окно LLM?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/long-context-vs-rag/">Зачем RAG, если у моделей контекст на сотни тысяч токенов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/conversation-memory/">Как реализовать память диалога и долговременную память ассистента?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как спланировать бюджет контекста и учесть эффект «потери середины»?","acceptedAnswer":{"@type":"Answer","text":"Контекст делят между системным промптом, историей, найденными документами, результатами инструментов и резервом под ответ; у каждой части — свой лимит, а при переполнении заранее известно, что сокращать (старую историю — в резюме, документы — меньше и лучше отобранные). Модели хуже используют информацию в середине длинного контекста, чем в начале и конце, поэтому самое важное ставят ближе к краям — например, вопрос пользователя и ключевые инструкции после документов. Резерв под ответ обязателен — иначе ответ обрежется Больше документов не всегда лучше: шум отвлекает модель Неизменную часть держат в начале — это также позволяет кэшировать префикс Эффект зависит от модели — проверяют на своём наборе, меняя порядок фрагментов Пример бюджета для окна 32 тысячи токенов: - системный промпт — 1,5 тысячи; - инструменты и их описания — 2 тысячи; - история — до 6 тысяч, старшее — резюме; - документы — до 16 тысяч, 8–10 лучших фрагментов; - ответ — резерв 2 тысячи. Порядок: неизменные инструкции → документы → история → текущий вопрос с напоминанием формата. Так кэшируется начало, а вопрос стоит в конце, где модель внимательнее. Проверка. Набор вопросов, где нужный факт ставится в разные позиции контекста, — видно, как падает точность в середине."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

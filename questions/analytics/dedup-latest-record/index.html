@@ -54,7 +54,7 @@ DELETE FROM users WHERE id IN (
     SELECT id, ROW_NUMBER() OVER (PARTITION BY email ORDER BY updated_at DESC, id DESC) rn
     FROM users) t
   WHERE rn &gt; 1);</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Поиск через GROUP BY HAVING.</li><li>Выбор версии через ROW_NUMBER.</li><li>Определение ключа и предотвращение повторения.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>SELECT DISTINCT * всегда оставляет последнюю версию записи</li><li class="ok"><span class="mark">✓</span>ROW_NUMBER() OVER (PARTITION BY ключ ORDER BY updated_at DESC) и оставить rn = 1</li><li class="no"><span class="mark">✗</span>GROUP BY ключ с MAX по каждой колонке отдельно</li><li class="no"><span class="mark">✗</span>Порядок выбора версии определять не нужно</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/top-n-per-group/">Как выбрать топ-N записей в каждой группе, например три самых дорогих заказа каждого клиента?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/join-fanout/">Почему после JOIN суммы в отчёте оказались больше, чем должны быть?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>

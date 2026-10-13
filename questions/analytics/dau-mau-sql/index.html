@@ -50,7 +50,7 @@ JOIN events e
   ON e.event_date &gt;  d.day - INTERVAL &#x27;30 day&#x27;
  AND e.event_date &lt;= d.day
 GROUP BY d.day;</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Подсчёт DAU и MAU.</li><li>Почему уникальные неаддитивны.</li><li>Скользящее окно и приблизительные методы.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Скользящий MAU — сумма DAU за 30 дней</li><li class="no"><span class="mark">✗</span>DAU — COUNT(*) событий за день</li><li class="ok"><span class="mark">✓</span>DAU — COUNT(DISTINCT user_id) по дням; скользящий MAU нельзя получить суммой DAU, нужны уникальные за окно</li><li class="no"><span class="mark">✗</span>Stickiness = MAU / DAU</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/dau-mau-stickiness/">Что такое DAU, MAU и stickiness и как ими пользоваться?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/window-functions/">Что такое оконные функции в SQL и чем они отличаются от GROUP BY?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>

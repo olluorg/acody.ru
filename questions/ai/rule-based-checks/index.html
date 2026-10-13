@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какие проверки ответов LLM можно автоматизировать без модели-судьи? — вопрос с собеседования</title>
+<meta name="description" content="Многое проверяется обычным кодом: формат (валидный JSON по схеме, длина ответа), наличие нужных фактов (подстрока, число, дата), отсутствие…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/rule-based-checks/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/rule-based-checks/">
+<meta property="og:title" content="Какие проверки ответов LLM можно автоматизировать без модели-судьи? — вопрос с собеседования">
+<meta property="og:description" content="Многое проверяется обычным кодом: формат (валидный JSON по схеме, длина ответа), наличие нужных фактов (подстрока, число, дата), отсутствие…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Какие проверки ответов LLM можно автоматизировать без модели-судьи?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Какие проверки ответов LLM можно автоматизировать без модели-судьи?"}]}</script>
+  <h1>Какие проверки ответов LLM можно автоматизировать без модели-судьи?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Оценка качества</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как проверять ответы LLM кодом?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Многое проверяется <b>обычным кодом</b>: <b>формат</b> (валидный JSON по схеме, длина ответа), <b>наличие нужных фактов</b> (подстрока, число, дата), <b>отсутствие запрещённого</b> (обещания скидок, контакты конкурентов, персональные данные), <b>вызван ли нужный инструмент</b> с правильными аргументами, <b>ссылки</b> только на переданные источники, <b>язык</b> ответа. Такие проверки <b>дешёвые, быстрые и детерминированные</b> — их ставят первыми, а судью — только туда, где нужна оценка смысла.</p><ul><li>Точное совпадение подходит для классификации и извлечения полей</li><li>Для чисел — сравнение с допуском и после нормализации формата</li><li>Регулярные выражения ловят телефоны, email, номера карт в ответе</li></ul><p class="extra"><span>А ещё</span> Если проверку можно написать кодом — пишите кодом, а не судьёй</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Примеры проверок:</b></p>
+<pre class="lang-python"><code>def check(answer, case):
+    assert json.loads(answer.text)          # формат
+    for fact in case[&quot;contains&quot;]:
+        assert fact in answer.text            # нужный факт
+    assert not re.search(r&quot;\+7\d{10}&quot;, answer.text)  # нет телефонов
+    assert answer.tool == case.get(&quot;tool&quot;)  # нужный инструмент</code></pre>
+<p><b>Отчёт:</b> доля прошедших примеров по каждой проверке и сценарию. Упавшие примеры показываются с ответом — их разбирают глазами.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Формат, факты, запреты, инструменты, ссылки.</li><li>Дешевизна и детерминированность.</li><li>Судья — только для смысловой оценки.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Несколько верных вариантов. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Валидность JSON и соответствие схеме</li><li class="ok"><span class="mark">✓</span>Наличие нужного факта или числа в ответе</li><li class="ok"><span class="mark">✓</span>Вызов нужного инструмента с правильными аргументами</li><li class="no"><span class="mark">✗</span>Насколько вежливо и убедительно звучит ответ</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/eval-set-basics/">Как собрать первый набор примеров для оценки LLM-функции?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/llm-evaluation/">Как оценивать качество ответов LLM?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/structured-output/">Как получить от LLM ответ в строгом формате, например JSON?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Какие проверки ответов LLM можно автоматизировать без модели-судьи?","acceptedAnswer":{"@type":"Answer","text":"Многое проверяется обычным кодом: формат (валидный JSON по схеме, длина ответа), наличие нужных фактов (подстрока, число, дата), отсутствие запрещённого (обещания скидок, контакты конкурентов, персональные данные), вызван ли нужный инструмент с правильными аргументами, ссылки только на переданные источники, язык ответа. Такие проверки дешёвые, быстрые и детерминированные — их ставят первыми, а судью — только туда, где нужна оценка смысла. Точное совпадение подходит для классификации и извлечения полей Для чисел — сравнение с допуском и после нормализации формата Регулярные выражения ловят телефоны, email, номера карт в ответе Если проверку можно написать кодом — пишите кодом, а не судьёй Примеры проверок: Отчёт: доля прошедших примеров по каждой проверке и сценарию. Упавшие примеры показываются с ответом — их разбирают глазами."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

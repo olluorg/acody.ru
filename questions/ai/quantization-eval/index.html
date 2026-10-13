@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как проверить, что квантованная или дистиллированная модель достаточно хороша для вашей задачи? — вопрос с собеседования</title>
+<meta name="description" content="Сравнивать на своём наборе оценки, а не по общим бенчмаркам: прогнать исходную и сжатую модель с одинаковыми промптами и параметрами и посмотреть…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/ai/quantization-eval/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/ai/quantization-eval/">
+<meta property="og:title" content="Как проверить, что квантованная или дистиллированная модель достаточно хороша для вашей задачи? — вопрос с собеседования">
+<meta property="og:description" content="Сравнивать на своём наборе оценки, а не по общим бенчмаркам: прогнать исходную и сжатую модель с одинаковыми промптами и параметрами и посмотреть…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как проверить, что квантованная или дистиллированная модель достаточно хороша для вашей задачи?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как проверить, что квантованная или дистиллированная модель достаточно хороша для вашей задачи?"}]}</script>
+  <h1>Как проверить, что квантованная или дистиллированная модель достаточно хороша для вашей задачи?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Дообучение</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как сравнить модель до и после квантизации?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Сравнивать на <b>своём наборе оценки</b>, а не по общим бенчмаркам: прогнать исходную и сжатую модель с <b>одинаковыми промптами и параметрами</b> и посмотреть качество <b>по сценариям</b>, а также <b>задержку, пропускную способность и память</b> на целевом железе. Потери часто проявляются на <b>сложных и редких</b> случаях: длинный контекст, рассуждения, строгий формат, русский язык — их обязательно включают в набор.</p><ul><li>Средняя метрика может почти не измениться при провале в одном сценарии</li><li>Проверить долю ошибок формата (JSON) — сжатые модели чаще ломают структуру</li><li>Сравнивать выигрыш по стоимости с потерей качества в деньгах</li></ul><p class="extra"><span>А ещё</span> Квантизация 8 бит обычно почти без потерь, 4 бита — заметнее на малых моделях</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Процедура:</b></p>
+<ol><li>Зафиксировать набор, промпты, параметры генерации.</li><li>Прогнать исходную модель — базовая линия.</li><li>Прогнать сжатые варианты (int8, 4 бита разными методами, дистиллированную).</li><li>Сравнить метрики по сценариям, долю ошибок формата, отказов.</li><li>Измерить скорость генерации, время до первого токена, память и пропускную способность под нагрузкой.</li><li>Решить: выигрыш в стоимости против потерь качества.</li></ol>
+<p><b>Тонкости.</b> Для дистилляции — проверить, не сузилась ли модель только под обучающие примеры: добавить в набор запросы вне их распределения.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Свой набор и одинаковые условия.</li><li>Метрики по сценариям, сложные случаи.</li><li>Скорость и память на целевом железе.</li><li>Решение через баланс стоимости и качества.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Достаточно сравнить модели по общему публичному бенчмарку</li><li class="ok"><span class="mark">✓</span>Прогнать обе модели на своём наборе в одинаковых условиях, сравнить по сценариям, включая сложные случаи, а также задержку и память на целевом железе</li><li class="no"><span class="mark">✗</span>Если средняя метрика не изменилась, модель годится для всех сценариев</li><li class="no"><span class="mark">✗</span>Квантизация никогда не влияет на качество, проверка не нужна</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/quantization/">Что такое квантизация модели и чем приходится за неё платить?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/distillation/">Что такое дистилляция модели?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-evaluation/">Как оценивать качество ответов LLM?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как проверить, что квантованная или дистиллированная модель достаточно хороша для вашей задачи?","acceptedAnswer":{"@type":"Answer","text":"Сравнивать на своём наборе оценки, а не по общим бенчмаркам: прогнать исходную и сжатую модель с одинаковыми промптами и параметрами и посмотреть качество по сценариям, а также задержку, пропускную способность и память на целевом железе. Потери часто проявляются на сложных и редких случаях: длинный контекст, рассуждения, строгий формат, русский язык — их обязательно включают в набор. Средняя метрика может почти не измениться при провале в одном сценарии Проверить долю ошибок формата (JSON) — сжатые модели чаще ломают структуру Сравнивать выигрыш по стоимости с потерей качества в деньгах Квантизация 8 бит обычно почти без потерь, 4 бита — заметнее на малых моделях Процедура: 1. Зафиксировать набор, промпты, параметры генерации. 2. Прогнать исходную модель — базовая линия. 3. Прогнать сжатые варианты (int8, 4 бита разными методами, дистиллированную). 4. Сравнить метрики по сценариям, долю ошибок формата, отказов. 5. Измерить скорость генерации, время до первого токена, память и пропускную способность под нагрузкой. 6. Решить: выигрыш в стоимости против потерь качества. Тонкости. Для дистилляции — проверить, не сузилась ли модель только под обучающие примеры: добавить в набор запросы вне их распределения."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как подключить проверку типов mypy или pyright к проекту? — вопрос с собеседования</title>
+<meta name="description" content="mypy и pyright — статические анализаторы: читают код и аннотации без запуска и находят несоответствия типов (передали str вместо int, забыли…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/python/mypy-basics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/python/mypy-basics/">
+<meta property="og:title" content="Как подключить проверку типов mypy или pyright к проекту? — вопрос с собеседования">
+<meta property="og:description" content="mypy и pyright — статические анализаторы: читают код и аннотации без запуска и находят несоответствия типов (передали str вместо int, забыли…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Как подключить проверку типов mypy или pyright к проекту?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Как подключить проверку типов mypy или pyright к проекту?"}]}</script>
+  <h1>Как подключить проверку типов mypy или pyright к проекту?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Окружение и инструменты</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что такое mypy?</li><li>Как читать ошибки mypy?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>mypy</b> и <b>pyright</b> — статические анализаторы: читают код и аннотации <b>без запуска</b> и находят несоответствия типов (передали str вместо int, забыли проверить None, вызвали несуществующий метод). Ставят как <b>зависимость разработки</b>, настраивают в <b>pyproject.toml</b> и запускают <b>в CI</b>, чтобы ошибки не попадали в основную ветку. Строгость повышают постепенно: сначала новые модули, потом весь проект.</p><ul><li>Код без аннотаций mypy по умолчанию почти не проверяет</li><li>Для библиотек без типов ставят пакеты stubs (types-requests)</li><li># type: ignore[код] — точечное отключение с указанием причины</li></ul><p class="extra"><span>А ещё</span> pyright встроен в редакторы (Pylance) и показывает ошибки прямо при наборе</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Настройка:</b></p>
+<pre class="lang-toml"><code>[tool.mypy]
+python_version = &quot;3.12&quot;
+strict = true</code></pre>
+<pre class="lang-bash"><code>mypy src/</code></pre>
+<p><b>Пример ошибки:</b></p>
+<pre class="lang-text"><code>app.py:12: error: Item &quot;None&quot; of &quot;dict[str, str] | None&quot; has no attribute &quot;get&quot;</code></pre>
+<p>Значит, функция может вернуть None, а код использует результат без проверки. Исправление — проверить на None или изменить контракт функции.</p>
+<p><b>Внедрение в существующий проект:</b> включить проверку в CI без strict, исправить ошибки, затем включать strict по модулям.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Статическая проверка без запуска.</li><li>Настройка и запуск в CI.</li><li>Stubs и постепенное внедрение.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>mypy проверяет типы во время выполнения программы</li><li class="no"><span class="mark">✗</span>mypy запускают только вручную на ноутбуке разработчика</li><li class="ok"><span class="mark">✓</span>Анализатор читает код и аннотации без запуска; его ставят как зависимость разработки, настраивают в pyproject.toml и запускают в CI</li><li class="no"><span class="mark">✗</span>mypy одинаково строго проверяет код без аннотаций</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/type-hints/">Что такое аннотации типов и проверяются ли они при выполнении?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/typing-collections/">Как аннотировать списки, словари, необязательные значения и объединения типов?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/venv-pip/">Зачем нужно виртуальное окружение и как управлять зависимостями?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как подключить проверку типов mypy или pyright к проекту?","acceptedAnswer":{"@type":"Answer","text":"mypy и pyright — статические анализаторы: читают код и аннотации без запуска и находят несоответствия типов (передали str вместо int, забыли проверить None, вызвали несуществующий метод). Ставят как зависимость разработки, настраивают в pyproject.toml и запускают в CI, чтобы ошибки не попадали в основную ветку. Строгость повышают постепенно: сначала новые модули, потом весь проект. Код без аннотаций mypy по умолчанию почти не проверяет Для библиотек без типов ставят пакеты stubs (types-requests) # type: ignore[код] — точечное отключение с указанием причины pyright встроен в редакторы (Pylance) и показывает ошибки прямо при наборе Настройка: Пример ошибки: Значит, функция может вернуть None, а код использует результат без проверки. Исправление — проверить на None или изменить контракт функции. Внедрение в существующий проект: включить проверку в CI без strict, исправить ошибки, затем включать strict по модулям."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

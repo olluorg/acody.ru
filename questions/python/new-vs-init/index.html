@@ -46,7 +46,7 @@
         return super().__new__(cls, value)
 
 t = Celsius(21.5)   # __init__ float тут не помог бы: значение уже задано</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Создание против инициализации.</li><li>Когда нужен __new__.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>__new__ создаёт и возвращает экземпляр, __init__ инициализирует уже созданный и ничего не возвращает</li><li class="no"><span class="mark">✗</span>__init__ вызывается раньше __new__</li><li class="no"><span class="mark">✗</span>Подкласс str инициализируют, меняя значение в __init__</li><li class="no"><span class="mark">✗</span>__init__ должен возвращать self</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/class-self-init/">Что такое self и __init__ в классе?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/metaclasses/">Что такое метакласс и когда он действительно нужен?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>

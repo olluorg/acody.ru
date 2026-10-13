@@ -54,7 +54,7 @@ SELECT
   COUNT(*) FILTER (WHERE t_buy &gt;= t_cart AND t_cart &gt;= t_view
                      AND t_buy &lt; t_view + INTERVAL &#x27;7 day&#x27;) AS bought
 FROM steps;</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Порядок шагов и окно конверсии.</li><li>Подсчёт по пользователям и доли.</li><li>Проверка корректности трекинга.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Посчитать число событий каждого типа — это и есть воронка</li><li class="ok"><span class="mark">✓</span>Для каждого пользователя проверить прохождение шагов в правильном порядке и в пределах окна, затем считать пользователей на шагах</li><li class="no"><span class="mark">✗</span>Порядок шагов не важен, главное — факт события</li><li class="no"><span class="mark">✗</span>Окно времени между шагами не нужно</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/funnel-analysis/">Как анализировать воронку и искать, где теряются пользователи?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/window-functions/">Что такое оконные функции в SQL и чем они отличаются от GROUP BY?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>

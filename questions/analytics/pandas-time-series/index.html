@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работать с временными рядами в pandas — ресемплинг, скользящие окна, сдвиги? — вопрос с собеседования</title>
+<meta name="description" content="Индекс — DatetimeIndex (pd.to_datetime и set_index). resample(&quot;D&quot;) меняет частоту с агрегатом (события → сумма по дням, дни → недели). rolling(7) …">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/analytics/pandas-time-series/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/analytics/pandas-time-series/">
+<meta property="og:title" content="Как работать с временными рядами в pandas — ресемплинг, скользящие окна, сдвиги? — вопрос с собеседования">
+<meta property="og:description" content="Индекс — DatetimeIndex (pd.to_datetime и set_index). resample(&quot;D&quot;) меняет частоту с агрегатом (события → сумма по дням, дни → недели). rolling(7) …">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=194ea2e11a" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Как работать с временными рядами в pandas — ресемплинг, скользящие окна, сдвиги?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Как работать с временными рядами в pandas — ресемплинг, скользящие окна, сдвиги?"}]}</script>
+  <h1>Как работать с временными рядами в pandas — ресемплинг, скользящие окна, сдвиги?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">Python и pandas</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что делает resample в pandas?</li><li>Как посчитать скользящее среднее в pandas?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Индекс — <b>DatetimeIndex</b> (pd.to_datetime и set_index). <b>resample("D")</b> меняет частоту с агрегатом (события → сумма по дням, дни → недели). <b>rolling(7)</b> — скользящее окно (среднее за 7 последних точек; с индексом времени — rolling("7D")). <b>shift(n)</b> — сдвиг на n периодов, основа <b>лаговых признаков</b>. <b>diff</b> и <b>pct_change</b> — изменения. Часовые пояса — <b>tz_localize / tz_convert</b>.</p><ul><li>Пропущенные дни после resample — NaN; заполнять осознанно (0 для продаж, ffill для цен)</li><li>Признак без утечки: rolling по сдвинутому ряду — shift(1).rolling(7)</li><li>groupby("store").resample(...) — ресемплинг по каждому ряду</li></ul><p class="extra"><span>А ещё</span> Ряд должен быть отсортирован по времени, иначе окна считаются неверно</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Пример: дневные продажи и признаки для прогноза.</b></p>
+<pre class="lang-python"><code>df[&quot;ts&quot;] = pd.to_datetime(df[&quot;ts&quot;])
+daily = (df.set_index(&quot;ts&quot;)
+           .groupby(&quot;store&quot;)[&quot;amount&quot;]
+           .resample(&quot;D&quot;).sum()
+           .reset_index())
+g = daily.groupby(&quot;store&quot;)[&quot;amount&quot;]
+daily[&quot;lag_7&quot;] = g.shift(7)
+daily[&quot;mean_7&quot;] = g.transform(lambda s: s.shift(1).rolling(7).mean())
+daily[&quot;dow&quot;] = daily[&quot;ts&quot;].dt.dayofweek</code></pre>
+<p><b>Утечка горизонта.</b> Если прогноз делается на 7 дней вперёд, все признаки должны использовать данные не позже дня прогноза: лаг меньше горизонта для дальних дней уже недоступен.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>DatetimeIndex, resample, rolling, shift.</li><li>Заполнение пропусков после ресемплинга.</li><li>Лаговые признаки без утечки.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>rolling(7).mean() без сдвига — безопасный признак для прогноза следующего дня</li><li class="no"><span class="mark">✗</span>resample работает с любым индексом, DatetimeIndex не нужен</li><li class="ok"><span class="mark">✓</span>resample меняет частоту с агрегатом, rolling — скользящее окно, shift — сдвиг для лаговых признаков; признаки строят по сдвинутому ряду, чтобы не было утечки</li><li class="no"><span class="mark">✗</span>Пропуски после resample всегда нужно заполнять нулями</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/time-series-forecasting/">Как подойти к задаче прогнозирования временного ряда?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/analytics/pandas-vectorization/">Почему apply и циклы в pandas медленные и как писать быстрее?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/data-leakage/">Что такое утечка данных (data leakage) в машинном обучении?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работать с временными рядами в pandas — ресемплинг, скользящие окна, сдвиги?","acceptedAnswer":{"@type":"Answer","text":"Индекс — DatetimeIndex (pd.to_datetime и set_index). resample(\"D\") меняет частоту с агрегатом (события → сумма по дням, дни → недели). rolling(7) — скользящее окно (среднее за 7 последних точек; с индексом времени — rolling(\"7D\")). shift(n) — сдвиг на n периодов, основа лаговых признаков. diff и pct_change — изменения. Часовые пояса — tz_localize / tz_convert. Пропущенные дни после resample — NaN; заполнять осознанно (0 для продаж, ffill для цен) Признак без утечки: rolling по сдвинутому ряду — shift(1).rolling(7) groupby(\"store\").resample(...) — ресемплинг по каждому ряду Ряд должен быть отсортирован по времени, иначе окна считаются неверно Пример: дневные продажи и признаки для прогноза. Утечка горизонта. Если прогноз делается на 7 дней вперёд, все признаки должны использовать данные не позже дня прогноза: лаг меньше горизонта для дальних дней уже недоступен."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

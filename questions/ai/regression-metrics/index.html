@@ -40,7 +40,7 @@
 <p><b>Выбор:</b></p>
 <ul><li>стоимость ошибки пропорциональна её размеру — MAE;</li><li>большие промахи особенно опасны (прогноз нагрузки, запасы) — RMSE;</li><li>нужно объяснить бизнесу «ошибаемся в среднем на 8%» — MAPE или sMAPE, WAPE (взвешенная, устойчивее);</li><li>сравнить модели на одной задаче — R², но он не говорит, достаточно ли точна модель для решения.</li></ul>
 <p><b>Связь с обучением:</b> минимизация MSE даёт прогноз среднего, минимизация MAE — медианы. Для прогноза интервалов — квантильная функция потерь.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Определения и интерпретация.</li><li>Различие MAE и RMSE.</li><li>Ограничения MAPE и R².</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>RMSE сильнее штрафует большие промахи, MAE устойчивее к выбросам, MAPE ломается около нуля</li><li class="no"><span class="mark">✗</span>MAE всегда больше RMSE</li><li class="no"><span class="mark">✗</span>MAPE симметрична и хорошо работает на значениях около нуля</li><li class="no"><span class="mark">✗</span>R² — средняя абсолютная ошибка в процентах</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/classification-metrics/">Какие метрики качества классификации вы знаете?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/linear-logistic-regression/">Как работают линейная и логистическая регрессия?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>

@@ -54,7 +54,7 @@ SELECT user_id, MIN(d) AS start_day, MAX(d) AS end_day, COUNT(*) AS streak
 FROM grp
 GROUP BY user_id, island
 ORDER BY streak DESC;</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Приём «дата минус номер».</li><li>Дедупликация дней.</li><li>Вариант через LAG и нарастающую сумму.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Пронумеровать даты пользователя ROW_NUMBER и вычесть номер из даты — у дней одной серии разность одинакова; группировать по ней</li><li class="no"><span class="mark">✗</span>Найти MAX и MIN даты пользователя — их разность и есть самая длинная серия</li><li class="no"><span class="mark">✗</span>Дубли дат удалять не нужно</li><li class="no"><span class="mark">✗</span>Задача решается только циклом в Python</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/window-functions/">Что такое оконные функции в SQL и чем они отличаются от GROUP BY?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
