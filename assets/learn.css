@@ -60,3 +60,4 @@
 .lesson-check { background: var(--surface); border: 1px solid var(--line-2); border-radius: 16px; padding: 18px 22px; }
 .lesson-check h2 { margin-top: 0; }
 .covers .lvl { margin-left: 6px; }
+.hero-bank h3.area { margin: 22px 0 10px; font-size: 15px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-2); }
