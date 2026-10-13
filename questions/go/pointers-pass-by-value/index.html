@@ -47,7 +47,7 @@ func renameP(u *User)   { u.Name = &quot;Петя&quot; }   // меняет ор
 u := User{Name: &quot;Вася&quot;}
 rename(u)    // u.Name == &quot;Вася&quot;
 renameP(&amp;u)  // u.Name == &quot;Петя&quot;</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Передача по значению всегда.</li><li>Указатели для изменения и больших структур.</li><li>Почему срезы и мапы ведут себя как ссылки.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Структуры передаются по ссылке автоматически</li><li class="ok"><span class="mark">✓</span>Всё передаётся по значению; чтобы изменить объект вызывающего, передают указатель; срезы, мапы и каналы — дескрипторы общих данных</li><li class="no"><span class="mark">✗</span>В Go есть арифметика указателей</li><li class="no"><span class="mark">✗</span>Возвращать указатель на локальную переменную нельзя</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/value-vs-pointer-receiver/">Когда метод должен иметь получатель-указатель, а когда — значение?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/go/slice-internals/">Как устроен срез (slice) в Go?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/pass-by-value-reference/">Метод принимает StringBuilder и внутри выполняет sb.append(&quot;x&quot;), а затем sb = new StringBuilder(). Что увидит вызывающий код?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>

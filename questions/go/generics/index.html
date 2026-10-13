@@ -54,7 +54,7 @@ func Sum[T Number](xs []T) T {
 
 type Stack[T any] struct{ items []T }
 func (s *Stack[T]) Push(x T) { s.items = append(s.items, x) }</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Параметры типов и ограничения.</li><li>Где применять, а где лучше интерфейсы.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Дженерики заменяют интерфейсы для описания поведения</li><li class="no"><span class="mark">✗</span>Дженерики появились в Go 1.10</li><li class="no"><span class="mark">✗</span>comparable — типы, поддерживающие сортировку</li><li class="ok"><span class="mark">✓</span>Параметры типов с ограничениями-интерфейсами (cmp.Ordered) — для контейнеров и алгоритмов над разными типами; для поведения лучше обычные интерфейсы</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/any-type-assertion/">Что такое any, type assertion и type switch?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/typing-generics/">Как в аннотациях Python описать обобщённые типы — TypeVar, Generic, Protocol?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/generics-wildcards/">Что такое generics в Java и зачем нужен wildcard ? extends / ? super?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>

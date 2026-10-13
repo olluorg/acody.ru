@@ -49,7 +49,7 @@
         h(w, r)
     }
 }</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Когда panic уместен.</li><li>Механика recover через defer.</li><li>Паника в горутине.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>panic — для невозможных ситуаций и ошибок программиста; recover работает только в defer той же горутины</li><li class="no"><span class="mark">✗</span>panic — основной способ вернуть ожидаемую ошибку</li><li class="no"><span class="mark">✗</span>recover перехватывает панику из любой горутины</li><li class="no"><span class="mark">✗</span>Паника в горутине без recover завершает только эту горутину</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/errors-as-values/">Как в Go обрабатывают ошибки и зачем нужны errors.Is, errors.As и %w?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/go/defer/">Как работает defer и в каком порядке выполняются отложенные вызовы?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>

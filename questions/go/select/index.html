@@ -52,7 +52,7 @@ case events &lt;- e:
 default:
     dropped++
 }</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Выбор готовой операции, случайность.</li><li>default и таймауты.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>select выполняет все готовые ветки по порядку</li><li class="ok"><span class="mark">✓</span>select ждёт несколько операций с каналами и выполняет готовую первой, при нескольких — случайную; default делает его неблокирующим</li><li class="no"><span class="mark">✗</span>nil-канал в select всегда готов</li><li class="no"><span class="mark">✗</span>Пустой select{} сразу завершается</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/channels/">Чем буферизованный канал отличается от небуферизованного и что происходит при закрытии канала?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/go/context/">Зачем нужен context.Context?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>

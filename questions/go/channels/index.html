@@ -52,7 +52,7 @@ for w := 0; w &lt; 4; w++ {
 }
 for i := 0; i &lt; 10; i++ { jobs &lt;- i }
 close(jobs)</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Блокировки буферизованного и небуферизованного.</li><li>Поведение закрытого канала.</li><li>Кто закрывает.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Отправка в закрытый канал возвращает false</li><li class="no"><span class="mark">✗</span>Канал должен закрывать получатель</li><li class="no"><span class="mark">✗</span>Буферизованный канал блокирует отправку всегда</li><li class="ok"><span class="mark">✓</span>Небуферизованный — синхронная встреча отправителя и получателя; буферизованный блокирует при полном буфере; из закрытого читается нулевое значение с ok == false, отправка в закрытый — panic</li></ul></details></section>
   <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/go/select/">Как работает select в Go?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/go/goroutine-leak/">Что такое утечка горутин и как её избежать?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/goroutines/">Что такое горутина и чем она отличается от потока ОС?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/stack-queue/">Чем стек отличается от очереди и где они применяются?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>

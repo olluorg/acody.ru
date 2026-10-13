@@ -45,7 +45,7 @@ t := s          // тот же массив
 t[0] = 100      // s[0] тоже 100</code></pre>
 <p><b>Почему массивы редко нужны.</b> Размер известен на этапе компиляции и входит в тип — функцию для <code>[3]int</code> нельзя вызвать с <code>[4]int</code>. Срезы универсальнее.</p>
 <p><b>Где массивы полезны:</b> сравнимость и хешируемость — массив можно сделать ключом мапы; хеши <code>sha256.Sum256</code> возвращают <code>[32]byte</code>; небольшие буферы, которые компилятор может разместить на стеке.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Размер как часть типа.</li><li>Копирование против общего массива.</li><li>Где массивы применяют.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Массив — значение фиксированного размера, размер входит в тип, копируется целиком; срез — дескриптор над массивом с общими данными</li><li class="no"><span class="mark">✗</span>[3]int и [4]int — один и тот же тип</li><li class="no"><span class="mark">✗</span>Передача массива в функцию копирует только указатель</li><li class="no"><span class="mark">✗</span>Срез нельзя расширить через append</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/slice-internals/">Как устроен срез (slice) в Go?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>

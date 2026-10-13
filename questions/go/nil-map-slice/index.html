@@ -45,7 +45,7 @@ _ = m[&quot;x&quot;]           // 0, без паники
 m[&quot;x&quot;] = 1           // panic: assignment to entry in nil map</code></pre>
 <p><b>Почему append работает с nil, а запись в map — нет.</b> append возвращает новый срез и сам выделяет массив. Запись в мапу изменяет существующую структуру по указателю, а у nil-мапы её нет, и вернуть новую мапу оператор присваивания не может.</p>
 <p><b>Поля структур.</b> Структура с полем-мапой после <code>var cfg Config</code> имеет nil-мапу — конструктор или ленивая инициализация перед записью.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Сходство и различия nil и пустого среза.</li><li>Почему nil-map паникует при записи.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>append к nil-срезу вызывает panic</li><li class="no"><span class="mark">✗</span>nil-map нельзя даже читать</li><li class="no"><span class="mark">✗</span>nil-срез и пустой срез одинаково кодируются в JSON</li><li class="ok"><span class="mark">✓</span>nil-срез и пустой оба имеют len 0 и работают с append, но в JSON дают null и []; nil-map можно читать, но запись — panic</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/zero-values/">Что такое нулевые значения в Go?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/go/map-internals/">Как устроена map в Go и какие у неё особенности?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>

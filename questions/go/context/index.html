@@ -49,7 +49,7 @@
         http.Error(w, &quot;timeout&quot;, 504); return
     }
 }</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Отмена и дедлайны через дерево контекстов.</li><li>Передача первым аргументом и cancel.</li><li>Ограничения WithValue.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Context хранят в поле структуры и передают последним аргументом</li><li class="ok"><span class="mark">✓</span>Context переносит отмену, дедлайн и значения запроса; передаётся первым аргументом, а cancel() обязательно вызывают</li><li class="no"><span class="mark">✗</span>Отмена дочернего контекста отменяет родителя</li><li class="no"><span class="mark">✗</span>cancel() можно не вызывать — утечек не будет</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/goroutine-leak/">Что такое утечка горутин и как её избежать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/go/select/">Как работает select в Go?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/asyncio-cancellation/">Как в asyncio работают отмена задач и таймауты?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>

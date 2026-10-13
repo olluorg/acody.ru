@@ -49,7 +49,7 @@ def split(total_kop: int, parts: int) -&gt; list[int]:
 split(10000, 3)            # [3334, 3333, 3333] — в сумме ровно 10000
 Decimal(&quot;2.675&quot;).quantize(Decimal(&quot;0.01&quot;), ROUND_HALF_EVEN)  # 2.68
 round(2.675, 2)            # 2.67 — double хранит 2.67499999…</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Почему не double — двоичное представление.</li><li>Два рабочих варианта: копейки в целом или десятичный тип.</li><li>Явный режим округления и создание BigDecimal из строки.</li><li>Распределение остатка и хранение валюты — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li><code>new BigDecimal(0.1)</code> и сравнение через <code>equals</code>.</li><li>Считать, что <code>float</code> с округлением при выводе «достаточно».</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Деньги удобно хранить в double</li><li class="ok"><span class="mark">✓</span>В целых копейках или десятичном типе (BigDecimal, NUMERIC) с явным округлением и валютой рядом</li><li class="no"><span class="mark">✗</span>Валюту хранить не нужно — она всегда рубли</li><li class="no"><span class="mark">✗</span>float точнее double для денег</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/floating-point/">Почему 0.1 + 0.2 не равно 0.3?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>

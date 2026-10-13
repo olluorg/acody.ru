@@ -41,7 +41,7 @@
 <p><b>Разбиение VPC 10.0.0.0/16 по зонам:</b></p>
 <ul><li>10.0.0.0/20, 10.0.16.0/20, 10.0.32.0/20 — приватные подсети приложений в трёх зонах;</li><li>10.0.48.0/24, 10.0.49.0/24, 10.0.50.0/24 — публичные подсети для балансировщиков и NAT.</li></ul>
 <p><b>Планирование:</b> у каждого окружения и региона свой непересекающийся диапазон; запас под рост (подсети Kubernetes расходуют адреса быстро — каждый под получает IP); документировать распределение.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Смысл префикса и расчёт числа адресов.</li><li>Частные диапазоны.</li><li>Планирование подсетей и пересечения.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>/16 — 16 бит префикса, остаётся 16 бит на адреса — 65 536 адресов; каждый шаг префикса делит сеть пополам</li><li class="no"><span class="mark">✗</span>/16 означает 16 адресов</li><li class="no"><span class="mark">✗</span>/32 — вся сеть интернета</li><li class="no"><span class="mark">✗</span>8.8.0.0/16 — частный диапазон</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/devops/firewall-ports/">Как ограничивать сетевой доступ к серверам и сервисам?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/osi-tcp-ip/">Расскажите про модель OSI и стек TCP/IP.</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>

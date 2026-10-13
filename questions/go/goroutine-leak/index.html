@@ -51,7 +51,7 @@ func fetch(ctx context.Context) (string, error) {
     }
 }
 // исправление: make(chan string, 1) — отправка не заблокируется</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Что такое утечка и типичные причины.</li><li>Как предотвращать.</li><li>Как обнаружить.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Горутина, навсегда заблокированная на канале или вводе-выводе; у каждой должен быть способ завершиться — отмена через context, буферизованный канал</li><li class="no"><span class="mark">✗</span>Горутины завершаются сами при выходе вызывающей функции</li><li class="no"><span class="mark">✗</span>Утечка горутин не занимает память</li><li class="no"><span class="mark">✗</span>Сборщик мусора удаляет заблокированные горутины</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/channels/">Чем буферизованный канал отличается от небуферизованного и что происходит при закрытии канала?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/go/context/">Зачем нужен context.Context?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/go/select/">Как работает select в Go?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>

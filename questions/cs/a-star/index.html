@@ -59,7 +59,7 @@ def a_star(grid, start, goal):
                     g[u], parent[u] = g[v] + 1, v
                     heapq.heappush(heap, (g[u] + h(u), u))
     return g.get(goal)</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Формула f = g + h и роль эвристики.</li><li>Допустимость как условие кратчайшего пути.</li><li>Связь с Дейкстрой (h = 0).</li><li>Примеры эвристик для сетки.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Использовать переоценивающую эвристику и ждать кратчайший путь.</li><li>Брать евклидово расстояние на сетке с 4 направлениями — допустимо, но медленнее манхэттенского.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>A* выбирает вершины по f = g + h, где h — оценка остатка до цели; при допустимой h путь кратчайший</li><li class="no"><span class="mark">✗</span>A* работает только на графах без весов</li><li class="no"><span class="mark">✗</span>A* всегда посещает больше вершин, чем Дейкстра</li><li class="no"><span class="mark">✗</span>Эвристика h может переоценивать расстояние без потери оптимальности</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/dijkstra/">Как работает алгоритм Дейкстры?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/bfs-dfs/">Чем обход в ширину (BFS) отличается от обхода в глубину (DFS)?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>

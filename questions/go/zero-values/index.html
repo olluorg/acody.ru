@@ -50,7 +50,7 @@ var buf bytes.Buffer
 buf.WriteString(&quot;ok&quot;)</code></pre>
 <p><b>Различия nil-типов:</b></p>
 <ul><li>nil-срез: <code>len</code> = 0, <code>range</code> ничего не делает, <code>append</code> работает;</li><li>nil-мапа: чтение даёт нулевое значение, <b>запись — panic</b>;</li><li>nil-канал: отправка и получение блокируются навсегда;</li><li>nil-указатель: обращение к полю — panic.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Нулевые значения разных типов.</li><li>Идея полезного нулевого значения.</li><li>Поведение nil-срезов, мап и каналов.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Неинициализированная переменная содержит мусор из памяти</li><li class="ok"><span class="mark">✓</span>Переменная без инициализации получает нулевое значение типа: 0, "", false, nil; sync.Mutex работает без инициализации</li><li class="no"><span class="mark">✗</span>Нулевое значение строки — nil</li><li class="no"><span class="mark">✗</span>Структуры без инициализации равны nil</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/go/nil-map-slice/">Чем nil-срез отличается от пустого и почему запись в nil-map вызывает panic?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/go/make-vs-new/">Чем make отличается от new в Go?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
