@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что делает CDN и когда он нужен? — вопрос с собеседования</title>
+<meta name="description" content="CDN — сеть серверов по всему миру (или стране), которые кэшируют копии ваших файлов и отдают их пользователю с ближайшего узла. Сайт грузится быстрее…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/cs/cdn-basics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/cs/cdn-basics/">
+<meta property="og:title" content="Что делает CDN и когда он нужен? — вопрос с собеседования">
+<meta property="og:description" content="CDN — сеть серверов по всему миру (или стране), которые кэшируют копии ваших файлов и отдают их пользователю с ближайшего узла. Сайт грузится быстрее…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/cs/">Основы</a> <span>/</span> <span>Что делает CDN и когда он нужен?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://learn.getsotto.ru/questions/cs/"},{"@type":"ListItem","position":3,"name":"Что делает CDN и когда он нужен?"}]}</script>
+  <h1>Что делает CDN и когда он нужен?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Сети</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Зачем сайту CDN?</li><li>Как CDN кэширует файлы?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>CDN</b> — сеть серверов по всему миру (или стране), которые <b>кэшируют</b> копии ваших файлов и отдают их пользователю <b>с ближайшего узла</b>. Сайт грузится быстрее (меньше расстояние и задержка), основной сервер <b>разгружается</b>, а всплески трафика и часть атак поглощает CDN. Что и сколько кэшировать, определяют заголовки <b>Cache-Control</b>; при обновлении файлы <b>инвалидируют</b> или дают им <b>новые имена</b> (хеш в имени: app.3f2a.js).</p><ul><li>Статика (картинки, JS, CSS, видео) — главный кандидат</li><li>Персональные ответы API обычно не кэшируют или кэшируют осторожно</li><li>CDN часто сам выпускает сертификат и терминирует HTTPS</li></ul><p class="extra"><span>А ещё</span> Хеш в имени файла + долгий max-age — простое и надёжное кэширование статики</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Как работает:</b> DNS домена указывает на CDN; пользователь приходит на ближайший узел; если файла в кэше нет — узел забирает его с исходного сервера (origin), сохраняет и отдаёт; следующие пользователи получают копию из кэша.</p>
+<p><b>Заголовки:</b></p>
+<pre class="lang-text"><code>Cache-Control: public, max-age=31536000, immutable   # app.3f2a.js
+Cache-Control: no-cache                               # index.html</code></pre>
+<p>HTML проверяется каждый раз, а ресурсы с хешем в имени кэшируются на год: новая версия получает новое имя.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Кэширование на ближайших узлах.</li><li>Скорость, разгрузка, защита.</li><li>Cache-Control и инвалидация.</li><li>Что кэшировать, а что нет.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>CDN — это резервная копия базы данных</li><li class="ok"><span class="mark">✓</span>CDN кэширует файлы на серверах рядом с пользователями: сайт быстрее, основной сервер разгружен; кэшированием управляет Cache-Control</li><li class="no"><span class="mark">✗</span>Через CDN нужно кэшировать персональные ответы API для всех пользователей одинаково</li><li class="no"><span class="mark">✗</span>CDN замедляет загрузку, потому что добавляет промежуточный узел</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/static-hosting-domain/">Как выложить статический сайт и подключить к нему свой домен?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/system-design/cdn/">Что делает CDN?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/what-happens-url/">Что происходит, когда вы вводите адрес сайта в браузере и нажимаете Enter?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что делает CDN и когда он нужен?","acceptedAnswer":{"@type":"Answer","text":"CDN — сеть серверов по всему миру (или стране), которые кэшируют копии ваших файлов и отдают их пользователю с ближайшего узла. Сайт грузится быстрее (меньше расстояние и задержка), основной сервер разгружается, а всплески трафика и часть атак поглощает CDN. Что и сколько кэшировать, определяют заголовки Cache-Control; при обновлении файлы инвалидируют или дают им новые имена (хеш в имени: app.3f2a.js). Статика (картинки, JS, CSS, видео) — главный кандидат Персональные ответы API обычно не кэшируют или кэшируют осторожно CDN часто сам выпускает сертификат и терминирует HTTPS Хеш в имени файла + долгий max-age — простое и надёжное кэширование статики Как работает: DNS домена указывает на CDN; пользователь приходит на ближайший узел; если файла в кэше нет — узел забирает его с исходного сервера (origin), сохраняет и отдаёт; следующие пользователи получают копию из кэша. Заголовки: HTML проверяется каждый раз, а ресурсы с хешем в имени кэшируются на год: новая версия получает новое имя."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
-<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
 <script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
-<script src="/assets/account.js?v=194ea2e11a" defer></script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -28,7 +28,7 @@
   <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
   <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/python/">Python</a> <span>/</span> <span>Как работает импорт модулей и что делать с циклическими импортами?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://learn.getsotto.ru/questions/python/"},{"@type":"ListItem","position":3,"name":"Как работает импорт модулей и что делать с циклическими импортами?"}]}</script>
   <h1>Как работает импорт модулей и что делать с циклическими импортами?</h1>
@@ -42,7 +42,7 @@
 <p><b>Решения:</b></p>
 <ul><li>вынести общее в третий модуль (часто цикл — признак плохого разбиения);</li><li><code>import a</code> и обращение <code>a.helper</code> при вызове, а не при импорте;</li><li>импорт внутри функции;</li><li>для аннотаций — <code>from __future__ import annotations</code> и импорт под <code>if TYPE_CHECKING:</code>.</li></ul>
 <p><b>Абсолютные и относительные:</b> <code>from .models import User</code> — внутри пакета; запуск файла пакета как скрипта ломает относительные импорты — использовать <code>python -m package.module</code>.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механика импорта и sys.modules.</li><li>Причина и решения циклических импортов.</li><li>Роль __init__.py.</li></ul></div></section>
-  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Модуль выполняется заново при каждом import</li><li class="no"><span class="mark">✗</span>Циклический импорт невозможен в Python</li><li class="ok"><span class="mark">✓</span>Модуль ищется по sys.path и выполняется один раз, затем берётся из sys.modules; циклы лечат разделением модулей или импортом внутри функции</li><li class="no"><span class="mark">✗</span>Порядок импортов никак не влияет на ошибки</li></ul></details></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Модуль выполняется заново при каждом import в каждом файле</li><li class="no"><span class="mark">✗</span>Циклический импорт невозможен — Python запрещает его на этапе компиляции</li><li class="ok"><span class="mark">✓</span>Модуль выполняется один раз и кэшируется в sys.modules; циклы лечат разделением модулей</li><li class="no"><span class="mark">✗</span>Циклы лечат, импортируя все модули в __init__.py пакета</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/python/name-main/">Зачем нужна конструкция if __name__ == &quot;__main__&quot;?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/venv-pip/">Зачем нужно виртуальное окружение и как управлять зависимостями?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
@@ -61,7 +61,7 @@
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
-  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>

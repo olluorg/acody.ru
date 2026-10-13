@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
-<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
 <script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
-<script src="/assets/account.js?v=194ea2e11a" defer></script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -28,7 +28,7 @@
   <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
   <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Чем различаются XGBoost, LightGBM и CatBoost и как настраивать градиентный бустинг?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Чем различаются XGBoost, LightGBM и CatBoost и как настраивать градиентный бустинг?"}]}</script>
   <h1>Чем различаются XGBoost, LightGBM и CatBoost и как настраивать градиентный бустинг?</h1>
@@ -43,7 +43,7 @@
 <p><b>Подводные камни:</b> утечка данных в признаках, валидация без учёта времени для временных рядов, слишком большая глубина.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Различия трёх библиотек.</li><li>Порядок настройки и ключевые параметры.</li><li>Ранняя остановка.</li></ul></div></section>
   <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>CatBoost не умеет работать с категориальными признаками</li><li class="no"><span class="mark">✗</span>Число деревьев подбирают независимо от learning rate</li><li class="no"><span class="mark">✗</span>LightGBM строит симметричные деревья, CatBoost — по листьям</li><li class="ok"><span class="mark">✓</span>CatBoost — встроенная работа с категориями, LightGBM — рост по листьям и гистограммы; число деревьев подбирают ранней остановкой вместе с learning rate</li></ul></details></section>
   
-  
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/ai/trees/">Деревья решений и градиентный бустинг</a><p>Как строится дерево, чем случайный лес отличается от бустинга, как выбрать между XGBoost, LightGBM и CatBoost и как объяснить прогноз.</p></li></ul></section>
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/decision-trees-ensembles/">Как работает дерево решений и чем случайный лес отличается от градиентного бустинга?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/hyperparameter-tuning/">Как подбирать гиперпараметры модели?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/feature-scaling-encoding/">Зачем масштабировать признаки и как кодировать категориальные признаки?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
 </div></section>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем различаются XGBoost, LightGBM и CatBoost и как настраивать градиентный бустинг?","acceptedAnswer":{"@type":"Answer","text":"Все три — реализации градиентного бустинга на деревьях. XGBoost — регуляризация в функции потерь и быстрая точная реализация; LightGBM — рост деревьев по листьям и гистограммы, очень быстрый на больших данных; CatBoost (Яндекс) — встроенная работа с категориальными признаками и симметричные деревья, хорош «из коробки». Главные параметры: learning rate и число деревьев (вместе), глубина или число листьев, subsample и colsample, регуляризация Число деревьев подбирают ранней остановкой по валидации Маленький learning rate + много деревьев = точнее, но дольше Для категорий с высокой кардинальностью CatBoost обычно проще всего Общая схема настройки: 1. Зафиксировать learning rate (0,05–0,1) и включить раннюю остановку на валидации — число деревьев подберётся само. 2. Настроить сложность дерева: max_depth (XGBoost, CatBoost) или num_leaves (LightGBM), минимум объектов в листе. 3. Добавить стохастичность: доля строк (subsample) и признаков (colsample_bytree) на дерево — снижает переобучение. 4. Регуляризация: L1 и L2 на веса листьев. 5. В конце уменьшить learning rate и увеличить число деревьев для финального прироста. Отличия реализаций: - XGBoost — растит дерево по уровням, сильная регуляризация, поддержка GPU, отличная документация. - LightGBM — растит дерево по листьям (быстрее сходится, но легче переобучается — ограничивают num_leaves), гистограммное разбиение, очень быстрый. - CatBoost — ordered target statistics для категорий (без утечки целевой переменной), симметричные (oblivious) деревья — быстрый…"}}]}</script>
@@ -60,7 +60,7 @@
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
-  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>

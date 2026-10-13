@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
-<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
 <script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
-<script src="/assets/account.js?v=194ea2e11a" defer></script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -28,7 +28,7 @@
   <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
   <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Чем базовая (base) модель отличается от инструктивной (instruct, chat)?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Чем базовая (base) модель отличается от инструктивной (instruct, chat)?"}]}</script>
   <h1>Чем базовая (base) модель отличается от инструктивной (instruct, chat)?</h1>
@@ -41,9 +41,9 @@
 <p><b>Как получается instruct:</b></p>
 <ol><li>Предобучение — знания о языке и мире.</li><li>SFT — примеры диалогов и выполнения инструкций.</li><li>Выравнивание (RLHF, DPO) — выбор ответов, которые люди считают лучше.</li></ol>
 <p><b>Практика.</b> Для дообучения под свою задачу обычно берут instruct-модель и дообучают её на своих примерах; base выбирают, когда нужно полностью своё поведение и много данных.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Base продолжает текст, instruct выполняет просьбы.</li><li>Этапы получения instruct-модели.</li><li>Что используют в продуктах.</li></ul></div></section>
-  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Base-модель прошла только предобучение и продолжает текст; instruct дополнительно обучена выполнять инструкции и выровнена по предпочтениям</li><li class="no"><span class="mark">✗</span>Base-модель меньше по размеру, instruct — больше</li><li class="no"><span class="mark">✗</span>Instruct-модель работает без предобучения</li><li class="no"><span class="mark">✗</span>Base-модель лучше подходит для чат-бота поддержки</li></ul></details></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Base только предобучена и продолжает текст; instruct обучена выполнять просьбы</li><li class="no"><span class="mark">✗</span>Base-модель меньше по числу параметров, instruct — больше в несколько раз</li><li class="no"><span class="mark">✗</span>Instruct-модель обучают с нуля на диалогах, без предобучения на корпусе</li><li class="no"><span class="mark">✗</span>Base-модель лучше подходит для чат-бота поддержки, так как меньше отказывает</li></ul></details></section>
   
-  
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/ai/llm-basics/">Как устроена языковая модель — токены, контекст и генерация</a><p>Что на самом деле делает LLM, почему она ошибается, как считаются токены и стоимость и как выглядит запрос к API модели.</p></li></ul></section>
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/pretraining-sft-rlhf/">Как обучают чат-модели — предобучение, SFT, RLHF и DPO?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/how-llm-works/">Как устроена большая языковая модель (LLM)?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/finetuning-lora/">Что такое дообучение модели и LoRA?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
 </div></section>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем базовая (base) модель отличается от инструктивной (instruct, chat)?","acceptedAnswer":{"@type":"Answer","text":"Базовая модель прошла только предобучение — предсказание следующего токена на огромном корпусе текстов. Она продолжает текст: на вопрос может ответить ещё одним вопросом или продолжить список вопросов. Инструктивная модель дополнительно обучена на примерах «инструкция → ответ» и выровнена по предпочтениям людей: она понимает роли сообщений, выполняет просьбы, отказывается от вредного. В продуктах используют инструктивные модели. Базовые модели берут для собственного дообучения и исследований У открытых моделей обычно публикуют обе версии: Base и Instruct Шаблон чата (роли, служебные токены) у каждой модели свой — его применяет библиотека Угодливость и лишние отказы — побочные эффекты выравнивания Пример. Промпт «Столица Франции?» - base-модель может продолжить: «Столица Германии? Столица Италии?» — как в списке вопросов из учебника; - instruct-модель ответит: «Париж». Как получается instruct: 1. Предобучение — знания о языке и мире. 2. SFT — примеры диалогов и выполнения инструкций. 3. Выравнивание (RLHF, DPO) — выбор ответов, которые люди считают лучше. Практика. Для дообучения под свою задачу обычно берут instruct-модель и дообучают её на своих примерах; base выбирают, когда нужно полностью своё поведение и много данных."}}]}</script>
@@ -60,7 +60,7 @@
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
-  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>

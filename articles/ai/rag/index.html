@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG — ответы по своим документам — разбор для собеседования</title>
+<meta name="description" content="Как модель отвечает по документам компании — эмбеддинги, разбиение на фрагменты, векторный и гибридный поиск, реранкинг.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/ai/rag/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/ai/rag/">
+<meta property="og:title" content="RAG — ответы по своим документам — разбор для собеседования">
+<meta property="og:description" content="Как модель отвечает по документам компании — эмбеддинги, разбиение на фрагменты, векторный и гибридный поиск, реранкинг.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#ai">AI и LLM</a> <span>/</span> <span>RAG — ответы по своим документам</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/articles/#ai"},{"@type":"ListItem","position":3,"name":"RAG — ответы по своим документам"}]}</script>
+  <h1>RAG — ответы по своим документам</h1>
+  <p class="lead">Как модель отвечает по документам компании — эмбеддинги, разбиение на фрагменты, векторный и гибридный поиск, реранкинг.</p>
+  <article class="md"><h2>Зачем нужен RAG</h2>
+<p>Модель не знает ваших документов и не знает свежих данных. <b>RAG</b> (retrieval-augmented generation) решает это в два шага: сначала <b>найти</b> релевантные фрагменты документов, затем <b>сгенерировать</b> ответ, передав их модели в контексте с инструкцией «отвечай по контексту». Бонусы — ссылки на источники, свежие данные без дообучения и права доступа на уровне документов.</p>
+<h2>Эмбеддинги: смысл в виде чисел</h2>
+<p><b>Эмбеддинг</b> — вектор из сотен чисел, в котором близкие по смыслу тексты оказываются близко друг к другу. Близость меряют <b>косинусным сходством</b>: 1 — направлены одинаково, около 0 — не связаны. Запрос и документы обязательно кодируют <b>одной и той же моделью</b> — векторы разных моделей несравнимы.</p>
+<h2>Индексация: от документа к фрагментам</h2>
+<p>Документы разбивают на <b>фрагменты</b> — по структуре (разделы, абзацы), а не по символам. Фрагмент должен быть самодостаточным и достаточно коротким: слишком мелкий теряет контекст, слишком крупный размывает эмбеддинг. Соседние фрагменты слегка перекрываются, к каждому добавляют заголовок раздела и метаданные — источник, дату, права. Размер подбирают экспериментом на своих вопросах.</p>
+<h2>Поиск</h2>
+<p><b>Векторный поиск</b> находит ближайшие векторы к вектору запроса. На больших объёмах используют приближённые индексы вроде HNSW — быстро ценой небольшой потери полноты. Хранить можно в pgvector или в специализированной базе.</p>
+<p>Векторный поиск ловит смысл, но промахивается на <b>точных совпадениях</b>: артикулы, коды ошибок, имена. Полнотекстовый поиск (BM25) — наоборот. <b>Гибридный поиск</b> выполняет оба и объединяет списки, например методом Reciprocal Rank Fusion.</p>
+<p><b>Реранкер</b> (cross-encoder) оценивает пару «запрос + фрагмент» вместе — точнее, но дороже. Поэтому схема двухэтапная: быстро отобрать 50–100 кандидатов, переранжировать и отдать модели лучшие 5–10.</p>
+<h2>Где ломается RAG</h2>
+<p>Если ответ плохой, сначала понять <b>этап</b>: не нашли нужный фрагмент (чинить поиск — разбиение, гибрид, реранкер) или нашли, но ответили плохо (чинить генерацию — промпт, порядок фрагментов, меньше шума). Всё проверяется на наборе вопросов с метриками.</p>
+<h2>Итог</h2>
+<ul><li>Поиск фрагментов, затем генерация по ним.</li><li>Эмбеддинги и косинусное сходство, одна модель для запроса и документов.</li><li>Разбиение по структуре с метаданными.</li><li>Гибридный поиск и реранкер для качества.</li></ul></article>
+  <section class="block lesson-check" data-lesson="ai/ai-lesson-rag"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="ai-engineer-basics"><a class="course-title" href="/courses/ai-engineer-basics/">Курс «ИИ-инженер: LLM-приложения с нуля»</a><span>урок 3 из 6</span><a href="/articles/ai/prompting/">← Промпты и структурированный вывод</a><a class="next" href="/articles/ai/evaluation/">Оценка качества LLM-продукта →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/ai/what-is-rag/">Что такое RAG и как он устроен?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/embeddings/">Что такое эмбеддинги?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/cosine-similarity/">Как найти похожие тексты по эмбеддингам — что такое косинусное сходство?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/chunking/">Как разбивать документы на фрагменты для RAG?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/vector-search/">Как устроен векторный поиск?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/hybrid-search/">Что такое гибридный поиск и зачем совмещать BM25 с векторным поиском?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/rerankers/">Что такое реранкер и чем cross-encoder отличается от bi-encoder?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/ai/prompting/">Промпты и структурированный вывод</a><p>Как написать промпт, который стабильно работает, отделить инструкции от данных, получить от модели строгий JSON и когда разбивать задачу на цепочку вызовов.</p></li><li><a href="/articles/ai/evaluation/">Оценка качества LLM-продукта</a><p>Как собрать набор примеров, какие проверки делать кодом, когда нужен LLM-судья и как мерить качество поиска.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"RAG — ответы по своим документам","description":"Как модель отвечает по документам компании — эмбеддинги, разбиение на фрагменты, векторный и гибридный поиск, реранкинг.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/ai/rag/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

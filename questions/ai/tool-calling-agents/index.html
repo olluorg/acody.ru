@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
-<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
 <script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
-<script src="/assets/account.js?v=194ea2e11a" defer></script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -28,7 +28,7 @@
   <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
   <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Что такое вызов инструментов (tool calling) и агенты?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Что такое вызов инструментов (tool calling) и агенты?"}]}</script>
   <h1>Что такое вызов инструментов (tool calling) и агенты?</h1>
@@ -44,7 +44,7 @@
 <p>Чем меньше инструментов и шагов, тем надёжнее. Часто фиксированный конвейер (сначала поиск, потом ответ) лучше полностью свободного агента.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механика: описание, запрос вызова, выполнение кодом, результат обратно.</li><li>Определение агента как цикла.</li><li>Риски и меры: лимиты, права, подтверждения, логи.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что модель сама выполняет код или запросы.</li><li>Давать агенту широкие права без подтверждения действий.</li></ul></div></section>
   <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Модель сама выполняет функции на серверах провайдера</li><li class="ok"><span class="mark">✓</span>Модель возвращает запрос на вызов по схеме инструмента, а выполняет его код приложения и отдаёт результат обратно</li><li class="no"><span class="mark">✗</span>Для вызова инструментов модель нужно дообучить на каждой функции</li><li class="no"><span class="mark">✗</span>Проверять аргументы вызова не нужно — модель всегда передаёт верные</li></ul></details></section>
   <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/ai/prompt-injection/">Что такое prompt injection и как от неё защищаться?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
-  
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/ai/agents/">Инструменты, агенты и безопасность</a><p>Как модель вызывает функции, когда нужен агент, что такое MCP и почему prompt injection — главная угроза агентам.</p></li></ul></section>
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/structured-output/">Как получить от LLM ответ в строгом формате, например JSON?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
 </div></section>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое вызов инструментов (tool calling) и агенты?","acceptedAnswer":{"@type":"Answer","text":"Модель получает описания инструментов (имя, параметры по схеме) и вместо текста может вернуть запрос на вызов; вызывает их код приложения и отдаёт результат обратно модели. Агент — цикл: модель решает, какой инструмент вызвать, видит результат, решает дальше, пока задача не решена Нужны лимиты шагов, логирование, проверка аргументов и подтверждение опасных действий Сама модель ничего не выполняет — все права и риски на стороне вашего кода Как работает tool calling: 1. Приложение передаёт модели запрос пользователя и список инструментов с JSON-схемами параметров: get_order_status(order_id), search_docs(query). 2. Модель решает, нужен ли инструмент, и возвращает его имя и аргументы. 3. Приложение проверяет аргументы, выполняет функцию и добавляет результат в диалог. 4. Модель формирует ответ или запрашивает следующий инструмент. Агент — когда этот цикл продолжается несколько шагов и модель сама планирует: найти документ → вытащить данные → посчитать → записать результат. Что важно в продакшене: - лимиты — число шагов, время, бюджет токенов, иначе агент может зациклиться; - минимальные права — инструмент делает только необходимое, с правами текущего пользователя; - проверка аргументов и подтверждение человеком для необратимых действий (оплата, удаление, отправка писем); - логирование каждого шага для отладки; - понятные…"}}]}</script>
@@ -61,7 +61,7 @@
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
-  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>

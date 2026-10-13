@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
-<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
 <script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
-<script src="/assets/account.js?v=194ea2e11a" defer></script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -28,7 +28,7 @@
   <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
   <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как работает дерево решений и чем случайный лес отличается от градиентного бустинга?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как работает дерево решений и чем случайный лес отличается от градиентного бустинга?"}]}</script>
   <h1>Как работает дерево решений и чем случайный лес отличается от градиентного бустинга?</h1>
@@ -45,7 +45,7 @@
 <div class="table"><table><thead><tr><th></th><th>случайный лес</th><th>градиентный бустинг</th></tr></thead><tbody><tr><td>деревья</td><td>глубокие, независимые</td><td>мелкие, последовательные</td></tr><tr><td>что снижает</td><td>разброс</td><td>смещение</td></tr><tr><td>настройка</td><td>почти не нужна</td><td>важна</td></tr><tr><td>обучение</td><td>параллельно</td><td>последовательно</td></tr></tbody></table></div></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Как строится дерево и почему переобучается.</li><li>Бэггинг и случайность в лесу.</li><li>Идея бустинга на остатках.</li><li>Сравнение по bias-variance.</li></ul></div></section>
   <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Случайный лес строит деревья последовательно, исправляя ошибки предыдущих</li><li class="ok"><span class="mark">✓</span>Лес усредняет много глубоких деревьев на подвыборках и снижает разброс; бустинг строит неглубокие деревья последовательно и снижает смещение</li><li class="no"><span class="mark">✗</span>Глубокое дерево решений не переобучается</li><li class="no"><span class="mark">✗</span>Бустинг и лес отличаются только числом деревьев</li></ul></details></section>
   <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/ai/gradient-boosting/">Чем различаются XGBoost, LightGBM и CatBoost и как настраивать градиентный бустинг?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
-  
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/ai/trees/">Деревья решений и градиентный бустинг</a><p>Как строится дерево, чем случайный лес отличается от бустинга, как выбрать между XGBoost, LightGBM и CatBoost и как объяснить прогноз.</p></li></ul></section>
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/bias-variance/">Что такое компромисс смещения и разброса (bias-variance tradeoff)?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/feature-importance/">Как объяснить предсказание модели — важность признаков и SHAP?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
 </div></section>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как работает дерево решений и чем случайный лес отличается от градиентного бустинга?","acceptedAnswer":{"@type":"Answer","text":"Дерево рекурсивно делит данные по признакам так, чтобы листья были максимально однородными; глубокое дерево легко переобучается. Случайный лес (бэггинг) обучает много глубоких деревьев на случайных подвыборках строк и признаков и усредняет — снижает разброс. Градиентный бустинг строит неглубокие деревья последовательно, каждое исправляет ошибки предыдущих — снижает смещение. Лес устойчив, почти не требует настройки, хорошо параллелится Бустинг обычно точнее на табличных данных, но чувствителен к гиперпараметрам Деревьям не нужно масштабирование признаков На табличных данных бустинг часто выигрывает у нейросетей Дерево решений. На каждом шаге выбирается признак и порог, лучше всего разделяющие данные (критерий — неопределённость Джини или энтропия для классификации, MSE для регрессии). Дерево легко читать, но без ограничений (глубина, минимум объектов в листе) оно выучивает каждую точку — высокий разброс. Бэггинг и случайный лес: - каждое дерево обучается на бутстреп-выборке (с повторениями); - в каждом узле выбирается лучший признак из случайного подмножества — деревья становятся менее похожими; - ответы усредняются (регрессия) или решаются голосованием. Ошибки отдельных деревьев частично гасят друг друга. Бонус — оценка качества на объектах, не попавших в выборку (out-of-bag). Градиентный бустинг: - начинается с простого прогноза (среднего); - каждое следующее дерево обучается предсказывать остатки (антиградиент функции потерь) текущего ансамбля; - вклад дерева умножается на небольшой шаг…"}}]}</script>
@@ -62,7 +62,7 @@
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
-  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>

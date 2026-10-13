@@ -49,7 +49,7 @@
       list.length
         ? el("div", { class: "login-buttons" }, list.map((p) => el("a", { class: `btn ${p}`, href: loginUrl(p) }, names[p] || p)))
         : el("p", { class: "muted" }, "Вход скоро заработает."),
-      el("p", { class: "muted consent" }, "Входя, вы соглашаетесь с ", el("a", { href: "/privacy/" }, "политикой обработки персональных данных"), " и даёте согласие на обработку данных аккаунта и прогресса."),
+      el("p", { class: "muted consent" }, "Входя, вы принимаете ", el("a", { href: "/terms/" }, "пользовательское соглашение"), ", соглашаетесь с ", el("a", { href: "/privacy/" }, "политикой обработки персональных данных"), " и даёте согласие на обработку данных аккаунта и прогресса."),
       el("button", { class: "btn ghost", type: "button", onclick: () => dlg.close() }, "Закрыть"));
     document.body.append(dlg);
     dlg.addEventListener("close", () => dlg.remove());

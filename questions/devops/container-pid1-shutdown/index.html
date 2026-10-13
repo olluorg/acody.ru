@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
-<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
 <script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
-<script src="/assets/account.js?v=194ea2e11a" defer></script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -28,7 +28,7 @@
   <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
   <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Почему контейнер не останавливается корректно и «висит» до SIGKILL?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Почему контейнер не останавливается корректно и «висит» до SIGKILL?"}]}</script>
   <h1>Почему контейнер не останавливается корректно и «висит» до SIGKILL?</h1>
@@ -41,7 +41,7 @@
 <p><b>Исправления:</b></p>
 <ul><li>exec-форма CMD и ENTRYPOINT;</li><li>в entrypoint-скрипте последней строкой <code>exec java …</code>;</li><li><code>tini</code> как PID 1 (или <code>--init</code>) — пересылает сигналы и собирает зомби-процессы;</li><li>приложение корректно обрабатывает SIGTERM: Spring Boot — <code>server.shutdown=graceful</code>.</li></ul>
 <p><b>Kubernetes:</b> при удалении пода одновременно начинается остановка и исключение из Service. Без <code>preStop</code> с короткой паузой часть запросов приходит в уже останавливающийся под.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Особенность PID 1 и сигналов.</li><li>Shell против exec формы.</li><li>tini и graceful shutdown приложения.</li></ul></div></section>
-  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Docker не отправляет SIGTERM</li><li class="ok"><span class="mark">✓</span>Shell-форма CMD делает PID 1 оболочкой, которая не передаёт сигнал приложению; нужна exec-форма или init (tini) и обработка SIGTERM</li><li class="no"><span class="mark">✗</span>Нужно увеличить лимит памяти контейнера</li><li class="no"><span class="mark">✗</span>PID 1 автоматически завершается по SIGTERM</li></ul></details></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Docker не отправляет SIGTERM, а сразу убивает контейнер</li><li class="ok"><span class="mark">✓</span>Shell-форма CMD: PID 1 — оболочка, которая не передаёт сигнал</li><li class="no"><span class="mark">✗</span>Не хватает памяти — контейнер не успевает завершиться</li><li class="no"><span class="mark">✗</span>PID 1 игнорирует SIGKILL, поэтому нужен больший таймаут</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/cs/signals-shutdown/">Чем SIGTERM отличается от SIGKILL и как правильно завершать сервис?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/dockerfile-best-practices/">Как написать хороший Dockerfile?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/k8s-probes/">Приложение долго стартует, а Kubernetes перезапускает его по кругу. Как правильно настроить пробы?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
@@ -60,7 +60,7 @@
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
-  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>

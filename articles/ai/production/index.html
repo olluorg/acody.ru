@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM в продакшене — стоимость, надёжность и наблюдаемость — разбор для собеседования</title>
+<meta name="description" content="Как сделать LLM-функцию быстрой, недорогой и надёжной — стриминг, повторы, кэш, guardrails, трассировка и борьба с галлюцинациями.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/ai/production/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/ai/production/">
+<meta property="og:title" content="LLM в продакшене — стоимость, надёжность и наблюдаемость — разбор для собеседования">
+<meta property="og:description" content="Как сделать LLM-функцию быстрой, недорогой и надёжной — стриминг, повторы, кэш, guardrails, трассировка и борьба с галлюцинациями.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#ai">AI и LLM</a> <span>/</span> <span>LLM в продакшене — стоимость, надёжность и наблюдаемость</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/articles/#ai"},{"@type":"ListItem","position":3,"name":"LLM в продакшене — стоимость, надёжность и наблюдаемость"}]}</script>
+  <h1>LLM в продакшене — стоимость, надёжность и наблюдаемость</h1>
+  <p class="lead">Как сделать LLM-функцию быстрой, недорогой и надёжной — стриминг, повторы, кэш, guardrails, трассировка и борьба с галлюцинациями.</p>
+  <article class="md"><h2>Стоимость и задержка</h2>
+<p>Платим и ждём <b>за токены</b>. Задержка = время до первого токена + скорость генерации × длина ответа. Рычаги: короче вход и выход, <b>модель по задаче</b> (простые запросы — маленькой модели), <b>кэш</b> неизменного начала промпта и готовых ответов, параллельные вызовы. Любую оптимизацию проверяют на наборе — экономия не должна ронять качество.</p>
+<h2>Стриминг</h2>
+<p>Ответ можно показывать <b>по мере генерации</b>: API отдаёт фрагменты по Server-Sent Events, клиент дописывает их к тексту. Воспринимаемая задержка падает с десятков секунд до доли секунды. Прокси не должен буферизовать поток, а при уходе клиента запрос к модели прерывают — иначе платите за ненужные токены.</p>
+<h2>Надёжность вызовов</h2>
+<p>Ошибки 429 (лимит) и 5xx повторяют с <b>экспоненциальной паузой и случайным разбросом</b>, ошибки запроса (400) — нет. У каждого вызова — таймаут, у повторов — общий бюджет времени. Провайдер скрыт за тонкой абстракцией: модель меняется конфигурацией, есть резервная модель, проверенная на наборе оценки.</p>
+<h2>Guardrails</h2>
+<p>Один системный промпт — не защита. <b>Guardrails</b> — проверки на входе и выходе: модерация тем, маскирование персональных данных перед отправкой внешнему провайдеру, защита от инъекций, валидация схемы ответа, ссылки только на найденные источники. Дешёвые проверки ставят первыми, чтобы не удваивать задержку.</p>
+<h2>Галлюцинации</h2>
+<p>Полностью убрать их нельзя — можно снизить и измерять: RAG с источниками, инструкция отвечать только по контексту и говорить «не знаю», инструменты вместо «памяти» модели, проверка ответа. Продукт проектируют с учётом того, что модель иногда ошибается.</p>
+<h2>Наблюдаемость</h2>
+<p>Каждый запрос трассируют по шагам: промпт и ответ, найденные документы, вызовы инструментов, модель и версия промпта, токены, стоимость, задержка. Плюс сигналы качества — оценки пользователей, выборочная автооценка трафика. Без трасс агент — чёрный ящик, а бюджет неуправляем.</p>
+<h2>Итог</h2>
+<ul><li>Токены — это деньги и время, оптимизировать по замеру.</li><li>Стриминг, повторы с паузой, резервная модель.</li><li>Guardrails на входе и выходе.</li><li>Трассы и метрики качества в продакшене.</li></ul></article>
+  <section class="block lesson-check" data-lesson="ai/ai-lesson-production"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="ai-engineer-basics"><a class="course-title" href="/courses/ai-engineer-basics/">Курс «ИИ-инженер: LLM-приложения с нуля»</a><span>урок 6 из 6</span><a href="/articles/ai/agents/">← Инструменты, агенты и безопасность</a><a class="next" href="/courses/ai-engineer-basics/">К итогам курса →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/ai/llm-cost-latency/">Как снизить стоимость и задержку приложения на LLM?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/sse-basics/">Как получить потоковый ответ модели и показать его пользователю?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/llm-api-retries/">Как сделать надёжные вызовы API модели — повторы, таймауты, смена провайдера?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-observability/">Как наблюдать за LLM-приложением в продакшене?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-guardrails/">Что такое guardrails в LLM-приложении и как их строить?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/hallucinations/">Что такое галлюцинации LLM и как с ними бороться?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/ai/agents/">Инструменты, агенты и безопасность</a><p>Как модель вызывает функции, когда нужен агент, что такое MCP и почему prompt injection — главная угроза агентам.</p></li><li><a href="/articles/ai/evaluation/">Оценка качества LLM-продукта</a><p>Как собрать набор примеров, какие проверки делать кодом, когда нужен LLM-судья и как мерить качество поиска.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"LLM в продакшене — стоимость, надёжность и наблюдаемость","description":"Как сделать LLM-функцию быстрой, недорогой и надёжной — стриминг, повторы, кэш, guardrails, трассировка и борьба с галлюцинациями.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/ai/production/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

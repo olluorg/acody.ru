@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
-<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
 <script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
-<script src="/assets/account.js?v=194ea2e11a" defer></script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -28,7 +28,7 @@
   <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
   <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/qa/">Тестирование (QA)</a> <span>/</span> <span>Какие HTTP-методы вы знаете? Чем GET отличается от POST?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Тестирование (QA)","item":"https://learn.getsotto.ru/questions/qa/"},{"@type":"ListItem","position":3,"name":"Какие HTTP-методы вы знаете? Чем GET отличается от POST?"}]}</script>
   <h1>Какие HTTP-методы вы знаете? Чем GET отличается от POST?</h1>
@@ -40,7 +40,7 @@
 <ul><li><b>GET</b> — получить ресурс. Параметры — в строке запроса (<code>?page=2</code>). Безопасный — не меняет данные; ответ можно кэшировать; URL с параметрами остаётся в истории и логах, поэтому пароли так не передают.</li><li><b>POST</b> — создать ресурс или выполнить действие. Данные — в теле запроса.</li><li><b>PUT</b> — заменить ресурс целиком данными из запроса.</li><li><b>PATCH</b> — изменить отдельные поля.</li><li><b>DELETE</b> — удалить.</li><li>Реже: <b>HEAD</b> (только заголовки), <b>OPTIONS</b> (какие методы доступны, используется браузером для CORS).</li></ul>
 <p><b>Идемпотентность</b> — повторный одинаковый запрос не меняет результат после первого. GET, PUT, DELETE идемпотентны: удалить уже удалённое — тот же итог. POST нет: два одинаковых POST создадут два заказа.</p>
 <p>Для тестировщика это источник проверок: двойная отправка формы, повтор запроса при плохой сети, кнопка «назад» после оплаты, GET-запрос, который вдруг меняет данные.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><p><code>GET /api/orders/15</code> — получить заказ. <code>POST /api/orders</code> с телом <code>{&quot;items&quot;: [...]}</code> — создать заказ. <code>PATCH /api/orders/15</code> с <code>{&quot;status&quot;: &quot;cancelled&quot;}</code> — отменить. Проверка: отправить POST дважды быстро — должен создаться один заказ или второй запрос должен быть отклонён.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Основные методы и их назначение.</li><li>Где передаются данные в GET и POST.</li><li>Идемпотентность и её практическое значение.</li><li>PUT против PATCH — плюс.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>«POST безопаснее GET, потому что данные спрятаны» — без HTTPS они видны так же.</li><li>Не знать, что такое идемпотентность.</li></ul></div></section>
-  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>POST идемпотентен</li><li class="no"><span class="mark">✗</span>GET может безопасно менять данные на сервере</li><li class="ok"><span class="mark">✓</span>GET — получить, POST — создать, PUT — заменить, PATCH — изменить частично, DELETE — удалить; GET, PUT, DELETE идемпотентны, POST — нет</li><li class="no"><span class="mark">✗</span>GET передаёт параметры только в теле запроса</li></ul></details></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>POST идемпотентен, а PUT — нет, поэтому повтор формы безопасен</li><li class="no"><span class="mark">✗</span>GET может менять данные — главное, чтобы параметры были в URL</li><li class="ok"><span class="mark">✓</span>GET получает, POST создаёт; GET, PUT, DELETE идемпотентны, POST — нет</li><li class="no"><span class="mark">✗</span>GET передаёт параметры в теле запроса, POST — в URL</li></ul></details></section>
   <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/qa/http-status-codes/">Какие коды ответа HTTP вы знаете?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/qa/api-testing/">Как тестировать REST API?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/qa/client-server/">Что происходит, когда вы вводите адрес сайта в браузере?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
@@ -59,7 +59,7 @@
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
-  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>

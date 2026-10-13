@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
-<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
 <script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
-<script src="/assets/account.js?v=194ea2e11a" defer></script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -28,7 +28,7 @@
   <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
   <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Что такое кросс-валидация и как правильно валидировать модель на временных данных?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Что такое кросс-валидация и как правильно валидировать модель на временных данных?"}]}</script>
   <h1>Что такое кросс-валидация и как правильно валидировать модель на временных данных?</h1>
@@ -47,7 +47,7 @@
 <p><b>Где ещё ошибаются:</b> нормализацию и отбор признаков делают на всех данных до разбиения — это утечка; правильно — внутри каждого фолда (Pipeline в sklearn).</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Механика k-fold и зачем она нужна.</li><li>Stratified и group варианты.</li><li>Валидация на временных данных.</li><li>Предобработка внутри фолдов.</li></ul></div></section>
   <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Для временных данных обычный k-fold с перемешиванием — лучший выбор</li><li class="no"><span class="mark">✗</span>При кросс-валидации тестовая выборка не нужна</li><li class="ok"><span class="mark">✓</span>K-fold обучает модель k раз, оставляя по части на проверку; для временных данных — обучение на прошлом, проверка на будущем</li><li class="no"><span class="mark">✗</span>Кросс-валидация обучает k моделей и складывает их в ансамбль для продакшена</li></ul></details></section>
   
-  
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/ai/validation/">Признаки, утечки и честная валидация</a><p>Как строить признаки, находить утечку данных, выбирать схему кросс-валидации и читать кривые обучения.</p></li></ul></section>
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/train-val-test/">Зачем делить данные на обучающую, валидационную и тестовую выборки?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/data-leakage/">Что такое утечка данных (data leakage) в машинном обучении?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/hyperparameter-tuning/">Как подбирать гиперпараметры модели?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
 </div></section>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое кросс-валидация и как правильно валидировать модель на временных данных?","acceptedAnswer":{"@type":"Answer","text":"K-fold: данные делят на k частей, модель обучают k раз, каждый раз оставляя одну часть для проверки, и усредняют метрику — оценка надёжнее одного разбиения. Для временных данных перемешивать нельзя: обучаются на прошлом, проверяются на будущем (скользящее окно или расширяющееся окно). Stratified k-fold сохраняет долю классов в каждой части — важно при дисбалансе Group k-fold — объекты одного пользователя не попадают и в обучение, и в проверку Тестовая выборка всё равно откладывается отдельно и используется один раз Перемешивание временного ряда — классическая утечка «из будущего» Зачем. Одно случайное разбиение даёт шумную оценку: повезло с тестом — метрика завышена. K-fold использует все данные и для обучения, и для проверки, и показывает разброс метрики между частями. Виды: - k-fold (обычно k = 5 или 10); - stratified — для классификации, особенно при редком классе; - group — когда у одного объекта несколько строк (сессии пользователя, снимки одного пациента), иначе модель «узнаёт» объект; - time series split — каждое следующее окно проверки позже обучающих данных. Временные данные: Иногда между обучением и проверкой делают зазор (gap), если целевая переменная становится известна с задержкой. Где ещё ошибаются: нормализацию и отбор признаков делают на всех данных до разбиения — это утечка; правильно — внутри каждого фолда (Pipeline в sklearn)."}}]}</script>
@@ -64,7 +64,7 @@
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
-  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>

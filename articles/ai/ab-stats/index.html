@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Статистика и A/B-тесты — разбор для собеседования</title>
+<meta name="description" content="Проверка гипотез и p-value, ошибки первого и второго рода, дизайн A/B-теста, размер выборки и почему нельзя подглядывать.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/ai/ab-stats/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/ai/ab-stats/">
+<meta property="og:title" content="Статистика и A/B-тесты — разбор для собеседования">
+<meta property="og:description" content="Проверка гипотез и p-value, ошибки первого и второго рода, дизайн A/B-теста, размер выборки и почему нельзя подглядывать.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#ai">AI и LLM</a> <span>/</span> <span>Статистика и A/B-тесты</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/articles/#ai"},{"@type":"ListItem","position":3,"name":"Статистика и A/B-тесты"}]}</script>
+  <h1>Статистика и A/B-тесты</h1>
+  <p class="lead">Проверка гипотез и p-value, ошибки первого и второго рода, дизайн A/B-теста, размер выборки и почему нельзя подглядывать.</p>
+  <article class="md"><h2>Проверка гипотез</h2>
+<p>Формулируют <b>нулевую гипотезу</b> (эффекта нет) и альтернативу. <b>p-value</b> — вероятность получить такие или более сильные различия, <b>если нулевая гипотеза верна</b>. Если p-value меньше заранее выбранного <b>α</b> (часто 0,05), нулевую гипотезу отвергают. p-value — не вероятность того, что гипотеза верна; «не значимо» не значит «эффекта нет» — возможно, не хватило данных.</p>
+<h2>Две ошибки и мощность</h2>
+<p><b>Ошибка I рода</b> — найти эффект, которого нет (вероятность α). <b>Ошибка II рода</b> — пропустить существующий эффект. <b>Мощность</b> — вероятность обнаружить эффект заданного размера, стандарт 80 %. Она растёт с размером выборки и эффекта и падает с дисперсией метрики.</p>
+<h2>Дизайн A/B-теста</h2>
+<p>До запуска фиксируют: <b>гипотезу</b>, <b>главную метрику</b> и <b>ограничители</b> (что не должно ухудшиться), <b>единицу рандомизации</b> (обычно пользователь), <b>размер выборки и длительность</b> и <b>критерий решения</b>. Во время теста следят за здоровьем: совпадает ли соотношение групп с планом, работает ли трекинг.</p>
+<h2>Размер выборки</h2>
+<p>Он зависит от базового значения и дисперсии метрики, <b>MDE</b> — минимального эффекта, который важно заметить, — α и мощности. Маленькие эффекты дорогие: вдвое меньший MDE требует вчетверо большей выборки. Длительность округляют до целых недель, чтобы покрыть недельную сезонность.</p>
+<h2>Подглядывание</h2>
+<p>p-value колеблется по ходу теста. Если проверять его каждый день и остановиться на первом p &lt; 0,05, доля ложных срабатываний вырастает с 5 % до 20–30 %. Правильно — зафиксировать выборку и смотреть один раз или использовать последовательные методы, рассчитанные на промежуточные проверки.</p>
+<h2>Итог</h2>
+<ul><li>p-value — про данные при верной нулевой гипотезе.</li><li>Мощность и MDE определяют размер выборки.</li><li>Всё важное фиксируют до запуска.</li><li>Не останавливать тест на первой значимости.</li></ul></article>
+  <section class="block lesson-check" data-lesson="ai/ds-lesson-ab-stats"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="data-science-basics"><a class="course-title" href="/courses/data-science-basics/">Курс «Data Science: от первой модели до A/B-теста»</a><span>урок 5 из 5</span><a href="/articles/ai/validation/">← Признаки, утечки и честная валидация</a><a class="next" href="/courses/data-science-basics/">К итогам курса →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/analytics/p-value-hypothesis/">Что такое p-value и как работает проверка статистических гипотез?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/type-errors-power/">Что такое ошибки первого и второго рода и мощность теста?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/analytics/ab-test-design/">Как спроектировать A/B-тест от гипотезы до решения?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/ab-sample-size/">Как рассчитать размер выборки и длительность A/B-теста?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/analytics/peeking-problem/">Почему нельзя останавливать A/B-тест, как только результат стал значимым?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/ai/metrics/">Метрики качества моделей</a><p>Матрица ошибок, precision и recall, ROC-AUC и PR-AUC, метрики регрессии и работа с несбалансированными классами.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Статистика и A/B-тесты","description":"Проверка гипотез и p-value, ошибки первого и второго рода, дизайн A/B-теста, размер выборки и почему нельзя подглядывать.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/ai/ab-stats/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

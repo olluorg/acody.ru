@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Метрики качества моделей — разбор для собеседования</title>
+<meta name="description" content="Матрица ошибок, precision и recall, ROC-AUC и PR-AUC, метрики регрессии и работа с несбалансированными классами.">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/ai/metrics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/ai/metrics/">
+<meta property="og:title" content="Метрики качества моделей — разбор для собеседования">
+<meta property="og:description" content="Матрица ошибок, precision и recall, ROC-AUC и PR-AUC, метрики регрессии и работа с несбалансированными классами.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#ai">AI и LLM</a> <span>/</span> <span>Метрики качества моделей</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/articles/#ai"},{"@type":"ListItem","position":3,"name":"Метрики качества моделей"}]}</script>
+  <h1>Метрики качества моделей</h1>
+  <p class="lead">Матрица ошибок, precision и recall, ROC-AUC и PR-AUC, метрики регрессии и работа с несбалансированными классами.</p>
+  <article class="md"><h2>Матрица ошибок</h2>
+<p>У классификатора четыре исхода: <b>TP</b> — верно нашли положительный, <b>FP</b> — ложная тревога, <b>FN</b> — пропуск, <b>TN</b> — верно отвергли. Из них считаются все метрики:</p>
+<ul><li><b>precision</b> = TP / (TP + FP) — доля верных среди найденных;</li><li><b>recall</b> = TP / (TP + FN) — доля найденных среди настоящих;</li><li><b>F1</b> — их гармоническое среднее.</li></ul>
+<h2>Почему accuracy обманывает</h2>
+<p>При 1 % мошенничества модель «всё честно» даёт 99 % accuracy и бесполезна. При дисбалансе смотрят precision, recall и <b>PR-AUC</b>, подбирают <b>порог</b> под цену ошибок, задают веса классов. Что дороже — ложная тревога или пропуск — решает бизнес, и от этого зависит выбор метрики.</p>
+<h2>ROC-AUC и PR-AUC</h2>
+<p><b>ROC-AUC</b> — вероятность, что случайный положительный объект получит оценку выше случайного отрицательного; 0,5 — угадывание, 1 — идеал. Она оценивает ранжирование при всех порогах. При сильном дисбалансе ROC-AUC может выглядеть высокой при плохой precision — тогда честнее <b>PR-AUC</b>.</p>
+<h2>Метрики регрессии</h2>
+<p><b>MAE</b> — средняя абсолютная ошибка в единицах цели, устойчива к выбросам. <b>RMSE</b> сильнее штрафует большие промахи. <b>MAPE</b> — ошибка в процентах, удобна бизнесу, но ломается около нуля. <b>R²</b> — доля объяснённой дисперсии. Сильный разрыв RMSE и MAE — признак крупных промахов.</p>
+<h2>Итог</h2>
+<ul><li>Метрика выбирается по цене ошибок.</li><li>При дисбалансе — precision, recall, PR-AUC и подбор порога.</li><li>ROC-AUC оценивает ранжирование, а не решение.</li><li>Для регрессии MAE и RMSE отвечают на разные вопросы.</li></ul></article>
+  <section class="block lesson-check" data-lesson="ai/ds-lesson-metrics"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="data-science-basics"><a class="course-title" href="/courses/data-science-basics/">Курс «Data Science: от первой модели до A/B-теста»</a><span>урок 2 из 5</span><a href="/articles/ai/ml-basics/">← Основы машинного обучения — задачи, выборки и первые модели</a><a class="next" href="/articles/ai/trees/">Деревья решений и градиентный бустинг →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/ai/confusion-matrix/">Что такое матрица ошибок и как по ней посчитать precision и recall?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/classification-metrics/">Какие метрики качества классификации вы знаете?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/roc-pr-auc/">Что такое ROC-AUC и PR-AUC и когда какую метрику использовать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/regression-metrics/">Какие метрики используют для задач регрессии — MAE, RMSE, MAPE, R²?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/imbalanced-classes/">Как работать с несбалансированными классами?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/ai/ml-basics/">Основы машинного обучения — задачи, выборки и первые модели</a><p>Какие бывают задачи ML, зачем делить данные на выборки, что такое переобучение и как обучаются линейная и логистическая регрессия.</p></li><li><a href="/articles/ai/validation/">Признаки, утечки и честная валидация</a><p>Как строить признаки, находить утечку данных, выбирать схему кросс-валидации и читать кривые обучения.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Метрики качества моделей","description":"Матрица ошибок, precision и recall, ROC-AUC и PR-AUC, метрики регрессии и работа с несбалансированными классами.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/ai/metrics/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

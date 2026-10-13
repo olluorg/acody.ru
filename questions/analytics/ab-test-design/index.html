@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
-<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
 <script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
-<script src="/assets/account.js?v=194ea2e11a" defer></script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -28,7 +28,7 @@
   <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
   <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/analytics/">Аналитика данных</a> <span>/</span> <span>Как спроектировать A/B-тест от гипотезы до решения?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Аналитика данных","item":"https://learn.getsotto.ru/questions/analytics/"},{"@type":"ListItem","position":3,"name":"Как спроектировать A/B-тест от гипотезы до решения?"}]}</script>
   <h1>Как спроектировать A/B-тест от гипотезы до решения?</h1>
@@ -42,7 +42,7 @@
 <p><b>Анализ:</b> эффект с доверительным интервалом, а не только p-value; ограничители; сегменты — как гипотезы, а не как основание для решения.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Элементы дизайна до запуска.</li><li>Главная метрика и ограничители.</li><li>Размер выборки, длительность и правило остановки.</li><li>Проверки во время теста.</li></ul></div></section>
   <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Гипотеза, главная метрика и ограничители, единица рандомизации, размер выборки и длительность по MDE и критерий решения — всё до запуска</li><li class="no"><span class="mark">✗</span>Запустить тест, а метрику выбрать по результатам, где эффект заметнее</li><li class="no"><span class="mark">✗</span>Длительность выбирать в днях без учёта недельной сезонности</li><li class="no"><span class="mark">✗</span>Главных метрик должно быть как можно больше</li></ul></details></section>
   <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/analytics/ab-sample-size/">Как рассчитать размер выборки и длительность A/B-теста?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/analytics/peeking-problem/">Почему нельзя останавливать A/B-тест, как только результат стал значимым?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
-  
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/ai/ab-stats/">Статистика и A/B-тесты</a><p>Проверка гипотез и p-value, ошибки первого и второго рода, дизайн A/B-теста, размер выборки и почему нельзя подглядывать.</p></li></ul></section>
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/analytics/p-value-hypothesis/">Что такое p-value и как работает проверка статистических гипотез?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/analytics/multiple-testing/">Что такое проблема множественных сравнений?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/ab-testing-models/">Почему хорошая офлайн-метрика модели не гарантирует успех в продакшене и как проверить модель онлайн?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
 </div></section>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как спроектировать A/B-тест от гипотезы до решения?","acceptedAnswer":{"@type":"Answer","text":"До запуска: гипотеза (что меняем и почему это должно сработать), главная метрика и ограничители (guardrails), единица рандомизации (пользователь, сессия, город), размер выборки и длительность по MDE, критерий решения. Во время — проверки здоровья (SRM, трекинг). После — анализ по заранее заданному плану и решение с учётом бизнес-контекста. Длительность — целое число недель, чтобы покрыть недельную сезонность Одна главная метрика, чувствительная и связанная с целью бизнеса Рандомизация по пользователю, если изменение заметно на протяжении визитов Записывают дизайн до старта — это защищает от подгонки выводов Шаблон дизайна: 1. Гипотеза: «Если показать доставку на карточке товара, больше пользователей добавят товар в корзину, потому что снимется неопределённость». 2. Метрики: главная — конверсия в добавление в корзину; вторичные — конверсия в заказ, средний чек; ограничители — выручка, скорость загрузки страницы, обращения в поддержку. 3. Единица и доля трафика: пользователи, 50/50, сегмент — все страны или только Россия. 4. Размер выборки: из базовой конверсии, MDE, α = 0,05 и мощности 80%. 5. Длительность: не меньше недели и до набора выборки; заранее — без «остановлю, когда станет значимо». 6. Решение: что делаем при положительном, нейтральном и отрицательном результате. Во время теста — проверить, что группы получились нужного размера (SRM), события отправляются в обеих группах, нет технических ошибок. Анализ: эффект с доверительным интервалом, а не только p-value; ограничители; сегменты…"}}]}</script>
@@ -59,7 +59,7 @@
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
-  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>

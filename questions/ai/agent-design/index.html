@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
-<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
 <script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
-<script src="/assets/account.js?v=194ea2e11a" defer></script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -28,7 +28,7 @@
   <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
   <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как проектировать LLM-агента и почему агенты ломаются?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как проектировать LLM-агента и почему агенты ломаются?"}]}</script>
   <h1>Как проектировать LLM-агента и почему агенты ломаются?</h1>
@@ -44,7 +44,7 @@
 <ul><li>инструменты проектировать как API для модели: строгие схемы параметров, компактные ответы, ошибки с подсказкой, что делать;</li><li>лимиты на число шагов, время и стоимость;</li><li>human-in-the-loop для необратимых действий (платёж, удаление, отправка письма);</li><li>минимальные права инструментов;</li><li>трассировка каждого шага и оценка на наборе реальных задач.</li></ul></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Цикл агента и ReAct.</li><li>Когда достаточно конвейера.</li><li>Причины отказов и практики надёжности.</li></ul></div></section>
   <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Всегда начинать с автономного агента — он гибче фиксированного конвейера</li><li class="no"><span class="mark">✗</span>Дать агенту как можно больше инструментов, чтобы он справился с любым шагом</li><li class="ok"><span class="mark">✓</span>Начинать с простейшего конвейера вызовов; агент — когда шаги заранее неизвестны, ведь ошибки на шагах накапливаются</li><li class="no"><span class="mark">✗</span>Лимиты шагов не нужны: модель сама поймёт, когда задача решена</li></ul></details></section>
   
-  
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/ai/agents/">Инструменты, агенты и безопасность</a><p>Как модель вызывает функции, когда нужен агент, что такое MCP и почему prompt injection — главная угроза агентам.</p></li></ul></section>
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/tool-calling-agents/">Что такое вызов инструментов (tool calling) и агенты?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/mcp/">Что такое Model Context Protocol (MCP)?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/llm-observability/">Как наблюдать за LLM-приложением в продакшене?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/prompt-injection/">Что такое prompt injection и как от неё защищаться?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
 </div></section>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как проектировать LLM-агента и почему агенты ломаются?","acceptedAnswer":{"@type":"Answer","text":"Агент — цикл: модель решает, какой инструмент вызвать, получает результат и решает дальше, пока задача не решена (паттерн ReAct: рассуждение → действие → наблюдение). Начинать стоит с простейшего решения: фиксированный конвейер (workflow) из нескольких вызовов LLM надёжнее и дешевле агента; агент — когда шаги заранее неизвестны. Ошибки накапливаются: 95% успеха на шаге дают около 60% на десяти шагах Хорошие инструменты: мало, с ясными именами, описаниями и понятными ошибками Обязательны лимиты шагов и бюджета, подтверждение человеком опасных действий, трассировка Мультиагентные схемы оправданы, когда подзадачи независимы и параллельны; иначе они множат ошибки и стоимость Спектр решений (от простого к сложному): 1. Один вызов LLM с хорошим промптом и контекстом. 2. Конвейер: цепочка вызовов, маршрутизация по типу запроса, параллельные вызовы с объединением. 3. Агент: модель сама выбирает инструменты и число шагов. Почему агенты ломаются: - накопление ошибок на длинных траекториях; - зацикливание и повтор одних и тех же вызовов; - неудачные инструменты: расплывчатые описания, огромные ответы, непонятные ошибки; - переполнение контекста результатами инструментов; - prompt injection из данных, которые агент читает (веб-страницы, письма). Практики: - инструменты проектировать как API для модели: строгие схемы параметров, компактные ответы, ошибки с подсказкой, что делать; - лимиты на число шагов, время и стоимость; - human-in-the-loop для необратимых действий (платёж, удаление, отправка письма); - минимальные права инструментов; - трассировка каждого шага и…"}}]}</script>
@@ -61,7 +61,7 @@
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
-  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>

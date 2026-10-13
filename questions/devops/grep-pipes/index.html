@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как найти текст в файлах и обработать вывод через пайпы? — вопрос с собеседования</title>
+<meta name="description" content="grep &quot;текст&quot; файл — строки с совпадением; -r — рекурсивно по каталогу, -i — без учёта регистра, -n — номера строк, -c — число совпадений, -v — строки…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/grep-pipes/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/grep-pipes/">
+<meta property="og:title" content="Как найти текст в файлах и обработать вывод через пайпы? — вопрос с собеседования">
+<meta property="og:description" content="grep &quot;текст&quot; файл — строки с совпадением; -r — рекурсивно по каталогу, -i — без учёта регистра, -n — номера строк, -c — число совпадений, -v — строки…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Как найти текст в файлах и обработать вывод через пайпы?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Как найти текст в файлах и обработать вывод через пайпы?"}]}</script>
+  <h1>Как найти текст в файлах и обработать вывод через пайпы?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Linux и диагностика</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как работает grep?</li><li>Что такое pipe в bash?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>grep "текст" файл</b> — строки с совпадением; <b>-r</b> — рекурсивно по каталогу, <b>-i</b> — без учёта регистра, <b>-n</b> — номера строк, <b>-c</b> — число совпадений, <b>-v</b> — строки без совпадения. <b>Пайп |</b> передаёт вывод одной команды на вход другой: <code>grep ERROR app.log | wc -l</code> — посчитать ошибки. Полезные звенья: <b>sort</b>, <b>uniq -c</b>, <b>head</b>, <b>wc -l</b>, <b>cut</b>, <b>awk</b>. Перенаправление: <b>&gt;</b> — в файл (перезаписать), <b>&gt;&gt;</b> — дописать, <b>2&gt;</b> — ошибки.</p><ul><li>grep -rn "TODO" src/ — найти все TODO с номерами строк</li><li>sort | uniq -c | sort -rn — частоты по убыванию</li><li>tail -f app.log | grep ERROR — следить за ошибками в реальном времени</li></ul><p class="extra"><span>А ещё</span> rg (ripgrep) — быстрее grep и сам пропускает .gitignore</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Примеры:</b></p>
+<pre class="lang-bash"><code># сколько раз встречается слово в проекте
+grep -rc &quot;deprecated&quot; src/ | grep -v &quot;:0&quot;
+# топ-10 IP по числу запросов в логе nginx
+awk &#x27;{print $1}&#x27; access.log | sort | uniq -c | sort -rn | head
+# ошибки за сегодня в файл
+grep &quot;$(date +%F)&quot; app.log | grep ERROR &gt; errors_today.txt</code></pre>
+<p><b>Идея Unix:</b> маленькие программы, каждая делает одно, и они соединяются пайпами.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Ключи grep: -r, -i, -n, -c, -v.</li><li>Пайпы и перенаправление.</li><li>Типовые цепочки sort, uniq, wc.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Пайп | сохраняет вывод команды в файл</li><li class="no"><span class="mark">✗</span>&gt; дописывает в конец файла, &gt;&gt; — перезаписывает</li><li class="ok"><span class="mark">✓</span>grep -r ищет рекурсивно; пайп | передаёт вывод на вход другой команде</li><li class="no"><span class="mark">✗</span>grep ищет только в одном файле, для каталога нужен find</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/devops/shell-navigation/">Как работать с файлами в командной строке Linux?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/linux-troubleshooting-commands/">Какими командами вы диагностируете проблему на Linux-сервере?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как найти текст в файлах и обработать вывод через пайпы?","acceptedAnswer":{"@type":"Answer","text":"grep \"текст\" файл — строки с совпадением; -r — рекурсивно по каталогу, -i — без учёта регистра, -n — номера строк, -c — число совпадений, -v — строки без совпадения. Пайп | передаёт вывод одной команды на вход другой: grep ERROR app.log | wc -l — посчитать ошибки. Полезные звенья: sort, uniq -c, head, wc -l, cut, awk. Перенаправление: > — в файл (перезаписать), >> — дописать, 2> — ошибки. grep -rn \"TODO\" src/ — найти все TODO с номерами строк sort | uniq -c | sort -rn — частоты по убыванию tail -f app.log | grep ERROR — следить за ошибками в реальном времени rg (ripgrep) — быстрее grep и сам пропускает .gitignore Примеры: Идея Unix: маленькие программы, каждая делает одно, и они соединяются пайпами."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

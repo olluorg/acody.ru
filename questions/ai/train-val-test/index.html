@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
-<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
 <script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
-<script src="/assets/account.js?v=194ea2e11a" defer></script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -28,7 +28,7 @@
   <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
   <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Зачем делить данные на обучающую, валидационную и тестовую выборки?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Зачем делить данные на обучающую, валидационную и тестовую выборки?"}]}</script>
   <h1>Зачем делить данные на обучающую, валидационную и тестовую выборки?</h1>
@@ -45,7 +45,7 @@
 <p><b>Утечка данных</b> — признаки, которые знают ответ или «будущее»: нормировка по всем данным до разбиения, дубли между выборками, признак, вычисленный после события. Модель показывает отличный результат на тесте и проваливается в работе.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Роль каждой выборки и почему тест используют один раз.</li><li>Кросс-валидация.</li><li>Особые разбиения: время, стратификация, группы.</li><li>Что такое утечка данных с примером.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Подбирать гиперпараметры по тестовой выборке.</li><li>Случайно перемешивать временной ряд.</li></ul></div></section>
   <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Тестовую выборку используют для подбора гиперпараметров</li><li class="no"><span class="mark">✗</span>Валидационная и тестовая выборки — одно и то же</li><li class="ok"><span class="mark">✓</span>На обучающей модель учится, на валидационной подбирают параметры и сравнивают модели, тестовую используют один раз в конце</li><li class="no"><span class="mark">✗</span>Делить данные нужно, только если их больше миллиона строк</li></ul></details></section>
   <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/ai/classification-metrics/">Какие метрики качества классификации вы знаете?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
-  
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/ai/ml-basics/">Основы машинного обучения — задачи, выборки и первые модели</a><p>Какие бывают задачи ML, зачем делить данные на выборки, что такое переобучение и как обучаются линейная и логистическая регрессия.</p></li></ul></section>
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/overfitting/">Что такое переобучение модели и как с ним бороться?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
 </div></section>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Зачем делить данные на обучающую, валидационную и тестовую выборки?","acceptedAnswer":{"@type":"Answer","text":"Обучающая — на ней модель учится, валидационная — подбираем параметры и сравниваем модели, тестовая — один раз в конце для честной оценки. Если подбирать параметры по тесту, оценка станет оптимистичной Кросс-валидация — несколько разбиений по очереди, когда данных мало Утечка данных: в обучение попала информация, которой не будет при реальном использовании Оценка на данных, которые модель видела при обучении, ничего не говорит о работе на новых. Поэтому данные делят: - train — обучение модели; - validation — выбор модели и гиперпараметров, ранняя остановка; - test — финальная оценка, к которой не прикасаются до конца. Если многократно подбирать решения по тестовой выборке, она перестаёт быть независимой. Типичные пропорции — около 70/15/15 или 80/10/10, зависит от объёма. Кросс-валидация (k-fold) — данные делят на k частей, по очереди каждая служит валидацией, остальные — обучением; метрики усредняют. Даёт более надёжную оценку на небольших данных. Особые случаи разбиения: - временные ряды — делить по времени: обучаться на прошлом, проверять на будущем; - несбалансированные классы — стратифицированное разбиение с сохранением долей классов; - группы — записи одного пользователя целиком в одной выборке. Утечка данных — признаки, которые…"}}]}</script>
@@ -62,7 +62,7 @@
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
-  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>

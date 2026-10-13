@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
-<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
 <script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
-<script src="/assets/account.js?v=194ea2e11a" defer></script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -28,7 +28,7 @@
   <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
   <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Как устроен векторный поиск?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Как устроен векторный поиск?"}]}</script>
   <h1>Как устроен векторный поиск?</h1>
@@ -43,7 +43,7 @@
 <p><b>Фильтры по метаданным</b> (раздел, дата, права доступа) применяют вместе с векторным поиском — иначе пользователь найдёт то, что ему видеть нельзя.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Постановка задачи: ближайшие соседи по вектору.</li><li>Точный поиск против ANN, идея HNSW.</li><li>Варианты хранилищ.</li><li>Гибридный поиск и фильтры по метаданным.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что векторный поиск всегда лучше полнотекстового.</li><li>Забыть про фильтрацию по правам доступа.</li></ul></div></section>
   <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Векторный поиск всегда точно перебирает все векторы</li><li class="no"><span class="mark">✗</span>HNSW — алгоритм создания эмбеддингов</li><li class="no"><span class="mark">✗</span>Векторный поиск лучше всего находит точные артикулы и коды</li><li class="ok"><span class="mark">✓</span>Поиск ближайших векторов к вектору запроса; на больших объёмах — приближённый (ANN) с индексами вроде HNSW</li></ul></details></section>
   <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/ai/rag-quality/">Как улучшить качество RAG, если он отвечает плохо?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
-  
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/ai/rag/">RAG — ответы по своим документам</a><p>Как модель отвечает по документам компании — эмбеддинги, разбиение на фрагменты, векторный и гибридный поиск, реранкинг.</p></li></ul></section>
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/embeddings/">Что такое эмбеддинги?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/what-is-rag/">Что такое RAG и как он устроен?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
 </div></section>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как устроен векторный поиск?","acceptedAnswer":{"@type":"Answer","text":"Векторный поиск находит ближайшие векторы к вектору запроса; на больших объёмах используют приближённый поиск (ANN) с индексами вроде HNSW. Точный перебор — O(n), ANN — быстро ценой небольшой потери полноты Хранилища: pgvector в PostgreSQL, FAISS, специализированные векторные базы Гибридный поиск: векторный + полнотекстовый (BM25) — ловит и смысл, и точные термины, коды, артикулы Задача — по вектору запроса вернуть k самых близких векторов документов. - Точный поиск (kNN) — посчитать сходство со всеми векторами. Подходит для тысяч и десятков тысяч записей. - Приближённый (ANN) — индекс позволяет проверить лишь часть векторов. Популярные подходы: - HNSW — многоуровневый граф ближайших соседей, быстрый поиск и хорошая полнота, но индекс занимает память; - IVF — векторы разбиты на кластеры, поиск идёт в нескольких ближайших; - квантизация (PQ) — сжатие векторов ради памяти. Параметры индекса — компромисс между скоростью, памятью и полнотой (recall). Где хранить: pgvector — расширение PostgreSQL, удобно, если данные и так в Postgres; FAISS — библиотека для поиска в памяти; отдельные векторные базы — когда нужен масштаб, фильтрация и управление коллекциями. Гибридный поиск. Эмбеддинги хорошо ловят смысл, но плохо — точные совпадения: номера, коды ошибок, редкие…"}}]}</script>
@@ -60,7 +60,7 @@
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
-  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>

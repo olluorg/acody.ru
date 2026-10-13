@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
-<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
 <script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
-<script src="/assets/account.js?v=194ea2e11a" defer></script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -28,7 +28,7 @@
   <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
   <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/ai/">AI и LLM</a> <span>/</span> <span>Что такое temperature и top-p у языковой модели?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/questions/ai/"},{"@type":"ListItem","position":3,"name":"Что такое temperature и top-p у языковой модели?"}]}</script>
   <h1>Что такое temperature и top-p у языковой модели?</h1>
@@ -42,7 +42,7 @@
 <p>Практика: для извлечения данных, классификации, кода — низкая температура и строгий формат вывода; для генерации идей — повыше. Для воспроизводимых тестов промптов — фиксировать параметры и прогонять несколько раз.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Это параметры выбора токена, а не «креативность модели» вообще.</li><li>Как каждый параметр влияет на распределение.</li><li>Когда низкая, когда высокая температура.</li><li>temperature 0 не гарантирует одинаковых ответов.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Считать, что низкая температура устраняет галлюцинации.</li><li>Одновременно агрессивно крутить temperature и top-p.</li></ul></div></section>
   <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Temperature 0 гарантирует полностью одинаковые ответы</li><li class="no"><span class="mark">✗</span>Высокая temperature лучше для извлечения данных и кода</li><li class="ok"><span class="mark">✓</span>Temperature делает распределение следующего токена острее или площе, top-p оставляет самые вероятные токены с суммарной вероятностью p</li><li class="no"><span class="mark">✗</span>Top-p ограничивает длину ответа в токенах</li></ul></details></section>
   <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/ai/structured-output/">Как получить от LLM ответ в строгом формате, например JSON?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
-  
+  <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/ai/llm-basics/">Как устроена языковая модель — токены, контекст и генерация</a><p>Что на самом деле делает LLM, почему она ошибается, как считаются токены и стоимость и как выглядит запрос к API модели.</p></li></ul></section>
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/ai/how-llm-works/">Как устроена большая языковая модель (LLM)?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/hallucinations/">Что такое галлюцинации LLM и как с ними бороться?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
 </div></section>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое temperature и top-p у языковой модели?","acceptedAnswer":{"@type":"Answer","text":"Параметры выборки следующего токена: temperature делает распределение острее или площе, top-p оставляет только самые вероятные токены с суммарной вероятностью p. Низкая температура — предсказуемо и сухо (извлечение данных, код), высокая — разнообразно (идеи, тексты) temperature 0 почти детерминирована, но совпадение ответов не гарантировано Обычно меняют что-то одно: либо температуру, либо top-p На каждом шаге модель выдаёт вероятности для всех токенов. Дальше токен нужно выбрать — это и настраивают параметры. - Temperature — делит «сырые» оценки модели перед превращением в вероятности. Меньше единицы — разрыв между вероятными и маловероятными токенами растёт, ответы стабильнее. Больше — распределение выравнивается, ответы разнообразнее, но растёт риск бессмыслицы. Около нуля — почти всегда берётся самый вероятный токен (жадная выборка). - Top-p (nucleus sampling) — сортируем токены по вероятности и оставляем минимальный набор, сумма вероятностей которого не меньше p (например, 0.9). Отбрасываются «хвосты» маловероятных вариантов. - Top-k — оставить k самых вероятных токенов. Почему ответы разные: выбор случайный, даже при низкой температуре. Детерминизм дополнительно ломают особенности вычислений на GPU и пакетная обработка запросов на стороне провайдера. Практика: для…"}}]}</script>
@@ -59,7 +59,7 @@
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
-  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>

@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
-<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
 <script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
-<script src="/assets/account.js?v=194ea2e11a" defer></script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -28,7 +28,7 @@
   <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
   <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/hr/">HR-вопросы</a> <span>/</span> <span>Расскажите об инциденте в продакшене, который вы разбирали.</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"HR-вопросы","item":"https://learn.getsotto.ru/questions/hr/"},{"@type":"ListItem","position":3,"name":"Расскажите об инциденте в продакшене, который вы разбирали."}]}</script>
   <h1>Расскажите об инциденте в продакшене, который вы разбирали.</h1>
@@ -40,7 +40,7 @@
 <p><b>Структура разбора (постмортема):</b></p>
 <ul><li>хронология: когда началось, когда заметили, когда восстановили;</li><li>влияние: сколько пользователей, денег, данных;</li><li>корневые причины и способствующие факторы;</li><li>что сработало хорошо и что плохо в реагировании;</li><li>действия с владельцами и сроками.</li></ul>
 <p><b>Без поиска виноватых</b> — не значит без ответственности: если человек смог одной командой уронить прод, проблема в процессе и защите, а не только в человеке.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><p>«Ночью резко выросли расходы на модель и задержка ассистента. Я ограничил частоту запросов на шлюзе — сервис стабилизировался за 15 минут. По трассам нашли, что после обновления агент в части диалогов зацикливался на вызове инструмента поиска. Откатили версию промпта. На разборе выяснили, что лимита шагов у агента не было, а алерта на стоимость — тоже. Добавили лимит шагов, алерт на стоимость в час и пример с зацикливанием в набор оценки. Через месяц алерт поймал похожую проблему на стейдже».</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Восстановление прежде расследования.</li><li>Коммуникация во время инцидента.</li><li>Разбор без обвинений и конкретные изменения.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>История, где виноват кто-то другой.</li><li>Нет системных изменений после инцидента.</li><li>Героизм вместо процесса.</li></ul></div></section>
-  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Сначала восстановить работу (откат, переключение), коммуницировать, затем разбор причин без поиска виноватых и изменения, чтобы не повторилось</li><li class="no"><span class="mark">✗</span>Сначала найти виноватого разработчика</li><li class="no"><span class="mark">✗</span>Исправлять причину, пока сервис лежит, без отката</li><li class="no"><span class="mark">✗</span>Не сообщать об инциденте, если удалось быстро исправить</li></ul></details></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Сначала восстановить работу, затем разбор причин без поиска виноватых</li><li class="no"><span class="mark">✗</span>Сначала найти разработчика, который выкатил ошибку</li><li class="no"><span class="mark">✗</span>Исправлять причину, пока сервис лежит, без отката</li><li class="no"><span class="mark">✗</span>Не сообщать об инциденте, если удалось быстро исправить</li></ul></details></section>
   
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/hr/failure/">Расскажите о своей ошибке или неудаче</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/hr/estimation-delivery/">Как вы оцениваете сроки задач и что делаете, когда понимаете, что не успеваете?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
@@ -59,7 +59,7 @@
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
-  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>

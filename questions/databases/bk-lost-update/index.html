@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое потерянное обновление и как его избежать? — вопрос с собеседования</title>
+<meta name="description" content="Два запроса одновременно читают одно значение (остаток 10), каждый вычисляет новое (10 − 1 = 9) и записывает — в итоге 9 вместо 8: одно обновление…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/databases/bk-lost-update/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/databases/bk-lost-update/">
+<meta property="og:title" content="Что такое потерянное обновление и как его избежать? — вопрос с собеседования">
+<meta property="og:description" content="Два запроса одновременно читают одно значение (остаток 10), каждый вычисляет новое (10 − 1 = 9) и записывает — в итоге 9 вместо 8: одно обновление…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/databases/">Базы данных</a> <span>/</span> <span>Что такое потерянное обновление и как его избежать?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/questions/databases/"},{"@type":"ListItem","position":3,"name":"Что такое потерянное обновление и как его избежать?"}]}</script>
+  <h1>Что такое потерянное обновление и как его избежать?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Транзакции и изоляция</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Зачем нужен SELECT FOR UPDATE?</li><li>Почему два одновременных запроса портят счётчик?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Два запроса одновременно <b>читают</b> одно значение (остаток 10), каждый <b>вычисляет</b> новое (10 − 1 = 9) и <b>записывает</b> — в итоге 9 вместо 8: одно обновление потеряно. Защита: <b>атомарное обновление</b> в одном запросе (<code>UPDATE ... SET stock = stock - 1 WHERE stock &gt; 0</code>), <b>пессимистическая блокировка</b> строки (<code>SELECT ... FOR UPDATE</code> внутри транзакции) или <b>оптимистическая</b> с версией (<code>UPDATE ... WHERE version = ?</code>).</p><ul><li>Схема «прочитать в приложении — посчитать — записать» без защиты небезопасна</li><li>Атомарный UPDATE — самый простой и быстрый вариант</li><li>Уровень изоляции Read Committed по умолчанию от этого не защищает</li></ul><p class="extra"><span>А ещё</span> Проверка: число затронутых строк — 0 значит, условие не выполнилось</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Плохо:</b></p>
+<pre class="lang-python"><code>stock = db.fetch(&quot;SELECT stock FROM items WHERE id = 1&quot;)
+db.execute(&quot;UPDATE items SET stock = %s WHERE id = 1&quot;, stock - 1)</code></pre>
+<p><b>Хорошо:</b></p>
+<pre class="lang-sql"><code>UPDATE items SET stock = stock - 1 WHERE id = 1 AND stock &gt; 0;</code></pre>
+<p>Или в транзакции:</p>
+<pre class="lang-sql"><code>BEGIN;
+SELECT stock FROM items WHERE id = 1 FOR UPDATE;
+-- проверка в приложении
+UPDATE items SET stock = 9 WHERE id = 1;
+COMMIT;</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Сценарий потерянного обновления.</li><li>Атомарный UPDATE.</li><li>SELECT FOR UPDATE и оптимистическая версия.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Прочитать значение в приложении, вычесть и записать — это безопасно при любой нагрузке</li><li class="ok"><span class="mark">✓</span>Два запроса читают одно значение и перезаписывают друг друга; защита — атомарный UPDATE, SELECT FOR UPDATE или проверка версии</li><li class="no"><span class="mark">✗</span>Потерянное обновление невозможно на уровне Read Committed</li><li class="no"><span class="mark">✗</span>Достаточно добавить индекс на колонку</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/databases/bk-transaction-basics/">Что такое транзакция в базе данных и как работают BEGIN, COMMIT и ROLLBACK?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/optimistic-locking/">Чем оптимистическая блокировка отличается от пессимистической и когда какую выбрать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/race-condition/">Что такое состояние гонки?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое потерянное обновление и как его избежать?","acceptedAnswer":{"@type":"Answer","text":"Два запроса одновременно читают одно значение (остаток 10), каждый вычисляет новое (10 − 1 = 9) и записывает — в итоге 9 вместо 8: одно обновление потеряно. Защита: атомарное обновление в одном запросе (UPDATE ... SET stock = stock - 1 WHERE stock > 0), пессимистическая блокировка строки (SELECT ... FOR UPDATE внутри транзакции) или оптимистическая с версией (UPDATE ... WHERE version = ?). Схема «прочитать в приложении — посчитать — записать» без защиты небезопасна Атомарный UPDATE — самый простой и быстрый вариант Уровень изоляции Read Committed по умолчанию от этого не защищает Проверка: число затронутых строк — 0 значит, условие не выполнилось Плохо: Хорошо: Или в транзакции:"}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

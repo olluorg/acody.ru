@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Промпты и структурированный вывод — разбор для собеседования</title>
+<meta name="description" content="Как написать промпт, который стабильно работает, отделить инструкции от данных, получить от модели строгий JSON и когда разбивать задачу на цепочку…">
+<link rel="canonical" href="https://learn.getsotto.ru/articles/ai/prompting/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/articles/ai/prompting/">
+<meta property="og:title" content="Промпты и структурированный вывод — разбор для собеседования">
+<meta property="og:description" content="Как написать промпт, который стабильно работает, отделить инструкции от данных, получить от модели строгий JSON и когда разбивать задачу на цепочку…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#ai">AI и LLM</a> <span>/</span> <span>Промпты и структурированный вывод</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"AI и LLM","item":"https://learn.getsotto.ru/articles/#ai"},{"@type":"ListItem","position":3,"name":"Промпты и структурированный вывод"}]}</script>
+  <h1>Промпты и структурированный вывод</h1>
+  <p class="lead">Как написать промпт, который стабильно работает, отделить инструкции от данных, получить от модели строгий JSON и когда разбивать задачу на цепочку вызовов.</p>
+  <article class="md"><h2>Хороший промпт — это постановка задачи</h2>
+<p>Модель не читает мысли. Хороший промпт содержит то же, что хорошая задача для нового сотрудника: <b>роль и контекст</b>, <b>конкретную задачу</b>, <b>ограничения</b>, <b>формат ответа</b> и <b>что делать, если данных не хватает</b> («если ответа нет в документе — так и скажи»). Без последнего пункта модель охотно додумает.</p>
+<p><b>Системный промпт</b> задаёт правила на весь диалог, пользовательский — конкретный запрос.</p>
+<h2>Отделяйте инструкции от данных</h2>
+<p>Документ, письмо или ввод пользователя оборачивают в явные границы — теги вроде <code>&lt;document&gt;…&lt;/document&gt;</code>. Так модель понимает, где инструкция, а где материал для обработки. Это повышает качество и немного снижает риск, что фраза из письма будет выполнена как команда.</p>
+<p><b>Few-shot</b> — несколько примеров «вход → выход» в промпте. Они показывают формат лучше любого описания. Примеры должны быть разнообразными и похожими на реальные входы, иначе модель начнёт копировать их содержание. Обычно хватает 2–5.</p>
+<h2>Строгий формат: JSON по схеме</h2>
+<p>Если результат читает программа, нужен <b>структурированный вывод</b>. Удобный путь в Python — описать результат классом Pydantic с типами, перечислениями и необязательными полями, передать его JSON-схему в API в режиме структурированного вывода и <b>проверить ответ тем же классом</b>. При ошибке валидации — повторить запрос с текстом ошибки.</p>
+<p>Схема гарантирует форму, но не правильность значений: сумму или дату всё равно проверяют бизнес-правилами.</p>
+<h2>Один промпт или цепочка</h2>
+<p>Когда один промпт пытается делать много разного — классифицировать, извлекать, отвечать, проверять, — он начинает путаться. Тогда задачу разбивают на <b>цепочку вызовов</b>: каждый решает одну подзадачу и передаёт структурированный результат следующему, а между шагами код проверяет данные. Цена — больше вызовов и задержка, поэтому решение принимают сравнением на наборе примеров.</p>
+<h2>Промпт — это код</h2>
+<p>Промпты хранят в репозитории, версионируют и проверяют на <b>наборе примеров</b> после каждого изменения. Улучшать промпт под один неудачный пример — путь к поломке других сценариев.</p>
+<h2>Итог</h2>
+<ul><li>Роль, задача, ограничения, формат и поведение без данных.</li><li>Явные границы для данных, несколько разнообразных примеров.</li><li>JSON по схеме и обязательная валидация.</li><li>Цепочка вызовов для сложных задач — по замеру.</li></ul></article>
+  <section class="block lesson-check" data-lesson="ai/ai-lesson-prompting"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="ai-engineer-basics"><a class="course-title" href="/courses/ai-engineer-basics/">Курс «ИИ-инженер: LLM-приложения с нуля»</a><span>урок 2 из 6</span><a href="/articles/ai/llm-basics/">← Как устроена языковая модель — токены, контекст и генерация</a><a class="next" href="/articles/ai/rag/">RAG — ответы по своим документам →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/ai/prompt-engineering/">Как писать хорошие промпты?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/few-shot-delimiters/">Зачем отделять инструкции от данных в промпте и как добавлять примеры (few-shot)?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/structured-output/">Как получить от LLM ответ в строгом формате, например JSON?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/ai/pydantic-extraction/">Как получить от модели JSON по схеме Pydantic и проверить его?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/ai/prompt-chaining/">Когда разбивать задачу на цепочку вызовов модели вместо одного большого промпта?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/ai/llm-basics/">Как устроена языковая модель — токены, контекст и генерация</a><p>Что на самом деле делает LLM, почему она ошибается, как считаются токены и стоимость и как выглядит запрос к API модели.</p></li><li><a href="/articles/ai/evaluation/">Оценка качества LLM-продукта</a><p>Как собрать набор примеров, какие проверки делать кодом, когда нужен LLM-судья и как мерить качество поиска.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Промпты и структурированный вывод","description":"Как написать промпт, который стабильно работает, отделить инструкции от данных, получить от модели строгий JSON и когда разбивать задачу на цепочку вызовов.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/ai/prompting/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

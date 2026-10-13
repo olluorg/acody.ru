@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
-<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
 <script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
-<script src="/assets/account.js?v=194ea2e11a" defer></script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -28,7 +28,7 @@
   <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
   <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/qa/">Тестирование (QA)</a> <span>/</span> <span>Что такое таблица принятия решений?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Тестирование (QA)","item":"https://learn.getsotto.ru/questions/qa/"},{"@type":"ListItem","position":3,"name":"Что такое таблица принятия решений?"}]}</script>
   <h1>Что такое таблица принятия решений?</h1>
@@ -41,7 +41,7 @@
 <ol><li>Выписать условия (входы): «пользователь авторизован», «сумма больше 3000», «есть промокод».</li><li>Выписать действия (результаты): «скидка 10 %», «бесплатная доставка».</li><li>Перечислить все комбинации условий — для трёх условий «да/нет» их восемь.</li><li>Для каждой комбинации записать ожидаемый результат по требованиям.</li><li>Убрать невозможные комбинации и объединить те, где результат не зависит от одного из условий.</li></ol>
 <p>Каждый столбец превращается в тест-кейс. Заодно видны дыры в требованиях: если для комбинации непонятно, что должно произойти, — это вопрос аналитику.</p></div></section><section class="block"><h2>Пример</h2><div class="md"><p>Доставка бесплатная, если сумма ≥ 3000 ₽ <b>или</b> у пользователя подписка.</p>
 <div class="table"><table><thead><tr><th>Условие / правило</th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead><tbody><tr><td>Сумма ≥ 3000</td><td>да</td><td>да</td><td>нет</td><td>нет</td></tr><tr><td>Есть подписка</td><td>да</td><td>нет</td><td>да</td><td>нет</td></tr><tr><td>Доставка бесплатная</td><td>да</td><td>да</td><td>да</td><td>нет</td></tr></tbody></table></div></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Назначение: перебор комбинаций условий.</li><li>Как строится таблица и как из неё получаются тест-кейсы.</li><li>Сокращение невозможных и равнозначных комбинаций.</li><li>Пример.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Путать с классами эквивалентности, которые работают с одним полем.</li><li>Проверить только «все да» и «все нет».</li></ul></div></section>
-  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Таблица со всеми комбинациями условий и результатом для каждой — помогает не потерять сочетания в бизнес-логике</li><li class="no"><span class="mark">✗</span>Список багов, отсортированный по приоритету</li><li class="no"><span class="mark">✗</span>План тестирования по датам</li><li class="no"><span class="mark">✗</span>Таблица с результатами прогона автотестов</li></ul></details></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="ok"><span class="mark">✓</span>Таблица всех комбинаций условий и результата для каждой</li><li class="no"><span class="mark">✗</span>Список багов, отсортированный по приоритету и серьёзности</li><li class="no"><span class="mark">✗</span>План тестирования с датами и ответственными</li><li class="no"><span class="mark">✗</span>Таблица с результатами прогона автотестов</li></ul></details></section>
   <section class="block next"><h2>Что спросят дальше</h2><ul class="links"><li><a href="/questions/qa/state-transition/">Что такое тестирование переходов состояний?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/qa/pairwise/">Что такое попарное тестирование (pairwise)?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/qa/equivalence-partitioning/">Что такое классы эквивалентности?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
@@ -60,7 +60,7 @@
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
-  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>

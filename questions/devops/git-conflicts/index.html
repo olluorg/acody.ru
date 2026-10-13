@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как разрешить конфликт слияния в Git? — вопрос с собеседования</title>
+<meta name="description" content="Конфликт — обе ветки изменили одни и те же строки, и Git не знает, что оставить. В файле появляются маркеры: между &lt;&lt;&lt;&lt;&lt;&lt;&lt; и ======= — ваша версия…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/devops/git-conflicts/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/devops/git-conflicts/">
+<meta property="og:title" content="Как разрешить конфликт слияния в Git? — вопрос с собеседования">
+<meta property="og:description" content="Конфликт — обе ветки изменили одни и те же строки, и Git не знает, что оставить. В файле появляются маркеры: между &lt;&lt;&lt;&lt;&lt;&lt;&lt; и ======= — ваша версия…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/devops/">DevOps</a> <span>/</span> <span>Как разрешить конфликт слияния в Git?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://learn.getsotto.ru/questions/devops/"},{"@type":"ListItem","position":3,"name":"Как разрешить конфликт слияния в Git?"}]}</script>
+  <h1>Как разрешить конфликт слияния в Git?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">CI/CD и Git</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Что означают &lt;&lt;&lt;&lt;&lt;&lt;&lt; и &gt;&gt;&gt;&gt;&gt;&gt;&gt; в файле?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Конфликт — обе ветки изменили <b>одни и те же строки</b>, и Git не знает, что оставить. В файле появляются маркеры: между <b>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</b> и <b>=======</b> — ваша версия, между <b>=======</b> и <b>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</b> — входящая. Нужно <b>понять смысл обоих изменений</b>, собрать правильный итог (часто — комбинацию), удалить маркеры, затем <code>git add</code> и продолжить (<code>git commit</code> или <code>git rebase --continue</code>). После — <b>собрать проект и прогнать тесты</b>: код без маркеров ещё не значит рабочий.</p><ul><li>Не выбирать «свою версию» не глядя — так теряют чужую работу</li><li>Редактор и IDE показывают конфликт в три колонки — удобнее</li><li>Частые небольшие слияния — меньше и проще конфликты</li></ul><p class="extra"><span>А ещё</span> Если запутались — git merge --abort или git rebase --abort вернёт состояние до начала</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><p><b>Пример:</b></p>
+<pre class="lang-text"><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+timeout = 10
+=======
+timeout = 30
+retries = 3
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/retries</code></pre>
+<p>Нужно выяснить, почему каждая сторона менялась. Возможно, верный итог — <code>timeout = 30</code> и <code>retries = 3</code>, а возможно — обсудить с автором изменения.</p>
+<p><b>Порядок:</b> разрешить все файлы (git status покажет), git add, завершить слияние, запустить тесты, push.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Почему возникает конфликт и что значат маркеры.</li><li>Осмысленное объединение, а не выбор стороны.</li><li>add и продолжение, проверка тестами.</li><li>abort как выход.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Всегда принимать свою версию, чтобы не сломать свой код</li><li class="ok"><span class="mark">✓</span>Понять оба изменения, собрать правильный итог, удалить маркеры, git add, завершить слияние и прогнать тесты</li><li class="no"><span class="mark">✗</span>Удалить маркеры и сразу отправить — Git сам проверит корректность</li><li class="no"><span class="mark">✗</span>Конфликт можно решить только удалив ветку</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/devops/git-merge-rebase/">Чем merge отличается от rebase и почему нельзя переписывать опубликованную историю?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/pull-request/">Как оформить pull request, который быстро проверят?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как разрешить конфликт слияния в Git?","acceptedAnswer":{"@type":"Answer","text":"Конфликт — обе ветки изменили одни и те же строки, и Git не знает, что оставить. В файле появляются маркеры: между <<<<<<< и ======= — ваша версия, между ======= и >>>>>>> — входящая. Нужно понять смысл обоих изменений, собрать правильный итог (часто — комбинацию), удалить маркеры, затем git add и продолжить (git commit или git rebase --continue). После — собрать проект и прогнать тесты: код без маркеров ещё не значит рабочий. Не выбирать «свою версию» не глядя — так теряют чужую работу Редактор и IDE показывают конфликт в три колонки — удобнее Частые небольшие слияния — меньше и проще конфликты Если запутались — git merge --abort или git rebase --abort вернёт состояние до начала Пример: Нужно выяснить, почему каждая сторона менялась. Возможно, верный итог — timeout = 30 и retries = 3, а возможно — обсудить с автором изменения. Порядок: разрешить все файлы (git status покажет), git add, завершить слияние, запустить тесты, push."}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -16,10 +16,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=194ea2e11a">
-<link rel="stylesheet" href="/assets/learn.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
 <script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
-<script src="/assets/account.js?v=194ea2e11a" defer></script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -28,7 +28,7 @@
   <div class="account" id="account"></div>
 </div></header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=194ea2e11a">
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
   <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/spring/">Spring</a> <span>/</span> <span>Как работает @Transactional и почему вызов метода внутри того же класса (self-invocation) может не открыть транзакцию?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Spring","item":"https://learn.getsotto.ru/questions/spring/"},{"@type":"ListItem","position":3,"name":"Как работает @Transactional и почему вызов метода внутри того же класса (self-invocation) может не открыть транзакцию?"}]}</script>
   <h1>Как работает @Transactional и почему вызов метода внутри того же класса (self-invocation) может не открыть транзакцию?</h1>
@@ -49,7 +49,7 @@ class OrderService {
 <p><b>Что делать:</b></p>
 <ul><li>вынести метод в отдельный бин (лучший вариант — часто это и отдельная ответственность);</li><li>программно: <code>TransactionTemplate.execute(...)</code>;</li><li>внедрить собственный прокси (<code>@Lazy @Autowired OrderService self</code>) — работает, но запутывает;</li><li>AspectJ compile-time / load-time weaving — аспекты вплетаются в байткод.</li></ul>
 <p><b>Ещё ограничения прокси:</b> не перехватываются private и final методы (CGLIB), а у JDK-прокси — методы не из интерфейса.</p></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Прокси как механизм работы @Transactional.</li><li>Почему внутренний вызов идёт мимо прокси.</li><li>Способы решения.</li><li>Другие ограничения прокси.</li></ul></div></section><section class="block mistakes"><h2>Частые ошибки</h2><div class="md"><ul><li>Ставить @Transactional на private-метод.</li><li>Ожидать REQUIRES_NEW при вызове из того же класса.</li></ul></div></section>
-  
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Вызов this.other() внутри класса тоже проходит через прокси</li><li class="no"><span class="mark">✗</span>@Transactional на private-методе работает так же, как на public</li><li class="ok"><span class="mark">✓</span>Транзакцию открывает прокси, а вызов this.other() идёт мимо него; решение — вынести метод в другой бин или TransactionTemplate</li><li class="no"><span class="mark">✗</span>Self-invocation открывает новую транзакцию REQUIRES_NEW</li></ul></details></section>
   <section class="block next"><h2>Что спросят дальше</h2><ul class="plainlist"><li>Какие бывают propagation?</li><li>Чем отличается JDK-прокси от CGLIB?</li></ul></section>
   <section class="block learn"><h2>Разбор темы</h2><ul class="links"><li><a href="/articles/spring/transactions/">@Transactional: propagation, isolation, rollback</a><p>Декларативные транзакции через прокси, ловушка self-invocation, уровни распространения, правила отката и readOnly/isolation.</p></li></ul></section>
   <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/spring/proxy-aop-limits/">Какие ограничения есть у Spring AOP из-за того, что он основан на прокси?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/jdk-vs-cglib-proxy/">Когда Spring создаёт JDK dynamic proxy, а когда CGLIB-прокси?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/spring/requires-new-pool/">Что делает propagation=REQUIRES_NEW и какой подводный камень с пулом соединений он несёт?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/spring/transactional-commit-basic/">Что происходит при выходе из метода с @Transactional, если исключений не было?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
@@ -68,7 +68,7 @@ class OrderService {
   <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
-  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
