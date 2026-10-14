@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Что такое CSS Modules и чем они отличаются от CSS-in-JS? — вопрос с собеседования</title>
+<meta name="description" content="CSS Modules — обычный CSS-файл, классы которого сборщик превращает в уникальные имена (.title → Card_title__x7a2) и отдаёт объектом: styles.title…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/css-modules/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/css-modules/">
+<meta property="og:title" content="Что такое CSS Modules и чем они отличаются от CSS-in-JS? — вопрос с собеседования">
+<meta property="og:description" content="CSS Modules — обычный CSS-файл, классы которого сборщик превращает в уникальные имена (.title → Card_title__x7a2) и отдаёт объектом: styles.title…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Что такое CSS Modules и чем они отличаются от CSS-in-JS?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Что такое CSS Modules и чем они отличаются от CSS-in-JS?"}]}</script>
+  <h1>Что такое CSS Modules и чем они отличаются от CSS-in-JS?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">Вёрстка и CSS</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как изолировать стили компонента?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><b>CSS Modules</b> — обычный CSS-файл, классы которого сборщик превращает в <b>уникальные имена</b> (<code>.title</code> → <code>Card_title__x7a2</code>) и отдаёт объектом: <code>styles.title</code>. Стили <b>изолированы</b> без соглашений об именах, остаются статическим CSS — быстро и кэшируется. <b>CSS-in-JS</b> (styled-components, Emotion) пишет стили в JS с доступом к props — гибко, но добавляет работу в рантайме и сложнее с серверными компонентами; современные варианты (vanilla-extract, Linaria) собирают CSS на этапе сборки.</p><ul><li>CSS-переменные — для тем и динамических значений без CSS-in-JS</li><li>Глобальные стили (сброс, шрифты) — отдельный файл</li><li>Выбор — по команде и фреймворку, главное — единообразие</li></ul></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><pre class="lang-jsx"><code>import styles from &#x27;./Card.module.css&#x27;;
+&lt;h3 className={styles.title}&gt;…&lt;/h3&gt;</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Уникальные имена классов при сборке.</li><li>Изоляция без методологии.</li><li>Плюсы и минусы CSS-in-JS.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>CSS Modules выполняют стили в JavaScript во время работы приложения</li><li class="no"><span class="mark">✗</span>CSS Modules делают классы глобальными</li><li class="ok"><span class="mark">✓</span>CSS Modules превращают классы в уникальные имена при сборке и изолируют стили, оставаясь статическим CSS; CSS-in-JS пишет стили в JS, часто с работой в рантайме</li><li class="no"><span class="mark">✗</span>CSS-in-JS не имеет недостатков по сравнению с CSS Modules</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/bem/">Что такое БЭМ и зачем методологии именования CSS?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/tailwind/">Что такое утилитарный CSS (Tailwind) и какие у него плюсы и минусы?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что такое CSS Modules и чем они отличаются от CSS-in-JS?","acceptedAnswer":{"@type":"Answer","text":"CSS Modules — обычный CSS-файл, классы которого сборщик превращает в уникальные имена (.title → Card_title__x7a2) и отдаёт объектом: styles.title. Стили изолированы без соглашений об именах, остаются статическим CSS — быстро и кэшируется. CSS-in-JS (styled-components, Emotion) пишет стили в JS с доступом к props — гибко, но добавляет работу в рантайме и сложнее с серверными компонентами; современные варианты (vanilla-extract, Linaria) собирают CSS на этапе сборки. CSS-переменные — для тем и динамических значений без CSS-in-JS Глобальные стили (сброс, шрифты) — отдельный файл Выбор — по команде и фреймворку, главное — единообразие "}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как избежать лишних перерисовок при использовании Context и почему Context — не менеджер состояния? — вопрос с собеседования</title>
+<meta name="description" content="Все потребители контекста перерисовываются, когда value меняется по ссылке. Частая ошибка — объект в value создаётся заново на каждом рендере…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/react-context-performance/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/react-context-performance/">
+<meta property="og:title" content="Как избежать лишних перерисовок при использовании Context и почему Context — не менеджер состояния? — вопрос с собеседования">
+<meta property="og:description" content="Все потребители контекста перерисовываются, когда value меняется по ссылке. Частая ошибка — объект в value создаётся заново на каждом рендере…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Как избежать лишних перерисовок при использовании Context и почему Context — не менеджер состояния?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Как избежать лишних перерисовок при использовании Context и почему Context — не менеджер состояния?"}]}</script>
+  <h1>Как избежать лишних перерисовок при использовании Context и почему Context — не менеджер состояния?</h1>
+  <div class="chips"><span class="lvl lvl-middle">Middle</span><span class="chip">React</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Почему все компоненты перерисовываются при изменении контекста?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main">Все потребители контекста перерисовываются, когда <b>value</b> меняется по ссылке. Частая ошибка — объект в value создаётся заново на каждом рендере провайдера: <code>value={{user, setUser}}</code> — тогда перерисовываются все даже без изменений. Лечение: <b>мемоизировать value</b> (useMemo), <b>разделять контексты</b> (данные и функции отдельно, часто и редко меняющееся отдельно), опускать провайдер ниже. Context лишь <b>доставляет</b> значение — у него нет селекторов, подписки на часть, middleware; для сложного часто меняющегося состояния берут <b>Zustand, Redux, Jotai</b>.</p><ul><li>Компонент не может подписаться на часть контекста</li><li>Функции из useState стабильны — их удобно класть в отдельный контекст</li><li>React.memo не спасает от перерисовки потребителя контекста</li></ul><p class="extra"><span>А ещё</span> Проверяйте Profiler'ом, прежде чем оптимизировать</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><pre class="lang-tsx"><code>const value = useMemo(() =&gt; ({ user, login, logout }), [user]);
+return &lt;AuthCtx.Provider value={value}&gt;{children}&lt;/AuthCtx.Provider&gt;;</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>Перерисовка при смене ссылки value.</li><li>useMemo и разделение контекстов.</li><li>Отсутствие селекторов — почему не менеджер состояния.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>Потребители перерисовываются только если изменилось поле, которое они используют</li><li class="ok"><span class="mark">✓</span>Мемоизировать value, разделять контексты по частоте изменений; Context лишь доставляет значение и не умеет подписываться на часть</li><li class="no"><span class="mark">✗</span>React.memo на потребителе полностью предотвращает перерисовку при смене контекста</li><li class="no"><span class="mark">✗</span>Создавать объект value заново на каждом рендере — рекомендуемая практика</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/react-context-basics/">Что такое Context в React и когда его использовать?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/react-memo-usecallback/">Когда применять React.memo, useMemo и useCallback?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/frontend/react-zustand/">Как создать хранилище Zustand и подписаться на его часть?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как избежать лишних перерисовок при использовании Context и почему Context — не менеджер состояния?","acceptedAnswer":{"@type":"Answer","text":"Все потребители контекста перерисовываются, когда value меняется по ссылке. Частая ошибка — объект в value создаётся заново на каждом рендере провайдера: value={{user, setUser}} — тогда перерисовываются все даже без изменений. Лечение: мемоизировать value (useMemo), разделять контексты (данные и функции отдельно, часто и редко меняющееся отдельно), опускать провайдер ниже. Context лишь доставляет значение — у него нет селекторов, подписки на часть, middleware; для сложного часто меняющегося состояния берут Zustand, Redux, Jotai. Компонент не может подписаться на часть контекста Функции из useState стабильны — их удобно класть в отдельный контекст React.memo не спасает от перерисовки потребителя контекста Проверяйте Profiler'ом, прежде чем оптимизировать "}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

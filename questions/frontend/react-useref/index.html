@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как получить доступ к DOM-элементу через useRef? — вопрос с собеседования</title>
+<meta name="description" content="const inputRef = useRef&lt;HTMLInputElement&gt;(null) и &lt;input ref={inputRef}/&gt; — после монтирования в inputRef.current будет DOM-элемент. Использовать его…">
+<link rel="canonical" href="https://learn.getsotto.ru/questions/frontend/react-useref/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://learn.getsotto.ru/questions/frontend/react-useref/">
+<meta property="og:title" content="Как получить доступ к DOM-элементу через useRef? — вопрос с собеседования">
+<meta property="og:description" content="const inputRef = useRef&lt;HTMLInputElement&gt;(null) и &lt;input ref={inputRef}/&gt; — после монтирования в inputRef.current будет DOM-элемент. Использовать его…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/frontend/">Frontend</a> <span>/</span> <span>Как получить доступ к DOM-элементу через useRef?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Frontend","item":"https://learn.getsotto.ru/questions/frontend/"},{"@type":"ListItem","position":3,"name":"Как получить доступ к DOM-элементу через useRef?"}]}</script>
+  <h1>Как получить доступ к DOM-элементу через useRef?</h1>
+  <div class="chips"><span class="lvl lvl-junior">Junior</span><span class="chip">React</span></div>
+  <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как поставить фокус на поле ввода в React?</li></ul></div>
+  <div class="short"><span class="label">Коротко</span><p class="main"><code>const inputRef = useRef&lt;HTMLInputElement&gt;(null)</code> и <code>&lt;input ref={inputRef}/&gt;</code> — после монтирования в <b>inputRef.current</b> будет DOM-элемент. Использовать его можно в <b>обработчиках</b> и <b>эффектах</b> (фокус, прокрутка, измерение размеров, воспроизведение видео), но <b>не во время рендера</b>: в этот момент элемента может ещё не быть. Ref нужен там, где React не даёт декларативного способа.</p><ul><li>inputRef.current?.focus() — опциональная цепочка на случай null</li><li>Прокрутка: element.scrollIntoView()</li><li>Не менять через ref то, чем управляет React (текст, классы)</li></ul><p class="extra"><span>А ещё</span> autoFocus в JSX — проще, если нужен фокус только при монтировании</p></div>
+  
+  <section class="block"><h2>Подробно</h2><div class="md"><pre class="lang-tsx"><code>function Search() {
+  const ref = useRef&lt;HTMLInputElement&gt;(null);
+  return (&lt;&gt;
+    &lt;input ref={ref} /&gt;
+    &lt;button onClick={() =&gt; ref.current?.focus()}&gt;Искать&lt;/button&gt;
+  &lt;/&gt;);
+}</code></pre></div></section><section class="block expect"><h2>Что хотят услышать</h2><div class="md"><ul><li>useRef и атрибут ref.</li><li>Использование в обработчиках и эффектах.</li><li>Не читать ref при рендере.</li></ul></div></section>
+  <section class="block quiz"><h2>Проверьте себя</h2><p class="hint">Один верный вариант. Подумайте, потом откройте ответ.</p><details><summary>Показать варианты и ответ</summary><ul><li class="no"><span class="mark">✗</span>ref.current доступен и заполнен уже во время первого рендера</li><li class="ok"><span class="mark">✓</span>useRef с атрибутом ref даёт DOM-элемент в ref.current после монтирования; его используют в обработчиках и эффектах — фокус, прокрутка, размеры</li><li class="no"><span class="mark">✗</span>Через ref правильно менять текст элементов вместо state</li><li class="no"><span class="mark">✗</span>useRef работает только в классовых компонентах</li></ul></details></section>
+  
+  
+  <section class="block"><h2>Связанные вопросы</h2><ul class="links"><li><a href="/questions/frontend/react-ref-vs-state/">Чем useRef отличается от useState?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/frontend/react-forward-ref/">Как передать ref в свой компонент и открыть его методы?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как получить доступ к DOM-элементу через useRef?","acceptedAnswer":{"@type":"Answer","text":"const inputRef = useRef<HTMLInputElement>(null) и <input ref={inputRef}/> — после монтирования в inputRef.current будет DOM-элемент. Использовать его можно в обработчиках и эффектах (фокус, прокрутка, измерение размеров, воспроизведение видео), но не во время рендера: в этот момент элемента может ещё не быть. Ref нужен там, где React не даёт декларативного способа. inputRef.current?.focus() — опциональная цепочка на случай null Прокрутка: element.scrollIntoView() Не менять через ref то, чем управляет React (текст, классы) autoFocus в JSX — проще, если нужен фокус только при монтировании "}}]}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>
