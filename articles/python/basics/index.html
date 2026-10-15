@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Типы и коллекции — что изменяемо, что хешируемо и как устроен dict — разбор для собеседования</title>
+<meta name="description" content="Изменяемые и неизменяемые типы, список и кортеж, словарь и множество на хеш-таблице, is против ==, модуль collections.">
+<link rel="canonical" href="https://acody.ru/articles/python/basics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/python/basics/">
+<meta property="og:title" content="Типы и коллекции — что изменяемо, что хешируемо и как устроен dict — разбор для собеседования">
+<meta property="og:description" content="Изменяемые и неизменяемые типы, список и кортеж, словарь и множество на хеш-таблице, is против ==, модуль collections.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#python">Python</a> <span>/</span> <span>Типы и коллекции — что изменяемо, что хешируемо и как устроен dict</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://acody.ru/articles/#python"},{"@type":"ListItem","position":3,"name":"Типы и коллекции — что изменяемо, что хешируемо и как устроен dict"}]}</script>
+  <h1>Типы и коллекции — что изменяемо, что хешируемо и как устроен dict</h1>
+  <p class="lead">Изменяемые и неизменяемые типы, список и кортеж, словарь и множество на хеш-таблице, is против ==, модуль collections.</p>
+  <article class="md"><h2>Всё — объекты, переменные — имена</h2>
+<p>В Python переменная — не ячейка с значением, а <b>имя, привязанное к объекту</b>. <code>b = a</code> не копирует объект, а даёт ему второе имя:</p>
+<pre class="lang-python"><code>a = [1, 2, 3]
+b = a
+b.append(4)
+print(a)  # [1, 2, 3, 4]</code></pre>
+<p>Отсюда главное разделение типов.</p>
+<h2>Изменяемые и неизменяемые</h2>
+<div class="table"><table><thead><tr><th>Неизменяемые</th><th>Изменяемые</th></tr></thead><tbody><tr><td>int, float, bool, str, bytes, tuple, frozenset, None</td><td>list, dict, set, bytearray, объекты обычных классов</td></tr></tbody></table></div>
+<p>Изменяемый объект меняется <b>на месте</b>, все имена видят изменение. Неизменяемый можно только заменить новым: <code>s += &quot;!&quot;</code> создаёт новую строку.</p>
+<p>С изменяемостью связана <b>хешируемость</b>: ключом словаря и элементом множества может быть только объект, хеш которого не меняется за время жизни. Поэтому <code>dict[(1, 2)]</code> можно, а <code>dict[[1, 2]]</code> — нет.</p>
+<h2>Список и кортеж</h2>
+<p>Список изменяемый, кортеж — нет; остальные различия следуют из этого. Кортеж может быть ключом словаря (если хешируемы его элементы), чуть легче по памяти и быстрее создаётся. По смыслу список — набор однотипных элементов, кортеж — запись с фиксированной структурой: <code>(name, age)</code>.</p>
+<h2>Словарь — хеш-таблица</h2>
+<p>По <code>hash(key)</code> словарь находит место ключа, поэтому поиск, вставка и удаление — в среднем <b>O(1)</b>. При коллизиях — разных ключах с одним местом — поиск может деградировать до O(n), но на практике это редкость. С Python 3.7 словарь гарантированно <b>сохраняет порядок вставки</b>.</p>
+<h2>Множество</h2>
+<p><code>set</code> — набор <b>уникальных</b> хешируемых элементов на той же хеш-таблице. Проверка <code>x in s</code> — в среднем O(1), у списка — O(n). Это частая оптимизация: проверка вхождения в цикле по списку даёт O(n²), по множеству — O(n).</p>
+<pre class="lang-python"><code>seen = set(ids)
+a | b   # объединение
+a &amp; b   # пересечение
+a - b   # разность</code></pre>
+<p><code>frozenset</code> — неизменяемая версия, её можно положить в другое множество.</p>
+<h2>is и ==</h2>
+<p><code>==</code> сравнивает <b>значения</b> (вызывает <code>__eq__</code>), <code>is</code> — что это <b>один и тот же объект</b>.</p>
+<pre class="lang-python"><code>[1, 2] == [1, 2]   # True
+[1, 2] is [1, 2]   # False — два разных списка
+x is None          # правильная проверка на None</code></pre>
+<p><code>is</code> используют для <code>None</code>, <code>True</code>, <code>False</code> и объектов-сентинелов. Числа и строки через <code>is</code> не сравнивают: результат зависит от деталей реализации.</p>
+<h2>Модуль collections</h2>
+<div class="table"><table><thead><tr><th>Тип</th><th>Когда</th></tr></thead><tbody><tr><td><code>defaultdict(list)</code></td><td>группировка без проверки «есть ли ключ»</td></tr><tr><td><code>Counter</code></td><td>подсчёт, <code>most_common(10)</code></td></tr><tr><td><code>deque</code></td><td>очередь с O(1) с обоих концов, скользящее окно через <code>maxlen</code></td></tr><tr><td><code>OrderedDict</code></td><td><code>move_to_end</code>, равенство с учётом порядка — нужен редко</td></tr></tbody></table></div>
+<pre class="lang-python"><code>from collections import Counter, deque
+Counter(&quot;abracadabra&quot;).most_common(2)  # [(&#x27;a&#x27;, 5), (&#x27;b&#x27;, 2)]
+q = deque(maxlen=3)</code></pre>
+<p><code>list.pop(0)</code> — O(n), <code>deque.popleft()</code> — O(1). У <code>defaultdict</code> есть ловушка: даже чтение <code>d[k]</code> создаёт ключ.</p>
+<h2>Что запомнить</h2>
+<ul><li>Присваивание не копирует — даёт объекту ещё одно имя.</li><li>Ключом словаря может быть только хешируемое, то есть неизменяемое.</li><li>dict и set — хеш-таблицы с поиском O(1).</li><li><code>is</code> — только для None и синглтонов, значения сравнивают через <code>==</code>.</li></ul></article>
+  <section class="block lesson-check" data-lesson="python/python-lesson-basics"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="python-backend"><a class="course-title" href="/courses/python-backend/">Курс «Python для бэкенда: от типов до asyncio и FastAPI»</a><span>урок 1 из 12</span><a class="next" href="/articles/python/functions/">Функции — аргументы, области видимости, замыкания и декораторы →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/python/mutable-immutable/">Чем изменяемые типы отличаются от неизменяемых?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/list-vs-tuple/">Чем список отличается от кортежа?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/dict-how-it-works/">Как устроен словарь в Python?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/set/">Что такое множество (set) и когда его использовать?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/is-vs-eq/">Чем отличается is от ==?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/collections-module/">Когда использовать defaultdict, Counter, deque и OrderedDict?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/python/functions/">Функции — аргументы, области видимости, замыкания и декораторы</a><p>Как передаются аргументы, *args и **kwargs, LEGB, ловушка изменяемого значения по умолчанию, замыкания и позднее связывание, декораторы и functools.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Типы и коллекции — что изменяемо, что хешируемо и как устроен dict","description":"Изменяемые и неизменяемые типы, список и кортеж, словарь и множество на хеш-таблице, is против ==, модуль collections.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/python/basics/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

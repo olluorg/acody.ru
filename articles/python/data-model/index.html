@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Модель данных — создание объектов, атрибуты и дескрипторы — разбор для собеседования</title>
+<meta name="description" content="__new__ и __init__, согласование __eq__ и __hash__, __getattr__ и __getattribute__, дескрипторы и __slots__.">
+<link rel="canonical" href="https://acody.ru/articles/python/data-model/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/python/data-model/">
+<meta property="og:title" content="Модель данных — создание объектов, атрибуты и дескрипторы — разбор для собеседования">
+<meta property="og:description" content="__new__ и __init__, согласование __eq__ и __hash__, __getattr__ и __getattribute__, дескрипторы и __slots__.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#python">Python</a> <span>/</span> <span>Модель данных — создание объектов, атрибуты и дескрипторы</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://acody.ru/articles/#python"},{"@type":"ListItem","position":3,"name":"Модель данных — создание объектов, атрибуты и дескрипторы"}]}</script>
+  <h1>Модель данных — создание объектов, атрибуты и дескрипторы</h1>
+  <p class="lead">__new__ и __init__, согласование __eq__ и __hash__, __getattr__ и __getattribute__, дескрипторы и __slots__.</p>
+  <article class="md"><h2>Как создаётся объект</h2>
+<p><code>Point(1, 2)</code> вызывает два метода по очереди:</p>
+<ol><li><code>Point.__new__(Point, 1, 2)</code> — <b>создаёт</b> и возвращает экземпляр;</li><li><code>obj.__init__(1, 2)</code> — <b>инициализирует</b> его и ничего не возвращает.</li></ol>
+<p>Если <code>__new__</code> вернул объект не своего класса, <code>__init__</code> не вызывается. Переопределять <code>__new__</code> нужно редко:</p>
+<ul><li>подклассы <b>неизменяемых</b> типов — значение <code>int</code>, <code>str</code>, <code>tuple</code> задаётся при создании, в <code>__init__</code> его уже не поменять;</li><li>кэши и синглтоны — вернуть уже существующий экземпляр;</li><li>метаклассы.</li></ul>
+<pre class="lang-python"><code>class Celsius(float):
+    def __new__(cls, value):
+        if value &lt; -273.15:
+            raise ValueError(&quot;ниже абсолютного нуля&quot;)
+        return super().__new__(cls, value)</code></pre>
+<h2>__eq__ и __hash__</h2>
+<p><b>Хешируемый</b> объект имеет хеш, неизменный за всё время жизни. Правило: <b>равные объекты обязаны иметь равные хеши</b> — иначе словарь и множество перестанут их находить.</p>
+<p>Если класс переопределяет <code>__eq__</code> и не определяет <code>__hash__</code>, Python ставит <code>__hash__ = None</code> — экземпляры становятся нехешируемыми. Хеш считают по тем же полям, что и равенство, и только по неизменяемым:</p>
+<pre class="lang-python"><code>def __eq__(self, other):
+    return isinstance(other, Point) and (self.x, self.y) == (other.x, other.y)
+
+def __hash__(self):
+    return hash((self.x, self.y))</code></pre>
+<p>Проще всего — <code>@dataclass(frozen=True)</code>: он сгенерирует согласованную пару.</p>
+<h2>__getattribute__ и __getattr__</h2>
+<ul><li><code>__getattribute__</code> вызывается при <b>каждом</b> обращении к атрибуту — это сам механизм поиска. Переопределять его опасно: любое <code>self.x</code> внутри снова вызовет его же — бесконечная рекурсия. Обращаются через <code>object.__getattribute__(self, name)</code>.</li><li><code>__getattr__</code> вызывается <b>только если атрибут не найден</b> обычным путём. Для прокси, обёрток и ленивых атрибутов используют его; для неизвестных имён он должен бросать <code>AttributeError</code>.</li></ul>
+<pre class="lang-python"><code>class Proxy:
+    def __init__(self, target):
+        self._target = target
+
+    def __getattr__(self, name):
+        return getattr(self._target, name)</code></pre>
+<h2>Дескрипторы</h2>
+<p><b>Дескриптор</b> — объект в атрибуте <b>класса</b>, у которого есть <code>__get__</code> и, возможно, <code>__set__</code> и <code>__delete__</code>. При обращении <code>obj.attr</code> Python вызывает эти методы вместо простого чтения. На дескрипторах построены property, обычные методы (функция — дескриптор, который привязывает <code>self</code>), <code>staticmethod</code>, <code>classmethod</code> и <code>__slots__</code>.</p>
+<pre class="lang-python"><code>class Positive:
+    def __set_name__(self, owner, name):
+        self.name = &quot;_&quot; + name
+
+    def __get__(self, obj, owner):
+        return getattr(obj, self.name)
+
+    def __set__(self, obj, value):
+        if value &lt;= 0:
+            raise ValueError(&quot;нужно положительное число&quot;)
+        setattr(obj, self.name, value)
+
+class Order:
+    count = Positive()</code></pre>
+<p>Дескриптор с <code>__set__</code> (data descriptor) важнее словаря экземпляра, а без него уступает словарю — поэтому метод можно перекрыть атрибутом экземпляра. Так устроены поля ORM в Django и SQLAlchemy.</p>
+<h2>__slots__</h2>
+<p><code>__slots__ = (&quot;x&quot;, &quot;y&quot;)</code> заменяет у экземпляров словарь <code>__dict__</code> фиксированными ячейками. Объект занимает в несколько раз меньше памяти, доступ чуть быстрее, но добавить новый атрибут нельзя. Выигрыш заметен на миллионах мелких объектов. Наследник без своих <code>__slots__</code> снова получает <code>__dict__</code>; для слабых ссылок нужен слот <code>__weakref__</code>. С Python 3.10 — <code>@dataclass(slots=True)</code>.</p>
+<h2>Что запомнить</h2>
+<ul><li><code>__new__</code> создаёт, <code>__init__</code> настраивает.</li><li>Равные объекты — равные хеши; переопределили <code>__eq__</code> — определите <code>__hash__</code>.</li><li>Для прокси — <code>__getattr__</code>, а не <code>__getattribute__</code>.</li><li>property и методы — это дескрипторы.</li></ul></article>
+  <section class="block lesson-check" data-lesson="python/python-lesson-data-model"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="python-backend"><a class="course-title" href="/courses/python-backend/">Курс «Python для бэкенда: от типов до asyncio и FastAPI»</a><span>урок 6 из 12</span><a href="/articles/python/oop/">← ООП в Python — классы, свойства, наследование и dataclass</a><a class="next" href="/articles/python/threads-processes/">Потоки, процессы и GIL →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/python/new-vs-init/">Чем __new__ отличается от __init__?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/eq-hash/">Как связаны __eq__ и __hash__ и что значит «хешируемый объект»?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/getattr-getattribute/">Чем __getattr__ отличается от __getattribute__?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/descriptors/">Что такое дескриптор и как на нём построены property и методы?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/slots/">Что такое __slots__ и когда его использовать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/property/">Что такое @property и зачем он нужен?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/python/oop/">ООП в Python — классы, свойства, наследование и dataclass</a><p>self и __init__, магические методы, property, staticmethod и classmethod, MRO и super, dataclass против namedtuple и Pydantic, ABC и Protocol, метаклассы.</p></li><li><a href="/articles/python/internals/">Память и производительность CPython</a><p>Подсчёт ссылок и сборщик циклов, слабые ссылки, интернирование чисел и строк, копирование, сложность операций, профилирование и способы ускорения.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Модель данных — создание объектов, атрибуты и дескрипторы","description":"__new__ и __init__, согласование __eq__ и __hash__, __getattr__ и __getattribute__, дескрипторы и __slots__.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/python/data-model/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Исключения и контекстные менеджеры — разбор для собеседования</title>
+<meta name="description" content="try, except, else и finally, свои исключения и цепочки raise from, with и контекстные менеджеры, ExceptionGroup.">
+<link rel="canonical" href="https://acody.ru/articles/python/errors/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/python/errors/">
+<meta property="og:title" content="Исключения и контекстные менеджеры — разбор для собеседования">
+<meta property="og:description" content="try, except, else и finally, свои исключения и цепочки raise from, with и контекстные менеджеры, ExceptionGroup.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#python">Python</a> <span>/</span> <span>Исключения и контекстные менеджеры</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://acody.ru/articles/#python"},{"@type":"ListItem","position":3,"name":"Исключения и контекстные менеджеры"}]}</script>
+  <h1>Исключения и контекстные менеджеры</h1>
+  <p class="lead">try, except, else и finally, свои исключения и цепочки raise from, with и контекстные менеджеры, ExceptionGroup.</p>
+  <article class="md"><h2>Четыре блока</h2>
+<pre class="lang-python"><code>try:
+    data = load(path)          # опасный код — как можно короче
+except FileNotFoundError:
+    data = default()           # обработка конкретной ошибки
+else:
+    validate(data)             # только если ошибки не было
+finally:
+    log.info(&quot;done&quot;)           # всегда</code></pre>
+<p><code>else</code> полезен тем, что исключения из него не попадают в <code>except</code> выше: так обработка не маскирует ошибки в коде, который к ней не относится.</p>
+<h2>Ловить конкретное</h2>
+<p><code>except:</code> без типа перехватит даже <code>KeyboardInterrupt</code> и <code>SystemExit</code>. <code>except Exception</code> — тоже слишком широко, если вы не логируете и не пробрасываете ошибку дальше. Ловят то, что умеют обработать, остальное пусть летит выше.</p>
+<h2>Свои исключения</h2>
+<p>У проекта или библиотеки — <b>один базовый класс</b> и иерархия под ним:</p>
+<pre class="lang-python"><code>class PaymentError(Exception): ...
+class CardDeclined(PaymentError): ...
+class ProviderUnavailable(PaymentError): ...</code></pre>
+<p>Вызывающему удобно: можно поймать всё семейство <code>except PaymentError</code> или конкретный случай.</p>
+<h2>Цепочки исключений</h2>
+<p>Когда низкоуровневую ошибку превращают в понятную, причину сохраняют:</p>
+<pre class="lang-python"><code>try:
+    resp = client.post(url, json=payload, timeout=5)
+except httpx.TimeoutException as err:
+    raise ProviderUnavailable(&quot;платёжный шлюз не ответил&quot;) from err</code></pre>
+<p><code>from err</code> кладёт исходную ошибку в <code>__cause__</code>, и в трассировке видно обе. Простой <code>raise</code> внутри <code>except</code> тоже связывает их через <code>__context__</code>, но с пометкой «во время обработки возникла другая ошибка». <code>from None</code> скрывает исходную — уместно редко. С Python 3.11 к исключению можно добавить контекст без обёртки: <code>err.add_note(&quot;заказ 42&quot;)</code>.</p>
+<h2>Контекстные менеджеры</h2>
+<p><code>with</code> гарантирует подготовку и очистку вокруг блока, даже при исключении:</p>
+<pre class="lang-python"><code>with open(&quot;data.csv&quot;) as f:
+    rows = f.readlines()
+# файл закрыт, что бы ни случилось</code></pre>
+<p>Протокол — <code>__enter__</code> при входе и <code>__exit__</code> при выходе. Проще написать менеджер генератором:</p>
+<pre class="lang-python"><code>from contextlib import contextmanager
+
+@contextmanager
+def timer(name):
+    start = time.perf_counter()
+    try:
+        yield
+    finally:
+        print(name, time.perf_counter() - start)</code></pre>
+<p>Если <code>__exit__</code> вернёт <code>True</code>, исключение будет подавлено — так делают редко и осознанно (<code>contextlib.suppress</code>). Ресурсы — файлы, соединения, блокировки, транзакции — закрывают через <code>with</code>, а не через <code>__del__</code>.</p>
+<h2>Несколько ошибок сразу</h2>
+<p>В конкурентном коде могут упасть несколько задач. <code>asyncio.TaskGroup</code> (3.11) отменяет остальные задачи при первой ошибке и собирает ошибки в <b>ExceptionGroup</b>, а <code>except*</code> разбирает группу по типам:</p>
+<pre class="lang-python"><code>try:
+    async with asyncio.TaskGroup() as tg:
+        tg.create_task(fetch_a())
+        tg.create_task(fetch_b())
+except* httpx.TimeoutException as group:
+    log.warning(&quot;таймаутов: %d&quot;, len(group.exceptions))</code></pre>
+<p><code>asyncio.gather</code> ведёт себя иначе: пробрасывает первую ошибку, а остальные задачи продолжают работать брошенными.</p>
+<h2>Что запомнить</h2>
+<ul><li><code>try</code> — короткий, <code>except</code> — конкретный, <code>else</code> — код после успеха.</li><li>Свои исключения — иерархия от одного базового класса.</li><li>Перевод ошибки — <code>raise ... from err</code>.</li><li>Ресурсы — через <code>with</code>.</li><li>TaskGroup отменяет соседей и возвращает ExceptionGroup.</li></ul></article>
+  <section class="block lesson-check" data-lesson="python/python-lesson-errors"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="python-backend"><a class="course-title" href="/courses/python-backend/">Курс «Python для бэкенда: от типов до asyncio и FastAPI»</a><span>урок 3 из 12</span><a href="/articles/python/functions/">← Функции — аргументы, области видимости, замыкания и декораторы</a><a class="next" href="/articles/python/iterators/">Итераторы, генераторы и itertools →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/python/try-except-else-finally/">Как работают try, except, else и finally?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/exception-chaining/">Что такое цепочки исключений (raise from) и как правильно создавать свои исключения?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/context-manager/">Что такое контекстный менеджер и как работает with?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/asyncio-gather-taskgroup/">Чем asyncio.gather отличается от TaskGroup и как в них обрабатываются ошибки?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/python/functions/">Функции — аргументы, области видимости, замыкания и декораторы</a><p>Как передаются аргументы, *args и **kwargs, LEGB, ловушка изменяемого значения по умолчанию, замыкания и позднее связывание, декораторы и functools.</p></li><li><a href="/articles/python/iterators/">Итераторы, генераторы и itertools</a><p>Протокол итерации, генераторы и генераторные выражения, срезы, send и yield from, ленивые инструменты itertools.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Исключения и контекстные менеджеры","description":"try, except, else и finally, свои исключения и цепочки raise from, with и контекстные менеджеры, ExceptionGroup.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/python/errors/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

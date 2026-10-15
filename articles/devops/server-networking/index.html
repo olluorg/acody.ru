@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сети на сервере — подсети, firewall, reverse proxy и диагностика — разбор для собеседования</title>
+<meta name="description" content="Как читать CIDR и планировать подсети, как ограничивать сетевой доступ, зачем nginx перед приложением и как искать, почему сервис A не видит сервис B.">
+<link rel="canonical" href="https://acody.ru/articles/devops/server-networking/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/devops/server-networking/">
+<meta property="og:title" content="Сети на сервере — подсети, firewall, reverse proxy и диагностика — разбор для собеседования">
+<meta property="og:description" content="Как читать CIDR и планировать подсети, как ограничивать сетевой доступ, зачем nginx перед приложением и как искать, почему сервис A не видит сервис B.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#devops">DevOps</a> <span>/</span> <span>Сети на сервере — подсети, firewall, reverse proxy и диагностика</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://acody.ru/articles/#devops"},{"@type":"ListItem","position":3,"name":"Сети на сервере — подсети, firewall, reverse proxy и диагностика"}]}</script>
+  <h1>Сети на сервере — подсети, firewall, reverse proxy и диагностика</h1>
+  <p class="lead">Как читать CIDR и планировать подсети, как ограничивать сетевой доступ, зачем nginx перед приложением и как искать, почему сервис A не видит сервис B.</p>
+  <article class="md"><h2>CIDR и подсети</h2>
+<p>Запись <code>10.0.0.0/16</code> — адрес и <b>число бит префикса сети</b>. Первые 16 бит фиксированы, оставшиеся 16 — под адреса, то есть 65 536 адресов от 10.0.0.0 до 10.0.255.255. Каждый шаг префикса делит сеть пополам:</p>
+<div class="table"><table><thead><tr><th>Префикс</th><th>Адресов</th></tr></thead><tbody><tr><td>/16</td><td>65 536</td></tr><tr><td>/24</td><td>256</td></tr><tr><td>/28</td><td>16</td></tr><tr><td>/32</td><td>1</td></tr></tbody></table></div>
+<p>Частные диапазоны: <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code>. В каждой подсети первый адрес — адрес сети, последний — broadcast, облака резервируют ещё несколько. Диапазоны планируют заранее: пересекающиеся сети не соединить через VPN или пиринг, а Kubernetes заберёт отдельные диапазоны под поды и сервисы. <code>0.0.0.0/0</code> в правиле означает «весь интернет».</p>
+<h2>Запрещено всё, что не разрешено</h2>
+<p>Сетевой доступ ограничивают слоями:</p>
+<ul><li><b>файрвол хоста</b> — nftables, iptables, ufw;</li><li><b>security groups</b> в облаке у каждой машины;</li><li><b>сетевые ACL</b> подсетей;</li><li><b>NetworkPolicy</b> в Kubernetes.</li></ul>
+<p>Типичная схема: наружу открыты только 80 и 443 балансировщика; база, кэш и брокер доступны только из подсети приложений; SSH — только с bastion или через VPN.</p>
+<p>Сервис, слушающий <code>0.0.0.0</code> без файрвола, доступен всему интернету — частая причина утечек баз. Docker при публикации портов правит iptables напрямую и обходит ufw — это стоит проверять отдельно.</p>
+<h2>Reverse proxy</h2>
+<p>Reverse proxy стоит перед приложением и принимает запросы от его имени. Задачи nginx:</p>
+<ul><li><b>терминация TLS</b> — сертификаты в одном месте;</li><li><b>балансировка</b> между экземплярами и <b>маршрутизация</b> по домену и пути;</li><li><b>статика</b>, сжатие, кэширование;</li><li><b>лимиты</b> — частота запросов, размер тела;</li><li><b>таймауты</b> и буферизация, которые защищают приложение от медленных клиентов.</li></ul>
+<pre class="lang-nginx"><code>server {
+    listen 443 ssl;
+    server_name shop.example.ru;
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}</code></pre>
+<p>Заголовки <code>X-Forwarded-*</code> сообщают приложению реальный IP клиента и схему. <b>502</b> — upstream недоступен или оборвал соединение, <b>504</b> — не ответил вовремя. В Kubernetes ту же роль играет ingress-контроллер.</p>
+<h2>Сервис A не видит сервис B</h2>
+<p>Идут по уровням снизу вверх:</p>
+<pre class="lang-bash"><code>dig b.internal                 # резолвится ли и в тот ли адрес
+mtr b.internal                 # маршрут и потери
+nc -zv b.internal 8080         # открыт ли порт
+openssl s_client -connect b.internal:443   # TLS
+curl -v http://b.internal:8080/health      # HTTP</code></pre>
+<p>Характер ошибки подсказывает уровень:</p>
+<ul><li><b>connection refused</b> — хост доступен, но порт никто не слушает;</li><li><b>timeout</b> — пакеты теряются, чаще всего виноват файрвол или маршрут.</li></ul>
+<p>На стороне B <code>ss -tlnp</code> показывает, слушает ли сервис и на каком адресе: <code>127.0.0.1</code> доступен только локально. Ping может быть запрещён, а TCP — работать, поэтому выводов по одному ping не делают. Последний аргумент — <code>tcpdump</code>: видно, доходят ли пакеты вообще.</p>
+<h2>Что запомнить</h2>
+<ul><li>/24 — 256 адресов, каждый шаг префикса делит сеть пополам.</li><li>Наружу — только балансировщик, базы — только из своей подсети.</li><li>Приложение прячут за reverse proxy с TLS и лимитами.</li><li>refused — порт не слушают, timeout — файрвол или маршрут.</li></ul></article>
+  <section class="block lesson-check" data-lesson="devops/devops-lesson-server-networking"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="dev-foundations"><a class="course-title" href="/courses/dev-foundations/">Курс «База разработчика: Git, командная строка, сети и Linux»</a><span>урок 8 из 8</span><a href="/articles/devops/linux/">← Linux — диагностика сервера</a><a class="next" href="/courses/dev-foundations/">К итогам курса →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/devops/cidr-subnets/">Что означает запись 10.0.0.0/16 и как разбить сеть на подсети?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/firewall-ports/">Как ограничивать сетевой доступ к серверам и сервисам?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/nginx-reverse-proxy/">Что такое reverse proxy и какие задачи решает nginx перед приложением?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/network-debugging/">Сервис A не может подключиться к сервису B. Как вы будете искать причину?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/devops/linux/">Linux — диагностика сервера</a><p>С чего начинать, когда сервер ведёт себя плохо, как читать load average, где на самом деле свободная память, кто такие зомби и куда делось место на диске.</p></li><li><a href="/articles/cs/internet/">Как работает интернет — от адреса в браузере до ответа</a><p>Что происходит после нажатия Enter, слои сети и стек TCP/IP, TCP и UDP, как работает DNS и как проверять записи.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Сети на сервере — подсети, firewall, reverse proxy и диагностика","description":"Как читать CIDR и планировать подсети, как ограничивать сетевой доступ, зачем nginx перед приложением и как искать, почему сервис A не видит сервис B.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/devops/server-networking/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

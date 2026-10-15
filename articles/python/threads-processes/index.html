@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Потоки, процессы и GIL — разбор для собеседования</title>
+<meta name="description" content="Что такое GIL и что он не защищает, когда выбирать потоки, процессы или asyncio, concurrent.futures, ограничения multiprocessing, сборка без GIL.">
+<link rel="canonical" href="https://acody.ru/articles/python/threads-processes/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/python/threads-processes/">
+<meta property="og:title" content="Потоки, процессы и GIL — разбор для собеседования">
+<meta property="og:description" content="Что такое GIL и что он не защищает, когда выбирать потоки, процессы или asyncio, concurrent.futures, ограничения multiprocessing, сборка без GIL.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#python">Python</a> <span>/</span> <span>Потоки, процессы и GIL</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://acody.ru/articles/#python"},{"@type":"ListItem","position":3,"name":"Потоки, процессы и GIL"}]}</script>
+  <h1>Потоки, процессы и GIL</h1>
+  <p class="lead">Что такое GIL и что он не защищает, когда выбирать потоки, процессы или asyncio, concurrent.futures, ограничения multiprocessing, сборка без GIL.</p>
+  <article class="md"><h2>GIL</h2>
+<p><b>GIL</b> — глобальная блокировка интерпретатора CPython: в каждый момент байткод Python выполняет только один поток. Следствия:</p>
+<ul><li>задачи <b>ввода-вывода</b> потоки ускоряют — на ожидании сети и диска GIL отпускается;</li><li><b>вычисления</b> потоки не ускоряют — для них процессы или C-расширения, отпускающие GIL (NumPy).</li></ul>
+<h2>Три инструмента</h2>
+<div class="table"><table><thead><tr><th></th><th>Что это</th><th>Для чего</th></tr></thead><tbody><tr><td>threading</td><td>потоки одного процесса, общая память</td><td>ожидание ввода-вывода</td></tr><tr><td>multiprocessing</td><td>отдельные процессы со своей памятью и своим GIL</td><td>вычисления на нескольких ядрах</td></tr><tr><td>asyncio</td><td>один поток, кооперативная многозадачность</td><td>тысячи одновременных соединений</td></tr></tbody></table></div>
+<h2>Блокировки всё равно нужны</h2>
+<p>GIL защищает внутренние структуры интерпретатора, а не ваши инварианты. <code>counter += 1</code> — несколько инструкций байткода: прочитать, сложить, записать. Поток может быть прерван между ними, и обновления теряются.</p>
+<pre class="lang-python"><code>import threading
+lock = threading.Lock()
+
+def inc():
+    global counter
+    with lock:
+        counter += 1</code></pre>
+<p>«Проверить и изменить» (<code>if k not in d: d[k] = ...</code>) — тоже гонка. Лучший способ — не делить изменяемое состояние: передавать данные через <code>queue.Queue</code> и использовать неизменяемые структуры.</p>
+<h2>concurrent.futures</h2>
+<p>Единый интерфейс для пулов потоков и процессов:</p>
+<pre class="lang-python"><code>from concurrent.futures import ThreadPoolExecutor, as_completed
+
+with ThreadPoolExecutor(max_workers=16) as pool:
+    futures = [pool.submit(download, url) for url in urls]
+    for f in as_completed(futures):
+        save(f.result())       # исключение задачи бросится здесь</code></pre>
+<p><code>ThreadPoolExecutor</code> — для ввода-вывода, <code>ProcessPoolExecutor</code> — для вычислений; интерфейс одинаковый. <code>with</code> гарантирует остановку пула и ожидание задач.</p>
+<h2>Ограничения процессов</h2>
+<p>Процессы не делят память: аргументы и результаты <b>сериализуются pickle</b> и копируются. Поэтому:</p>
+<ul><li>лямбды, локальные функции, открытые файлы и соединения передать нельзя;</li><li>большие данные гонять дорого — лучше передать путь к файлу или использовать <code>shared_memory</code>.</li></ul>
+<p>Способ запуска важен. <b>fork</b> копирует процесс родителя — быстро, но опасно, если в родителе уже работали потоки: можно унаследовать захваченную блокировку и зависнуть. <b>spawn</b> запускает чистый интерпретатор и заново импортирует модуль — поэтому нужен <code>if __name__ == &quot;__main__&quot;:</code>. В macOS и Windows по умолчанию spawn, в Linux с Python 3.14 — forkserver.</p>
+<h2>Python без GIL</h2>
+<p>С Python 3.13 есть отдельная сборка без GIL (python3.13t), в 3.14 она официально поддерживается, но не включена по умолчанию. Потоки выполняют Python-код по-настоящему параллельно, вычисления в потоках ускоряются почти линейно по ядрам. Цена — медленнее однопоточный код, а C-расширения должны объявить совместимость, иначе GIL включится снова. Гонки в вашем коде никуда не денутся — их станет только больше.</p>
+<h2>Что запомнить</h2>
+<ul><li>GIL мешает вычислениям в потоках, но не вводу-выводу.</li><li>GIL не защищает ваши данные — нужны Lock или очереди.</li><li>Вычисления — процессы, ожидание — потоки или asyncio.</li><li>Процессам всё передаётся через pickle.</li></ul></article>
+  <section class="block lesson-check" data-lesson="python/python-lesson-threads-processes"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="python-backend"><a class="course-title" href="/courses/python-backend/">Курс «Python для бэкенда: от типов до asyncio и FastAPI»</a><span>урок 7 из 12</span><a href="/articles/python/data-model/">← Модель данных — создание объектов, атрибуты и дескрипторы</a><a class="next" href="/articles/python/asyncio/">asyncio — корутины, задачи, отмена и блокирующий код →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/python/gil/">Что такое GIL?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/threading-multiprocessing-asyncio/">Чем отличаются threading, multiprocessing и asyncio?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/threading-race-lock/">Нужны ли блокировки в многопоточном Python-коде, если есть GIL?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/concurrent-futures/">Как пользоваться concurrent.futures и чем ThreadPoolExecutor отличается от ProcessPoolExecutor?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/multiprocessing-pickle/">Какие ограничения есть у multiprocessing и чем fork отличается от spawn?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/free-threading/">Что меняет сборка Python без GIL (free-threaded)?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/python/asyncio/">asyncio — корутины, задачи, отмена и блокирующий код</a><p>Как работают async и await, как запускать корутины одновременно, gather и TaskGroup, что делает блокирующий вызов в цикле событий, отмена и таймауты.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Потоки, процессы и GIL","description":"Что такое GIL и что он не защищает, когда выбирать потоки, процессы или asyncio, concurrent.futures, ограничения multiprocessing, сборка без GIL.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/python/threads-processes/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

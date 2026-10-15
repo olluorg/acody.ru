@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTTP и HTTPS — методы, коды ответа, версии — разбор для собеседования</title>
+<meta name="description" content="Методы и идемпотентность, группы кодов ответа, REST, отличия HTTP/1.1, HTTP/2 и HTTP/3, как HTTPS защищает соединение.">
+<link rel="canonical" href="https://acody.ru/articles/cs/http/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/cs/http/">
+<meta property="og:title" content="HTTP и HTTPS — методы, коды ответа, версии — разбор для собеседования">
+<meta property="og:description" content="Методы и идемпотентность, группы кодов ответа, REST, отличия HTTP/1.1, HTTP/2 и HTTP/3, как HTTPS защищает соединение.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#cs">Основы</a> <span>/</span> <span>HTTP и HTTPS — методы, коды ответа, версии</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://acody.ru/articles/#cs"},{"@type":"ListItem","position":3,"name":"HTTP и HTTPS — методы, коды ответа, версии"}]}</script>
+  <h1>HTTP и HTTPS — методы, коды ответа, версии</h1>
+  <p class="lead">Методы и идемпотентность, группы кодов ответа, REST, отличия HTTP/1.1, HTTP/2 и HTTP/3, как HTTPS защищает соединение.</p>
+  <article class="md"><h2>Запрос и ответ</h2>
+<p>HTTP — текстовый протокол «запрос — ответ». Запрос состоит из метода, пути, заголовков и необязательного тела:</p>
+<pre class="lang-http"><code>POST /api/orders HTTP/1.1
+Host: shop.example.ru
+Content-Type: application/json
+Authorization: Bearer eyJ...
+
+{&quot;productId&quot;: 42, &quot;count&quot;: 2}</code></pre>
+<p>Ответ — код статуса, заголовки и тело.</p>
+<h2>Методы</h2>
+<div class="table"><table><thead><tr><th>Метод</th><th>Что делает</th><th>Идемпотентен</th></tr></thead><tbody><tr><td>GET</td><td>получить</td><td>да</td></tr><tr><td>POST</td><td>создать или отправить</td><td>нет</td></tr><tr><td>PUT</td><td>заменить целиком</td><td>да</td></tr><tr><td>PATCH</td><td>изменить частично</td><td>не обязательно</td></tr><tr><td>DELETE</td><td>удалить</td><td>да</td></tr></tbody></table></div>
+<p>GET передаёт параметры в URL и не должен менять данные. <b>Идемпотентный</b> метод при повторе даёт тот же эффект, что и один вызов. Отсюда важный тест: двойной клик по кнопке «Оформить» не должен создавать два заказа — POST сам по себе от этого не защищает.</p>
+<h2>Коды ответа</h2>
+<div class="table"><table><thead><tr><th>Группа</th><th>Смысл</th><th>Частые</th></tr></thead><tbody><tr><td>2xx</td><td>успех</td><td>200, 201 Created, 204 No Content</td></tr><tr><td>3xx</td><td>перенаправление</td><td>301, 302, 304 Not Modified</td></tr><tr><td>4xx</td><td>ошибка клиента</td><td>400, 401, 403, 404, 409, 422, 429</td></tr><tr><td>5xx</td><td>ошибка сервера</td><td>500, 502, 503, 504</td></tr></tbody></table></div>
+<p><b>401</b> — не аутентифицирован: «кто вы?». <b>403</b> — известно, кто вы, но нельзя. 4xx подсказывает, что проблема в запросе, 5xx — на сервере. Это первое, что смотрят в DevTools на вкладке Network, когда ищут, на чьей стороне ошибка.</p>
+<h2>REST</h2>
+<p>REST — стиль проектирования API поверх HTTP: <b>ресурсы</b> адресуются URL, <b>действия</b> выражаются методами, сервер не хранит состояние клиента между запросами.</p>
+<pre class="lang-text"><code>GET    /orders/42     — получить заказ
+POST   /orders        — создать
+DELETE /orders/42     — удалить</code></pre>
+<p>В пути — существительные: <code>/orders/42</code>, а не <code>/getOrder?id=42</code>. Коды ответа и заголовки кэширования несут смысл, а не просто «200 и текст ошибки в теле».</p>
+<h2>Версии HTTP</h2>
+<ul><li><b>HTTP/1.1</b> — текст, один запрос за раз в соединении. Чтобы распараллелить загрузку, браузер открывает около шести соединений на домен.</li><li><b>HTTP/2</b> — бинарные кадры и много потоков в одном TCP-соединении, сжатие заголовков. Блокировка на уровне HTTP ушла, но осталась на уровне TCP: потеря одного пакета задерживает все потоки.</li><li><b>HTTP/3</b> — то же поверх QUIC (UDP): потеря пакета задерживает только свой поток, TLS 1.3 встроен, соединение переживает смену сети.</li></ul>
+<p>Методы, коды и заголовки во всех версиях одинаковы.</p>
+<h2>HTTPS</h2>
+<p>HTTPS — HTTP поверх TLS. TLS даёт три вещи: <b>шифрование</b>, <b>целостность</b> и <b>подлинность сервера</b>. В рукопожатии стороны договариваются об общем ключе, а сервер доказывает владение сертификатом. Браузер проверяет цепочку сертификата до доверенного корневого центра и совпадение имени домена. Дальше данные шифруются быстрым симметричным шифром: асимметрия нужна, чтобы договориться о ключе, симметрия — чтобы быстро шифровать.</p>
+<p>TLS 1.3 тратит на рукопожатие один оборот, а при повторном подключении — ноль.</p>
+<h2>Что запомнить</h2>
+<ul><li>GET читает, POST создаёт; PUT и DELETE идемпотентны, POST — нет.</li><li>4xx — проблема в запросе, 5xx — на сервере; 401 и 403 — разное.</li><li>REST — ресурсы в URL, действия в методах.</li><li>HTTP/2 — много потоков в одном соединении, HTTP/3 — поверх QUIC.</li><li>HTTPS — шифрование, целостность и подлинность сервера.</li></ul></article>
+  <section class="block lesson-check" data-lesson="cs/cs-lesson-http"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="dev-foundations"><a class="course-title" href="/courses/dev-foundations/">Курс «База разработчика: Git, командная строка, сети и Linux»</a><span>урок 5 из 8</span><a href="/articles/cs/internet/">← Как работает интернет — от адреса в браузере до ответа</a><a class="next" href="/articles/cs/tcp-tls/">TCP изнутри — рукопожатие, надёжность и перегрузка →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/qa/http-methods/">Какие HTTP-методы вы знаете? Чем GET отличается от POST?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/qa/http-status-codes/">Какие коды ответа HTTP вы знаете?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/system-design/rest-meaning/">Что означает буква R в аббревиатуре REST применительно к проектированию API?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/http-versions/">Чем отличаются HTTP/1.1, HTTP/2 и HTTP/3?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/tls-handshake/">Как работает HTTPS и TLS-рукопожатие?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/qa/devtools/">Как вы используете DevTools при тестировании?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/cs/internet/">Как работает интернет — от адреса в браузере до ответа</a><p>Что происходит после нажатия Enter, слои сети и стек TCP/IP, TCP и UDP, как работает DNS и как проверять записи.</p></li><li><a href="/articles/cs/tcp-tls/">TCP изнутри — рукопожатие, надёжность и перегрузка</a><p>Как устанавливается и закрывается соединение, откуда TIME_WAIT, как TCP гарантирует доставку и не перегружает сеть, что добавляет TLS.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"HTTP и HTTPS — методы, коды ответа, версии","description":"Методы и идемпотентность, группы кодов ответа, REST, отличия HTTP/1.1, HTTP/2 и HTTP/3, как HTTPS защищает соединение.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/cs/http/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

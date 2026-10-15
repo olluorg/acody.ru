@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ООП в Python — классы, свойства, наследование и dataclass — разбор для собеседования</title>
+<meta name="description" content="self и __init__, магические методы, property, staticmethod и classmethod, MRO и super, dataclass против namedtuple и Pydantic, ABC и Protocol…">
+<link rel="canonical" href="https://acody.ru/articles/python/oop/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/python/oop/">
+<meta property="og:title" content="ООП в Python — классы, свойства, наследование и dataclass — разбор для собеседования">
+<meta property="og:description" content="self и __init__, магические методы, property, staticmethod и classmethod, MRO и super, dataclass против namedtuple и Pydantic, ABC и Protocol…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#python">Python</a> <span>/</span> <span>ООП в Python — классы, свойства, наследование и dataclass</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://acody.ru/articles/#python"},{"@type":"ListItem","position":3,"name":"ООП в Python — классы, свойства, наследование и dataclass"}]}</script>
+  <h1>ООП в Python — классы, свойства, наследование и dataclass</h1>
+  <p class="lead">self и __init__, магические методы, property, staticmethod и classmethod, MRO и super, dataclass против namedtuple и Pydantic, ABC и Protocol, метаклассы.</p>
+  <article class="md"><h2>Класс и экземпляр</h2>
+<pre class="lang-python"><code>class Account:
+    currency = &quot;RUB&quot;              # атрибут класса — общий для всех
+
+    def __init__(self, owner):
+        self.owner = owner        # атрибут экземпляра
+        self.balance = 0</code></pre>
+<p><code>self</code> — ссылка на текущий экземпляр, Python передаёт её первым аргументом. <code>__init__</code> не создаёт объект, а заполняет уже созданный — создаёт <code>__new__</code>. Изменяемый атрибут класса (<code>items = []</code>) общий для всех экземпляров — частая ошибка.</p>
+<h2>Магические методы</h2>
+<p>Методы вида <code>__имя__</code> подключают объект к операциям языка: <code>__len__</code> к <code>len()</code>, <code>__iter__</code> к <code>for</code>, <code>__eq__</code> к <code>==</code>, <code>__enter__</code> и <code>__exit__</code> к <code>with</code>, <code>__call__</code> к вызову.</p>
+<ul><li><code>__repr__</code> — однозначное представление для разработчика: <code>Account(owner=&#x27;Анна&#x27;)</code>;</li><li><code>__str__</code> — читаемое для человека. <code>print</code> берёт <code>__str__</code>, а если его нет — <code>__repr__</code>. Поэтому <code>__repr__</code> пишут всегда.</li></ul>
+<h2>property</h2>
+<p><code>@property</code> превращает метод в атрибут: снаружи <code>obj.area</code>, внутри — вычисление или проверка.</p>
+<pre class="lang-python"><code>class Rect:
+    def __init__(self, w, h):
+        self.w, self.h = w, h
+
+    @property
+    def area(self):
+        return self.w * self.h</code></pre>
+<p><code>@x.setter</code> добавляет проверку при присваивании. В Python не пишут <code>get_x()</code> и <code>set_x()</code> заранее: начинают с обычного атрибута и заменяют его на property, когда понадобится, — вызывающий код не меняется.</p>
+<h2>staticmethod и classmethod</h2>
+<p><code>@classmethod</code> получает класс (<code>cls</code>) — это способ писать альтернативные конструкторы: <code>User.from_json(data)</code>. При наследовании <code>cls</code> будет подклассом, и создастся объект нужного типа. <code>@staticmethod</code> не получает ничего — это обычная функция, логически относящаяся к классу.</p>
+<h2>Наследование и MRO</h2>
+<p><b>MRO</b> — порядок поиска метода по иерархии, его строит алгоритм C3: <code>Class.__mro__</code>. <code>super()</code> вызывает <b>следующий класс в MRO</b>, а не просто родителя — при множественном наследовании это разные вещи. В «ромбе» общий предок встречается в MRO один раз, и каждый класс вызывается ровно однажды, если все используют <code>super()</code>.</p>
+<h2>dataclass, namedtuple и Pydantic</h2>
+<div class="table"><table><thead><tr><th></th><th>Что даёт</th><th>Когда</th></tr></thead><tbody><tr><td><code>@dataclass</code></td><td><code>__init__</code>, <code>__repr__</code>, <code>__eq__</code> по полям; без проверки типов</td><td>внутренние структуры</td></tr><tr><td><code>namedtuple</code></td><td>неизменяемый кортеж с именами полей</td><td>лёгкие записи, распаковка</td></tr><tr><td>Pydantic</td><td>проверка и преобразование данных, JSON</td><td>внешние данные: API, конфиги</td></tr></tbody></table></div>
+<pre class="lang-python"><code>from dataclasses import dataclass, field
+
+@dataclass(frozen=True, slots=True)
+class Point:
+    x: float
+    y: float
+    tags: list[str] = field(default_factory=list)</code></pre>
+<p><code>frozen=True</code> — неизменяемость и согласованный хеш, <code>slots=True</code> — экономия памяти. Изменяемое значение по умолчанию — только через <code>default_factory</code>.</p>
+<h2>ABC и Protocol</h2>
+<p><b>ABC</b> — номинальная типизация: класс явно наследует абстрактный, и пока не реализованы все <code>@abstractmethod</code>, экземпляр не создать. <b>Protocol</b> — структурная: подходит любой класс с нужными методами, без наследования, а проверяет это mypy или pyright. Protocol удобен для чужих классов, которые нельзя изменить; ABC может нести общую реализацию.</p>
+<h2>Метаклассы</h2>
+<p>Класс — тоже объект, метакласс — класс класса, по умолчанию <code>type</code>. Метаклассы используют ABCMeta, Enum, модели Django и SQLAlchemy. В своём коде регистрацию и проверку подклассов почти всегда проще сделать через <code>__init_subclass__</code> или декоратор класса. «Если вы сомневаетесь, нужен ли метакласс, — он не нужен».</p>
+<h2>Что запомнить</h2>
+<ul><li><code>__init__</code> заполняет объект, создаёт его <code>__new__</code>.</li><li><code>__repr__</code> пишут всегда.</li><li>property вместо геттеров и сеттеров.</li><li><code>super()</code> — следующий в MRO, а не родитель.</li><li>dataclass — для своих структур, Pydantic — для внешних данных.</li></ul></article>
+  <section class="block lesson-check" data-lesson="python/python-lesson-oop"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="python-backend"><a class="course-title" href="/courses/python-backend/">Курс «Python для бэкенда: от типов до asyncio и FastAPI»</a><span>урок 5 из 12</span><a href="/articles/python/iterators/">← Итераторы, генераторы и itertools</a><a class="next" href="/articles/python/data-model/">Модель данных — создание объектов, атрибуты и дескрипторы →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/python/class-self-init/">Что такое self и __init__ в классе?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/dunder-str-repr/">Что такое магические методы? Чем __str__ отличается от __repr__?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/property/">Что такое @property и зачем он нужен?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/staticmethod-classmethod/">Чем @staticmethod отличается от @classmethod?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/inheritance-super-mro/">Как работают наследование, super() и MRO?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/dataclasses/">Чем dataclass отличается от namedtuple и Pydantic-модели?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/abc-protocol/">Чем абстрактный базовый класс (ABC) отличается от Protocol?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/metaclasses/">Что такое метакласс и когда он действительно нужен?</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/python/iterators/">Итераторы, генераторы и itertools</a><p>Протокол итерации, генераторы и генераторные выражения, срезы, send и yield from, ленивые инструменты itertools.</p></li><li><a href="/articles/python/data-model/">Модель данных — создание объектов, атрибуты и дескрипторы</a><p>__new__ и __init__, согласование __eq__ и __hash__, __getattr__ и __getattribute__, дескрипторы и __slots__.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"ООП в Python — классы, свойства, наследование и dataclass","description":"self и __init__, магические методы, property, staticmethod и classmethod, MRO и super, dataclass против namedtuple и Pydantic, ABC и Protocol, метаклассы.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/python/oop/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

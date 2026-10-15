@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Командная строка — файлы, поиск, окружение и SSH — разбор для собеседования</title>
+<meta name="description" content="Навигация и работа с файлами, grep и пайпы, права доступа, переменные окружения и PATH, вход по SSH-ключам.">
+<link rel="canonical" href="https://acody.ru/articles/devops/terminal/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/devops/terminal/">
+<meta property="og:title" content="Командная строка — файлы, поиск, окружение и SSH — разбор для собеседования">
+<meta property="og:description" content="Навигация и работа с файлами, grep и пайпы, права доступа, переменные окружения и PATH, вход по SSH-ключам.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#devops">DevOps</a> <span>/</span> <span>Командная строка — файлы, поиск, окружение и SSH</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://acody.ru/articles/#devops"},{"@type":"ListItem","position":3,"name":"Командная строка — файлы, поиск, окружение и SSH"}]}</script>
+  <h1>Командная строка — файлы, поиск, окружение и SSH</h1>
+  <p class="lead">Навигация и работа с файлами, grep и пайпы, права доступа, переменные окружения и PATH, вход по SSH-ключам.</p>
+  <article class="md"><h2>Где я и что здесь</h2>
+<div class="table"><table><thead><tr><th>Команда</th><th>Что делает</th></tr></thead><tbody><tr><td><code>pwd</code></td><td>текущий каталог</td></tr><tr><td><code>ls -la</code></td><td>содержимое, со скрытыми файлами и правами</td></tr><tr><td><code>cd каталог</code>, <code>cd ..</code>, <code>cd ~</code>, <code>cd -</code></td><td>перейти, вверх, домой, назад</td></tr><tr><td><code>mkdir -p a/b/c</code></td><td>создать каталоги с родителями</td></tr><tr><td><code>cp -r</code>, <code>mv</code>, <code>rm</code>, <code>rm -r</code></td><td>копировать, переместить, удалить</td></tr><tr><td><code>cat</code>, <code>less</code>, <code>head</code>, <code>tail</code></td><td>посмотреть файл целиком, постранично, начало, конец</td></tr></tbody></table></div>
+<p>Tab дополняет пути, стрелка вверх и Ctrl+R ищут по истории команд. Справка — <code>man команда</code> или <code>команда --help</code>. Имена с пробелами берут в кавычки.</p>
+<p>Корзины нет: <code>rm</code> удаляет безвозвратно. <code>rm -rf $DIR/</code> с пустой переменной — классическая катастрофа.</p>
+<h2>grep и пайпы</h2>
+<p><code>grep</code> ищет строки по тексту:</p>
+<pre class="lang-bash"><code>grep -rn &quot;TODO&quot; src/        # рекурсивно, с номерами строк
+grep -i error app.log       # без учёта регистра
+grep -v DEBUG app.log       # строки без совпадения</code></pre>
+<p><b>Пайп</b> <code>|</code> передаёт вывод одной команды на вход следующей — из простых команд собирают анализ:</p>
+<pre class="lang-bash"><code>grep ERROR app.log | wc -l                          # сколько ошибок
+cut -d&#x27; &#x27; -f1 access.log | sort | uniq -c | sort -rn | head   # топ IP
+tail -f app.log | grep ERROR                        # следить за ошибками</code></pre>
+<p>Перенаправление: <code>&gt;</code> — записать в файл, <code>&gt;&gt;</code> — дописать, <code>2&gt;</code> — записать ошибки.</p>
+<h2>Права доступа</h2>
+<p>У файла есть владелец, группа и три набора прав — для владельца, группы и остальных: чтение (r = 4), запись (w = 2), выполнение (x = 1).</p>
+<pre class="lang-bash"><code>chmod 755 deploy.sh   # владелец rwx, остальные r-x
+chmod 600 id_ed25519  # только владелец читает и пишет</code></pre>
+<p>Для каталога <code>x</code> — право войти, <code>r</code> — увидеть список файлов. Удалить файл позволяет право записи в <b>каталог</b>, а не в сам файл. Секреты и ключи — 600: ssh откажется работать с ключом с более открытыми правами.</p>
+<h2>Окружение и PATH</h2>
+<p>Переменные окружения процесс получает от родителя:</p>
+<pre class="lang-bash"><code>export DATABASE_URL=postgres://localhost/app   # для сессии и дочерних
+LOG_LEVEL=debug ./run.sh                        # для одной команды
+echo $DATABASE_URL</code></pre>
+<p><b>PATH</b> — список каталогов через двоеточие, где оболочка ищет программы. «command not found» означает, что программы нет ни в одном из них: она не установлена, установлена в другое место или не активировано окружение — например, Python venv. <code>which команда</code> показывает, откуда берётся программа. Скрипт из текущего каталога запускают как <code>./script.sh</code>: точки в PATH нет. Постоянные настройки — в <code>~/.bashrc</code> или <code>~/.profile</code>.</p>
+<h2>SSH по ключам</h2>
+<p>Пара ключей: закрытый хранится у вас, открытый кладут на сервер в <code>~/.ssh/authorized_keys</code>. При входе сервер проверяет, что вы владеете закрытым ключом, — сам ключ по сети не передаётся.</p>
+<pre class="lang-bash"><code>ssh-keygen -t ed25519
+ssh-copy-id user@server</code></pre>
+<p>На сервере отключают вход по паролю и вход под root. <b>Bastion</b> — единственная точка входа во внутреннюю сеть: остальные серверы в интернет не открыты, а доступ идёт через один контролируемый хост: <code>ssh -J bastion internal-host</code>.</p>
+<h2>Что запомнить</h2>
+<ul><li><code>rm</code> без корзины — проверяйте пути и переменные.</li><li>Пайпы превращают маленькие команды в анализ.</li><li>Ключи и секреты — права 600.</li><li>«command not found» — ищите программу в PATH.</li><li>В SSH — ключи вместо паролей, во внутреннюю сеть — через bastion.</li></ul></article>
+  <section class="block lesson-check" data-lesson="devops/devops-lesson-terminal"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="dev-foundations"><a class="course-title" href="/courses/dev-foundations/">Курс «База разработчика: Git, командная строка, сети и Linux»</a><span>урок 3 из 8</span><a href="/articles/devops/git-collaboration/">← Pull request, код-ревью и стратегии ветвления</a><a class="next" href="/articles/cs/internet/">Как работает интернет — от адреса в браузере до ответа →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/devops/shell-navigation/">Как работать с файлами в командной строке Linux?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/grep-pipes/">Как найти текст в файлах и обработать вывод через пайпы?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/linux-permissions/">Как устроены права доступа к файлам в Linux?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/path-env/">Что такое переменные окружения и PATH и почему команда «не найдена»?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/ssh-keys-bastion/">Как устроен доступ по SSH-ключам и зачем нужен bastion-хост?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/devops/git-basics/">Git — ветки, коммиты и отмена изменений</a><p>Как работать в ветке от первого коммита до push, чем merge отличается от rebase, как отменять изменения и разрешать конфликты.</p></li><li><a href="/articles/devops/linux/">Linux — диагностика сервера</a><p>С чего начинать, когда сервер ведёт себя плохо, как читать load average, где на самом деле свободная память, кто такие зомби и куда делось место на диске.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Командная строка — файлы, поиск, окружение и SSH","description":"Навигация и работа с файлами, grep и пайпы, права доступа, переменные окружения и PATH, вход по SSH-ключам.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/devops/terminal/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

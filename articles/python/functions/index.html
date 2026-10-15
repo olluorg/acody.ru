@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Функции — аргументы, области видимости, замыкания и декораторы — разбор для собеседования</title>
+<meta name="description" content="Как передаются аргументы, args и kwargs, LEGB, ловушка изменяемого значения по умолчанию, замыкания и позднее связывание, декораторы и functools.">
+<link rel="canonical" href="https://acody.ru/articles/python/functions/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/python/functions/">
+<meta property="og:title" content="Функции — аргументы, области видимости, замыкания и декораторы — разбор для собеседования">
+<meta property="og:description" content="Как передаются аргументы, args и kwargs, LEGB, ловушка изменяемого значения по умолчанию, замыкания и позднее связывание, декораторы и functools.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#python">Python</a> <span>/</span> <span>Функции — аргументы, области видимости, замыкания и декораторы</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://acody.ru/articles/#python"},{"@type":"ListItem","position":3,"name":"Функции — аргументы, области видимости, замыкания и декораторы"}]}</script>
+  <h1>Функции — аргументы, области видимости, замыкания и декораторы</h1>
+  <p class="lead">Как передаются аргументы, *args и **kwargs, LEGB, ловушка изменяемого значения по умолчанию, замыкания и позднее связывание, декораторы и functools.</p>
+  <article class="md"><h2>Как передаются аргументы</h2>
+<p>Ни «по значению», ни «по ссылке» в классическом смысле: функция получает <b>ссылку на тот же объект</b> (call by sharing).</p>
+<pre class="lang-python"><code>def add(items):
+    items.append(1)    # меняет объект — видно снаружи
+    items = [99]       # переприсваивает имя — снаружи не видно</code></pre>
+<p>Если менять аргумент не нужно — копируйте или возвращайте новый объект.</p>
+<h2>*args и **kwargs</h2>
+<p><code>*args</code> собирает лишние позиционные аргументы в кортеж, <code>**kwargs</code> — лишние именованные в словарь. При вызове звёздочки распаковывают: <code>f(*values, **options)</code>.</p>
+<pre class="lang-python"><code>def connect(host, /, port=5432, *, timeout=5): ...</code></pre>
+<p>До <code>/</code> — только позиционные, после <code>*</code> — только именованные.</p>
+<h2>Области видимости — LEGB</h2>
+<p>Имя ищется по цепочке: <b>L</b>ocal → <b>E</b>nclosing → <b>G</b>lobal → <b>B</b>uilt-in. Присваивание внутри функции делает имя локальным для всей функции — отсюда <code>UnboundLocalError</code>, если прочитать его до присваивания. Писать во внешнюю переменную — через <code>global</code> или <code>nonlocal</code>. Циклы и <code>if</code> своей области не создают.</p>
+<h2>Изменяемое значение по умолчанию</h2>
+<p>Значение по умолчанию вычисляется <b>один раз</b> — при определении функции:</p>
+<pre class="lang-python"><code>def add_item(item, items=[]):     # общий список на все вызовы
+    items.append(item)
+    return items
+
+def add_item(item, items=None):   # правильно
+    if items is None:
+        items = []
+    items.append(item)
+    return items</code></pre>
+<h2>Замыкания</h2>
+<p>Вложенная функция <b>помнит переменные внешней</b> после её завершения:</p>
+<pre class="lang-python"><code>def counter():
+    n = 0
+    def inc():
+        nonlocal n
+        n += 1
+        return n
+    return inc</code></pre>
+<p>Захватывается <b>переменная, а не значение</b> — оно читается в момент вызова. Отсюда ловушка:</p>
+<pre class="lang-python"><code>fs = [lambda: i for i in range(3)]
+[f() for f in fs]                    # [2, 2, 2]
+fs = [lambda i=i: i for i in range(3)]   # [0, 1, 2]</code></pre>
+<h2>Декораторы</h2>
+<p>Декоратор — функция, которая принимает функцию и возвращает новую; <code>@dec</code> — сахар для <code>f = dec(f)</code>.</p>
+<pre class="lang-python"><code>import functools, time
+
+def timed(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        try:
+            return func(*args, **kwargs)
+        finally:
+            print(func.__name__, time.perf_counter() - start)
+    return wrapper</code></pre>
+<p><code>functools.wraps</code> копирует в обёртку имя, docstring и ставит <code>__wrapped__</code> — без него логи, документация и pytest видят «wrapper».</p>
+<p>Декоратор с параметрами — <b>фабрика декораторов</b>, три уровня вложенности: <code>@retry(times=3)</code> равно <code>f = retry(times=3)(f)</code>. Для async-функций обёртка тоже должна быть async.</p>
+<h2>functools</h2>
+<div class="table"><table><thead><tr><th>Что</th><th>Зачем</th></tr></thead><tbody><tr><td><code>lru_cache(maxsize)</code>, <code>cache</code></td><td>мемоизация; аргументы должны быть хешируемыми</td></tr><tr><td><code>partial</code></td><td>зафиксировать часть аргументов</td></tr><tr><td><code>singledispatch</code></td><td>перегрузка по типу первого аргумента</td></tr><tr><td><code>cached_property</code></td><td>вычислить атрибут один раз</td></tr></tbody></table></div>
+<p><code>lru_cache</code> на методе держит ссылку на <code>self</code> — объекты не освобождаются.</p>
+<h2>Что запомнить</h2>
+<ul><li>Функция получает ссылку на объект: изменить можно, переприсвоить снаружи — нет.</li><li>Изменяемое значение по умолчанию — <code>None</code> и создание внутри.</li><li>Замыкание видит переменную в момент вызова.</li><li>Обёртку декоратора всегда помечают <code>functools.wraps</code>.</li></ul></article>
+  <section class="block lesson-check" data-lesson="python/python-lesson-functions"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="python-backend"><a class="course-title" href="/courses/python-backend/">Курс «Python для бэкенда: от типов до asyncio и FastAPI»</a><span>урок 2 из 12</span><a href="/articles/python/basics/">← Типы и коллекции — что изменяемо, что хешируемо и как устроен dict</a><a class="next" href="/articles/python/errors/">Исключения и контекстные менеджеры →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/python/args-passing/">Как передаются аргументы в функцию — по значению или по ссылке?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/args-kwargs/">Что такое *args и **kwargs?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/scope-legb/">Как работают области видимости в Python?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/mutable-default-arg/">Почему нельзя использовать изменяемый объект как значение аргумента по умолчанию?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/closures/">Что такое замыкание?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/late-binding-closures/">Почему лямбды, созданные в цикле, возвращают одно и то же значение?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/decorators/">Что такое декоратор и как его написать?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/decorator-params-wraps/">Как написать декоратор с параметрами и зачем нужен functools.wraps?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/functools-tools/">Что полезного есть в functools — lru_cache, cache, partial, singledispatch?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/python/basics/">Типы и коллекции — что изменяемо, что хешируемо и как устроен dict</a><p>Изменяемые и неизменяемые типы, список и кортеж, словарь и множество на хеш-таблице, is против ==, модуль collections.</p></li><li><a href="/articles/python/errors/">Исключения и контекстные менеджеры</a><p>try, except, else и finally, свои исключения и цепочки raise from, with и контекстные менеджеры, ExceptionGroup.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Функции — аргументы, области видимости, замыкания и декораторы","description":"Как передаются аргументы, *args и **kwargs, LEGB, ловушка изменяемого значения по умолчанию, замыкания и позднее связывание, декораторы и functools.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/python/functions/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

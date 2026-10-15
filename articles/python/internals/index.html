@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Память и производительность CPython — разбор для собеседования</title>
+<meta name="description" content="Подсчёт ссылок и сборщик циклов, слабые ссылки, интернирование чисел и строк, копирование, сложность операций, профилирование и способы ускорения.">
+<link rel="canonical" href="https://acody.ru/articles/python/internals/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/python/internals/">
+<meta property="og:title" content="Память и производительность CPython — разбор для собеседования">
+<meta property="og:description" content="Подсчёт ссылок и сборщик циклов, слабые ссылки, интернирование чисел и строк, копирование, сложность операций, профилирование и способы ускорения.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#python">Python</a> <span>/</span> <span>Память и производительность CPython</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://acody.ru/articles/#python"},{"@type":"ListItem","position":3,"name":"Память и производительность CPython"}]}</script>
+  <h1>Память и производительность CPython</h1>
+  <p class="lead">Подсчёт ссылок и сборщик циклов, слабые ссылки, интернирование чисел и строк, копирование, сложность операций, профилирование и способы ускорения.</p>
+  <article class="md"><h2>Подсчёт ссылок</h2>
+<p>В CPython у каждого объекта есть счётчик ссылок. Когда он падает до нуля, объект <b>освобождается сразу</b> — поэтому файл, на который больше нет ссылок, закрывается в тот же момент. <code>sys.getrefcount(x)</code> покажет счётчик (на единицу больше — сам аргумент).</p>
+<p>Циклические ссылки — <code>a</code> ссылается на <code>b</code>, <code>b</code> на <code>a</code> — счётчик до нуля не доведут. Их находит <b>циклический сборщик</b> модуля <code>gc</code>, который работает по поколениям: молодые объекты проверяются чаще. В цикле момент вызова <code>__del__</code> непредсказуем, поэтому ресурсы закрывают через <code>with</code>.</p>
+<h2>Слабые ссылки</h2>
+<p>Слабая ссылка не увеличивает счётчик: объект удаляется, когда исчезнут обычные ссылки, а слабая начинает возвращать <code>None</code>.</p>
+<pre class="lang-python"><code>import weakref
+cache = weakref.WeakValueDictionary()</code></pre>
+<p>Применения — кэши и реестры, которые не должны продлевать жизнь объектов, разрыв циклов «родитель ↔ ребёнок», наблюдатели. <code>weakref.finalize</code> — надёжная замена <code>__del__</code>. Не у всех типов есть слабые ссылки: у <code>int</code>, <code>str</code>, <code>tuple</code>, <code>list</code> их нет.</p>
+<h2>Почему a is b иногда True</h2>
+<p>CPython заранее создаёт целые от −5 до 256 и переиспользует их. Строки, похожие на идентификаторы, и одинаковые константы в одном блоке кода <b>интернируются</b>. Поэтому <code>a = 256; b = 256; a is b</code> — <code>True</code>, а с 257 результат зависит от того, как выполнялся код. Это детали реализации: значения сравнивают через <code>==</code>.</p>
+<h2>Копирование</h2>
+<ul><li><code>b = a</code> — не копия, а второе имя.</li><li><b>Поверхностная</b> копия — новый контейнер со <b>старыми</b> элементами: <code>copy.copy(x)</code>, <code>x[:]</code>, <code>list(x)</code>, <code>x.copy()</code>.</li><li><b>Глубокая</b> — копирует всё рекурсивно: <code>copy.deepcopy(x)</code>.</li></ul>
+<pre class="lang-python"><code>grid = [[0] * 3] * 3      # три ссылки на один и тот же список
+grid[0][0] = 1            # меняется «каждая» строка
+grid = [[0] * 3 for _ in range(3)]   # правильно</code></pre>
+<h2>Сложность операций</h2>
+<div class="table"><table><thead><tr><th>Операция</th><th>list</th><th>dict, set</th></tr></thead><tbody><tr><td>доступ по индексу или ключу</td><td>O(1)</td><td>O(1) в среднем</td></tr><tr><td><code>append</code>, <code>add</code></td><td>O(1) амортизированно</td><td>O(1)</td></tr><tr><td>вставка в начало</td><td>O(n)</td><td>—</td></tr><tr><td><code>x in ...</code></td><td>O(n)</td><td>O(1)</td></tr></tbody></table></div>
+<p><code>x in list</code> внутри цикла — самая частая причина неожиданного O(n²). Очередь с двух концов — <code>deque</code>, сортировка — O(n log n).</p>
+<h2>Сначала измерить</h2>
+<ul><li><b>cProfile</b> (и snakeviz для картинки) — время по функциям локально.</li><li><b>py-spy</b> — сэмплирующий профилировщик, подключается к <b>работающему процессу</b> без перезапуска; <code>py-spy dump</code> показывает стеки зависшего процесса.</li><li><b>line_profiler</b> — построчно; <b>tracemalloc</b>, memray — память.</li><li><code>timeit</code> — для микроизмерений.</li></ul>
+<p>Профилируют под реалистичной нагрузкой: узким местом часто оказывается ввод-вывод, а не процессор.</p>
+<h2>Почему Python медленный и что делать</h2>
+<p>Каждая операция проверяет типы, числа — объекты в куче. Ускоряют так:</p>
+<ul><li><b>алгоритм</b> и правильные структуры данных — обычно самый большой выигрыш;</li><li><b>встроенные функции</b> на C вместо ручных циклов: <code>sum</code>, <code>sorted</code>, <code>str.join</code>, множества;</li><li><b>векторизация</b> — NumPy и pandas выполняют циклы на C;</li><li>расширения на Cython или Rust, Numba для числовых функций, PyPy;</li><li><b>процессы</b> — для параллельных вычислений.</li></ul>
+<p>Python 3.11 стал быстрее на 10–60 % за счёт адаптивного интерпретатора.</p>
+<h2>Что запомнить</h2>
+<ul><li>Объект освобождается, когда счётчик ссылок падает до нуля; циклы ловит gc.</li><li>Слабые ссылки — для кэшей, которые не держат объекты.</li><li><code>is</code> для чисел и строк — деталь реализации.</li><li><code>in</code> по списку в цикле — O(n²).</li><li>Сначала профиль, потом оптимизация.</li></ul></article>
+  <section class="block lesson-check" data-lesson="python/python-lesson-internals"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="python-backend"><a class="course-title" href="/courses/python-backend/">Курс «Python для бэкенда: от типов до asyncio и FastAPI»</a><span>урок 9 из 12</span><a href="/articles/python/asyncio/">← asyncio — корутины, задачи, отмена и блокирующий код</a><a class="next" href="/articles/python/typing/">Аннотации типов, mypy и Pydantic →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/python/refcount-gc/">Как Python управляет памятью — подсчёт ссылок и сборщик мусора?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/weakref/">Что такое слабые ссылки (weakref) и где они нужны?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/small-int-interning/">Почему a is b для чисел и строк иногда True, а иногда False?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/copy-deepcopy/">Чем поверхностная копия отличается от глубокой?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/complexity-list-dict/">Какая сложность у основных операций со списком, словарём и множеством?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/profiling/">Как найти, что тормозит в Python-программе?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/python-speedup/">Почему Python медленный и как ускорить вычисления?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/python/data-model/">Модель данных — создание объектов, атрибуты и дескрипторы</a><p>__new__ и __init__, согласование __eq__ и __hash__, __getattr__ и __getattribute__, дескрипторы и __slots__.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Память и производительность CPython","description":"Подсчёт ссылок и сборщик циклов, слабые ссылки, интернирование чисел и строк, копирование, сложность операций, профилирование и способы ускорения.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/python/internals/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

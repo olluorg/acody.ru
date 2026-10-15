@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TCP изнутри — рукопожатие, надёжность и перегрузка — разбор для собеседования</title>
+<meta name="description" content="Как устанавливается и закрывается соединение, откуда TIME_WAIT, как TCP гарантирует доставку и не перегружает сеть, что добавляет TLS.">
+<link rel="canonical" href="https://acody.ru/articles/cs/tcp-tls/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/cs/tcp-tls/">
+<meta property="og:title" content="TCP изнутри — рукопожатие, надёжность и перегрузка — разбор для собеседования">
+<meta property="og:description" content="Как устанавливается и закрывается соединение, откуда TIME_WAIT, как TCP гарантирует доставку и не перегружает сеть, что добавляет TLS.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#cs">Основы</a> <span>/</span> <span>TCP изнутри — рукопожатие, надёжность и перегрузка</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://acody.ru/articles/#cs"},{"@type":"ListItem","position":3,"name":"TCP изнутри — рукопожатие, надёжность и перегрузка"}]}</script>
+  <h1>TCP изнутри — рукопожатие, надёжность и перегрузка</h1>
+  <p class="lead">Как устанавливается и закрывается соединение, откуда TIME_WAIT, как TCP гарантирует доставку и не перегружает сеть, что добавляет TLS.</p>
+  <article class="md"><h2>Установка соединения</h2>
+<p>TCP-соединение открывается тройным рукопожатием:</p>
+<pre class="lang-text"><code>клиент → SYN            (мой начальный номер — x)
+клиент ← SYN-ACK        (принял x, мой номер — y)
+клиент → ACK            (принял y)</code></pre>
+<p>Стороны обмениваются начальными номерами последовательности — от них считаются все байты потока. До первых данных проходит один полный оборот (RTT). Для HTTPS к нему добавляется рукопожатие TLS, поэтому новое соединение с далёким сервером стоит десятки и сотни миллисекунд.</p>
+<h2>Закрытие и TIME_WAIT</h2>
+<p>Соединение закрывается по половинам: каждая сторона отправляет FIN и получает ACK. Тот, кто закрыл первым, переходит в <b>TIME_WAIT</b> и держит запись о соединении 2×MSL — в Linux 60 секунд. Это защищает новое соединение с тем же адресом и портом от запоздавших пакетов старого.</p>
+<p>Тысячи соединений в TIME_WAIT на клиенте — признак того, что он открывает новое соединение на каждый запрос. Лечится пулом соединений и keep-alive, а не настройками ядра.</p>
+<p>RST — аварийный разрыв без вежливого закрытия.</p>
+<h2>Надёжная доставка</h2>
+<p>Каждый байт пронумерован. Получатель подтверждает принятое (ACK), неподтверждённое отправляется повторно — по таймауту или после трёх одинаковых ACK, которые сигнализируют о дыре в потоке. Получатель собирает байты в правильном порядке, даже если пакеты пришли вразнобой.</p>
+<h2>Два окна</h2>
+<p>TCP ограничивает, сколько данных можно отправить без подтверждения:</p>
+<ul><li><b>окно получателя</b> (flow control) — сколько он готов принять, чтобы не переполнить свой буфер;</li><li><b>окно перегрузки</b> (congestion control) — сколько, по оценке отправителя, выдержит сеть.</li></ul>
+<p>Новое соединение начинает с <b>медленного старта</b>: окно удваивается каждый RTT до первой потери, дальше растёт линейно, а при потере уменьшается. Отсюда полезная оценка: пропускная способность одного соединения ≈ окно / RTT. Через океан с RTT 150 мс даже широкий канал не заполняется одним соединением с маленьким окном.</p>
+<h2>Почему не всегда TCP</h2>
+<p>Гарантии TCP стоят задержки: потерянный пакет задерживает всё, что идёт за ним (<b>блокировка начала очереди</b>). Для голоса и игр опоздавшие данные уже не нужны — им подходит UDP. HTTP/2 мультиплексирует потоки в одном TCP-соединении, но одна потеря тормозит их все. HTTP/3 поэтому перешёл на QUIC поверх UDP — там каждый поток восстанавливается независимо.</p>
+<h2>TLS поверх TCP</h2>
+<p>TLS добавляет шифрование, целостность и подлинность сервера. В рукопожатии стороны договариваются об общем ключе по схеме Диффи — Хеллмана, сервер подтверждает сертификатом, что он тот, за кого себя выдаёт. Дальше данные шифруются симметрично. В TLS 1.3 рукопожатие занимает один RTT, используются только стойкие шифры с прямой секретностью: перехваченный трафик не расшифровать даже после утечки ключа сервера.</p>
+<p><b>mTLS</b> — сертификат предъявляет и клиент; так сервисы внутри компании проверяют друг друга.</p>
+<h2>Что запомнить</h2>
+<ul><li>SYN, SYN-ACK, ACK — один RTT до данных, плюс TLS.</li><li>TIME_WAIT у клиента лечится пулом соединений.</li><li>Надёжность — нумерация, подтверждения и повторы.</li><li>Окно получателя бережёт его, окно перегрузки — сеть.</li><li>Потеря пакета в TCP задерживает весь поток — отсюда QUIC.</li></ul></article>
+  <section class="block lesson-check" data-lesson="cs/cs-lesson-tcp-tls"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="dev-foundations"><a class="course-title" href="/courses/dev-foundations/">Курс «База разработчика: Git, командная строка, сети и Linux»</a><span>урок 6 из 8</span><a href="/articles/cs/http/">← HTTP и HTTPS — методы, коды ответа, версии</a><a class="next" href="/articles/devops/linux/">Linux — диагностика сервера →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/cs/tcp-handshake/">Как устанавливается и закрывается TCP-соединение?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/tcp-reliability/">Как TCP обеспечивает надёжную доставку и не перегружает сеть?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/tcp-vs-udp/">Чем TCP отличается от UDP?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/tls-handshake/">Как работает HTTPS и TLS-рукопожатие?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/cs/http-versions/">Чем отличаются HTTP/1.1, HTTP/2 и HTTP/3?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/cs/http/">HTTP и HTTPS — методы, коды ответа, версии</a><p>Методы и идемпотентность, группы кодов ответа, REST, отличия HTTP/1.1, HTTP/2 и HTTP/3, как HTTPS защищает соединение.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"TCP изнутри — рукопожатие, надёжность и перегрузка","description":"Как устанавливается и закрывается соединение, откуда TIME_WAIT, как TCP гарантирует доставку и не перегружает сеть, что добавляет TLS.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/cs/tcp-tls/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

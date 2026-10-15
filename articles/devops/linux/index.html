@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linux — диагностика сервера — разбор для собеседования</title>
+<meta name="description" content="С чего начинать, когда сервер ведёт себя плохо, как читать load average, где на самом деле свободная память, кто такие зомби и куда делось место на…">
+<link rel="canonical" href="https://acody.ru/articles/devops/linux/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/devops/linux/">
+<meta property="og:title" content="Linux — диагностика сервера — разбор для собеседования">
+<meta property="og:description" content="С чего начинать, когда сервер ведёт себя плохо, как читать load average, где на самом деле свободная память, кто такие зомби и куда делось место на…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#devops">DevOps</a> <span>/</span> <span>Linux — диагностика сервера</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://acody.ru/articles/#devops"},{"@type":"ListItem","position":3,"name":"Linux — диагностика сервера"}]}</script>
+  <h1>Linux — диагностика сервера</h1>
+  <p class="lead">С чего начинать, когда сервер ведёт себя плохо, как читать load average, где на самом деле свободная память, кто такие зомби и куда делось место на диске.</p>
+  <article class="md"><h2>Порядок диагностики</h2>
+<p>Сначала смотрят, потом перезапускают — иначе улики пропадут.</p>
+<ol><li><b>Жив ли процесс</b> — <code>systemctl status app</code>, <code>ps aux | grep app</code>.</li><li><b>Логи</b> — <code>journalctl -u app --since &quot;10 min ago&quot;</code>, файлы приложения.</li><li><b>Ресурсы</b> — <code>top</code>, <code>free -m</code>, <code>df -h</code>, <code>iostat -xz 1</code>.</li><li><b>Сеть</b> — <code>ss -tlnp</code> (слушает ли порт), <code>curl localhost:8080/health</code>.</li><li><b>Что изменилось</b> — деплой, конфиг, истёкший сертификат.</li></ol>
+<p><code>strace -p PID</code> показывает, что процесс делает прямо сейчас. Перед перезапуском зависшего сервиса полезно снять дамп потоков — он понадобится для разбора.</p>
+<h2>Load average</h2>
+<p>Три числа — среднее за 1, 5 и 15 минут <b>числа процессов, которые выполняются или ждут CPU</b>, а в Linux ещё и <b>ждут ввода-вывода</b>. Сравнивают с числом ядер:</p>
+<ul><li>load 8 на 16 ядрах — нормально;</li><li>load 8 на 2 ядрах — очередь.</li></ul>
+<p>Если первое число больше третьего, нагрузка растёт. Высокий load при свободном процессоре — признак ожидания диска или сетевой файловой системы. В <code>top</code> смотрят на <code>wa</code> (ожидание ввода-вывода) и <code>st</code> (время, украденное гипервизором соседям).</p>
+<h2>Память</h2>
+<p>Linux занимает свободную память под <b>кэш файлов</b>, поэтому <code>free</code> почти всегда мал. Смотрят на <b>available</b> — сколько можно выделить, вытеснив кэш:</p>
+<pre class="lang-bash"><code>free -m
+#        total   used   free  shared  buff/cache  available
+# Mem:    7972   3120    210      45        4642       4520</code></pre>
+<p>Здесь свободно не 210 МБ, а около 4,5 ГБ.</p>
+<p>Когда память действительно кончилась, <b>OOM killer</b> убивает процесс с наибольшей оценкой — обычно самый большой. Следы — в логе ядра:</p>
+<pre class="lang-bash"><code>dmesg -T | grep -i &quot;killed process&quot;</code></pre>
+<p>В контейнере OOM срабатывает при превышении лимита cgroup, даже если на хосте память есть.</p>
+<h2>Состояния процессов</h2>
+<p>В <code>ps</code> видно состояние процесса:</p>
+<div class="table"><table><thead><tr><th>Код</th><th>Что значит</th></tr></thead><tbody><tr><td>R</td><td>выполняется или ждёт процессор</td></tr><tr><td>S</td><td>спит в ожидании события — норма</td></tr><tr><td>D</td><td>непрерываемый сон, ждёт диск или сеть; не реагирует даже на SIGKILL</td></tr><tr><td>T</td><td>остановлен</td></tr><tr><td>Z</td><td>зомби</td></tr></tbody></table></div>
+<p><b>Зомби</b> — процесс завершился, но родитель не забрал код выхода. Памяти он не занимает, только запись в таблице процессов, и убить его нельзя — исправляют или перезапускают родителя. Тысячи зомби исчерпывают лимит PID. В контейнере без init зомби собирать некому — для этого ставят tini.</p>
+<p>Много процессов в состоянии D — проблема с диском или NFS, и они же поднимают load average.</p>
+<h2>Диск заполнен, а du показывает мало</h2>
+<p><code>df</code> считает место на файловой системе, <code>du</code> — сумму видимых файлов. Если они расходятся, почти всегда виноват <b>удалённый файл, который ещё держит открытым процесс</b> — например, лог после ротации:</p>
+<pre class="lang-bash"><code>lsof +L1                         # открытые удалённые файлы
+du -xh --max-depth=1 / | sort -h # где большие каталоги
+df -i                            # не кончились ли inodes</code></pre>
+<p>Место освобождается после перезапуска процесса. Чтобы проблема не повторялась, ротацию логов настраивают с перезапуском или <code>copytruncate</code>. Вторая частая причина — кончились inodes из-за множества мелких файлов. Для Docker — <code>docker system df</code>: старые образы и логи контейнеров.</p>
+<h2>Что запомнить</h2>
+<ul><li>Сначала данные и логи, потом перезапуск.</li><li>Load average сравнивают с числом ядер.</li><li>Свободная память — колонка available.</li><li>Зомби лечат через родителя.</li><li>df больше du — ищите удалённые открытые файлы.</li></ul></article>
+  <section class="block lesson-check" data-lesson="devops/devops-lesson-linux"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="dev-foundations"><a class="course-title" href="/courses/dev-foundations/">Курс «База разработчика: Git, командная строка, сети и Linux»</a><span>урок 7 из 8</span><a href="/articles/cs/tcp-tls/">← TCP изнутри — рукопожатие, надёжность и перегрузка</a><a class="next" href="/articles/devops/server-networking/">Сети на сервере — подсети, firewall, reverse proxy и диагностика →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/devops/linux-troubleshooting-commands/">Какими командами вы диагностируете проблему на Linux-сервере?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/linux-load-average/">Что показывает load average и как понять, что сервер перегружен?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/linux-memory-oom/">Как понять, сколько памяти реально свободно в Linux, и что такое OOM killer?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/linux-process-states/">Какие состояния бывают у процесса в Linux и что такое зомби и сироты?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/linux-disk-full/">Диск заполнен, а du показывает, что места занято мало. В чём дело?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/devops/terminal/">Командная строка — файлы, поиск, окружение и SSH</a><p>Навигация и работа с файлами, grep и пайпы, права доступа, переменные окружения и PATH, вход по SSH-ключам.</p></li><li><a href="/articles/devops/server-networking/">Сети на сервере — подсети, firewall, reverse proxy и диагностика</a><p>Как читать CIDR и планировать подсети, как ограничивать сетевой доступ, зачем nginx перед приложением и как искать, почему сервис A не видит сервис B.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Linux — диагностика сервера","description":"С чего начинать, когда сервер ведёт себя плохо, как читать load average, где на самом деле свободная память, кто такие зомби и куда делось место на диске.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/devops/linux/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

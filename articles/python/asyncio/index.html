@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>asyncio — корутины, задачи, отмена и блокирующий код — разбор для собеседования</title>
+<meta name="description" content="Как работают async и await, как запускать корутины одновременно, gather и TaskGroup, что делает блокирующий вызов в цикле событий, отмена и таймауты.">
+<link rel="canonical" href="https://acody.ru/articles/python/asyncio/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/python/asyncio/">
+<meta property="og:title" content="asyncio — корутины, задачи, отмена и блокирующий код — разбор для собеседования">
+<meta property="og:description" content="Как работают async и await, как запускать корутины одновременно, gather и TaskGroup, что делает блокирующий вызов в цикле событий, отмена и таймауты.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#python">Python</a> <span>/</span> <span>asyncio — корутины, задачи, отмена и блокирующий код</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://acody.ru/articles/#python"},{"@type":"ListItem","position":3,"name":"asyncio — корутины, задачи, отмена и блокирующий код"}]}</script>
+  <h1>asyncio — корутины, задачи, отмена и блокирующий код</h1>
+  <p class="lead">Как работают async и await, как запускать корутины одновременно, gather и TaskGroup, что делает блокирующий вызов в цикле событий, отмена и таймауты.</p>
+  <article class="md"><h2>Корутины и цикл событий</h2>
+<p><code>async def</code> создаёт <b>корутину</b>. <code>await</code> — точка, где она <b>отдаёт управление</b> циклу событий, пока ждёт сеть, диск или таймер. Цикл в это время выполняет другие корутины — всё в одном потоке.</p>
+<pre class="lang-python"><code>import asyncio, httpx
+
+async def fetch(client, url):
+    resp = await client.get(url, timeout=5)
+    return resp.status_code
+
+async def main():
+    async with httpx.AsyncClient() as client:
+        print(await fetch(client, &quot;https://example.ru&quot;))
+
+asyncio.run(main())</code></pre>
+<p><code>asyncio.run</code> создаёт цикл событий и выполняет корутину. Вызов корутины без <code>await</code> ничего не делает — Python предупредит «coroutine was never awaited».</p>
+<h2>Одновременно, а не по очереди</h2>
+<pre class="lang-python"><code>a = await fetch(client, url1)   # по очереди —
+b = await fetch(client, url2)   # выигрыша нет
+
+a, b = await asyncio.gather(fetch(client, url1), fetch(client, url2))</code></pre>
+<p><code>gather</code> запускает корутины конкурентно и возвращает результаты в том же порядке. С Python 3.11 есть <b>TaskGroup</b>:</p>
+<pre class="lang-python"><code>async with asyncio.TaskGroup() as tg:
+    t1 = tg.create_task(fetch(client, url1))
+    t2 = tg.create_task(fetch(client, url2))
+print(t1.result(), t2.result())</code></pre>
+<p>Разница — в ошибках. <code>gather</code> пробрасывает первую ошибку, но остальные задачи продолжают работать брошенными. TaskGroup <b>отменяет остальные</b>, ждёт их завершения и отдаёт ошибки группой <code>ExceptionGroup</code> — задач-сирот не остаётся.</p>
+<p>Ограничить число одновременных запросов — <code>asyncio.Semaphore</code>.</p>
+<h2>Блокирующий вызов останавливает всё</h2>
+<p>Корутины переключаются только в точках <code>await</code>. Блокирующий вызов — <code>time.sleep</code>, <code>requests.get</code>, синхронный драйвер базы, тяжёлое вычисление — не отдаёт управление, и <b>весь цикл событий стоит</b>. Симптом: растут задержки всех запросов, хотя процессор почти не загружен.</p>
+<p>Решения:</p>
+<ul><li>асинхронные библиотеки — httpx, asyncpg, aiofiles;</li><li>вынести блокирующий код в поток: <code>await asyncio.to_thread(func, arg)</code>;</li><li>тяжёлые вычисления — в пул процессов через <code>loop.run_in_executor</code>.</li></ul>
+<p>Отладочный режим asyncio предупреждает о шагах дольше 100 мс. Во FastAPI обработчик <code>def</code> выполняется в пуле потоков, а <code>async def</code> — прямо в цикле, поэтому блокирующий код в <code>async def</code> особенно опасен.</p>
+<h2>Отмена и таймауты</h2>
+<p><code>task.cancel()</code> бросает <code>CancelledError</code> внутрь корутины в ближайшей точке <code>await</code>. Таймаут:</p>
+<pre class="lang-python"><code>try:
+    async with asyncio.timeout(3):
+        data = await fetch_slow()
+except TimeoutError:
+    data = None</code></pre>
+<p>По истечении времени задача отменяется, наружу приходит <code>TimeoutError</code>.</p>
+<p><code>CancelledError</code> <b>нельзя глотать</b>: очистить ресурсы в <code>finally</code> или <code>async with</code> и пробросить дальше. С Python 3.8 он наследует <code>BaseException</code>, поэтому <code>except Exception</code> его не ловит — так и задумано. Синхронный код без <code>await</code> отменить нельзя: отмена сработает только на следующем <code>await</code>. <code>asyncio.shield</code> защищает внутреннюю операцию от отмены внешней.</p>
+<h2>Что запомнить</h2>
+<ul><li><code>await</code> — точка переключения; без него корутины не чередуются.</li><li>Одновременный запуск — gather или TaskGroup, а не <code>await</code> подряд.</li><li>TaskGroup отменяет соседей при ошибке.</li><li>Блокирующий вызов останавливает весь цикл — <code>to_thread</code> или асинхронная библиотека.</li><li>CancelledError пробрасывают, а не глотают.</li></ul></article>
+  <section class="block lesson-check" data-lesson="python/python-lesson-asyncio"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="python-backend"><a class="course-title" href="/courses/python-backend/">Курс «Python для бэкенда: от типов до asyncio и FastAPI»</a><span>урок 8 из 12</span><a href="/articles/python/threads-processes/">← Потоки, процессы и GIL</a><a class="next" href="/articles/python/internals/">Память и производительность CPython →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/python/async-await/">Как работают async и await?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/asyncio-gather-basics/">Как запустить несколько корутин одновременно и получить их результаты?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/asyncio-gather-taskgroup/">Чем asyncio.gather отличается от TaskGroup и как в них обрабатываются ошибки?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/asyncio-blocking-call/">Что будет, если внутри async-функции вызвать блокирующий код?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/asyncio-cancellation/">Как в asyncio работают отмена задач и таймауты?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/python/threads-processes/">Потоки, процессы и GIL</a><p>Что такое GIL и что он не защищает, когда выбирать потоки, процессы или asyncio, concurrent.futures, ограничения multiprocessing, сборка без GIL.</p></li><li><a href="/articles/python/web/">Веб на Python — WSGI и ASGI, FastAPI, HTTP-клиенты, JSON, Django ORM</a><p>Чем WSGI отличается от ASGI, простой API на FastAPI и внедрение зависимостей, requests и httpx с таймаутами, JSON с датами и деньгами, N+1 в Django.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"asyncio — корутины, задачи, отмена и блокирующий код","description":"Как работают async и await, как запускать корутины одновременно, gather и TaskGroup, что делает блокирующий вызов в цикле событий, отмена и таймауты.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/python/asyncio/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

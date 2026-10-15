@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Окружение, импорты и тесты на pytest — разбор для собеседования</title>
+<meta name="description" content="Виртуальные окружения и зависимости, как работает импорт и чем опасны циклические импорты, __name__ == &quot;__main__&quot;, pytest, фикстуры и mock.patch.">
+<link rel="canonical" href="https://acody.ru/articles/python/tooling/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/python/tooling/">
+<meta property="og:title" content="Окружение, импорты и тесты на pytest — разбор для собеседования">
+<meta property="og:description" content="Виртуальные окружения и зависимости, как работает импорт и чем опасны циклические импорты, __name__ == &quot;__main__&quot;, pytest, фикстуры и mock.patch.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#python">Python</a> <span>/</span> <span>Окружение, импорты и тесты на pytest</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://acody.ru/articles/#python"},{"@type":"ListItem","position":3,"name":"Окружение, импорты и тесты на pytest"}]}</script>
+  <h1>Окружение, импорты и тесты на pytest</h1>
+  <p class="lead">Виртуальные окружения и зависимости, как работает импорт и чем опасны циклические импорты, __name__ == &quot;__main__&quot;, pytest, фикстуры и mock.patch.</p>
+  <article class="md"><h2>Виртуальное окружение</h2>
+<p>У каждого проекта — своя копия Python со своими пакетами. Проекты не конфликтуют версиями библиотек, системный Python не засоряется.</p>
+<pre class="lang-bash"><code>python -m venv .venv
+source .venv/bin/activate     # Windows: .venv\Scripts\activate
+pip install -r requirements.txt</code></pre>
+<p>Точные версии фиксируют lock-файлом — <code>uv.lock</code>, <code>poetry.lock</code> или хотя бы <code>pip freeze</code>, — иначе через полгода сборка соберёт другие версии. uv и poetry управляют окружением и зависимостями одной командой.</p>
+<h2>Как работает импорт</h2>
+<p>При первом <code>import orders</code> Python:</p>
+<ol><li>ищет модуль по <code>sys.path</code>;</li><li><b>выполняет его сверху вниз</b> один раз;</li><li>кладёт в <code>sys.modules</code> — повторные импорты берут оттуда.</li></ol>
+<p>Отсюда два правила. На уровне модуля не делают тяжёлого — подключений к базе, сетевых запросов: это выполнится при импорте. И циклические импорты ломаются: если <code>a</code> импортирует <code>b</code>, а <code>b</code> берёт имя из ещё не выполненного до конца <code>a</code>, получится <code>ImportError: cannot import name</code>. Лечат разделением модулей, импортом модуля вместо имени или импортом внутри функции. Импорт только для аннотаций — под <code>if TYPE_CHECKING:</code>.</p>
+<h2>if __name__ == "__main__"</h2>
+<pre class="lang-python"><code>def main():
+    ...
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre>
+<p>При запуске <code>python app.py</code> у модуля <code>__name__</code> равно <code>&quot;__main__&quot;</code>, при импорте — его имя. Так один файл служит и модулем, и программой. Для multiprocessing со spawn (Windows, macOS) эта защита обязательна.</p>
+<h2>pytest</h2>
+<p>Тест — функция <code>test_…</code> в файле <code>test_*.py</code>, проверка — обычный <code>assert</code>: pytest сам покажет, какие значения не совпали.</p>
+<pre class="lang-python"><code>import pytest
+
+@pytest.mark.parametrize(&quot;price, discount, expected&quot;, [
+    (100, 0, 100),
+    (100, 0.1, 90),
+])
+def test_total(price, discount, expected):
+    assert total([price], discount) == expected
+
+def test_negative_discount():
+    with pytest.raises(ValueError):
+        total([100], -1)</code></pre>
+<p><code>pytest -x</code> останавливается на первой ошибке, <code>-k имя</code> выбирает тесты. Тест проверяет одно поведение и не зависит от порядка запуска.</p>
+<h2>Фикстуры</h2>
+<p>Фикстура — функция с <code>@pytest.fixture</code>, результат которой pytest передаёт в тест <b>по имени параметра</b>. Код после <code>yield</code> — очистка:</p>
+<pre class="lang-python"><code>@pytest.fixture(scope=&quot;session&quot;)
+def db():
+    conn = connect_test_db()
+    yield conn
+    conn.close()
+
+def test_save(db):
+    ...</code></pre>
+<p><code>scope</code> задаёт, как часто фикстура создаётся заново: дорогое (контейнер базы) — раз на сессию, дешёвое и изменяемое — на каждый тест. Общие фикстуры кладут в <code>conftest.py</code>, их видно без импорта.</p>
+<h2>mock.patch — патчить там, где используют</h2>
+<p><code>patch</code> временно заменяет атрибут <b>по имени</b> на Mock. Подменять нужно в модуле, <b>где имя ищется</b>, а не где оно определено:</p>
+<pre class="lang-python"><code># orders.py:  from payments import charge
+with patch(&quot;orders.charge&quot;) as charge:      # не &quot;payments.charge&quot;
+    charge.return_value = {&quot;ok&quot;: True}
+    place_order(...)
+    charge.assert_called_once()</code></pre>
+<p><code>autospec=True</code> создаёт мок с сигнатурой оригинала — неверный вызов упадёт. Для async-функций — <code>AsyncMock</code>. Много моков в тесте — признак сильной связанности: часто лучше фейковая реализация или интеграционный тест.</p>
+<h2>Что запомнить</h2>
+<ul><li>У каждого проекта — свой venv и lock-файл.</li><li>Импорт выполняет модуль — тяжёлое на уровне модуля не делают.</li><li><code>assert</code>, <code>parametrize</code>, <code>pytest.raises</code> — основа тестов.</li><li>Фикстуры — по имени параметра, очистка после <code>yield</code>.</li><li>patch — там, где имя используется.</li></ul></article>
+  <section class="block lesson-check" data-lesson="python/python-lesson-tooling"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="python-backend"><a class="course-title" href="/courses/python-backend/">Курс «Python для бэкенда: от типов до asyncio и FastAPI»</a><span>урок 11 из 12</span><a href="/articles/python/typing/">← Аннотации типов, mypy и Pydantic</a><a class="next" href="/articles/python/web/">Веб на Python — WSGI и ASGI, FastAPI, HTTP-клиенты, JSON, Django ORM →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/python/venv-pip/">Зачем нужно виртуальное окружение и как управлять зависимостями?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/imports/">Как работает импорт модулей и что делать с циклическими импортами?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/name-main/">Зачем нужна конструкция if __name__ == &quot;__main__&quot;?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/pytest-basics/">Как писать тесты на pytest — assert, запуск, параметризация?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/pytest-fixtures/">Как работают фикстуры pytest и что такое их scope?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/mock-patch/">Как работает unittest.mock.patch и почему патчить нужно там, где объект используется?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/python/typing/">Аннотации типов, mypy и Pydantic</a><p>Что дают аннотации и кто их проверяет, как аннотировать коллекции, Optional и объединения, обобщённые типы, mypy в проекте, проверка данных Pydantic.</p></li><li><a href="/articles/python/web/">Веб на Python — WSGI и ASGI, FastAPI, HTTP-клиенты, JSON, Django ORM</a><p>Чем WSGI отличается от ASGI, простой API на FastAPI и внедрение зависимостей, requests и httpx с таймаутами, JSON с датами и деньгами, N+1 в Django.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Окружение, импорты и тесты на pytest","description":"Виртуальные окружения и зависимости, как работает импорт и чем опасны циклические импорты, __name__ == \"__main__\", pytest, фикстуры и mock.patch.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/python/tooling/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

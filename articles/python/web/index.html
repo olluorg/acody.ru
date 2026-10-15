@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Веб на Python — WSGI и ASGI, FastAPI, HTTP-клиенты, JSON, Django ORM — разбор для собеседования</title>
+<meta name="description" content="Чем WSGI отличается от ASGI, простой API на FastAPI и внедрение зависимостей, requests и httpx с таймаутами, JSON с датами и деньгами, N+1 в Django.">
+<link rel="canonical" href="https://acody.ru/articles/python/web/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/python/web/">
+<meta property="og:title" content="Веб на Python — WSGI и ASGI, FastAPI, HTTP-клиенты, JSON, Django ORM — разбор для собеседования">
+<meta property="og:description" content="Чем WSGI отличается от ASGI, простой API на FastAPI и внедрение зависимостей, requests и httpx с таймаутами, JSON с датами и деньгами, N+1 в Django.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#python">Python</a> <span>/</span> <span>Веб на Python — WSGI и ASGI, FastAPI, HTTP-клиенты, JSON, Django ORM</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://acody.ru/articles/#python"},{"@type":"ListItem","position":3,"name":"Веб на Python — WSGI и ASGI, FastAPI, HTTP-клиенты, JSON, Django ORM"}]}</script>
+  <h1>Веб на Python — WSGI и ASGI, FastAPI, HTTP-клиенты, JSON, Django ORM</h1>
+  <p class="lead">Чем WSGI отличается от ASGI, простой API на FastAPI и внедрение зависимостей, requests и httpx с таймаутами, JSON с датами и деньгами, N+1 в Django.</p>
+  <article class="md"><h2>WSGI и ASGI</h2>
+<p><b>WSGI</b> — синхронный интерфейс между веб-сервером и приложением: запрос занимает поток или процесс до ответа. На нём Flask и классический Django, серверы — Gunicorn, uWSGI.</p>
+<p><b>ASGI</b> — асинхронный: приложение — корутина, один процесс обслуживает тысячи соединений через цикл событий, поддерживаются WebSocket и долгие соединения. На нём FastAPI, Starlette, Django в режиме ASGI, серверы — Uvicorn, Hypercorn, Granian.</p>
+<p>ASGI не ускоряет вычисления и бесполезен с блокирующими библиотеками. Типичный запуск — Gunicorn с воркерами Uvicorn: процессы по числу ядер, внутри каждого — свой цикл событий.</p>
+<h2>FastAPI</h2>
+<pre class="lang-python"><code>from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class ItemIn(BaseModel):
+    name: str
+    price: float
+
+@app.get(&quot;/items/{item_id}&quot;)
+async def get_item(item_id: int, full: bool = False):
+    item = await repo.get(item_id)
+    if item is None:
+        raise HTTPException(status_code=404)
+    return item
+
+@app.post(&quot;/items&quot;, status_code=201)
+async def create_item(item: ItemIn):
+    return await repo.create(item)</code></pre>
+<p>Параметр из пути становится аргументом, простые аргументы — query- параметрами, Pydantic-модель — телом запроса. Типы проверяются автоматически, ошибка — <b>422</b>. Документация API — на <code>/docs</code>, её строят из аннотаций. <code>response_model</code> задаёт схему ответа и скрывает лишние поля.</p>
+<h2>Внедрение зависимостей</h2>
+<pre class="lang-python"><code>from typing import Annotated
+from fastapi import Depends
+
+async def get_session():
+    async with SessionLocal() as session:
+        yield session              # очистка — после ответа
+
+Session = Annotated[AsyncSession, Depends(get_session)]
+
+@app.get(&quot;/orders&quot;)
+async def list_orders(session: Session): ...</code></pre>
+<p>FastAPI вызывает зависимость перед обработчиком и передаёт результат. Зависимости образуют граф, результат <b>кэшируется в пределах запроса</b>, а код после <code>yield</code> выполняется после ответа. В тестах их подменяют через <code>app.dependency_overrides</code>. Идея та же, что у фикстур pytest.</p>
+<h2>HTTP-клиенты</h2>
+<p><code>requests</code> — синхронный, <code>httpx</code> — похожий интерфейс плюс асинхронный клиент и HTTP/2. Обязательные привычки:</p>
+<pre class="lang-python"><code>with httpx.Client(timeout=5) as client:      # всегда таймаут
+    resp = client.get(url)
+    resp.raise_for_status()                  # 4xx и 5xx — исключение
+    data = resp.json()</code></pre>
+<ul><li><b>таймаут всегда</b> — requests по умолчанию ждёт бесконечно и может повесить воркер;</li><li><b>клиент или сессия</b> на много запросов — переиспользуются соединения;</li><li>повторы — только для безопасных запросов и временных ошибок;</li><li>в асинхронном коде <code>requests</code> блокирует цикл — нужен <code>httpx.AsyncClient</code>.</li></ul>
+<h2>JSON</h2>
+<p><code>json.dumps</code> и <code>json.loads</code> знают только dict, list, str, int, float, bool и None. Кортеж станет списком, ключи — строками. Даты, <code>Decimal</code>, <code>UUID</code> и свои классы нужно преобразовать — параметром <code>default</code> или через Pydantic:</p>
+<pre class="lang-python"><code>json.dumps(data, default=str, ensure_ascii=False)</code></pre>
+<p>Даты передают в ISO 8601 (<code>dt.isoformat()</code>), деньги — строкой или целыми копейками, а не float. <code>ensure_ascii=False</code> оставляет кириллицу читаемой.</p>
+<h2>N+1 в Django</h2>
+<pre class="lang-python"><code>for order in Order.objects.all():
+    print(order.customer.name)     # запрос на каждый заказ</code></pre>
+<p>Один запрос за списком и по запросу на каждый элемент. Лечение:</p>
+<ul><li><code>select_related(&quot;customer&quot;)</code> — JOIN в том же запросе для ForeignKey и OneToOne;</li><li><code>prefetch_related(&quot;items&quot;)</code> — отдельный запрос и склейка в Python для ManyToMany и обратных связей.</li></ul>
+<p>Найти N+1 помогают django-debug-toolbar, лог SQL и <code>assertNumQueries</code> в тестах. Агрегаты считают в базе — <code>annotate(Count(...))</code>, а не <code>len()</code> в цикле.</p>
+<h2>Что запомнить</h2>
+<ul><li>WSGI — поток на запрос, ASGI — цикл событий и WebSocket.</li><li>FastAPI проверяет типы сам и строит документацию из аннотаций.</li><li>HTTP-запрос — всегда с таймаутом и проверкой статуса.</li><li>Даты в JSON — ISO 8601, деньги — не float.</li><li>N+1 лечат select_related и prefetch_related.</li></ul></article>
+  <section class="block lesson-check" data-lesson="python/python-lesson-web"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="python-backend"><a class="course-title" href="/courses/python-backend/">Курс «Python для бэкенда: от типов до asyncio и FastAPI»</a><span>урок 12 из 12</span><a href="/articles/python/tooling/">← Окружение, импорты и тесты на pytest</a><a class="next" href="/courses/python-backend/">К итогам курса →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/python/wsgi-asgi/">Чем WSGI отличается от ASGI?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/fastapi-basics/">Как написать простой HTTP API на FastAPI?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/fastapi-depends/">Как устроено внедрение зависимостей в FastAPI?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/requests-httpx/">Как правильно делать HTTP-запросы из Python — requests и httpx?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/json-serialization/">Как работать с JSON в Python и что делать с датами и своими объектами?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/django-n-plus-one/">Как найти и исправить проблему N+1 запросов в Django ORM?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/python/asyncio/">asyncio — корутины, задачи, отмена и блокирующий код</a><p>Как работают async и await, как запускать корутины одновременно, gather и TaskGroup, что делает блокирующий вызов в цикле событий, отмена и таймауты.</p></li><li><a href="/articles/python/tooling/">Окружение, импорты и тесты на pytest</a><p>Виртуальные окружения и зависимости, как работает импорт и чем опасны циклические импорты, __name__ == &quot;__main__&quot;, pytest, фикстуры и mock.patch.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Веб на Python — WSGI и ASGI, FastAPI, HTTP-клиенты, JSON, Django ORM","description":"Чем WSGI отличается от ASGI, простой API на FastAPI и внедрение зависимостей, requests и httpx с таймаутами, JSON с датами и деньгами, N+1 в Django.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/python/web/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

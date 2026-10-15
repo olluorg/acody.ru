@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pull request, код-ревью и стратегии ветвления — разбор для собеседования</title>
+<meta name="description" content="Как оформить pull request, который быстро проверят, как ревьюить по существу, чем trunk-based отличается от GitFlow и что делает CI/CD.">
+<link rel="canonical" href="https://acody.ru/articles/devops/git-collaboration/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/devops/git-collaboration/">
+<meta property="og:title" content="Pull request, код-ревью и стратегии ветвления — разбор для собеседования">
+<meta property="og:description" content="Как оформить pull request, который быстро проверят, как ревьюить по существу, чем trunk-based отличается от GitFlow и что делает CI/CD.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#devops">DevOps</a> <span>/</span> <span>Pull request, код-ревью и стратегии ветвления</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://acody.ru/articles/#devops"},{"@type":"ListItem","position":3,"name":"Pull request, код-ревью и стратегии ветвления"}]}</script>
+  <h1>Pull request, код-ревью и стратегии ветвления</h1>
+  <p class="lead">Как оформить pull request, который быстро проверят, как ревьюить по существу, чем trunk-based отличается от GitFlow и что делает CI/CD.</p>
+  <article class="md"><h2>Pull request, который быстро проверят</h2>
+<p>Ревьюер — занятой человек. PR на 2000 строк он прочитает поверхностно и напишет «Looks good». Чтобы ревью было полезным:</p>
+<ul><li><b>маленький PR</b> — до нескольких сотен строк, <b>одна</b> задача; рефакторинг и новая функция — разными PR;</li><li><b>описание</b>: что сделано и зачем (ссылка на задачу), как проверить, на что обратить внимание, скриншоты для интерфейса;</li><li><b>самопроверка</b> диффа и зелёный CI до того, как звать людей;</li><li>ветка <b>актуальна</b> с main.</li></ul>
+<p>Черновик (draft) открывают рано, чтобы получить отзыв на подход, пока переделывать дёшево. На замечания отвечают по существу: исправить или объяснить, почему иначе. Каждый комментарий закрывают ответом или отметкой «решено».</p>
+<h2>Ревью по существу, а не по вкусу</h2>
+<p>Порядок важности:</p>
+<ol><li><b>Правильность</b> — решает ли задачу, крайние случаи, обработка ошибок.</li><li><b>Безопасность</b> — ввод, права, секреты.</li><li><b>Данные и совместимость</b> — миграции, изменения API.</li><li><b>Тесты</b> — проверяют ли они поведение.</li><li><b>Поддерживаемость</b> — понятность, сложность, дублирование.</li></ol>
+<p>Стиль и форматирование — работа линтера, а не человека. Комментарии конкретные, с причиной, вариантом и пометкой важности: «блокирует», «можно позже», «мелочь». Вопрос работает лучше приказа: «что будет, если список пустой?» Ревью проверяет код, а не автора: «здесь гонка», а не «ты не подумал».</p>
+<p>Отвечать на ревью нужно быстро — PR, который ждёт два дня, тормозит всю команду. И отмечать хорошее: ревью — ещё и обучение.</p>
+<h2>Trunk-based и GitFlow</h2>
+<p><b>GitFlow</b> — долгоживущие ветки develop и main, отдельные ветки фич, релизов и хотфиксов. Подходит продуктам с редкими версионированными релизами — мобильным приложениям, коробочному ПО. Цена — большие слияния и поздние конфликты.</p>
+<p><b>Trunk-based development</b> — короткие ветки на часы или день-два, частое слияние в main, main всегда готов к выкатке. Незаконченное прячут за <b>feature flags</b>: код уже на проде, но функция выключена. Флаг позволяет включить её для 1 % пользователей или для сотрудников. После раскатки флаг удаляют, иначе копится долг.</p>
+<p><b>GitHub Flow</b> — упрощённый вариант: ветка → PR → ревью → main → деплой.</p>
+<h2>CI/CD</h2>
+<p><b>CI</b> — каждое изменение автоматически собирается и проверяется: сборка, линтеры, тесты, проверка зависимостей, сборка артефакта — например, образа.</p>
+<p><b>CD</b> бывает двух видов:</p>
+<ul><li><b>continuous delivery</b> — артефакт всегда готов, на прод — по кнопке;</li><li><b>continuous deployment</b> — каждое изменение, прошедшее проверки, уходит на прод автоматически.</li></ul>
+<p>Главный принцип — <b>собрать один раз</b> и продвигать тот же артефакт через окружения. Версия артефакта — из коммита, а не <code>latest</code>. Дешёвые проверки идут первыми, весь пайплайн — в пределах 10–15 минут. Красный main — приоритет команды: пока он сломан, никто не выкатывает.</p>
+<h2>Что запомнить</h2>
+<ul><li>Маленький PR с понятным описанием и зелёным CI.</li><li>Ревью — по важности: правильность, безопасность, данные, тесты, остальное.</li><li>Короткие ветки и флаги вместо долгих веток.</li><li>Один артефакт проходит все окружения.</li></ul></article>
+  <section class="block lesson-check" data-lesson="devops/devops-lesson-git-collaboration"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="dev-foundations"><a class="course-title" href="/courses/dev-foundations/">Курс «База разработчика: Git, командная строка, сети и Linux»</a><span>урок 2 из 8</span><a href="/articles/devops/git-basics/">← Git — ветки, коммиты и отмена изменений</a><a class="next" href="/articles/devops/terminal/">Командная строка — файлы, поиск, окружение и SSH →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/devops/pull-request/">Как оформить pull request, который быстро проверят?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/code-review/">Как проводить код-ревью полезно, а не по вкусу?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/branching-strategies/">Чем trunk-based development отличается от GitFlow?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/devops/ci-cd-pipeline/">Из каких этапов состоит CI/CD-пайплайн и чем continuous delivery отличается от continuous deployment?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/devops/git-basics/">Git — ветки, коммиты и отмена изменений</a><p>Как работать в ветке от первого коммита до push, чем merge отличается от rebase, как отменять изменения и разрешать конфликты.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Pull request, код-ревью и стратегии ветвления","description":"Как оформить pull request, который быстро проверят, как ревьюить по существу, чем trunk-based отличается от GitFlow и что делает CI/CD.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/devops/git-collaboration/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

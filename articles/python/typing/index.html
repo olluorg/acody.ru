@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Аннотации типов, mypy и Pydantic — разбор для собеседования</title>
+<meta name="description" content="Что дают аннотации и кто их проверяет, как аннотировать коллекции, Optional и объединения, обобщённые типы, mypy в проекте, проверка данных Pydantic.">
+<link rel="canonical" href="https://acody.ru/articles/python/typing/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/python/typing/">
+<meta property="og:title" content="Аннотации типов, mypy и Pydantic — разбор для собеседования">
+<meta property="og:description" content="Что дают аннотации и кто их проверяет, как аннотировать коллекции, Optional и объединения, обобщённые типы, mypy в проекте, проверка данных Pydantic.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#python">Python</a> <span>/</span> <span>Аннотации типов, mypy и Pydantic</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://acody.ru/articles/#python"},{"@type":"ListItem","position":3,"name":"Аннотации типов, mypy и Pydantic"}]}</script>
+  <h1>Аннотации типов, mypy и Pydantic</h1>
+  <p class="lead">Что дают аннотации и кто их проверяет, как аннотировать коллекции, Optional и объединения, обобщённые типы, mypy в проекте, проверка данных Pydantic.</p>
+  <article class="md"><h2>Аннотации не проверяются при выполнении</h2>
+<pre class="lang-python"><code>def total(prices: list[float], discount: float = 0) -&gt; float:
+    return sum(prices) * (1 - discount)
+
+total(&quot;abc&quot;)   # интерпретатор не возразит до ошибки внутри</code></pre>
+<p>Аннотации — подсказки для людей и инструментов. Их проверяют статические анализаторы — mypy и pyright, — а IDE берут из них автодополнение. Во время выполнения аннотации читают только те, кто делает это явно: Pydantic, FastAPI, dataclasses.</p>
+<h2>Как аннотировать</h2>
+<ul><li>список, словарь, множество — <code>list[int]</code>, <code>dict[str, float]</code>, <code>set[str]</code>;</li><li>кортеж фиксированной и любой длины — <code>tuple[int, str]</code>, <code>tuple[int, ...]</code>;</li><li>может быть None — <code>int | None</code> (раньше <code>Optional[int]</code>);</li><li>одно из — <code>int | str</code>;</li><li>функция — <code>Callable[[int], str]</code>;</li><li>что угодно — <code>object</code> безопасно, <code>Any</code> отключает проверку.</li></ul>
+<p>Для параметров удобнее абстрактные типы из <code>collections.abc</code>: <code>Iterable</code>, <code>Sequence</code>, <code>Mapping</code> — так функция принимает и список, и кортеж, и генератор.</p>
+<p><code>Optional</code> означает «может быть None», а не «необязательный аргумент». Перед использованием значения типа <code>X | None</code> его проверяют на <code>None</code> — mypy на это и укажет.</p>
+<h2>Обобщённые типы</h2>
+<p><code>TypeVar</code> связывает типы входа и выхода:</p>
+<pre class="lang-python"><code>def first[T](items: list[T]) -&gt; T:    # синтаксис Python 3.12
+    return items[0]
+
+first([1, 2])        # mypy знает: int
+first([&quot;a&quot;, &quot;b&quot;])    # str</code></pre>
+<p>До 3.12 то же пишут через <code>T = TypeVar(&quot;T&quot;)</code> и <code>Generic[T]</code> для классов. Ограничения — <code>bound=</code> или перечисление допустимых типов.</p>
+<h2>Protocol — утиная типизация для mypy</h2>
+<pre class="lang-python"><code>from typing import Protocol
+
+class Closable(Protocol):
+    def close(self) -&gt; None: ...
+
+def shutdown(items: list[Closable]) -&gt; None:
+    for item in items:
+        item.close()</code></pre>
+<p>Подходит любой класс с методом <code>close</code>, без наследования. ABC, наоборот, требует явного наследования и проверяет реализацию при создании объекта.</p>
+<h2>mypy в проекте</h2>
+<p>mypy и pyright ставят как зависимость разработки, настраивают в <code>pyproject.toml</code> и запускают в CI:</p>
+<pre class="lang-toml"><code>[tool.mypy]
+python_version = &quot;3.12&quot;
+strict = true</code></pre>
+<p>Код без аннотаций mypy по умолчанию почти не проверяет, поэтому строгость наращивают постепенно — сначала новые модули. Для библиотек без типов ставят пакеты-заглушки (<code>types-requests</code>). Точечное отключение — <code># type: ignore[код]</code> с понятной причиной.</p>
+<h2>Pydantic — проверка данных на входе</h2>
+<p>Pydantic проверяет и преобразует данные <b>во время выполнения</b> по аннотациям модели:</p>
+<pre class="lang-python"><code>from pydantic import BaseModel, Field
+
+class OrderIn(BaseModel):
+    product_id: int
+    count: int = Field(ge=1, le=100)
+    comment: str | None = None
+
+OrderIn.model_validate({&quot;product_id&quot;: &quot;42&quot;, &quot;count&quot;: 2})   # &quot;42&quot; → 42
+OrderIn.model_validate({&quot;product_id&quot;: &quot;abc&quot;, &quot;count&quot;: 0})  # ValidationError</code></pre>
+<p><code>ValidationError</code> указывает поле и причину. Обратно — <code>model_dump()</code> и <code>model_dump_json()</code>. Pydantic используют для запросов API, конфигурации, ответов внешних сервисов и LLM; FastAPI построен на нём.</p>
+<h2>Что запомнить</h2>
+<ul><li>Аннотации проверяет mypy, а не интерпретатор.</li><li><code>X | None</code> нужно проверить на None перед использованием.</li><li>Для параметров — <code>Iterable</code> и <code>Sequence</code>, для результата — конкретный тип.</li><li>mypy — в CI, строгость — постепенно.</li><li>Внешние данные — через Pydantic.</li></ul></article>
+  <section class="block lesson-check" data-lesson="python/python-lesson-typing"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="python-backend"><a class="course-title" href="/courses/python-backend/">Курс «Python для бэкенда: от типов до asyncio и FastAPI»</a><span>урок 10 из 12</span><a href="/articles/python/internals/">← Память и производительность CPython</a><a class="next" href="/articles/python/tooling/">Окружение, импорты и тесты на pytest →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/python/type-hints/">Что такое аннотации типов и проверяются ли они при выполнении?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/typing-collections/">Как аннотировать списки, словари, необязательные значения и объединения типов?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/typing-generics/">Как в аннотациях Python описать обобщённые типы — TypeVar, Generic, Protocol?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/mypy-basics/">Как подключить проверку типов mypy или pyright к проекту?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/pydantic-basics/">Как проверять входные данные с помощью Pydantic?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/abc-protocol/">Чем абстрактный базовый класс (ABC) отличается от Protocol?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/python/oop/">ООП в Python — классы, свойства, наследование и dataclass</a><p>self и __init__, магические методы, property, staticmethod и classmethod, MRO и super, dataclass против namedtuple и Pydantic, ABC и Protocol, метаклассы.</p></li><li><a href="/articles/python/tooling/">Окружение, импорты и тесты на pytest</a><p>Виртуальные окружения и зависимости, как работает импорт и чем опасны циклические импорты, __name__ == &quot;__main__&quot;, pytest, фикстуры и mock.patch.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Аннотации типов, mypy и Pydantic","description":"Что дают аннотации и кто их проверяет, как аннотировать коллекции, Optional и объединения, обобщённые типы, mypy в проекте, проверка данных Pydantic.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/python/typing/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

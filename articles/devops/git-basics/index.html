@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Git — ветки, коммиты и отмена изменений — разбор для собеседования</title>
+<meta name="description" content="Как работать в ветке от первого коммита до push, чем merge отличается от rebase, как отменять изменения и разрешать конфликты.">
+<link rel="canonical" href="https://acody.ru/articles/devops/git-basics/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/devops/git-basics/">
+<meta property="og:title" content="Git — ветки, коммиты и отмена изменений — разбор для собеседования">
+<meta property="og:description" content="Как работать в ветке от первого коммита до push, чем merge отличается от rebase, как отменять изменения и разрешать конфликты.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#devops">DevOps</a> <span>/</span> <span>Git — ветки, коммиты и отмена изменений</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"DevOps","item":"https://acody.ru/articles/#devops"},{"@type":"ListItem","position":3,"name":"Git — ветки, коммиты и отмена изменений"}]}</script>
+  <h1>Git — ветки, коммиты и отмена изменений</h1>
+  <p class="lead">Как работать в ветке от первого коммита до push, чем merge отличается от rebase, как отменять изменения и разрешать конфликты.</p>
+  <article class="md"><h2>Ветка — для каждой задачи</h2>
+<p>Работа идёт не в main, а в отдельной ветке от её актуальной версии:</p>
+<pre class="lang-bash"><code>git switch main
+git pull
+git switch -c feature/login</code></pre>
+<p>Дальше цикл повторяется:</p>
+<pre class="lang-bash"><code>git status          # что изменилось
+git diff            # как именно
+git add src/login.py
+git commit -m &quot;Добавить вход по коду из письма&quot;</code></pre>
+<p><b>Индекс</b> (staging) — промежуточная зона: в коммит попадает только то, что добавлено через <code>git add</code>. Перед каждым коммитом смотрят <code>git status</code> и <code>git diff</code> — так в историю не попадают отладочные строки, лишние файлы и секреты.</p>
+<p>Готовую ветку отправляют на сервер и открывают pull request:</p>
+<pre class="lang-bash"><code>git push -u origin feature/login</code></pre>
+<h2>Хороший коммит</h2>
+<ul><li><b>Одно логическое изменение</b>, которое собирается и проходит тесты.</li><li>Сообщение — <b>что</b> и <b>зачем</b>, в повелительном наклонении: «Добавить вход по коду», «Исправить округление в итоговой сумме».</li><li>«fix», «wip», «правки» — плохие сообщения: через месяц никто не поймёт, что в них.</li></ul>
+<p>В <code>.gitignore</code> заносят то, что не должно попасть в репозиторий: результаты сборки, зависимости, файлы IDE и секреты.</p>
+<h2>merge и rebase</h2>
+<p>Ветка отстала от main — её нужно обновить. Есть два способа.</p>
+<ul><li><b>merge</b> соединяет ветки <b>коммитом слияния</b>, история остаётся как была.</li><li><b>rebase</b> <b>переносит</b> коммиты ветки поверх main. Получаются <b>новые коммиты</b> с другими хешами, история становится линейной.</li></ul>
+<p>Отсюда главное правило: rebase переписывает историю, поэтому его делают только с локальными или личными ветками. Переписать опубликованную общую ветку — значит сломать работу коллег, у которых остались старые коммиты. Если личную ветку после rebase нужно отправить снова — <code>git push --force-with-lease</code>: в отличие от <code>--force</code>, он не затрёт чужие новые коммиты.</p>
+<h2>Конфликты</h2>
+<p>Конфликт возникает, когда обе ветки изменили <b>одни и те же строки</b>. Git отмечает их в файле:</p>
+<pre class="lang-text"><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+total = price * count
+=======
+total = round(price * count, 2)
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/rounding</code></pre>
+<p>Сверху — ваша версия, снизу — входящая. Нужно понять смысл обоих изменений и собрать правильный итог — часто это комбинация. Затем убрать маркеры, <code>git add</code> и продолжить: <code>git commit</code> или <code>git rebase --continue</code>. После — обязательно собрать проект и прогнать тесты: код без маркеров ещё не значит рабочий.</p>
+<p>Запутались — <code>git merge --abort</code> или <code>git rebase --abort</code> вернут всё как было. Частые небольшие слияния дают меньше конфликтов, чем одно большое в конце.</p>
+<h2>Как отменить</h2>
+<div class="table"><table><thead><tr><th>Что нужно</th><th>Команда</th></tr></thead><tbody><tr><td>Отменить правки в файле</td><td><code>git restore файл</code></td></tr><tr><td>Убрать файл из индекса</td><td><code>git restore --staged файл</code></td></tr><tr><td>Поправить последний неопубликованный коммит</td><td><code>git commit --amend</code></td></tr><tr><td>Отменить локальные коммиты, сохранив правки</td><td><code>git reset --soft HEAD~1</code></td></tr><tr><td>Отменить опубликованный коммит</td><td><code>git revert &lt;хеш&gt;</code></td></tr></tbody></table></div>
+<p><code>git reset</code> двигает ветку назад и годится только для локальных коммитов. <code>--hard</code> при этом <b>удаляет</b> изменения — самый частый способ потерять работу. <code>git revert</code> создаёт новый коммит, отменяющий старый, и историю не переписывает — поэтому для опубликованного используют его.</p>
+<p>Если всё-таки потеряли коммит — <code>git reflog</code> помнит, куда указывала ветка, и позволяет вернуться.</p>
+<h2>Что запомнить</h2>
+<ul><li>Каждая задача — в своей ветке, каждый коммит — одно изменение.</li><li>Перед коммитом — <code>git status</code> и <code>git diff</code>.</li><li>rebase — только для неопубликованного, push после него — с <code>--force-with-lease</code>.</li><li>reset — для локального, revert — для опубликованного.</li></ul></article>
+  <section class="block lesson-check" data-lesson="devops/devops-lesson-git-basics"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="dev-foundations"><a class="course-title" href="/courses/dev-foundations/">Курс «База разработчика: Git, командная строка, сети и Linux»</a><span>урок 1 из 8</span><a class="next" href="/articles/devops/git-collaboration/">Pull request, код-ревью и стратегии ветвления →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/devops/git-commits-branches/">Как работать с ветками и коммитами в Git — от создания ветки до push?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/git-merge-rebase/">Чем merge отличается от rebase и почему нельзя переписывать опубликованную историю?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/git-undo/">Как отменить изменения в Git — restore, reset и revert?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/devops/git-conflicts/">Как разрешить конфликт слияния в Git?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/devops/git-collaboration/">Pull request, код-ревью и стратегии ветвления</a><p>Как оформить pull request, который быстро проверят, как ревьюить по существу, чем trunk-based отличается от GitFlow и что делает CI/CD.</p></li><li><a href="/articles/devops/terminal/">Командная строка — файлы, поиск, окружение и SSH</a><p>Навигация и работа с файлами, grep и пайпы, права доступа, переменные окружения и PATH, вход по SSH-ключам.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Git — ветки, коммиты и отмена изменений","description":"Как работать в ветке от первого коммита до push, чем merge отличается от rebase, как отменять изменения и разрешать конфликты.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/devops/git-basics/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

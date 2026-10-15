@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как работает интернет — от адреса в браузере до ответа — разбор для собеседования</title>
+<meta name="description" content="Что происходит после нажатия Enter, слои сети и стек TCP/IP, TCP и UDP, как работает DNS и как проверять записи.">
+<link rel="canonical" href="https://acody.ru/articles/cs/internet/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/cs/internet/">
+<meta property="og:title" content="Как работает интернет — от адреса в браузере до ответа — разбор для собеседования">
+<meta property="og:description" content="Что происходит после нажатия Enter, слои сети и стек TCP/IP, TCP и UDP, как работает DNS и как проверять записи.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#cs">Основы</a> <span>/</span> <span>Как работает интернет — от адреса в браузере до ответа</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Основы","item":"https://acody.ru/articles/#cs"},{"@type":"ListItem","position":3,"name":"Как работает интернет — от адреса в браузере до ответа"}]}</script>
+  <h1>Как работает интернет — от адреса в браузере до ответа</h1>
+  <p class="lead">Что происходит после нажатия Enter, слои сети и стек TCP/IP, TCP и UDP, как работает DNS и как проверять записи.</p>
+  <article class="md"><h2>Что происходит после Enter</h2>
+<ol><li><b>DNS</b> превращает имя <code>shop.example.ru</code> в IP-адрес.</li><li><b>TCP-рукопожатие</b> устанавливает соединение с сервером.</li><li><b>TLS-рукопожатие</b> договаривается о шифровании (для HTTPS).</li><li>Браузер отправляет <b>HTTP-запрос</b>.</li><li>На сервере запрос проходит балансировщик, веб-сервер, приложение, кэш и базу.</li><li>Приходит <b>ответ</b>, браузер разбирает HTML, догружает CSS, JavaScript и картинки и рисует страницу.</li></ol>
+<p>Каждый шаг — минимум один оборот по сети. Поэтому так важны кэш DNS, повторное использование соединений (keep-alive) и CDN рядом с пользователем. На собеседовании глубину выбирают по вакансии: бэкендеру — подробнее про сервер, фронтендеру — про рендеринг.</p>
+<h2>Слои сети</h2>
+<p>Сеть устроена слоями: каждый решает свою задачу и пользуется нижним. <b>OSI</b> — учебная модель из семи уровней, на практике работает <b>TCP/IP</b> из четырёх:</p>
+<div class="table"><table><thead><tr><th>Слой</th><th>Протоколы</th><th>Задача</th></tr></thead><tbody><tr><td>Канальный</td><td>Ethernet, Wi-Fi</td><td>кадры между соседями по MAC-адресам</td></tr><tr><td>Сетевой</td><td>IP</td><td>пакеты между любыми узлами через маршрутизаторы</td></tr><tr><td>Транспортный</td><td>TCP, UDP</td><td>доставка между процессами по портам</td></tr><tr><td>Прикладной</td><td>HTTP, DNS, gRPC</td><td>смысл сообщений</td></tr></tbody></table></div>
+<p>«L4» и «L7» в описании балансировщиков — номера уровней OSI: транспортный и прикладной.</p>
+<h2>TCP и UDP</h2>
+<p><b>TCP</b> — надёжный упорядоченный поток байтов с установкой соединения: рукопожатие, подтверждения, повторная передача, порядок, управление потоком и перегрузкой.</p>
+<p><b>UDP</b> — отдельные датаграммы без гарантий: нет соединения, повторов и порядка, зато быстро и просто. Его выбирают там, где потерянное уже устарело — голос, видео, игры, — и где запрос маленький, как в DNS.</p>
+<p>QUIC, на котором работает HTTP/3, строит надёжность поверх UDP, чтобы обойти ограничения TCP.</p>
+<h2>DNS</h2>
+<p>DNS — распределённая иерархическая база «имя → адрес». Рекурсивный резолвер спрашивает по цепочке: корневые серверы → серверы зоны <code>.ru</code> → авторитетный сервер домена. Ответы кэшируются в браузере, ОС и резолвере на время <b>TTL</b>.</p>
+<div class="table"><table><thead><tr><th>Запись</th><th>Что хранит</th></tr></thead><tbody><tr><td>A, AAAA</td><td>IPv4- и IPv6-адрес</td></tr><tr><td>CNAME</td><td>псевдоним другого имени</td></tr><tr><td>MX</td><td>почтовый сервер</td></tr><tr><td>TXT</td><td>произвольный текст, проверки владения</td></tr><tr><td>NS</td><td>какие серверы отвечают за зону</td></tr></tbody></table></div>
+<h2>Как проверить DNS</h2>
+<pre class="lang-bash"><code>dig shop.example.ru              # A-запись и оставшийся TTL
+dig shop.example.ru MX +short    # только ответ
+dig @8.8.8.8 shop.example.ru     # спросить конкретный резолвер
+dig +trace shop.example.ru       # цепочка от корня</code></pre>
+<p>Разные ответы у разных резолверов — где-то в кэше старое значение, ждите TTL. <code>NXDOMAIN</code> — домена нет; пустой ответ — нет записи такого типа. <code>nslookup</code> делает то же попроще и есть в Windows.</p>
+<h2>Переезд без простоя</h2>
+<p>Резолверы держат запись до истечения TTL, поэтому смена адреса не мгновенна. План:</p>
+<ol><li>Заранее, не позже чем за текущий TTL, понизить TTL до минут.</li><li>Поднять новый сервер и проверить его напрямую.</li><li>Сменить запись.</li><li>Держать старый сервер, пока по логам не уйдёт трафик, — некоторые резолверы игнорируют TTL.</li><li>Вернуть TTL обратно.</li></ol>
+<h2>Что запомнить</h2>
+<ul><li>DNS → TCP → TLS → HTTP → сервер → ответ → рендеринг.</li><li>TCP — надёжность и порядок, UDP — скорость без гарантий.</li><li>DNS кэшируется на время TTL — перед переездом его снижают.</li><li><code>dig</code> показывает и запись, и сколько она ещё проживёт в кэше.</li></ul></article>
+  <section class="block lesson-check" data-lesson="cs/cs-lesson-internet"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="dev-foundations"><a class="course-title" href="/courses/dev-foundations/">Курс «База разработчика: Git, командная строка, сети и Linux»</a><span>урок 4 из 8</span><a href="/articles/devops/terminal/">← Командная строка — файлы, поиск, окружение и SSH</a><a class="next" href="/articles/cs/http/">HTTP и HTTPS — методы, коды ответа, версии →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/cs/what-happens-url/">Что происходит, когда вы вводите адрес сайта в браузере и нажимаете Enter?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/osi-tcp-ip/">Расскажите про модель OSI и стек TCP/IP.</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/tcp-vs-udp/">Чем TCP отличается от UDP?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/dns/">Как работает DNS?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/dig-nslookup/">Как проверить DNS-записи домена через dig или nslookup?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/cs/dns-ttl-migration/">Как сменить DNS-запись (например, переехать на новый сервер) без простоя?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/cs/http/">HTTP и HTTPS — методы, коды ответа, версии</a><p>Методы и идемпотентность, группы кодов ответа, REST, отличия HTTP/1.1, HTTP/2 и HTTP/3, как HTTPS защищает соединение.</p></li><li><a href="/articles/cs/tcp-tls/">TCP изнутри — рукопожатие, надёжность и перегрузка</a><p>Как устанавливается и закрывается соединение, откуда TIME_WAIT, как TCP гарантирует доставку и не перегружает сеть, что добавляет TLS.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Как работает интернет — от адреса в браузере до ответа","description":"Что происходит после нажатия Enter, слои сети и стек TCP/IP, TCP и UDP, как работает DNS и как проверять записи.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/cs/internet/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

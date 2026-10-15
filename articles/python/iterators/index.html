@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Итераторы, генераторы и itertools — разбор для собеседования</title>
+<meta name="description" content="Протокол итерации, генераторы и генераторные выражения, срезы, send и yield from, ленивые инструменты itertools.">
+<link rel="canonical" href="https://acody.ru/articles/python/iterators/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/python/iterators/">
+<meta property="og:title" content="Итераторы, генераторы и itertools — разбор для собеседования">
+<meta property="og:description" content="Протокол итерации, генераторы и генераторные выражения, срезы, send и yield from, ленивые инструменты itertools.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#python">Python</a> <span>/</span> <span>Итераторы, генераторы и itertools</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Python","item":"https://acody.ru/articles/#python"},{"@type":"ListItem","position":3,"name":"Итераторы, генераторы и itertools"}]}</script>
+  <h1>Итераторы, генераторы и itertools</h1>
+  <p class="lead">Протокол итерации, генераторы и генераторные выражения, срезы, send и yield from, ленивые инструменты itertools.</p>
+  <article class="md"><h2>Как работает for</h2>
+<p><b>Итерируемый</b> объект умеет выдать итератор через <code>__iter__</code>. <b>Итератор</b> выдаёт значения по одному через <code>__next__</code> и бросает <code>StopIteration</code>, когда они кончились. <code>for</code> делает ровно это:</p>
+<pre class="lang-python"><code>it = iter([1, 2, 3])
+next(it)  # 1
+next(it)  # 2</code></pre>
+<p>Список итерируемый, но не итератор: его можно обходить сколько угодно раз. Итератор одноразовый, его <code>__iter__</code> возвращает сам себя — второй проход ничего не даст.</p>
+<h2>Генераторы</h2>
+<p>Функция с <code>yield</code> возвращает генератор — итератор, который отдаёт значения по одному и <b>замирает между ними</b>, сохраняя состояние:</p>
+<pre class="lang-python"><code>def read_lines(path):
+    with open(path) as f:
+        for line in f:
+            if line.strip():
+                yield line.rstrip(&quot;\n&quot;)</code></pre>
+<p>Следующее значение вычисляется только по запросу, поэтому память — O(1) вместо целого списка: так обрабатывают файлы на гигабайты и бесконечные потоки.</p>
+<h2>Списковое включение и генераторное выражение</h2>
+<pre class="lang-python"><code>squares = [x * x for x in data]      # весь список в памяти сразу
+total = sum(x * x for x in data)     # лениво, по одному</code></pre>
+<p>Список нужен, если результат обходят несколько раз, берут <code>len</code> или индекс. Для однократного прохода в <code>sum</code>, <code>any</code>, <code>max</code> и подобных — генератор.</p>
+<h2>Срезы</h2>
+<p><code>seq[start:stop:step]</code> — новая последовательность с <code>start</code> включительно до <code>stop</code> не включая. Отрицательные индексы считаются с конца, <code>a[::-1]</code> — развёрнутая копия, <code>a[:]</code> — поверхностная копия. Срез не бросает <code>IndexError</code> при выходе за границы — просто вернёт меньше. Для итераторов срезов нет — для них <code>itertools.islice</code>.</p>
+<h2>send, throw и yield from</h2>
+<p>Генератор умеет и принимать значения: <code>send(x)</code> передаёт <code>x</code> внутрь, и оно становится результатом выражения <code>yield</code>. <code>throw(exc)</code> бросает исключение в точке <code>yield</code>, <code>close()</code> завершает генератор. Первый вызов — только <code>next()</code> или <code>send(None)</code>: генератор ещё не дошёл до <code>yield</code>.</p>
+<p><code>yield from sub()</code> делегирует подгенератору: пробрасывает его значения, <code>send</code> и <code>throw</code>, а возвращает его <code>return</code>. На этих механизмах исторически был построен asyncio до появления <code>async</code> и <code>await</code>. Сейчас <code>send</code> нужен редко, а <code>yield from</code> удобен для композиции генераторов.</p>
+<h2>itertools</h2>
+<p>Ленивые строительные блоки:</p>
+<div class="table"><table><thead><tr><th>Функция</th><th>Что делает</th></tr></thead><tbody><tr><td><code>chain(a, b)</code></td><td>склеить итераторы</td></tr><tr><td><code>islice(it, 10)</code></td><td>срез итератора</td></tr><tr><td><code>groupby(sorted_data, key)</code></td><td>группы подряд идущих элементов</td></tr><tr><td><code>batched(it, 100)</code></td><td>пачки по n (3.12)</td></tr><tr><td><code>accumulate</code></td><td>накопительные суммы</td></tr><tr><td><code>product</code>, <code>permutations</code>, <code>combinations</code></td><td>комбинаторика</td></tr></tbody></table></div>
+<p><code>groupby</code> группирует только <b>подряд идущие</b> одинаковые ключи — без предварительной сортировки один ключ окажется в нескольких группах.</p>
+<pre class="lang-python"><code>from itertools import batched
+for chunk in batched(read_lines(&quot;ids.txt&quot;), 500):
+    save(chunk)</code></pre>
+<h2>Что запомнить</h2>
+<ul><li>Итерируемый выдаёт итератор, итератор — значения, и он одноразовый.</li><li>Генератор вычисляет по запросу и не держит всё в памяти.</li><li>Однократный проход — генераторное выражение, повторный — список.</li><li><code>groupby</code> работает по отсортированным данным.</li></ul></article>
+  <section class="block lesson-check" data-lesson="python/python-lesson-iterators"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="python-backend"><a class="course-title" href="/courses/python-backend/">Курс «Python для бэкенда: от типов до asyncio и FastAPI»</a><span>урок 4 из 12</span><a href="/articles/python/errors/">← Исключения и контекстные менеджеры</a><a class="next" href="/articles/python/oop/">ООП в Python — классы, свойства, наследование и dataclass →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/python/iterator-vs-iterable/">Чем итератор отличается от итерируемого объекта?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/generators/">Что такое генератор и чем он полезен?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/comprehension-vs-genexpr/">Чем list comprehension отличается от генераторного выражения?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/slices/">Как работают срезы в Python?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/generator-send-yield-from/">Что делают send, throw и yield from у генераторов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/itertools/">Какие инструменты itertools стоит знать?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/python/errors/">Исключения и контекстные менеджеры</a><p>try, except, else и finally, свои исключения и цепочки raise from, with и контекстные менеджеры, ExceptionGroup.</p></li><li><a href="/articles/python/oop/">ООП в Python — классы, свойства, наследование и dataclass</a><p>self и __init__, магические методы, property, staticmethod и classmethod, MRO и super, dataclass против namedtuple и Pydantic, ABC и Protocol, метаклассы.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Итераторы, генераторы и itertools","description":"Протокол итерации, генераторы и генераторные выражения, срезы, send и yield from, ленивые инструменты itertools.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/python/iterators/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>
