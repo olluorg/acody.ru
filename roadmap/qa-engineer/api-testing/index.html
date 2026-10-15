@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тестирование API — карта «QA-инженер (тестировщик)»</title>
+<meta name="description" content="Как тестировать REST API, методы и коды ответа, аутентификация и авторизация.">
+<link rel="canonical" href="https://acody.ru/roadmap/qa-engineer/api-testing/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/roadmap/qa-engineer/api-testing/">
+<meta property="og:title" content="Тестирование API — карта «QA-инженер (тестировщик)»">
+<meta property="og:description" content="Как тестировать REST API, методы и коды ответа, аутентификация и авторизация.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/qa-engineer/#api-testing">QA-инженер (тестировщик)</a> <span>/</span> <span>Тестирование API</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://acody.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"QA-инженер (тестировщик)","item":"https://acody.ru/roadmap/qa-engineer/#api-testing"},{"@type":"ListItem","position":3,"name":"Тестирование API"}]}</script>
+  <h1>Тестирование API</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Как тестировать REST API, методы и коды ответа, аутентификация и авторизация.</p>
+  <article class="md"><h3>Что важно знать</h3>
+<ul><li>Аутентификация — кто вы, авторизация — что вам можно.</li><li>Проверяют не только ответ, но и состояние данных после запроса.</li><li>Чужой идентификатор в запросе — частая уязвимость.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 10 ч</small></h3><ul><li>Тестирует REST API в Postman или аналоге — статусы, тело, заголовки, негативные случаи</li><li>Проверяет, что без токена и с чужим токеном доступ к данным закрыт</li></ul><p class="rm-practice"><b>Практика.</b> Покрыть проверками пять методов открытого учебного API, включая негативные и проверки прав.</p></div><div class="rm-grade"><h3>Middle <small>≈ 8 ч</small></h3><ul><li>Автоматизирует проверки API коллекциями или кодом и встраивает их в CI</li></ul><p class="rm-practice"><b>Практика.</b> Перенести проверки в автотесты (pytest и requests или аналог) и запустить их в CI.</p></div></section><section class="block rm-test" data-node="qa-engineer/api-testing" data-grades="junior,middle"><h2>Проверка знаний</h2><p class="rm-test-note">Войдите, чтобы пройти тест: сданный тест отмечает тему пройденной на карте и в ИПР.</p></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/qa/api-testing/">Как тестировать REST API?</a> <span class="lvl lvl-junior">Junior</span><p>API тестируют без интерфейса: отправляем запросы (Postman, curl) и проверяем статус, тело ответа, схему данных, побочные эффекты и обработку ошибок.</p></li><li><a href="/questions/qa/auth-authorization/">Чем аутентификация отличается от авторизации?</a> <span class="lvl lvl-junior">Junior</span><p>Идентификация — кто вы (логин), аутентификация — докажите это (пароль, код), авторизация — что вам разрешено делать.</p></li><li><a href="/questions/qa/http-methods/">Какие HTTP-методы вы знаете? Чем GET отличается от POST?</a> <span class="lvl lvl-junior">Junior</span><p>GET — получить данные, POST — создать или отправить, PUT — заменить целиком, PATCH — изменить частично, DELETE — удалить.</p></li><li><a href="/questions/qa/http-status-codes/">Какие коды ответа HTTP вы знаете?</a> <span class="lvl lvl-junior">Junior</span><p>Пять групп: 1xx информационные, 2xx успех, 3xx перенаправление, 4xx ошибка клиента, 5xx ошибка сервера.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/qa-engineer/web-testing/">← Тестирование веб-приложений</a><a class="next" href="/roadmap/common/sql/">SQL и реляционные базы →</a></nav>
+  <p class="rm-back"><a href="/roadmap/qa-engineer/#api-testing">← Вся карта «QA-инженер (тестировщик)»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Тестирование API","description":"Как тестировать REST API, методы и коды ответа, аутентификация и авторизация.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/roadmap/qa-engineer/api-testing/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

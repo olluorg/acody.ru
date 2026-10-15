@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как база хранит данные — карта «Backend-разработчик»</title>
+<meta name="description" content="B-дерево и LSM-дерево, журнал предзаписи, строковое и колоночное хранение.">
+<link rel="canonical" href="https://acody.ru/roadmap/backend/storage-engines/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/roadmap/backend/storage-engines/">
+<meta property="og:title" content="Как база хранит данные — карта «Backend-разработчик»">
+<meta property="og:description" content="B-дерево и LSM-дерево, журнал предзаписи, строковое и колоночное хранение.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/backend/#databases">Backend-разработчик</a> <span>/</span> <a href="/roadmap/backend/databases/">Базы данных</a> <span>/</span> <span>Как база хранит данные</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://acody.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"Backend-разработчик","item":"https://acody.ru/roadmap/backend/#databases"},{"@type":"ListItem","position":3,"name":"Базы данных","item":"https://acody.ru/roadmap/backend/databases/"},{"@type":"ListItem","position":4,"name":"Как база хранит данные"}]}</script>
+  <h1>Как база хранит данные</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-middle">с Middle</span></div>
+  <p class="lead">B-дерево и LSM-дерево, журнал предзаписи, строковое и колоночное хранение.</p>
+  <article class="md"><h3>Что важно знать</h3>
+<ul><li>Сначала запись в журнал, потом в данные.</li><li>B-дерево быстрее читает, LSM-дерево быстрее пишет.</li><li>Аналитика по нескольким колонкам — колоночное хранение.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Middle <small>≈ 8 ч</small></h3><ul><li>Объясняет, как журнал предзаписи обеспечивает надёжность после сбоя</li><li>Отличает строковое хранение от колоночного и выбирает под OLTP или аналитику</li></ul><p class="rm-practice"><b>Практика.</b> Загрузить одну таблицу в PostgreSQL и в колоночную базу (ClickHouse или DuckDB) и сравнить время агрегирующих запросов и размер на диске.</p></div><div class="rm-grade"><h3>Senior <small>≈ 6 ч</small></h3><ul><li>Сравнивает B-дерево и LSM-дерево по усилению записи и чтения и выбирает движок под нагрузку</li></ul><p class="rm-practice"><b>Практика.</b> Описать для своего сервиса профиль нагрузки — чтение, запись, обновления — и обосновать выбор движка хранения.</p></div></section><section class="block rm-test" data-node="backend/storage-engines" data-grades="senior"><h2>Проверка знаний</h2><p class="rm-test-note">Войдите, чтобы пройти тест: сданный тест отмечает тему пройденной на карте и в ИПР.</p></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/cs/b-tree/">Почему индексы в базах данных устроены как B-дерево?</a> <span class="lvl lvl-middle">Middle</span><p>B-дерево — сбалансированное дерево с широкими узлами: в узле сотни ключей, узел = страница на диске (8–16 КБ). Высота 3–4 даже для миллиардов строк — значит, 3–4 чтения страницы.</p></li><li><a href="/questions/cs/wal/">Что такое журнал предзаписи (WAL) и зачем он нужен?</a> <span class="lvl lvl-middle">Middle</span><p>Сначала запись в журнал, потом в данные. Перед изменением страниц база дописывает в конец журнала, что собирается изменить, и делает fsync. После сбоя журнал проигрывается заново…</p></li><li><a href="/questions/cs/lsm-tree/">Что такое LSM-дерево и чем оно отличается от B-дерева?</a> <span class="lvl lvl-senior">Senior</span><p>LSM-дерево превращает случайные записи в последовательные: запись идёт в журнал и в память (memtable), при заполнении memtable сбрасывается на диск отсортированным неизменяемым…</p></li><li><a href="/questions/cs/row-vs-column/">Чем строковое хранение отличается от колоночного?</a> <span class="lvl lvl-middle">Middle</span><p>Строковое: строка лежит целиком подряд — быстро прочитать или изменить одну запись (OLTP). Колоночное: каждая колонка лежит отдельно — быстро посчитать агрегат по нескольким…</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/backend/db-transactions/">← Транзакции и изоляция</a><a class="next" href="/roadmap/backend/data-modeling/">Моделирование данных →</a></nav>
+  <p class="rm-back"><a href="/roadmap/backend/#databases">← Вся карта «Backend-разработчик»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Как база хранит данные","description":"B-дерево и LSM-дерево, журнал предзаписи, строковое и колоночное хранение.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/roadmap/backend/storage-engines/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

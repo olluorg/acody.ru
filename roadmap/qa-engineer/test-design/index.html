@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тест-дизайн — карта «QA-инженер (тестировщик)»</title>
+<meta name="description" content="Классы эквивалентности, граничные значения, таблицы решений, переходы состояний, pairwise.">
+<link rel="canonical" href="https://acody.ru/roadmap/qa-engineer/test-design/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/roadmap/qa-engineer/test-design/">
+<meta property="og:title" content="Тест-дизайн — карта «QA-инженер (тестировщик)»">
+<meta property="og:description" content="Классы эквивалентности, граничные значения, таблицы решений, переходы состояний, pairwise.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/" class=on>Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/roadmap/">Карты развития</a> <span>/</span> <a href="/roadmap/qa-engineer/#test-design">QA-инженер (тестировщик)</a> <span>/</span> <span>Тест-дизайн</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Карты развития","item":"https://acody.ru/roadmap/"},{"@type":"ListItem","position":2,"name":"QA-инженер (тестировщик)","item":"https://acody.ru/roadmap/qa-engineer/#test-design"},{"@type":"ListItem","position":3,"name":"Тест-дизайн"}]}</script>
+  <h1>Тест-дизайн</h1>
+  <div class="chips"><span class="rm-kind k-core">Основа</span> <span class="lvl lvl-junior">с Junior</span></div>
+  <p class="lead">Классы эквивалентности, граничные значения, таблицы решений, переходы состояний, pairwise.</p>
+  <article class="md"><h3>Что важно знать</h3>
+<ul><li>Ошибки чаще всего живут на границах.</li><li>Один тест на класс эквивалентности, но обе стороны каждой границы.</li><li>Pairwise ловит большинство ошибок от сочетаний двух параметров.</li></ul></article>
+  <section class="block rm-plan"><h2>Критерии освоения</h2><div class="rm-grade"><h3>Junior <small>≈ 12 ч</small></h3><ul><li>Выделяет классы эквивалентности и граничные значения для полей ввода</li><li>Строит таблицу решений для правил и диаграмму переходов для объекта со статусами</li><li>Отвечает на «протестируйте карандаш» по структуре — требования, функции, нагрузка, безопасность</li></ul><p class="rm-practice"><b>Практика.</b> Для формы регистрации составить тесты по классам эквивалентности и границам, для заказа со статусами — диаграмму переходов.</p></div><div class="rm-grade"><h3>Middle <small>≈ 6 ч</small></h3><ul><li>Сокращает число комбинаций попарным тестированием и обосновывает покрытие</li></ul><p class="rm-practice"><b>Практика.</b> Составить pairwise-набор для настроек из 5–6 параметров и сравнить его размер с полным перебором.</p></div></section><section class="block rm-test" data-node="qa-engineer/test-design" data-grades="junior,middle"><h2>Проверка знаний</h2><p class="rm-test-note">Войдите, чтобы пройти тест: сданный тест отмечает тему пройденной на карте и в ИПР.</p></section><section class="block"><h2>Вопросы с собеседований</h2><ul class="links"><li><a href="/questions/qa/equivalence-partitioning/">Что такое классы эквивалентности?</a> <span class="lvl lvl-junior">Junior</span><p>Делим входные данные на группы, которые система обрабатывает одинаково, и берём по одному значению из каждой.</p></li><li><a href="/questions/qa/boundary-values/">Что такое анализ граничных значений?</a> <span class="lvl lvl-junior">Junior</span><p>Ошибки чаще всего на границах классов, поэтому проверяем саму границу и значения рядом с ней.</p></li><li><a href="/questions/qa/decision-table/">Что такое таблица принятия решений?</a> <span class="lvl lvl-junior">Junior</span><p>Таблица решений описывает все комбинации условий и результат для каждой — так не теряются сочетания в сложной бизнес-логике.</p></li><li><a href="/questions/qa/state-transition/">Что такое тестирование переходов состояний?</a> <span class="lvl lvl-junior">Junior</span><p>Если у объекта есть статусы (заказ, заявка, аккаунт), рисуем состояния и переходы между ними и проверяем каждый переход — и недопустимые тоже.</p></li><li><a href="/questions/qa/pairwise/">Что такое попарное тестирование (pairwise)?</a> <span class="lvl lvl-junior">Junior</span><p>Pairwise — подбор набора тестов, в котором каждая пара значений любых двух параметров встречается хотя бы один раз.</p></li><li><a href="/questions/qa/test-pencil/">Протестируйте карандаш (ручку, лифт, кружку)</a> <span class="lvl lvl-junior">Junior</span><p>Начните с вопросов о требованиях: для кого предмет и как его используют — затем структурируйте проверки по видам.</p></li></ul></section>
+  <nav class="rm-pager"><a href="/roadmap/qa-engineer/test-types/">← Виды и уровни тестирования</a><a class="next" href="/roadmap/qa-engineer/docs-bugs/">Требования, тест-документация и баги →</a></nav>
+  <p class="rm-back"><a href="/roadmap/qa-engineer/#test-design">← Вся карта «QA-инженер (тестировщик)»</a></p>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Тест-дизайн","description":"Классы эквивалентности, граничные значения, таблицы решений, переходы состояний, pairwise.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/roadmap/qa-engineer/test-design/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>
