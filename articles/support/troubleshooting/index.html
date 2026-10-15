@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Диагностика, обходные пути и эскалация — разбор для собеседования</title>
+<meta name="description" content="Как искать причину проблемы по шагам, что собрать у клиента, когда и как передавать обращение дальше, что делать при массовом сбое.">
+<link rel="canonical" href="https://acody.ru/articles/support/troubleshooting/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/support/troubleshooting/">
+<meta property="og:title" content="Диагностика, обходные пути и эскалация — разбор для собеседования">
+<meta property="og:description" content="Как искать причину проблемы по шагам, что собрать у клиента, когда и как передавать обращение дальше, что делать при массовом сбое.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#support">Поддержка клиентов</a> <span>/</span> <span>Диагностика, обходные пути и эскалация</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Поддержка клиентов","item":"https://acody.ru/articles/#support"},{"@type":"ListItem","position":3,"name":"Диагностика, обходные пути и эскалация"}]}</script>
+  <h1>Диагностика, обходные пути и эскалация</h1>
+  <p class="lead">Как искать причину проблемы по шагам, что собрать у клиента, когда и как передавать обращение дальше, что делать при массовом сбое.</p>
+  <article class="md"><h2>От частого к редкому</h2>
+<p>Причину ищут последовательно, от простого и частого к редкому:</p>
+<ol><li><b>Известные инциденты</b> — статус-страница, общий канал команды.</li><li><b>База знаний</b> по симптому.</li><li><b>Данные клиента</b> в системе — тариф, настройки, оплата.</li><li><b>Воспроизвести</b> у себя.</li><li><b>Сузить</b>: у всех или у одного, всегда или иногда, в одном браузере или во всех.</li></ol>
+<p>Меняют по одному фактору и записывают проверенное в заметку. «У всех» — скорее инцидент, «у одного» — скорее настройки или данные клиента. Время самостоятельного поиска ограничивают, например 20 минутами: не нашли — эскалация с собранными фактами.</p>
+<h2>Что собрать у клиента</h2>
+<p>Минимум для разбора: что делал, что ожидал, что получил (точный текст ошибки, скриншот или видео), когда началось, где (устройство, браузер или версия приложения), учётная запись или номер заказа.</p>
+<p>Сначала посмотрите, что видно самому в системе и логах, и спрашивайте только недостающее. Простые просьбы — обновить страницу, другой браузер, выйти и войти — одновременно и проверка, и сбор данных. Видео экрана часто экономит десять писем.</p>
+<h2>Обходной путь</h2>
+<p>Исправление может занять недели, а клиенту нужно сделать дело сегодня. Обходной путь — другой способ получить результат: выгрузить вручную, провести операцию через поддержку, временно поменять настройку. Его проверяют сами, дают клиенту пошагово и честно говорят, что это временно. Рабочий обходной путь — в базу знаний и в баг-репорт, чтобы его получили все затронутые. Обходной путь не должен создавать риск для данных.</p>
+<h2>Ошибка для разработки</h2>
+<p>Хороший баг-репорт от поддержки:</p>
+<ul><li><b>заголовок</b> «что — где — при каком условии»;</li><li><b>шаги</b> воспроизведения, <b>ожидаемый</b> и <b>фактический</b> результат;</li><li><b>окружение</b> и доказательства;</li><li><b>влияние</b>: сколько клиентов, есть ли обходной путь, под угрозой ли деньги.</li></ul>
+<p>Влияние в цифрах — лучший аргумент для приоритета. Новые обращения по той же ошибке привязывают к репорту — так виден растущий масштаб. После исправления сообщают всем затронутым.</p>
+<h2>Когда эскалировать</h2>
+<p>Обращение передают дальше, когда:</p>
+<ul><li>нет прав или знаний решить;</li><li>исчерпан регламент первой линии или отведённое время;</li><li>похоже на ошибку продукта или затронуты многие;</li><li>есть риск для денег, данных или безопасности;</li><li>клиент просит исключения из правил.</li></ul>
+<p>Подозрение на утечку данных или взлом — сразу и вне очереди. Не эскалируют, чтобы избавиться от сложного клиента или не разбираясь.</p>
+<h2>Как передать</h2>
+<p>Передача должна читаться за минуту: суть в одной фразе, шаги, что уже проверено, доказательства, что нужно сделать и насколько срочно. Клиенту — что передано и когда он получит новости. Обращение остаётся на контроле: специалист следит за сроком и возвращается к клиенту, а не «перекидывает и забывает».</p>
+<h2>Массовый сбой</h2>
+<p>Десять одинаковых обращений за час — это инцидент:</p>
+<ol><li>Сообщить дежурной команде с фактами — что, с какого времени, сколько обращений, примеры.</li><li>Завести главный тикет и привязывать к нему остальные.</li><li>Подготовить единый ответ и статус на сайте.</li><li>Передавать клиентам обновления — и не называть сроков, которых не назвала техническая команда.</li><li>После устранения — сообщить всем затронутым и участвовать в разборе.</li></ol>
+<h2>Что запомнить</h2>
+<ul><li>От частого к простому, по одному фактору, с заметками.</li><li>Спрашивать только то, чего не видно в системе.</li><li>Обходной путь сегодня, исправление потом.</li><li>Эскалация — по критериям и с полным контекстом.</li><li>При сбое — один главный тикет и один ответ для всех.</li></ul></article>
+  <section class="block lesson-check" data-lesson="support/support-lesson-troubleshooting"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="support-basics"><a class="course-title" href="/courses/support-basics/">Курс «Поддержка клиентов: от первого тикета до руководства службой»</a><span>урок 5 из 8</span><a href="/articles/support/difficult/">← Сложные клиенты — злость, грубость, угрозы и требования</a><a class="next" href="/articles/support/knowledge/">База знаний, шаблоны и самообслуживание →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/support/troubleshoot-steps/">Как последовательно искать причину проблемы клиента?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/support/repro-info/">Какую информацию собрать у клиента, чтобы разобраться в технической проблеме?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/support/workaround/">Ошибку исправят не скоро. Как помочь клиенту прямо сейчас?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/support/bug-report-dev/">Как описать ошибку продукта для разработки так, чтобы её быстро исправили?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/support/when-escalate/">Когда нужно передавать обращение на вторую линию или руководителю?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/support/escalation-handoff/">Как правильно передать обращение другой линии или команде?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/support/incident-mass/">Пошёл поток одинаковых обращений — похоже на сбой. Что делает поддержка?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/support/difficult/">Сложные клиенты — злость, грубость, угрозы и требования</a><p>Как вести разговор с рассерженным клиентом, где граница допустимого и что делать с требованием возврата, угрозой отзывом и жалобой крупного клиента.</p></li><li><a href="/articles/support/knowledge/">База знаний, шаблоны и самообслуживание</a><p>Как написать статью, которую найдут и поймут, пользоваться шаблонами без «робота», держать базу актуальной и снижать число обращений.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Диагностика, обходные пути и эскалация","description":"Как искать причину проблемы по шагам, что собрать у клиента, когда и как передавать обращение дальше, что делать при массовом сбое.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/support/troubleshooting/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>
