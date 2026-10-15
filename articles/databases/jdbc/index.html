@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JDBC и безопасные запросы — разбор для собеседования</title>
 <meta name="description" content="Connection/Statement/ResultSet, PreparedStatement против инъекций, ручные транзакции, ресурсы и пул соединений.">
-<link rel="canonical" href="https://learn.getsotto.ru/articles/databases/jdbc/">
+<link rel="canonical" href="https://acody.ru/articles/databases/jdbc/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Учебная платформа">
 <meta property="og:locale" content="ru_RU">
-<meta property="og:url" content="https://learn.getsotto.ru/articles/databases/jdbc/">
+<meta property="og:url" content="https://acody.ru/articles/databases/jdbc/">
 <meta property="og:title" content="JDBC и безопасные запросы — разбор для собеседования">
 <meta property="og:description" content="Connection/Statement/ResultSet, PreparedStatement против инъекций, ручные транзакции, ресурсы и пул соединений.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -18,7 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
 <link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
-<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
 <script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
@@ -30,7 +30,7 @@
 <main>
 <link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page article"><div class="wrap narrow">
-  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>JDBC и безопасные запросы</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"JDBC и безопасные запросы"}]}</script>
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>JDBC и безопасные запросы</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://acody.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"JDBC и безопасные запросы"}]}</script>
   <h1>JDBC и безопасные запросы</h1>
   <p class="lead">Connection/Statement/ResultSet, PreparedStatement против инъекций, ручные транзакции, ресурсы и пул соединений.</p>
   <article class="md"><h2>Что такое JDBC</h2>
@@ -97,7 +97,7 @@ try (PreparedStatement st = con.prepareStatement(&quot;select id, total from ord
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/databases/prepared-statement/">Чем PreparedStatement безопаснее обычного Statement?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/databases/jdbc-manual-transaction/">Как в JDBC выполнить несколько операций в одной транзакции вручную?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/jdbc-connection-pool/">Зачем нужен пул соединений и почему его размер обычно невелик?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/jdbc-bulk-insert/">Нужно вставить 100 000 строк через JDBC. Что даст наибольший эффект?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/what-is-jdbc/">Что такое JDBC?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/databases/transactions/">Транзакции, изоляция и блокировки</a><p>ACID по буквам, аномалии чтения, уровни изоляции, MVCC и оптимистичные/пессимистичные блокировки.</p></li><li><a href="/articles/databases/orm/">ORM, persistence context и N+1</a><p>Что делает ORM, lazy/eager и proxy, механизм N+1, способы лечения и типичные грабли.</p></li></ul></section>
 </div></section>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"JDBC и безопасные запросы","description":"Connection/Statement/ResultSet, PreparedStatement против инъекций, ручные транзакции, ресурсы и пул соединений.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/databases/jdbc/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"JDBC и безопасные запросы","description":"Connection/Statement/ResultSet, PreparedStatement против инъекций, ручные транзакции, ресурсы и пул соединений.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/databases/jdbc/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
 <section class="partner"><div class="wrap">
   <div>
     <span class="kicker">Партнёр платформы</span>

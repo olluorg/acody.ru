@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GC: поколения и продвижение объектов — разбор для собеседования</title>
 <meta name="description" content="Гипотеза о поколениях, Eden и Survivor, minor GC через копирование, tenuring и преждевременное продвижение.">
-<link rel="canonical" href="https://learn.getsotto.ru/articles/java/gc-generations/">
+<link rel="canonical" href="https://acody.ru/articles/java/gc-generations/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Учебная платформа">
 <meta property="og:locale" content="ru_RU">
-<meta property="og:url" content="https://learn.getsotto.ru/articles/java/gc-generations/">
+<meta property="og:url" content="https://acody.ru/articles/java/gc-generations/">
 <meta property="og:title" content="GC: поколения и продвижение объектов — разбор для собеседования">
 <meta property="og:description" content="Гипотеза о поколениях, Eden и Survivor, minor GC через копирование, tenuring и преждевременное продвижение.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -18,7 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
 <link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
-<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
 <script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
@@ -30,7 +30,7 @@
 <main>
 <link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page article"><div class="wrap narrow">
-  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>GC: поколения и продвижение объектов</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"GC: поколения и продвижение объектов"}]}</script>
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>GC: поколения и продвижение объектов</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://acody.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"GC: поколения и продвижение объектов"}]}</script>
   <h1>GC: поколения и продвижение объектов</h1>
   <p class="lead">Гипотеза о поколениях, Eden и Survivor, minor GC через копирование, tenuring и преждевременное продвижение.</p>
   <article class="md"><h2>Зачем GC и что такое «мусор»</h2>
@@ -63,7 +63,7 @@
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/gc-reachability/">Какие объекты удаляет сборщик мусора?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/generational-hypothesis/">На какой гипотезе построено разделение кучи на поколения?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/two-survivor-spaces/">Зачем в молодом поколении две области Survivor, а не одна?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/frequent-full-gc/">В приложении участились длинные паузы full GC, при этом старое поколение почти всегда заполнено. О чём это говорит?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/gc-algorithms/">GC: алгоритмы и сборщики</a><p>Mark-sweep-compact и копирование, stop-the-world и safepoints, конкурентная маркировка, G1 и ZGC и выбор по throughput/latency.</p></li><li><a href="/articles/java/jvm-memory/">Память JVM и устройство объекта</a><p>Runtime data areas, стек против кучи, заголовок объекта и выравнивание, compressed oops и metaspace.</p></li></ul></section>
 </div></section>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"GC: поколения и продвижение объектов","description":"Гипотеза о поколениях, Eden и Survivor, minor GC через копирование, tenuring и преждевременное продвижение.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/gc-generations/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"GC: поколения и продвижение объектов","description":"Гипотеза о поколениях, Eden и Survivor, minor GC через копирование, tenuring и преждевременное продвижение.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/java/gc-generations/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
 <section class="partner"><div class="wrap">
   <div>
     <span class="kicker">Партнёр платформы</span>

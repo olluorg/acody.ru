@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RAG и векторный поиск</title>
 <meta name="description" content="Эмбеддинги, векторные индексы, фрагментация документов, гибридный поиск и улучшение качества RAG.">
-<link rel="canonical" href="https://learn.getsotto.ru/prep/rag/">
+<link rel="canonical" href="https://acody.ru/prep/rag/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Учебная платформа">
 <meta property="og:locale" content="ru_RU">
-<meta property="og:url" content="https://learn.getsotto.ru/prep/rag/">
+<meta property="og:url" content="https://acody.ru/prep/rag/">
 <meta property="og:title" content="RAG и векторный поиск">
 <meta property="og:description" content="Эмбеддинги, векторные индексы, фрагментация документов, гибридный поиск и улучшение качества RAG.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -18,7 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
 <link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
-<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
 <script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
@@ -30,7 +30,7 @@
 <main>
 <link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank"><div class="wrap narrow">
-  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/#prep">Подборки</a> <span>/</span> <span>RAG и векторный поиск</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Подборки","item":"https://learn.getsotto.ru/questions/#prep"},{"@type":"ListItem","position":3,"name":"RAG и векторный поиск"}]}</script>
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/#prep">Подборки</a> <span>/</span> <span>RAG и векторный поиск</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://acody.ru/questions/"},{"@type":"ListItem","position":2,"name":"Подборки","item":"https://acody.ru/questions/#prep"},{"@type":"ListItem","position":3,"name":"RAG и векторный поиск"}]}</script>
   <h1>RAG и векторный поиск</h1>
   <p class="lead">Эмбеддинги, векторные индексы, фрагментация документов, гибридный поиск и улучшение качества RAG.</p>
   <ol class="links prep"><li><a href="/questions/ai/what-is-rag/">Что такое RAG и как он устроен?</a> <span class="lvl lvl-junior">Junior</span><p>RAG — модель отвечает по найденным документам: сначала поиск релевантных фрагментов, затем генерация ответа с ними в контексте.</p></li><li><a href="/questions/ai/embeddings/">Что такое эмбеддинги?</a> <span class="lvl lvl-junior">Junior</span><p>Эмбеддинг — вектор чисел, в котором тексты близкие по смыслу оказываются близко в пространстве.</p></li><li><a href="/questions/ai/vector-search/">Как устроен векторный поиск?</a> <span class="lvl lvl-middle">Middle</span><p>Векторный поиск находит ближайшие векторы к вектору запроса; на больших объёмах используют приближённый поиск (ANN) с индексами вроде HNSW.</p></li><li><a href="/questions/ai/hybrid-search/">Что такое гибридный поиск и зачем совмещать BM25 с векторным поиском?</a> <span class="lvl lvl-middle">Middle</span><p>Векторный поиск хорошо ловит смысл и перефразирования, но промахивается на точных совпадениях: артикулы, коды ошибок, имена, редкие термины. BM25 (лексический поиск) — наоборот…</p></li><li><a href="/questions/ai/chunking/">Как разбивать документы на фрагменты для RAG?</a> <span class="lvl lvl-middle">Middle</span><p>Фрагмент должен быть самодостаточным по смыслу и достаточно коротким, чтобы точно находиться поиском; режут по структуре документа, а не по символам.</p></li><li><a href="/questions/ai/rerankers/">Что такое реранкер и чем cross-encoder отличается от bi-encoder?</a> <span class="lvl lvl-middle">Middle</span><p>Bi-encoder кодирует запрос и документ отдельно в векторы и сравнивает их — документы индексируются заранее, поиск быстрый, но точность ограничена. Cross-encoder подаёт запрос и…</p></li><li><a href="/questions/ai/rag-quality/">Как улучшить качество RAG, если он отвечает плохо?</a> <span class="lvl lvl-middle">Middle</span><p>Сначала понять, где ломается: не нашли нужное (поиск) или нашли, но ответили плохо (генерация) — и чинить соответствующий этап.</p></li><li><a href="/questions/ai/long-context-vs-rag/">Зачем RAG, если у моделей контекст на сотни тысяч токенов?</a> <span class="lvl lvl-middle">Middle</span><p>Длинный контекст не заменяет поиск: стоимость и задержка растут с каждым токеном, качество падает на длинных входах (модель хуже использует информацию из середины — lost in the…</p></li><li><a href="/questions/ai/rag-vs-finetuning/">Когда использовать RAG, а когда дообучение модели?</a> <span class="lvl lvl-middle">Middle</span><p>RAG — когда нужны знания (факты, документы, свежие данные); дообучение — когда нужно поведение (формат, стиль, навык, предметный язык).</p></li><li><a href="/questions/ai/hallucinations/">Что такое галлюцинации LLM и как с ними бороться?</a> <span class="lvl lvl-junior">Junior</span><p>Галлюцинация — правдоподобный, но неверный ответ: модель генерирует вероятный текст, а не сверяется с фактами.</p></li><li><a href="/questions/ai/llm-evaluation/">Как оценивать качество ответов LLM?</a> <span class="lvl lvl-middle">Middle</span><p>Собрать набор тестовых примеров с ожидаемым результатом, выбрать метрики под задачу и прогонять его при каждом изменении промпта, модели или поиска.</p></li><li><a href="/questions/ai/llm-as-judge/">Что такое LLM как судья (LLM-as-a-judge) и какие у этого подхода ловушки?</a> <span class="lvl lvl-middle">Middle</span><p>Сильная модель оценивает ответы другой (или той же) модели по чёткой рубрике: верность фактам из контекста, полнота, следование формату. Это масштабирует оценку там, где точного…</p></li></ol>

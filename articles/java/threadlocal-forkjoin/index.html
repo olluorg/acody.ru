@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadLocal и Fork/Join — разбор для собеседования</title>
 <meta name="description" content="Состояние на поток и утечки в пулах, InheritableThreadLocal, work-stealing в ForkJoinPool и общий пул parallel streams.">
-<link rel="canonical" href="https://learn.getsotto.ru/articles/java/threadlocal-forkjoin/">
+<link rel="canonical" href="https://acody.ru/articles/java/threadlocal-forkjoin/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Учебная платформа">
 <meta property="og:locale" content="ru_RU">
-<meta property="og:url" content="https://learn.getsotto.ru/articles/java/threadlocal-forkjoin/">
+<meta property="og:url" content="https://acody.ru/articles/java/threadlocal-forkjoin/">
 <meta property="og:title" content="ThreadLocal и Fork/Join — разбор для собеседования">
 <meta property="og:description" content="Состояние на поток и утечки в пулах, InheritableThreadLocal, work-stealing в ForkJoinPool и общий пул parallel streams.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -18,7 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
 <link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
-<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
 <script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
@@ -30,7 +30,7 @@
 <main>
 <link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page article"><div class="wrap narrow">
-  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>ThreadLocal и Fork/Join</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"ThreadLocal и Fork/Join"}]}</script>
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>ThreadLocal и Fork/Join</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://acody.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"ThreadLocal и Fork/Join"}]}</script>
   <h1>ThreadLocal и Fork/Join</h1>
   <p class="lead">Состояние на поток и утечки в пулах, InheritableThreadLocal, work-stealing в ForkJoinPool и общий пул parallel streams.</p>
   <article class="md"><h2>ThreadLocal: состояние на поток</h2>
@@ -60,7 +60,7 @@
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/threadlocal-in-pool/">В чём опасность ThreadLocal в пуле потоков?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/fork-join-work-stealing/">Что такое Fork/Join framework и work stealing?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/parallel-stream-blocking/">В parallel stream выполняется обращение к внешнему HTTP-сервису. Почему это опасно для всего приложения?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/parallel-stream-no-gain/">В каких случаях parallel stream, скорее всего, не даст выигрыша или окажется медленнее последовательного?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/threadlocal/">Что даёт переменная типа ThreadLocal?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/executors/">Пулы потоков и ExecutorService</a><p>Зачем пул, параметры ThreadPoolExecutor, ловушки фабрик Executors, выбор размера и корректное завершение.</p></li><li><a href="/articles/java/virtual-threads/">Виртуальные потоки (Project Loom)</a><p>Лёгкие потоки JVM, монтирование на carrier, когда их применять, почему не пулят и проблема pinning.</p></li></ul></section>
 </div></section>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"ThreadLocal и Fork/Join","description":"Состояние на поток и утечки в пулах, InheritableThreadLocal, work-stealing в ForkJoinPool и общий пул parallel streams.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/threadlocal-forkjoin/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"ThreadLocal и Fork/Join","description":"Состояние на поток и утечки в пулах, InheritableThreadLocal, work-stealing в ForkJoinPool и общий пул parallel streams.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/java/threadlocal-forkjoin/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
 <section class="partner"><div class="wrap">
   <div>
     <span class="kicker">Партнёр платформы</span>

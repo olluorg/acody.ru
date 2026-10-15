@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Что такое zero-copy и почему Kafka так быстро отдаёт данные? — вопрос с собеседования</title>
 <meta name="description" content="Обычная отдача файла: диск → page cache → буфер приложения → буфер сокета → сеть: 4 копирования и 4 переключения режима. sendfile передаёт данные из…">
-<link rel="canonical" href="https://learn.getsotto.ru/questions/highload/zero-copy/">
+<link rel="canonical" href="https://acody.ru/questions/highload/zero-copy/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Учебная платформа">
 <meta property="og:locale" content="ru_RU">
-<meta property="og:url" content="https://learn.getsotto.ru/questions/highload/zero-copy/">
+<meta property="og:url" content="https://acody.ru/questions/highload/zero-copy/">
 <meta property="og:title" content="Что такое zero-copy и почему Kafka так быстро отдаёт данные? — вопрос с собеседования">
 <meta property="og:description" content="Обычная отдача файла: диск → page cache → буфер приложения → буфер сокета → сеть: 4 копирования и 4 переключения режима. sendfile передаёт данные из…">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -18,7 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
 <link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
-<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
 <script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
@@ -30,7 +30,7 @@
 <main>
 <link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
-  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Что такое zero-copy и почему Kafka так быстро отдаёт данные?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://learn.getsotto.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Что такое zero-copy и почему Kafka так быстро отдаёт данные?"}]}</script>
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/highload/">Highload</a> <span>/</span> <span>Что такое zero-copy и почему Kafka так быстро отдаёт данные?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://acody.ru/questions/"},{"@type":"ListItem","position":2,"name":"Highload","item":"https://acody.ru/questions/highload/"},{"@type":"ListItem","position":3,"name":"Что такое zero-copy и почему Kafka так быстро отдаёт данные?"}]}</script>
   <h1>Что такое zero-copy и почему Kafka так быстро отдаёт данные?</h1>
   <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">Сеть и ввод-вывод</span><span class="chip">Kafka</span></div>
   <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Как работает sendfile?</li><li>Почему Kafka быстрая?</li><li>Сколько раз копируются данные при отдаче файла по сети?</li></ul></div>

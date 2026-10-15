@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Базы данных временных рядов — разбор для собеседования</title>
 <meta name="description" content="Чем особенны time-series, модель measurement/tags/fields, сжатие и chunking, downsampling/retention и когда хватит обычной БД.">
-<link rel="canonical" href="https://learn.getsotto.ru/articles/databases/timeseries-db/">
+<link rel="canonical" href="https://acody.ru/articles/databases/timeseries-db/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Учебная платформа">
 <meta property="og:locale" content="ru_RU">
-<meta property="og:url" content="https://learn.getsotto.ru/articles/databases/timeseries-db/">
+<meta property="og:url" content="https://acody.ru/articles/databases/timeseries-db/">
 <meta property="og:title" content="Базы данных временных рядов — разбор для собеседования">
 <meta property="og:description" content="Чем особенны time-series, модель measurement/tags/fields, сжатие и chunking, downsampling/retention и когда хватит обычной БД.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -18,7 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
 <link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
-<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
 <script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
@@ -30,7 +30,7 @@
 <main>
 <link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page article"><div class="wrap narrow">
-  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>Базы данных временных рядов</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://learn.getsotto.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"Базы данных временных рядов"}]}</script>
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#databases">Базы данных</a> <span>/</span> <span>Базы данных временных рядов</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Базы данных","item":"https://acody.ru/articles/#databases"},{"@type":"ListItem","position":3,"name":"Базы данных временных рядов"}]}</script>
   <h1>Базы данных временных рядов</h1>
   <p class="lead">Чем особенны time-series, модель measurement/tags/fields, сжатие и chunking, downsampling/retention и когда хватит обычной БД.</p>
   <article class="md"><h2>Что особенного во временных рядах</h2>
@@ -79,7 +79,7 @@ select add_retention_policy(&#x27;metrics&#x27;, interval &#x27;90 days&#x27;);<
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/databases/tsdb-cardinality/">Какая ошибка моделирования сильнее всего вредит базе временных рядов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/tsdb-downsampling/">Зачем во временных рядах нужен downsampling?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/timeseries-compression/">Почему данные временных рядов сжимаются заметно лучше обычных?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/metrics-long-retention/">Как обычно организуют хранение метрик на длинном горизонте?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/databases/timeseries-traits/">Что характерно для данных временных рядов?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/databases/nosql-overview/">NoSQL: семейства и когда их выбирать</a><p>Почему появился NoSQL, моделирование от access patterns, четыре семейства хранилищ, BASE против ACID и горизонтальное масштабирование.</p></li><li><a href="/articles/databases/wide-column-db/">Колоночные БД: wide-column и аналитические</a><p>Разница между wide-column (Cassandra) и column-oriented OLAP (ClickHouse), partition/clustering keys, LSM-дерево и зачем хранить по колонкам.</p></li></ul></section>
 </div></section>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Базы данных временных рядов","description":"Чем особенны time-series, модель measurement/tags/fields, сжатие и chunking, downsampling/retention и когда хватит обычной БД.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/databases/timeseries-db/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Базы данных временных рядов","description":"Чем особенны time-series, модель measurement/tags/fields, сжатие и chunking, downsampling/retention и когда хватит обычной БД.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/databases/timeseries-db/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
 <section class="partner"><div class="wrap">
   <div>
     <span class="kicker">Партнёр платформы</span>

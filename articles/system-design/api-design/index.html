@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Проектирование API: REST, gRPC и события — разбор для собеседования</title>
 <meta name="description" content="Выбор стиля взаимодействия, семантика и идемпотентность HTTP, формат ошибок, курсорная пагинация против offset, версионирование и обратная…">
-<link rel="canonical" href="https://learn.getsotto.ru/articles/system-design/api-design/">
+<link rel="canonical" href="https://acody.ru/articles/system-design/api-design/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Учебная платформа">
 <meta property="og:locale" content="ru_RU">
-<meta property="og:url" content="https://learn.getsotto.ru/articles/system-design/api-design/">
+<meta property="og:url" content="https://acody.ru/articles/system-design/api-design/">
 <meta property="og:title" content="Проектирование API: REST, gRPC и события — разбор для собеседования">
 <meta property="og:description" content="Выбор стиля взаимодействия, семантика и идемпотентность HTTP, формат ошибок, курсорная пагинация против offset, версионирование и обратная…">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -18,7 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
 <link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
-<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
 <script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
@@ -30,7 +30,7 @@
 <main>
 <link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page article"><div class="wrap narrow">
-  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#system-design">System design</a> <span>/</span> <span>Проектирование API: REST, gRPC и события</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://learn.getsotto.ru/articles/#system-design"},{"@type":"ListItem","position":3,"name":"Проектирование API: REST, gRPC и события"}]}</script>
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#system-design">System design</a> <span>/</span> <span>Проектирование API: REST, gRPC и события</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"System design","item":"https://acody.ru/articles/#system-design"},{"@type":"ListItem","position":3,"name":"Проектирование API: REST, gRPC и события"}]}</script>
   <h1>Проектирование API: REST, gRPC и события</h1>
   <p class="lead">Выбор стиля взаимодействия, семантика и идемпотентность HTTP, формат ошибок, курсорная пагинация против offset, версионирование и обратная совместимость, контрактное тестирование.</p>
   <article class="md"><h2>Три стиля и когда какой</h2>
@@ -80,7 +80,7 @@ LIMIT 20;</code></pre>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/system-design/idempotent-http-methods/">Какие HTTP-методы идемпотентны?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/idempotency-key/">Клиент отправил POST для создания заказа, не дождался ответа из-за таймаута и повторил запрос. Как правильно не допустить второго заказа?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/offset-vs-keyset-pagination/">Лента с бесконечной прокруткой использует LIMIT 20 OFFSET N. С ростом N страницы отдаются всё медленнее, а пользователи жалуются на дубли. В чём причина и что делать?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/api-backward-compatibility/">Какие изменения REST API обратно совместимы для существующих клиентов?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/sync-call-vs-event/">Какой вопрос лучше всего определяет выбор между синхронным вызовом и событием через брокер?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/api-contract-safety/">Как гарантировать, что изменение вашего API не сломает потребителей, которых вы не контролируете?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/system-design/rest-meaning/">Что означает буква R в аббревиатуре REST применительно к проектированию API?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/system-design/microservices/">Монолит, микросервисы и границы сервисов</a><p>Когда микросервисы оправданы, а когда вредны; bounded context и DDD как способ резать систему; распределённый монолит и его признаки; база на сервис и организационная цена.</p></li><li><a href="/articles/system-design/reliability/">Надёжность и идемпотентность</a><p>Управляемая деградация вместо каскада, таймауты и бюджет времени запроса, безопасные ретраи и их мультипликация, идемпотентность как фундамент, предохранитель, отсеки и сброс нагрузки, transactional outbox вместо 2PC.</p></li><li><a href="/articles/system-design/cqrs-event-sourcing/">CQRS и Event Sourcing</a><p>Разделение моделей чтения и записи, цена рассинхронизации, событие как источник истины, снапшоты и версионирование событий, и честный ответ на вопрос «когда это не нужно».</p></li><li><a href="/articles/brokers/message-design/">Проектирование событий и команд</a><p>Event vs command, обязательные поля envelope, idempotency key, schema evolution, thick vs thin payload и transactional outbox.</p></li></ul></section>
 </div></section>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Проектирование API: REST, gRPC и события","description":"Выбор стиля взаимодействия, семантика и идемпотентность HTTP, формат ошибок, курсорная пагинация против offset, версионирование и обратная совместимость, контрактное тестирование.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/system-design/api-design/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Проектирование API: REST, gRPC и события","description":"Выбор стиля взаимодействия, семантика и идемпотентность HTTP, формат ошибок, курсорная пагинация против offset, версионирование и обратная совместимость, контрактное тестирование.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/system-design/api-design/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
 <section class="partner"><div class="wrap">
   <div>
     <span class="kicker">Партнёр платформы</span>

@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Как выбрать сборщик мусора: Parallel, G1 или ZGC? — вопрос с собеседования</title>
 <meta name="description" content="Ось выбора — пропускная способность против задержки. Parallel — максимум throughput, паузы растут с кучей: батчи. G1 (по умолчанию с JDK 9) — баланс…">
-<link rel="canonical" href="https://learn.getsotto.ru/questions/java/choose-gc/">
+<link rel="canonical" href="https://acody.ru/questions/java/choose-gc/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Учебная платформа">
 <meta property="og:locale" content="ru_RU">
-<meta property="og:url" content="https://learn.getsotto.ru/questions/java/choose-gc/">
+<meta property="og:url" content="https://acody.ru/questions/java/choose-gc/">
 <meta property="og:title" content="Как выбрать сборщик мусора: Parallel, G1 или ZGC? — вопрос с собеседования">
 <meta property="og:description" content="Ось выбора — пропускная способность против задержки. Parallel — максимум throughput, паузы растут с кучей: батчи. G1 (по умолчанию с JDK 9) — баланс…">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -18,7 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
 <link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
-<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
 <script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
@@ -30,7 +30,7 @@
 <main>
 <link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page"><div class="wrap narrow">
-  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Как выбрать сборщик мусора: Parallel, G1 или ZGC?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://learn.getsotto.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Как выбрать сборщик мусора: Parallel, G1 или ZGC?"}]}</script>
+  <nav class="crumbs"><a href="/questions/">Вопросы</a> <span>/</span> <a href="/questions/java/">Java</a> <span>/</span> <span>Как выбрать сборщик мусора: Parallel, G1 или ZGC?</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Вопросы","item":"https://acody.ru/questions/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://acody.ru/questions/java/"},{"@type":"ListItem","position":3,"name":"Как выбрать сборщик мусора: Parallel, G1 или ZGC?"}]}</script>
   <h1>Как выбрать сборщик мусора: Parallel, G1 или ZGC?</h1>
   <div class="chips"><span class="lvl lvl-senior">Senior</span><span class="chip">JVM и сборка мусора</span></div>
   <div class="aliases"><span>Ещё спрашивают так:</span><ul><li>Сервис с кучей 16 ГБ должен держать задержку в десятках миллисекунд. Какой сборщик выбрать?</li><li>Сервис с кучей в 16 ГБ должен держать задержку ответа в пределах десятков миллисекунд. Какой сборщик выберешь и почему?</li></ul></div>

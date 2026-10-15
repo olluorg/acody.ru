@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Дженерики: массивы, varargs и bridge-методы — разбор для собеседования</title>
 <meta name="description" content="Почему дженерики не дружат с массивами, heap pollution и @SafeVarargs, синтетические bridge-методы и reifiable-типы.">
-<link rel="canonical" href="https://learn.getsotto.ru/articles/java/generics-pitfalls/">
+<link rel="canonical" href="https://acody.ru/articles/java/generics-pitfalls/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Учебная платформа">
 <meta property="og:locale" content="ru_RU">
-<meta property="og:url" content="https://learn.getsotto.ru/articles/java/generics-pitfalls/">
+<meta property="og:url" content="https://acody.ru/articles/java/generics-pitfalls/">
 <meta property="og:title" content="Дженерики: массивы, varargs и bridge-методы — разбор для собеседования">
 <meta property="og:description" content="Почему дженерики не дружат с массивами, heap pollution и @SafeVarargs, синтетические bridge-методы и reifiable-типы.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -18,7 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
 <link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
-<script>window.LEARN = {"api": "https://api.learn.getsotto.ru"};</script>
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
 <script src="/assets/account.js?v=a520c4e2d4" defer></script>
 </head>
 <body>
@@ -30,7 +30,7 @@
 <main>
 <link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
 <section class="bank card-page article"><div class="wrap narrow">
-  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Дженерики: массивы, varargs и bridge-методы</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://learn.getsotto.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://learn.getsotto.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Дженерики: массивы, varargs и bridge-методы"}]}</script>
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Дженерики: массивы, varargs и bridge-методы</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://acody.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Дженерики: массивы, varargs и bridge-методы"}]}</script>
   <h1>Дженерики: массивы, varargs и bridge-методы</h1>
   <p class="lead">Почему дженерики не дружат с массивами, heap pollution и @SafeVarargs, синтетические bridge-методы и reifiable-типы.</p>
   <article class="md"><h2>Дженерики и массивы не дружат</h2>
@@ -61,7 +61,7 @@ T[] arr = (T[]) Array.newInstance(componentType, n); // componentType: Class&lt;
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/generic-array-heap-pollution/">Почему нельзя создать массив параметризованного типа (new List&lt;String&gt;[10] или new T[n])?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/safevarargs/">Когда корректно ставить @SafeVarargs на generic-varargs-метод?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/bridge-method/">Что такое bridge-метод в Java?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/java/raw-types/">Чем опасно использование raw type, например List вместо List&lt;String&gt;?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/type-erasure/">Что означает стирание типов (type erasure)?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/generics/">Дженерики и стирание типов</a><p>Типобезопасность на компиляции, механизм type erasure и его последствия, дженерик-методы, ограниченные параметры и опасность raw types.</p></li><li><a href="/articles/java/wildcards/">Wildcards и правило PECS</a><p>Инвариантность дженериков против ковариантных массивов, ? extends/super, и когда что выбирать по PECS.</p></li></ul></section>
 </div></section>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Дженерики: массивы, varargs и bridge-методы","description":"Почему дженерики не дружат с массивами, heap pollution и @SafeVarargs, синтетические bridge-методы и reifiable-типы.","inLanguage":"ru","mainEntityOfPage":"https://learn.getsotto.ru/articles/java/generics-pitfalls/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Дженерики: массивы, varargs и bridge-методы","description":"Почему дженерики не дружат с массивами, heap pollution и @SafeVarargs, синтетические bridge-методы и reifiable-типы.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/java/generics-pitfalls/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
 <section class="partner"><div class="wrap">
   <div>
     <span class="kicker">Партнёр платформы</span>

@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /me/
 
-Sitemap: https://learn.getsotto.ru/sitemap.xml
+Sitemap: https://acody.ru/sitemap.xml
