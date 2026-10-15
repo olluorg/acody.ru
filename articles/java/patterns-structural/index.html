@@ -7,7 +7,7 @@
 <meta name="description" content="Adapter, Decorator, Proxy и чем они отличаются друг от друга, Facade, Composite, Bridge и Flyweight — на примерах java.io, java.lang.reflect.Proxy и…">
 <link rel="canonical" href="https://acody.ru/articles/java/patterns-structural/">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:site_name" content="Acody">
 <meta property="og:locale" content="ru_RU">
 <meta property="og:url" content="https://acody.ru/articles/java/patterns-structural/">
 <meta property="og:title" content="Структурные паттерны — разбор для собеседования">
@@ -23,7 +23,7 @@
 </head>
 <body>
 <header class="top"><div class="wrap">
-  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Acody</a>
   <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
   <div class="account" id="account"></div>
 </div></header>
@@ -73,23 +73,23 @@ List&lt;String&gt; readOnly = Collections.unmodifiableList(list);</code></pre>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/adapter-decorator-proxy/">По какому признаку проще всего отличить Adapter от Decorator и Proxy?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/java-io-decorator/">Какой паттерн лежит в основе конструкции new BufferedInputStream(new GZIPInputStream(new FileInputStream(file)))?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/spring-proxy-consequences/">Spring оборачивает бины в прокси, чтобы работали @Transactional и @Cacheable. Какие практические следствия из этого вытекают?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/arrays-aslist-add/">Что произойдёт при вызове add на списке, полученном из Arrays.asList(array)?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/facade/">Какой паттерн реализуют SLF4J и JdbcTemplate по отношению к тому, что они скрывают?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/proxy-vs-decorator/">Чем паттерн Proxy отличается от Decorator, если у обоих тот же интерфейс, что и у обёрнутого объекта?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/structural-patterns/">На каком приёме построено большинство структурных паттернов?</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/patterns-creational/">Порождающие паттерны</a><p>Factory Method против статической фабрики Блоха, Abstract Factory, Builder в двух версиях, Prototype и почему clone() считают ошибкой, object pool — с примерами из JDK и Spring.</p></li><li><a href="/articles/java/patterns-behavioral/">Поведенческие паттерны</a><p>Strategy, Template Method, Observer, Command, Chain of Responsibility, State, Iterator и Visitor — с примерами из JDK, Spring и заменой паттернов лямбдами и sealed-типами.</p></li><li><a href="/articles/java/io/">Потоки ввода-вывода: байты, символы, буферы</a><p>Байтовые и символьные потоки, кодировки и Charset, буферизация и системные вызовы, декоратор-паттерн и современный файловый API.</p></li><li><a href="/articles/java/solid/">SOLID: пять принципов дизайна</a><p>SRP, OCP, LSP, ISP, DIP — что каждая буква значит на самом деле, как выглядит нарушение в Java-коде, чем DIP отличается от DI и IoC.</p></li></ul></section>
 </div></section>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Структурные паттерны","description":"Adapter, Decorator, Proxy и чем они отличаются друг от друга, Facade, Composite, Bridge и Flyweight — на примерах java.io, java.lang.reflect.Proxy и Spring AOP.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/java/patterns-structural/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Структурные паттерны","description":"Adapter, Decorator, Proxy и чем они отличаются друг от друга, Facade, Composite, Bridge и Flyweight — на примерах java.io, java.lang.reflect.Proxy и Spring AOP.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/java/patterns-structural/","publisher":{"@type":"Organization","name":"Acody"}}</script>
 <section class="partner"><div class="wrap">
   <div>
     <span class="kicker">Партнёр платформы</span>
-    <h2>sotto — ассистент для живых разговоров</h2>
-    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+    <h2>Разбор собеседования с sotto</h2>
+    <p>После собеседования sotto разбирает разговор: оценка, каждый вопрос — хорошо, частично или слабо, чего не хватило в ответе и над чем поработать к следующему разу. Первые 30 минут бесплатно.</p>
   </div>
-  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+  <a class="btn primary" href="https://getsotto.ru/interviews/?utm_source=acody&amp;utm_medium=partner&amp;utm_campaign=it&amp;utm_content=java" rel="noopener">Разбор собеседования</a>
 </div></section>
 </main>
 <footer><div class="wrap">
-  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Acody</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
   <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
-  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=acody&amp;utm_medium=footer&amp;utm_campaign=general" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>
 </html>

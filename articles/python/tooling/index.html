@@ -7,7 +7,7 @@
 <meta name="description" content="Виртуальные окружения и зависимости, как работает импорт и чем опасны циклические импорты, __name__ == &quot;__main__&quot;, pytest, фикстуры и mock.patch.">
 <link rel="canonical" href="https://acody.ru/articles/python/tooling/">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:site_name" content="Acody">
 <meta property="og:locale" content="ru_RU">
 <meta property="og:url" content="https://acody.ru/articles/python/tooling/">
 <meta property="og:title" content="Окружение, импорты и тесты на pytest — разбор для собеседования">
@@ -23,7 +23,7 @@
 </head>
 <body>
 <header class="top"><div class="wrap">
-  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Acody</a>
   <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
   <div class="account" id="account"></div>
 </div></header>
@@ -90,23 +90,23 @@ with patch(&quot;orders.charge&quot;) as charge:      # не &quot;payments.char
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/python/venv-pip/">Зачем нужно виртуальное окружение и как управлять зависимостями?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/imports/">Как работает импорт модулей и что делать с циклическими импортами?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/name-main/">Зачем нужна конструкция if __name__ == &quot;__main__&quot;?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/pytest-basics/">Как писать тесты на pytest — assert, запуск, параметризация?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/python/pytest-fixtures/">Как работают фикстуры pytest и что такое их scope?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/python/mock-patch/">Как работает unittest.mock.patch и почему патчить нужно там, где объект используется?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/python/typing/">Аннотации типов, mypy и Pydantic</a><p>Что дают аннотации и кто их проверяет, как аннотировать коллекции, Optional и объединения, обобщённые типы, mypy в проекте, проверка данных Pydantic.</p></li><li><a href="/articles/python/web/">Веб на Python — WSGI и ASGI, FastAPI, HTTP-клиенты, JSON, Django ORM</a><p>Чем WSGI отличается от ASGI, простой API на FastAPI и внедрение зависимостей, requests и httpx с таймаутами, JSON с датами и деньгами, N+1 в Django.</p></li></ul></section>
 </div></section>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Окружение, импорты и тесты на pytest","description":"Виртуальные окружения и зависимости, как работает импорт и чем опасны циклические импорты, __name__ == \"__main__\", pytest, фикстуры и mock.patch.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/python/tooling/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Окружение, импорты и тесты на pytest","description":"Виртуальные окружения и зависимости, как работает импорт и чем опасны циклические импорты, __name__ == \"__main__\", pytest, фикстуры и mock.patch.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/python/tooling/","publisher":{"@type":"Organization","name":"Acody"}}</script>
 <section class="partner"><div class="wrap">
   <div>
     <span class="kicker">Партнёр платформы</span>
-    <h2>sotto — ассистент для живых разговоров</h2>
-    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+    <h2>Разбор собеседования с sotto</h2>
+    <p>После собеседования sotto разбирает разговор: оценка, каждый вопрос — хорошо, частично или слабо, чего не хватило в ответе и над чем поработать к следующему разу. Первые 30 минут бесплатно.</p>
   </div>
-  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+  <a class="btn primary" href="https://getsotto.ru/interviews/?utm_source=acody&amp;utm_medium=partner&amp;utm_campaign=it&amp;utm_content=python" rel="noopener">Разбор собеседования</a>
 </div></section>
 </main>
 <footer><div class="wrap">
-  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Acody</a>
     <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
   <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
   <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
-  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=acody&amp;utm_medium=footer&amp;utm_campaign=general" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
 </body>
 </html>
