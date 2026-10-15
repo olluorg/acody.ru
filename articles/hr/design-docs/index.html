@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design doc, ADR и технический долг — разбор для собеседования</title>
+<meta name="description" content="Как написать design doc и провести обсуждение, зачем записывать решения в ADR и как договориться с бизнесом о работе с техническим долгом.">
+<link rel="canonical" href="https://acody.ru/articles/hr/design-docs/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/hr/design-docs/">
+<meta property="og:title" content="Design doc, ADR и технический долг — разбор для собеседования">
+<meta property="og:description" content="Как написать design doc и провести обсуждение, зачем записывать решения в ADR и как договориться с бизнесом о работе с техническим долгом.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#hr">HR-вопросы</a> <span>/</span> <span>Design doc, ADR и технический долг</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"HR-вопросы","item":"https://acody.ru/articles/#hr"},{"@type":"ListItem","position":3,"name":"Design doc, ADR и технический долг"}]}</script>
+  <h1>Design doc, ADR и технический долг</h1>
+  <p class="lead">Как написать design doc и провести обсуждение, зачем записывать решения в ADR и как договориться с бизнесом о работе с техническим долгом.</p>
+  <article class="md"><h2>Design doc — до кода</h2>
+<p>Design doc — короткий документ, который пишут <b>до начала</b> крупной работы. Найденная на бумаге ошибка стоит часов, в коде — недель.</p>
+<p>Структура:</p>
+<ol><li><b>Контекст и проблема</b> — что происходит и почему это важно.</li><li><b>Цели и не-цели</b> — что делаем и что сознательно не делаем.</li><li><b>Требования</b> — нагрузка, данные, сроки.</li><li><b>Решение</b> со схемой.</li><li><b>Альтернативы</b> — и почему не они.</li><li><b>Риски</b> и как их снимаем.</li><li><b>План внедрения</b> и <b>метрики успеха</b>.</li></ol>
+<p>Три–шесть страниц, схемы вместо абзацев. Не-цели не менее важны, чем цели: они останавливают расползание задачи.</p>
+<h2>Как провести обсуждение</h2>
+<p>Документ рассылают заранее. На встрече его не читают вслух, а решают <b>открытые вопросы</b>. Приглашают тех, кого решение затронет: соседние команды, эксплуатацию, безопасность. Итог фиксируют — разделом «решение» или отдельным ADR. Ценность документа — в обсуждении, а не в самом тексте.</p>
+<h2>ADR — память о решениях</h2>
+<p><b>ADR</b> (architecture decision record) — одна страница на одно значимое решение:</p>
+<pre class="lang-markdown"><code># ADR-0007: Очередь задач на RabbitMQ, а не на Kafka
+
+Статус: принято (заменяет ADR-0003)
+
+## Контекст
+Фоновые задачи разной длительности, нужны повторы и приоритеты...
+
+## Решение
+RabbitMQ с отдельной очередью на тип задачи.
+
+## Варианты
+Kafka — перечитывание не нужно, медленная задача тормозит партицию...
+
+## Последствия
+Проще повторы и приоритеты; история событий не хранится.
+Пересмотреть, если понадобится аналитика по событиям.</code></pre>
+<p>ADR хранят в репозитории, нумеруют и <b>не переписывают</b>: если решение меняется, пишут новый со ссылкой на старый. Пишут их для значимых решений: выбор базы, схема авторизации, деление на сервисы. Через год ADR отвечает на вопрос «почему так сделано?» — без него новые люди либо боятся трогать странный код, либо ломают то, что было сделано не зря.</p>
+<h2>Технический долг</h2>
+<p>Долг — упрощения, которые ускорили работу тогда и замедляют сейчас: каждая задача в этой части дороже и чаще ломается. С бизнесом о долге говорят через <b>последствия</b>, а не через красоту кода:</p>
+<ul><li>«код некрасивый» — не работает;</li><li>«изменения в оплате занимают втрое дольше, четыре инцидента за квартал» — работает.</li></ul>
+<p>Как с ним жить:</p>
+<ul><li>держать <b>список</b> долга с оценкой влияния и стоимости;</li><li>гасить <b>по частям</b> вместе с задачами в той же области — правило бойскаута;</li><li>выделять <b>регулярную долю</b> времени, например 15–20 %;</li><li>крупные переделки обосновывать отдельно, как проект.</li></ul>
+<p>Не весь долг надо гасить — только тот, что мешает развитию или несёт риск. Рефакторинг без тестов — риск, поэтому сначала тесты. «Переписать всё с нуля» почти всегда хуже постепенной замены.</p>
+<h2>Что запомнить</h2>
+<ul><li>Design doc — до кода, с альтернативами и не-целями.</li><li>На встрече решают вопросы, а не читают документ.</li><li>ADR не переписывают — заменяют новым.</li><li>Долг обсуждают в цифрах последствий.</li></ul></article>
+  <section class="block lesson-check" data-lesson="hr/hr-lesson-design-docs"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="tech-leadership"><a class="course-title" href="/courses/tech-leadership/">Курс «Лидерство для инженера: от middle к senior»</a><span>урок 2 из 6</span><a href="/articles/hr/tech-decisions/">← Технические решения — варианты, проверка и цена ошибки</a><a class="next" href="/articles/hr/delivery/">Ведение задачи до результата — постановка, оценка, срыв сроков и инциденты →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/hr/design-doc/">Как написать design doc для крупной задачи и провести его обсуждение?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/hr/adr/">Что такое ADR (architecture decision record) и зачем записывать решения?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/hr/tech-debt/">Как договориться с бизнесом о работе с техническим долгом?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/hr/technical-decision/">Расскажите о сложном техническом решении, которое вы приняли или отстояли.</a> <span class="lvl lvl-senior">Senior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/hr/tech-decisions/">Технические решения — варианты, проверка и цена ошибки</a><p>Как предлагать решение команде, разрешать спор проверкой, решать, сколько времени тратить на выбор, когда писать своё, а когда брать готовое, и как рассказать о решении на собеседовании.</p></li><li><a href="/articles/hr/delivery/">Ведение задачи до результата — постановка, оценка, срыв сроков и инциденты</a><p>Как довести расплывчатую задачу до понятной постановки, разбить её и оценить, что делать, если не успеваете, как разбирать инциденты и рассказывать об ошибках.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Design doc, ADR и технический долг","description":"Как написать design doc и провести обсуждение, зачем записывать решения в ADR и как договориться с бизнесом о работе с техническим долгом.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/hr/design-docs/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>

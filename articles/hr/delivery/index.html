@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ведение задачи до результата — постановка, оценка, срыв сроков и инциденты — разбор для собеседования</title>
+<meta name="description" content="Как довести расплывчатую задачу до понятной постановки, разбить её и оценить, что делать, если не успеваете, как разбирать инциденты и рассказывать…">
+<link rel="canonical" href="https://acody.ru/articles/hr/delivery/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Учебная платформа">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://acody.ru/articles/hr/delivery/">
+<meta property="og:title" content="Ведение задачи до результата — постановка, оценка, срыв сроков и инциденты — разбор для собеседования">
+<meta property="og:description" content="Как довести расплывчатую задачу до понятной постановки, разбить её и оценить, что делать, если не успеваете, как разбирать инциденты и рассказывать…">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
+<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<script>window.LEARN = {"api": "https://api.acody.ru"};</script>
+<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
+  <div class="account" id="account"></div>
+</div></header>
+<main>
+<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
+<section class="bank card-page article"><div class="wrap narrow">
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#hr">HR-вопросы</a> <span>/</span> <span>Ведение задачи до результата — постановка, оценка, срыв сроков и инциденты</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"HR-вопросы","item":"https://acody.ru/articles/#hr"},{"@type":"ListItem","position":3,"name":"Ведение задачи до результата — постановка, оценка, срыв сроков и инциденты"}]}</script>
+  <h1>Ведение задачи до результата — постановка, оценка, срыв сроков и инциденты</h1>
+  <p class="lead">Как довести расплывчатую задачу до понятной постановки, разбить её и оценить, что делать, если не успеваете, как разбирать инциденты и рассказывать об ошибках.</p>
+  <article class="md"><h2>Результат, а не закрытый тикет</h2>
+<p>Задача считается сделанной не тогда, когда код влит, а когда он выкачен, работает, измерен и заинтересованные люди знают об этом. Ведение задачи до результата начинается с постановки и заканчивается метриками.</p>
+<h2>Расплывчатая задача</h2>
+<p>«Сделайте кнопку экспорта» — это желаемое решение, а не задача. Сначала выясняют проблему и цель:</p>
+<ul><li>кто пользователь и что у него сейчас не получается;</li><li>как он делает это без нашей функции;</li><li>как поймём, что стало лучше.</li></ul>
+<p>Дальше — <b>критерии приёмки</b> и <b>примеры</b> (входы и ожидаемые результаты), явный список того, что <b>не входит</b> в задачу. Черновик постановки или прототип показывают заказчику и согласуют письменно. Допущения не додумывают молча — их записывают и показывают. Неясность, найденная до кода, в разы дешевле найденной после.</p>
+<h2>Разбить и оценить</h2>
+<ol><li>Разбить на <b>проверяемые части по 1–3 дня</b> с понятным результатом: «эндпоинт работает», «миграция выкачена».</li><li>Найти <b>неизвестные</b> — новую библиотеку, чужой API, неясные требования — и снять их первыми коротким исследованием (спайком).</li><li>Оценить <b>диапазоном с допущениями</b>: «5–8 дней, если API партнёра готов; если нет — плюс неделя».</li><li>Не забыть тесты, ревью, выкатку и документацию.</li></ol>
+<p>Лучший ориентир — похожие прошлые задачи. Оценка — прогноз с неопределённостью, а не обещание, и её пересматривают, когда появляется информация. Задача «на две недели» без разбиения обычно занимает месяц. Сначала делают то, что снижает риск, а не то, что приятно, и выпускают частями: работающий минимум раньше полного варианта.</p>
+<h2>Не успеваете</h2>
+<p>Сообщить <b>сразу</b>, как стало понятно, а не в день дедлайна:</p>
+<blockquote><p>«Интеграция с доставкой: сделано 60 %. API партнёра отдаёт другие статусы, чем в документации, — на переделку нужно ещё 3–4 дня. Варианты: выпустить в пятницу без отслеживания статусов и доделать на следующей неделе или сдвинуть релиз на среду. Предлагаю первый».</p></blockquote>
+<p>Что, почему (факты), новая оценка и варианты: урезать объём, выпустить часть, сдвинуть срок, получить помощь. Решает тот, кто отвечает за срок, — ваша задача дать ему информацию вовремя. Чем раньше сообщение, тем больше вариантов. Работать ночами молча — плохая стратегия: риск не исчезает, а команда о нём не знает.</p>
+<h2>Инцидент</h2>
+<p>Порядок:</p>
+<ol><li><b>Восстановить</b> работу — откат, переключение, отключение функции. Сначала смягчить, потом искать причину.</li><li><b>Коммуницировать</b> — один координатор, понятный канал, короткие регулярные обновления для бизнеса.</li><li><b>Разобрать причины</b> без поиска виноватых: почему система позволила ошибке случиться.</li><li><b>Изменить</b> — задачи с владельцами и сроками: алерт, проверка в CI, ограничение.</li></ol>
+<p>На собеседовании об инциденте рассказывают по этим шагам. Хорошо показать, что после разбора появилась проверка, которая теперь ловит такие случаи раньше.</p>
+<h2>Рассказ об ошибке</h2>
+<p>Вопрос «расскажите о своей ошибке» проверяет ответственность и выводы. Нужна настоящая ошибка, где вы:</p>
+<ul><li>берёте ответственность на себя, а не перекладываете;</li><li>рассказываете, что сделали сразу, чтобы исправить последствия;</li><li>и главное — что изменили в работе, чтобы не повторилось.</li></ul>
+<p>Масштаб — реальный, но не катастрофа, ставящая крест на роли.</p>
+<h2>Что запомнить</h2>
+<ul><li>Сначала проблема и критерии приёмки, потом код.</li><li>Части по 1–3 дня, неизвестные — первыми, оценка — диапазоном.</li><li>О срыве — сразу, с фактами и вариантами.</li><li>Инцидент: восстановить, сообщить, разобрать без виноватых, изменить.</li></ul></article>
+  <section class="block lesson-check" data-lesson="hr/hr-lesson-delivery"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="tech-leadership"><a class="course-title" href="/courses/tech-leadership/">Курс «Лидерство для инженера: от middle к senior»</a><span>урок 3 из 6</span><a href="/articles/hr/design-docs/">← Design doc, ADR и технический долг</a><a class="next" href="/articles/hr/mentoring/">Рост коллег — наставничество, онбординг, ревью и общие знания →</a></nav>
+  <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/hr/unclear-task/">Задача поставлена расплывчато. Как довести её до понятной постановки?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/hr/task-breakdown/">Как разбить большую задачу и дать оценку сроков?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/hr/estimation-delivery/">Как вы оцениваете сроки задач и что делаете, когда понимаете, что не успеваете?</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/hr/report-delay/">Вы понимаете, что не успеваете к сроку. Что делать?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/hr/incident-ownership/">Расскажите об инциденте в продакшене, который вы разбирали.</a> <span class="lvl lvl-senior">Senior</span></li><li><a href="/questions/hr/failure/">Расскажите о своей ошибке или неудаче</a> <span class="lvl lvl-junior">Junior</span></li></ul></section>
+  <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/hr/design-docs/">Design doc, ADR и технический долг</a><p>Как написать design doc и провести обсуждение, зачем записывать решения в ADR и как договориться с бизнесом о работе с техническим долгом.</p></li><li><a href="/articles/hr/communication/">Коммуникация — с командой, бизнесом и руководителем</a><p>Как писать рабочие сообщения и статусы, объяснять проблему без технических терминов, давать обратную связь, решать конфликты, не соглашаться с решением и влиять на продукт.</p></li></ul></section>
+</div></section>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Ведение задачи до результата — постановка, оценка, срыв сроков и инциденты","description":"Как довести расплывчатую задачу до понятной постановки, разбить её и оценить, что делать, если не успеваете, как разбирать инциденты и рассказывать об ошибках.","inLanguage":"ru","mainEntityOfPage":"https://acody.ru/articles/hr/delivery/","publisher":{"@type":"Organization","name":"Учебная платформа"}}</script>
+<section class="partner"><div class="wrap">
+  <div>
+    <span class="kicker">Партнёр платформы</span>
+    <h2>sotto — ассистент для живых разговоров</h2>
+    <p>Помогает вести занятия, лекции и рабочие созвоны: на одном экране показывает подсказки по материалу, которые не видит аудитория, и помогает точнее отвечать на вопросы.</p>
+  </div>
+  <a class="btn primary" href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=partner" rel="noopener">Узнать о sotto</a>
+</div></section>
+</main>
+<footer><div class="wrap">
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Учебная платформа</a>
+    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
+    <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
+  <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=learn&amp;utm_medium=footer" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
+</div></footer>
+</body>
+</html>
