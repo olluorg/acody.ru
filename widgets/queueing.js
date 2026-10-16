@@ -101,7 +101,7 @@ select { max-width: 100%; }
 .srv { fill: var(--w-surface-2); stroke: var(--w-line-2); stroke-width: 1.5; }
 .srv.busy { stroke: var(--w-good); }
 .bar { fill: var(--w-good); opacity: .55; }
-.lbl { font: 11px "Manrope", system-ui, sans-serif; fill: var(--w-muted); }
+.lbl { font: 11px "Inter", system-ui, sans-serif; fill: var(--w-muted); }
 .lbl.num { font: 600 12px "JetBrains Mono", ui-monospace, monospace; fill: var(--w-text); }
 .grid line { stroke: var(--w-line); }
 .axis { font: 10px "JetBrains Mono", ui-monospace, monospace; fill: var(--w-faint); }

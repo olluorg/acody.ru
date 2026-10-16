@@ -1,63 +1,58 @@
-/* Отличия платформы от лендинга sotto: знак в логотипе, шапка без кнопок, партнёрский блок. */
-.logo .mark { flex: none; }
-.top .nav { margin-left: auto; }
-@media (max-width: 1000px) { .top .nav { display: flex; gap: 14px; font-size: 14px; } }
-@media (max-width: 560px) { .top .nav a:not(:first-child) { display: none; } }
-.partner { padding: 56px 0; }
-.partner .wrap { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between;
-  background: var(--surface); border: 1px solid var(--line-2); border-radius: 22px; padding: 28px 32px; }
-.partner .wrap > div { max-width: 640px; }
-.partner h2 { font-size: 26px; margin: 6px 0 10px; }
-.partner p { color: var(--muted); margin: 0; }
+/* Личное: вход, отметки пройденного, тесты, профиль, курсы. Цвета — токены темы. */
 
-/* ---- вход и прогресс ---- */
-.account { margin-left: 18px; display: flex; align-items: center; }
-.account-link { color: var(--text); font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.login-dialog { background: var(--surface); color: var(--text); border: 1px solid var(--line-2); border-radius: 18px; padding: 26px 28px; max-width: 420px; }
-.login-dialog::backdrop { background: rgba(5, 6, 15, .7); }
+/* ---- вход ---- */
+.login-dialog { background: var(--surface); color: var(--text); border: 1px solid var(--line-2); border-radius: 18px; padding: 26px 28px; max-width: 420px; box-shadow: var(--shadow); }
+.login-dialog::backdrop { background: rgba(0, 0, 0, .55); }
 .login-dialog h2 { margin: 0 0 8px; font-size: 22px; }
 .login-dialog p { color: var(--muted); }
+.login-dialog .consent { font-size: 13px; margin: 0 0 14px; }
 .login-buttons { display: grid; gap: 10px; margin: 16px 0; }
 .btn.yandex { background: #fc3f1d; color: #fff; }
 .btn.vk { background: #0077ff; color: #fff; }
-.btn.ghost { background: transparent; border: 1px solid var(--line-2); color: var(--muted); }
-.btn.danger { color: #ff8a8a; }
-.toast { position: fixed; left: 50%; top: 80px; transform: translateX(-50%); z-index: 60; background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 12px; padding: 10px 16px; }
+.btn.danger { color: var(--bad); }
+.toast { position: fixed; left: 50%; top: 24px; transform: translateX(-50%); z-index: 60; background: var(--surface); color: var(--text);
+         border: 1px solid var(--line-2); border-radius: 12px; padding: 10px 16px; box-shadow: var(--shadow); }
+
+/* ---- пройденное ---- */
 .rm-node.done { border-color: var(--good); }
 .rm-node .done-mark { margin-left: 6px; font-size: 11px; font-weight: 700; color: var(--good); }
-.rm-node.trunk .done-mark { color: #fff; }
+.rm-node.trunk .done-mark { color: var(--on-primary); }
 .pg.done > b { color: var(--good); }
 .pg .done-mark { color: var(--good); font-size: 13px; }
 .muted { color: var(--faint); }
-.rm-test { background: var(--surface); border: 1px solid var(--line-2); border-radius: 16px; padding: 18px 22px; }
-.rm-test h2 { margin-top: 0; }
+
+/* ---- тесты ---- */
+.rm-test, .lesson-check { background: var(--surface); border: 1px solid var(--line-2); border-radius: 16px; padding: 20px 24px; box-shadow: var(--shadow); }
+.rm-test h2, .lesson-check h2 { margin-top: 0; }
 .rm-test-note { color: var(--muted); }
 .test-grades { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 4px; }
+.test-grades .btn, .profile-actions .btn:not(.ghost) { background: var(--surface-2); color: var(--text); border: 1px solid var(--line-2); }
+.test-grades .btn:hover { border-color: var(--text); }
 .test-grades .btn.passed { border-color: var(--good); color: var(--good); }
 .test-form fieldset { border: 1px solid var(--line-2); border-radius: 12px; margin: 14px 0; padding: 12px 16px; }
-.test-form legend { font-weight: 700; padding: 0 6px; }
+.test-form legend { font-weight: 600; padding: 0 6px; color: var(--text); }
 .test-form label { display: block; padding: 4px 0; color: var(--muted); cursor: pointer; }
 .test-form fieldset.ok { border-color: var(--good); }
-.test-form fieldset.wrong { border-color: #ff8a8a; }
+.test-form fieldset.wrong { border-color: var(--bad); }
 .test-form label.right { color: var(--good); font-weight: 600; }
 .test-form .why { display: inline-block; margin-top: 6px; font-size: 14px; }
 .test-ok { color: var(--good); font-weight: 700; }
-.test-error { color: #ff8a8a; font-weight: 600; }
+.test-error { color: var(--bad); font-weight: 600; }
+
+/* ---- профиль ---- */
 .profile-actions { display: flex; gap: 10px; margin-top: 28px; }
-.rm-test.block { padding: 18px 22px; }
-.test-grades .btn, .profile-actions .btn:not(.ghost) { background: var(--surface-2); color: var(--text); border: 1px solid var(--line-2); }
-.test-grades .btn:hover { border-color: var(--accent); }
 #profile h2 { font-size: 22px; margin: 24px 0 10px; }
 
 /* ---- курсы ---- */
-.course-nav { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin: 28px 0 0; padding: 14px 18px; border: 1px solid var(--line-2); border-radius: 14px; background: var(--surface); font-size: 15px; }
+.course-nav { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin: 28px 0 0; padding: 14px 18px; border: 1px solid var(--line-2);
+              border-radius: 14px; background: var(--surface); font-size: 15px; }
 .course-nav .course-title { font-weight: 700; color: var(--text); }
 .course-nav span { color: var(--faint); }
 .course-nav .next { margin-left: auto; }
-.course-meta { color: var(--faint); }
+.course-meta { color: var(--faint); margin: 6px 0 22px; }
 .course-status { margin: 10px 0 18px; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--good); color: var(--good); font-weight: 600; }
 .course-lessons li.done > a::after, .tile.done b::after { content: " ✓"; color: var(--good); }
-.lesson-check { background: var(--surface); border: 1px solid var(--line-2); border-radius: 16px; padding: 18px 22px; }
-.lesson-check h2 { margin-top: 0; }
+ol.course-lessons { counter-reset: l; }
+ol.course-lessons li { counter-increment: l; position: relative; padding: 14px 18px 14px 56px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+ol.course-lessons li::before { content: counter(l, decimal-leading-zero); position: absolute; left: 18px; top: 15px; font-weight: 600; font-size: 13px; color: var(--faint); font-variant-numeric: tabular-nums; }
 .covers .lvl { margin-left: 6px; }
-.hero-bank h3.area { margin: 22px 0 10px; font-size: 15px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-2); }

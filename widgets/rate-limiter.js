@@ -119,8 +119,8 @@ export const ALGOS = [
 const STYLE = `
 .view { margin-top: 12px; background: var(--w-surface); border: 1px solid var(--w-line); border-radius: 12px; padding: 6px; overflow-x: auto; }
 svg { width: 100%; min-width: 560px; height: auto; display: block; }
-.name { font: 600 12px "Manrope", system-ui, sans-serif; fill: var(--w-text); }
-.sub { font: 10px "Manrope", system-ui, sans-serif; fill: var(--w-faint); }
+.name { font: 600 12px "Inter", system-ui, sans-serif; fill: var(--w-text); }
+.sub { font: 10px "Inter", system-ui, sans-serif; fill: var(--w-faint); }
 .rowbg { fill: var(--w-bg); }
 .sec { stroke: var(--w-line-2); stroke-width: 1; }
 .sec.edge { stroke-dasharray: 3 3; }

@@ -60,7 +60,8 @@
     const box = $("#account");
     if (!box) return;
     box.replaceChildren(me.user
-      ? el("a", { class: "account-link", href: "/me/" }, me.user.name)
+      ? el("a", { class: "avatar", href: "/me/", title: me.user.name, "aria-label": `Профиль: ${me.user.name}` },
+          (me.user.name.trim()[0] || "?").toUpperCase())
       : el("button", { class: "btn primary small", type: "button", onclick: loginDialog }, "Войти"));
   }
 
@@ -87,6 +88,19 @@
     }
   }
 
+  // Меню слева: пройденные темы карты или уроки курса и полоса прогресса.
+  function markSide() {
+    for (const a of $$(".ctx-steps a[data-node]")) a.classList.toggle("done", done.has(a.dataset.node));
+    for (const a of $$(".ctx-steps a[data-lesson]")) a.classList.toggle("done", !!lessonsDone[a.dataset.lesson]);
+    const box = $(".ctx-progress");
+    if (!box) return;
+    const ids = (box.dataset.nodes || box.dataset.lessons || "").split(",").filter(Boolean);
+    const got = ids.filter((x) => (box.dataset.nodes ? done.has(x) : !!lessonsDone[x])).length;
+    $("b", box).textContent = `${got} из ${ids.length}`;
+    $("em", box).style.width = `${ids.length ? Math.round((got / ids.length) * 100) : 0}%`;
+    box.hidden = false;
+  }
+
   function markPlan() {
     const hide = $("#pf-hide-done");
     if (!hide) return;
@@ -110,8 +124,9 @@
     const body = el("div", { class: "test-body" });
     const note = $(".rm-test-note", box);
     if (!me.user) {
+      box.classList.add("locked");
       note.replaceChildren("Войдите, чтобы пройти тест: сданный тест отмечает тему пройденной на карте и в ИПР. ",
-        el("button", { class: "btn small", type: "button", onclick: loginDialog }, "Войти"));
+        el("button", { class: "btn primary small", type: "button", onclick: loginDialog }, "Войти"));
       return;
     }
     const got = done.get(node) || {};
@@ -179,8 +194,9 @@
     const lesson = box.dataset.lesson;
     const note = $(".rm-test-note", box);
     if (!me.user) {
+      box.classList.add("locked");
       note.replaceChildren("Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР. ",
-        el("button", { class: "btn small", type: "button", onclick: loginDialog }, "Войти"));
+        el("button", { class: "btn primary small", type: "button", onclick: loginDialog }, "Войти"));
       return;
     }
     const body = el("div", { class: "test-body" });
@@ -259,6 +275,7 @@
       markMaps();
       markPlan();
       markCourses();
+      markSide();
     }
     $$(".rm-test").forEach(testBlock);
     $$(".lesson-check").forEach(lessonCheck);

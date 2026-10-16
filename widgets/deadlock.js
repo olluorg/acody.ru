@@ -166,11 +166,11 @@ svg { width: 100%; max-width: 280px; height: auto; display: block; margin: 0 aut
 .node { fill: var(--w-surface-2); stroke: var(--w-line-2); stroke-width: 1.5; }
 .node.lock-held { fill: color-mix(in srgb, var(--w-accent) 35%, var(--w-surface-2)); }
 .node.hot { stroke: var(--w-bad); stroke-width: 2.5; }
-.ntext { font: 600 12px "Manrope", system-ui, sans-serif; fill: var(--w-text); text-anchor: middle; dominant-baseline: central; }
+.ntext { font: 600 12px "Inter", system-ui, sans-serif; fill: var(--w-text); text-anchor: middle; dominant-baseline: central; }
 .edge { stroke: var(--w-accent-2); stroke-width: 2; fill: none; }
 .edge.wait { stroke: var(--w-warm); stroke-dasharray: 5 4; }
 .edge.cycle { stroke: var(--w-bad); }
-.elabel { font: 10px "Manrope", system-ui, sans-serif; fill: var(--w-muted); text-anchor: middle; }
+.elabel { font: 10px "Inter", system-ui, sans-serif; fill: var(--w-muted); text-anchor: middle; }
 .ctrl { margin-top: 12px; }
 `;
 

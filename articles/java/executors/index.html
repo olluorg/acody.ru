@@ -12,27 +12,65 @@
 <meta property="og:url" content="https://acody.ru/articles/java/executors/">
 <meta property="og:title" content="Пулы потоков и ExecutorService — разбор для собеседования">
 <meta property="og:description" content="Зачем пул, параметры ThreadPoolExecutor, ловушки фабрик Executors, выбор размера и корректное завершение.">
+<meta name="color-scheme" content="light dark">
+<script>(function(){var t;try{t=localStorage.getItem('theme')}catch(e){}if(t==='light'||t==='dark')document.documentElement.dataset.theme=t})();</script>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=a520c4e2d4">
-<link rel="stylesheet" href="/assets/learn.css?v=a520c4e2d4">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=5943d77cd5">
+<link rel="stylesheet" href="/assets/learn.css?v=5943d77cd5">
 <script>window.LEARN = {"api": "https://api.acody.ru"};</script>
-<script src="/assets/account.js?v=a520c4e2d4" defer></script>
+<script src="/assets/ui.js?v=5943d77cd5" defer></script>
+<script src="/assets/account.js?v=5943d77cd5" defer></script>
 </head>
 <body>
-<header class="top"><div class="wrap">
-  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Acody</a>
-  <nav class="nav"><a href="/roadmap/">Карты профессий</a><a href="/courses/">Курсы</a><a href="/questions/">Вопросы</a><a href="/articles/">Статьи</a></nav>
-  <div class="account" id="account"></div>
-</div></header>
+<aside class="side" id="side">
+  <a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><defs><linearGradient id="lg-mark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9b8ff"/><stop offset="1" stop-color="#7c5cff"/></linearGradient></defs><path d="M14.2 4.6a2 2 0 0 1 3.6 0l10 21.2a1.4 1.4 0 0 1-1.9 1.8L16 22.4 6.1 27.6a1.4 1.4 0 0 1-1.9-1.8z" fill="url(#lg-mark)"/><path d="M16 22.4 6.1 27.6a1.4 1.4 0 0 1-1.9-1.8L14.2 4.6A2 2 0 0 1 16 3.5z" fill="#fff" fill-opacity=".22"/></svg><span>Acody</span></a>
+  <nav class="side-nav" aria-label="Разделы"><a href="/"><svg class="i i-home" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Главная</span></a><a href="/roadmap/"><svg class="i i-map" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="10" r="3"/><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/></svg><span>Карты профессий</span></a><a href="/courses/"><svg class="i i-book" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5.5C4.5 4 8 4 12 6c4-2 7.5-2 10-.5V19c-2.5-1.5-6-1.5-10 .5-4-2-7.5-2-10-.5z"/><path d="M12 6v13.5"/></svg><span>Курсы</span></a><a href="/questions/"><svg class="i i-ask" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M9.5 8.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5M12 14.5h.01"/></svg><span>Вопросы с собеседований</span></a><a href="/articles/" class=on aria-current=page><svg class="i i-doc" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h6"/></svg><span>Статьи</span></a><a href="/me/"><svg class="i i-chart" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg><span>Мой прогресс</span></a></nav>
+  <div class="side-ctx">
+    <span class="side-label">Курс</span>
+    <a class="ctx-title" href="/courses/java-concurrency/"><span class="ctx-ico"><svg class="i i-code" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg></span><b>Многопоточность в Java</b></a>
+    <ol class="ctx-steps"><li><a href="/articles/java/threads/" data-lesson="java/jc-lesson-threads"><span class="n">01</span><span>Потоки: создание, состояния и отмена</span></a></li><li><a href="/articles/java/synchronized/" data-lesson="java/jc-lesson-synchronized"><span class="n">02</span><span>synchronized, мониторы и wait/notify</span></a></li><li><a href="/articles/java/jmm/" data-lesson="java/jc-lesson-jmm"><span class="n">03</span><span>Java Memory Model: happens-before и volatile</span></a></li><li><a href="/articles/java/atomics/" data-lesson="java/jc-lesson-atomics"><span class="n">04</span><span>volatile, атомарность и CAS</span></a></li><li><a href="/articles/java/locks/" data-lesson="java/jc-lesson-locks"><span class="n">05</span><span>Явные блокировки: ReentrantLock, RW и Condition</span></a></li><li><a href="/articles/java/executors/" class=on aria-current=page data-lesson="java/jc-lesson-executors"><span class="n">06</span><span>Пулы потоков и ExecutorService</span></a></li><li><a href="/articles/java/completablefuture/" data-lesson="java/jc-lesson-completablefuture"><span class="n">07</span><span>Future и CompletableFuture</span></a></li><li><a href="/articles/java/coordination/" data-lesson="java/jc-lesson-coordination"><span class="n">08</span><span>Координация: семафоры, защёлки и барьеры</span></a></li><li><a href="/articles/java/threadlocal-forkjoin/" data-lesson="java/jc-lesson-threadlocal-forkjoin"><span class="n">09</span><span>ThreadLocal и Fork/Join</span></a></li><li><a href="/articles/java/concurrent-collections/" data-lesson="java/jc-lesson-concurrent-collections"><span class="n">10</span><span>Конкурентные коллекции</span></a></li><li><a href="/articles/java/virtual-threads/" data-lesson="java/jc-lesson-virtual-threads"><span class="n">11</span><span>Виртуальные потоки (Project Loom)</span></a></li></ol>
+    <div class="ctx-progress" data-lessons="java/jc-lesson-threads,java/jc-lesson-synchronized,java/jc-lesson-jmm,java/jc-lesson-atomics,java/jc-lesson-locks,java/jc-lesson-executors,java/jc-lesson-completablefuture,java/jc-lesson-coordination,java/jc-lesson-threadlocal-forkjoin,java/jc-lesson-concurrent-collections,java/jc-lesson-virtual-threads" hidden><span>Прогресс курса</span><b>0 из 0</b><i><em></em></i></div>
+  </div>
+  <a class="side-partner" href="https://getsotto.ru/?utm_source=acody&amp;utm_medium=sidebar&amp;utm_campaign=general" rel="noopener">
+    <span class="sp-name"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M2 8v4M6 5v10M10 3v14M14 6v8M18 9v2" stroke="#b9a6ff" stroke-width="2" stroke-linecap="round"/></svg>sotto</span>
+    <b>AI-ассистент для живых разговоров</b>
+    <span class="sp-text">Подсказки по материалу на занятиях и созвонах, разбор собеседования после разговора.</span>
+    <span class="sp-go"><svg class="i i-next" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>
+  </a>
+</aside>
+<div class="side-shade" data-close-side></div>
+<div class="shell"><div class="panel">
+<header class="bar">
+  <button class="bar-btn bar-menu" type="button" data-open-side aria-label="Меню"><svg class="i i-menu" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <a class="bar-btn bar-back" href="/articles/#java" aria-label="Назад"><svg class="i i-back" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg></a>
+  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Пулы потоков и ExecutorService</span></nav>
+  <div class="bar-tools">
+    <div class="search" role="search">
+      <svg class="i i-search" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" id="q" placeholder="Поиск…" autocomplete="off" aria-label="Поиск по сайту" aria-controls="q-out">
+      <kbd>Ctrl K</kbd>
+      <div class="search-out" id="q-out" hidden></div>
+    </div>
+    <span class="bar-sep"></span>
+    <button class="bar-btn theme-btn" type="button" data-theme-toggle aria-label="Сменить тему"><svg class="i i-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="i i-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
+    <div class="account" id="account"></div>
+  </div>
+</header>
 <main>
-<link rel="stylesheet" href="/assets/bank.css?v=a520c4e2d4">
-<section class="bank card-page article"><div class="wrap narrow">
-  <nav class="crumbs"><a href="/articles/">Статьи</a> <span>/</span> <a href="/articles/#java">Java</a> <span>/</span> <span>Пулы потоков и ExecutorService</span></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://acody.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Пулы потоков и ExecutorService"}]}</script>
-  <h1>Пулы потоков и ExecutorService</h1>
-  <p class="lead">Зачем пул, параметры ThreadPoolExecutor, ловушки фабрик Executors, выбор размера и корректное завершение.</p>
+<link rel="stylesheet" href="/assets/bank.css?v=5943d77cd5">
+<section class="bank card-page article"><div class="wrap">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Статьи","item":"https://acody.ru/articles/"},{"@type":"ListItem","position":2,"name":"Java","item":"https://acody.ru/articles/#java"},{"@type":"ListItem","position":3,"name":"Пулы потоков и ExecutorService"}]}</script>
+  <div class="lesson-head has-toc">
+    <div>
+      <span class="kicker">Урок 06 из 11 · 2 минуты чтения</span>
+      <h1>Пулы потоков и ExecutorService</h1>
+      <p class="lead">Зачем пул, параметры ThreadPoolExecutor, ловушки фабрик Executors, выбор размера и корректное завершение.</p>
+    </div>
+    <aside class="lesson-toc"><h2>Что вы узнаете</h2><ol><li><span>01</span>Зачем пул</li><li><span>02</span>Параметры ThreadPoolExecutor</li><li><span>03</span>Ловушки фабрик Executors</li><li><span>04</span>Выбор размера пула</li><li><span>05</span>Жизненный цикл и планирование</li><li><span>06</span>Как отвечать на собеседовании</li></ol></aside>
+  </div>
   <article class="md"><h2>Зачем пул</h2>
 <p>Создавать new Thread на каждую задачу опасно: потоки дороги, и при всплеске нагрузки их число (а с ним и память/переключения контекста) выходит из-под контроля. Пул переиспользует ограниченное число потоков и ставит избыточные задачи в очередь.</p>
 <p>ExecutorService отделяет ЧТО делать (задача Runnable/Callable) от ТОГО, как и где это выполняется (политика пула). Это и абстракция, и предохранитель.</p>
@@ -61,7 +99,7 @@ ExecutorService pool = new ThreadPoolExecutor(
 <p><code>submit()</code> возвращает Future, <code>invokeAll()</code> запускает пачку задач. ScheduledExecutorService планирует отложенные и периодические задачи (<code>scheduleAtFixedRate</code>/<code>scheduleWithFixedDelay</code>) — современная замена <code>java.util.Timer</code>, который не переживал исключения и работал в одном потоке.</p>
 <h2>Как отвечать на собеседовании</h2>
 <p>Объясните, как ThreadPoolExecutor принимает задачу (core → очередь → max → политика отказа), назовите ловушку фабрик (неограниченные очередь/потоки → OOM) и почему предпочитают явный пул с ограниченной очередью. Дайте ориентиры размера для CPU- и IO-bound и не забудьте про корректный shutdown/<code>awaitTermination</code>.</p></article>
-  <section class="block lesson-check" data-lesson="java/jc-lesson-executors"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="java-concurrency"><a class="course-title" href="/courses/java-concurrency/">Курс «Многопоточность в Java»</a><span>урок 6 из 11</span><a href="/articles/java/locks/">← Явные блокировки: ReentrantLock, RW и Condition</a><a class="next" href="/articles/java/completablefuture/">Future и CompletableFuture →</a></nav>
+  <section class="block lesson-check" id="check" data-lesson="java/jc-lesson-executors"><h2>Проверка урока</h2><p class="rm-test-note">Войдите, чтобы проверить себя: сданные проверки всех уроков курса отмечают его темы пройденными на карте и в ИПР.</p></section><nav class="course-nav" data-course="java-concurrency"><a class="course-title" href="/courses/java-concurrency/">Курс «Многопоточность в Java»</a><span>урок 6 из 11</span><a href="/articles/java/locks/">← Явные блокировки: ReentrantLock, RW и Condition</a><a class="next" href="/articles/java/completablefuture/">Future и CompletableFuture →</a></nav>
   <section class="block"><h2>Вопросы по теме</h2><ul class="links"><li><a href="/questions/java/thread-pool/">Почему задачи отдают в пул потоков, а не создают поток на каждую?</a> <span class="lvl lvl-junior">Junior</span></li><li><a href="/questions/java/executors-factories-danger/">Почему фабрики из класса Executors считают опасными в production-коде?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/thread-pool-sizing/">Сервис в основном ходит по сети: на каждую задачу примерно 90% времени — ожидание ответа и 10% — вычисления. Как выбрать размер пула потоков?</a> <span class="lvl lvl-middle">Middle</span></li><li><a href="/questions/java/submit-swallows-exception/">Задача, отправленная в пул через submit(), бросает RuntimeException, но в логах ничего нет. Почему?</a> <span class="lvl lvl-middle">Middle</span></li></ul></section>
   <section class="block"><h2>Читайте также</h2><ul class="links"><li><a href="/articles/java/completablefuture/">Future и CompletableFuture</a><p>Ограничения Future, асинхронная композиция CompletableFuture, async-варианты с пулами и обработка ошибок.</p></li><li><a href="/articles/java/threads/">Потоки: создание, состояния и отмена</a><p>Thread и Runnable, стоимость платформенных потоков, состояния жизненного цикла, кооперативное прерывание и daemon-потоки.</p></li></ul></section>
 </div></section>
@@ -76,12 +114,13 @@ ExecutorService pool = new ThreadPoolExecutor(
 </div></section>
 </main>
 <footer><div class="wrap">
-  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#9676ff"/><path d="M7 24h6v-5h6v-5h6V8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Acody</a>
-    <p style="margin-top:12px">Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
-  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
+  <div><a class="logo" href="/"><svg class="mark" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><defs><linearGradient id="lg-mark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9b8ff"/><stop offset="1" stop-color="#7c5cff"/></linearGradient></defs><path d="M14.2 4.6a2 2 0 0 1 3.6 0l10 21.2a1.4 1.4 0 0 1-1.9 1.8L16 22.4 6.1 27.6a1.4 1.4 0 0 1-1.9-1.8z" fill="url(#lg-mark)"/><path d="M16 22.4 6.1 27.6a1.4 1.4 0 0 1-1.9-1.8L14.2 4.6A2 2 0 0 1 16 3.5z" fill="#fff" fill-opacity=".22"/></svg><span>Acody</span></a>
+    <p>Карты профессий, статьи и вопросы с собеседований — бесплатно и в открытом доступе.</p></div>
+  <div><h4>Разделы</h4><ul><li><a href="/roadmap/">Карты профессий</a></li><li><a href="/courses/">Курсы</a></li><li><a href="/questions/">Вопросы с собеседований</a></li><li><a href="/articles/">Статьи</a></li></ul></div>
   <div><h4>Документы</h4><ul><li><a href="/privacy/">Политика обработки персональных данных</a></li><li><a href="/terms/">Пользовательское соглашение</a></li>
     <li><a href="mailto:s_knyazev@vk.com">s_knyazev@vk.com</a></li></ul></div>
   <div><h4>Партнёр</h4><ul><li><a href="https://getsotto.ru/?utm_source=acody&amp;utm_medium=footer&amp;utm_campaign=general" rel="noopener">sotto — ассистент для живых разговоров</a></li></ul></div>
 </div></footer>
+</div></div>
 </body>
 </html>

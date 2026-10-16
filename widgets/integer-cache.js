@@ -37,9 +37,9 @@ svg { width: 100%; height: auto; display: block; }
 .box { fill: var(--w-surface-2); stroke: var(--w-line-2); stroke-width: 1.5; }
 .box.cache { stroke: var(--w-teal); }
 .box.fresh { stroke: var(--w-warm); }
-.cap { font: 600 11px "Manrope", system-ui, sans-serif; fill: var(--w-muted); text-anchor: middle; }
+.cap { font: 600 11px "Inter", system-ui, sans-serif; fill: var(--w-muted); text-anchor: middle; }
 .v { font: 600 13px "JetBrains Mono", ui-monospace, monospace; fill: var(--w-text); text-anchor: middle; dominant-baseline: central; }
-.tag { font: 10px "Manrope", system-ui, sans-serif; fill: var(--w-muted); text-anchor: middle; }
+.tag { font: 10px "Inter", system-ui, sans-serif; fill: var(--w-muted); text-anchor: middle; }
 .ref { fill: none; stroke-width: 2; }
 .ref.a { stroke: var(--w-accent-2); }
 .ref.b { stroke: var(--w-teal); }

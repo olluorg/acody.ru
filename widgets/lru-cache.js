@@ -155,7 +155,7 @@ svg { width: 100%; min-width: 520px; height: auto; display: block; }
 .node.evict { fill: color-mix(in srgb, var(--w-bad) 35%, var(--w-surface-2)); stroke: var(--w-bad); }
 .t { font: 600 12px "JetBrains Mono", ui-monospace, monospace; fill: var(--w-text); text-anchor: middle; dominant-baseline: central; }
 .t.on { fill: #fff; }
-.small { font: 10px "Manrope", system-ui, sans-serif; fill: var(--w-muted); text-anchor: middle; }
+.small { font: 10px "Inter", system-ui, sans-serif; fill: var(--w-muted); text-anchor: middle; }
 .ptr { stroke: var(--w-accent-2); stroke-width: 1.3; fill: none; opacity: .55; }
 .ptr.hl { opacity: 1; stroke-width: 2; }
 .link { stroke: var(--w-line-2); stroke-width: 1.5; fill: none; }

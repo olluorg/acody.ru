@@ -148,7 +148,7 @@ const STYLE = `
 .view { overflow-x: auto; margin-top: 12px; background: var(--w-surface); border: 1px solid var(--w-line); border-radius: 12px; padding: 6px; }
 svg { width: 100%; min-width: 540px; height: auto; display: block; }
 .lane { stroke: var(--w-line-2); stroke-width: 2; }
-.who { font: 700 14px "Manrope", system-ui, sans-serif; fill: var(--w-text); text-anchor: middle; }
+.who { font: 700 14px "Inter", system-ui, sans-serif; fill: var(--w-text); text-anchor: middle; }
 .st { font: 600 11px "JetBrains Mono", ui-monospace, monospace; fill: var(--w-teal); }
 .st.cur { fill: var(--w-warm); }
 .st-old { opacity: .55; }

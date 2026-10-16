@@ -51,7 +51,7 @@ const STYLE = `
 svg { width: 100%; height: auto; display: block; }
 .ringline { fill: none; stroke: var(--w-line-2); stroke-width: 2; }
 .key.moved { stroke: var(--w-text); stroke-width: 1.5; }
-.lbl { font: 600 12px "Manrope", system-ui, sans-serif; fill: var(--w-text); text-anchor: middle; dominant-baseline: central; }
+.lbl { font: 600 12px "Inter", system-ui, sans-serif; fill: var(--w-text); text-anchor: middle; dominant-baseline: central; }
 .small { font: 10px "JetBrains Mono", ui-monospace, monospace; fill: var(--w-faint); text-anchor: middle; }
 .bars { display: grid; gap: 6px; }
 .bar { display: grid; grid-template-columns: 26px 1fr 64px; gap: 8px; align-items: center; font-size: 13px; }
